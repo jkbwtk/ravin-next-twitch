@@ -2,6 +2,7 @@
 tsconfig.tsbuildinfo
 build
 *.csv
+config.json
 
 # Logs
 logs
