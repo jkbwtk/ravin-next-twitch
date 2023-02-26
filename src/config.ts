@@ -9,9 +9,11 @@ interface Credentials {
   token: string;
 }
 
-interface Config {
+interface PublicConfig {
   channels: string | string[];
 }
+
+type Config = BotOptions;
 
 const getCredentials = (): Credentials => {
   const login = process.env.LOGIN;
@@ -34,19 +36,24 @@ const validateConfig = (config: unknown): void => {
       if (typeof channel !== 'string') throw new Error('Channels must be a string or an array of strings');
     }
   }
+
+  if ('trainingDataPath' in config) {
+    if (typeof config.trainingDataPath !== 'string') throw new Error('Training data path must be a string');
+    if (config.trainingDataPath.length === 0) throw new Error('Training data path must be a non-empty string');
+  }
 };
 
-const loadConfig = (): Config => {
+const loadConfig = (): PublicConfig => {
   const raw = readFileSync(configPath, 'utf-8');
 
-  const object = JSON.parse(raw) as Config;
+  const object = JSON.parse(raw) as PublicConfig;
   validateConfig(object);
 
   return object;
 };
 
 
-export const getConfig = (): BotOptions => {
+export const getConfig = (): Config => {
   loadConfig();
 
   return {

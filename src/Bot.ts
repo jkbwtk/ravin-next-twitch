@@ -1,5 +1,6 @@
 import { ChatUserstate, Client } from 'tmi.js';
 import { ChannelThread } from './ChannelThread';
+import { display } from './display';
 import { ExtendedMap } from './ExtendedMap';
 import { arrayFrom } from './utils';
 
@@ -10,6 +11,7 @@ export interface BotOptions {
   channels: string | string[],
   joinInterval?: number;
   debug?: boolean;
+  trainingDataPath?: string;
 }
 
 export class Bot {
@@ -24,6 +26,7 @@ export class Bot {
     channels: [],
     joinInterval: 1000,
     debug: false,
+    trainingDataPath: './training-data.csv',
   };
 
   constructor(options: BotOptions) {
@@ -54,7 +57,7 @@ export class Bot {
       logger: {
         info: (msg) => null,
         warn: (msg) => console.log(msg),
-        error: (msg) => console.log(msg),
+        error: (msg) => null,
       },
     });
   }
@@ -76,9 +79,29 @@ export class Bot {
   private handleMessage = (channel: string, userstate: ChatUserstate, message: string, self: boolean) => {
     if (self) return;
     console.log(`<${channel}> ${userstate['display-name']}: ${message}`);
+
+    const channelThread = this.channels.get(channel.slice(1));
+    if (!channelThread) {
+      display.warning.nextLine(`Bot:handleMessage`, `Channel thread for [${channel}] not found`);
+      return;
+    }
+
+    display.debug.nextLine(channel, 'Time since last message:', channelThread.getTimeSinceLastMessage());
+
+    channelThread.addMessage(message, userstate.username ?? 'Anonymous');
+
+    display.debug.nextLine(channel, 'Chant length:', channelThread.getChantLength());
   };
 
   public async init(): Promise<void> {
     await this.client.connect();
+  }
+
+  public updateConfig(options: BotOptions): void {
+    this.options = { ...this.options, ...options };
+
+    for (const channel of this.channels.values()) {
+      channel.updateConfig({});
+    }
   }
 }
