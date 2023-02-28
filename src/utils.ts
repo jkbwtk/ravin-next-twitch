@@ -28,3 +28,11 @@ export const isObject = (variable: unknown): boolean => {
 export const isStrOrNumber = (variable: unknown): boolean => {
   return (typeof variable === 'string' || typeof variable === 'number');
 };
+
+export const clamp = (min: number, max: number, val: number): number => {
+  if (val < min) return min;
+  if (val > max) return max;
+  return val;
+};
+
+export const enumerate = <T>(array: Array<T>): [number, T][] => array.map((v, k) => [k, v]);
