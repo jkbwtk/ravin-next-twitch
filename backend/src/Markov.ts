@@ -42,7 +42,7 @@ export class Markov {
   private options: Required<MarkovOptions>;
 
   private static defaultOptions: Required<MarkovOptions> = {
-    minLength: 1,
+    minLength: 5,
     maxLength: 25,
     safetyFilter: false,
     duplicates: false,
@@ -79,7 +79,7 @@ export class Markov {
 
   private validChars(word: string): boolean {
     if (!this.options.charFilter) return true;
-    if (word === MarkovNode.startToken || word === MarkovNode.endToken) return true;
+    if (word.includes(MarkovNode.startToken) || word.includes(MarkovNode.endToken)) return true;
 
     const chars = word.toLowerCase().split('');
 
@@ -207,7 +207,7 @@ export class Markov {
     if (node === undefined) throw new Error('Seed node not found');
     nodes.push(node);
 
-    let next = seed === MarkovNode.startToken ? this.pickRandom(node.next) : this.pickRandomWeighted(node.next, nodes.length);
+    let next = this.pickRandom(node.next, nodes.length);
     nodes.push(next);
     node = this.nodes.get(next.joinedWords.toLowerCase());
 
@@ -217,7 +217,7 @@ export class Markov {
     while (nodes.length < this.options.maxLength && !next.isEndNode()) {
       if (node === undefined) {
         display.warning.nextLine('Markov:generate', 'Node is undefined, picking random node');
-        node = this.pickRandom(this.nodes);
+        node = this.pickRandom(this.nodes, nodes.length);
       }
 
       next = this.pickRandomWeighted(node.next, nodes.length);
@@ -255,16 +255,18 @@ export class Markov {
     if (seed === MarkovNode.startToken) nodes.shift();
     nodes.pop();
 
-    return nodes.length > this.options.minLength ? nodes.map((node) => node.words.join(' ')).join(' ') : this.generate(seed);
+    return nodes.length >= this.options.minLength ? nodes.map((node) => node.words.join(' ')).join(' ') : this.generate(seed);
   }
 
-  private pickRandom(set: ExtendedMap<string, MarkovNode>): MarkovNode {
+  private pickRandom(set: ExtendedMap<string, MarkovNode>, sentenceLength = -1): MarkovNode {
     const array = Array.from(set.values());
 
     const pick = array[randomInt(array.length)];
     if (pick === undefined) throw new Error('Picking random node failed');
 
-    return pick;
+    if (pick.isEndNode() && !this.shouldEndSentence(sentenceLength)) {
+      return this.pickRandom(set, sentenceLength + 0.1);
+    } else return pick;
   }
 
   private pickRandomWeighted(set: ExtendedMap<string, MarkovNode>, sentenceLength = -1): MarkovNode {
@@ -281,23 +283,23 @@ export class Markov {
       random -= node.weight;
 
       if (random <= 0) {
-        if (
-          node.isEndNode() &&
-          sentenceLength !== -1
-        ) {
-          const pick = randomInt(this.options.maxLength);
-          const chance = Math.max(0, this.options.maxLength - sentenceLength);
-
-          if (pick <= chance) return this.pickRandomWeighted(set, sentenceLength + 0.1);
-          else return node;
-        } else {
-          return node;
-        }
+        if (node.isEndNode() && !this.shouldEndSentence(sentenceLength)) {
+          return this.pickRandomWeighted(set, sentenceLength + 0.1);
+        } else return node;
       }
     }
 
     debugger;
     throw new Error('Picking random weighted node failed');
+  }
+
+  private shouldEndSentence(sentenceLength: number): boolean {
+    if (sentenceLength === -1) return true;
+
+    const pick = randomInt(this.options.maxLength);
+    const requirement = Math.max(0, this.options.maxLength - sentenceLength);
+
+    return pick > requirement;
   }
 
   public save(entry: Entry): void {

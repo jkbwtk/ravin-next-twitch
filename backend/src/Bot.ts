@@ -2,6 +2,7 @@ import { ChatUserstate, Client } from 'tmi.js';
 import { ChannelThread } from './ChannelThread';
 import { display } from './display';
 import { ExtendedMap } from './ExtendedMap';
+import { Markov } from './Markov';
 import { arrayFrom } from './utils';
 
 
@@ -12,11 +13,13 @@ export interface BotOptions {
   joinInterval?: number;
   debug?: boolean;
   trainingDataPath?: string;
+  ignoredUsers?: string[];
 }
 
 export class Bot {
   private options: Required<BotOptions>;
   private client: Client;
+  public markov: Markov;
 
   private channels: ExtendedMap<string, ChannelThread>;
 
@@ -27,12 +30,14 @@ export class Bot {
     joinInterval: 1000,
     debug: false,
     trainingDataPath: './training-data.csv',
+    ignoredUsers: [],
   };
 
   constructor(options: BotOptions) {
     this.options = { ...Bot.defaultOptions, ...options };
 
     this.client = this.createClient();
+    this.markov = new Markov(this.options.trainingDataPath, { ignoredUsers: this.options.ignoredUsers });
 
     this.channels = this.createChannelThreads();
 
@@ -87,10 +92,18 @@ export class Bot {
     }
 
     display.debug.nextLine(channel, 'Time since last message:', channelThread.getTimeSinceLastMessage());
-
     channelThread.addMessage(message, userstate.username ?? 'Anonymous');
-
     display.debug.nextLine(channel, 'Chant length:', channelThread.getChantLength());
+
+    if (message.startsWith('!generate')) {
+      const prompt = message.replace('!generate', '').trim();
+      const words = prompt.split(' ');
+
+      const seed = (words[0] ?? '').length > 0 ? words[0] : undefined;
+      const generated = this.markov.generate(seed);
+
+      this.client.say(channel, generated);
+    }
   };
 
   public async init(): Promise<void> {
@@ -99,6 +112,7 @@ export class Bot {
 
   public updateConfig(options: BotOptions): void {
     this.options = { ...this.options, ...options };
+    this.markov.updateConfig({ ignoredUsers: this.options.ignoredUsers });
 
     for (const channel of this.channels.values()) {
       channel.updateConfig({});

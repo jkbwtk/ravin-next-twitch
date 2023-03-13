@@ -41,6 +41,13 @@ const validateConfig = (config: unknown): void => {
     if (typeof config.trainingDataPath !== 'string') throw new Error('Training data path must be a string');
     if (config.trainingDataPath.length === 0) throw new Error('Training data path must be a non-empty string');
   }
+
+  if ('ignoredUsers' in config) {
+    if (!Array.isArray(config.ignoredUsers)) throw new Error('Ignored users must be an array of strings');
+    for (const user of config.ignoredUsers) {
+      if (typeof user !== 'string') throw new Error('Ignored users must be an array of strings');
+    }
+  }
 };
 
 const loadConfig = (): PublicConfig => {

@@ -1,5 +1,8 @@
+web
+server
+
 .env
-tsconfig.tsbuildinfo
+*.tsbuildinfo
 build
 *.csv
 config.json
