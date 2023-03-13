@@ -8,6 +8,8 @@ parser: "@typescript-eslint/parser"
 parserOptions:
   ecmaVersion: 12
   sourceType: module
+  ecmaFeatures:
+    jsx: true
 plugins:
   - "@typescript-eslint"
 rules:
@@ -49,3 +51,4 @@ rules:
     ["warn", { allowArgumentsExplicitlyTypedAsAny: true }]
   quote-props: ["error", "as-needed"]
   space-in-parens: ["error", "never"]
+  jsx-quotes: ["error", "prefer-single"]

@@ -1,0 +1,57 @@
+@use 'app';
+@use 'symbolUtils';
+
+@import 'https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:FILL@0..1';
+
+
+.materialSymbol {
+  @include symbolUtils.symbolFont(0);
+  @include symbolUtils.symbolSize();
+
+  color: white;
+
+  user-select: none;
+
+  transition: all ease-in-out .1s;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+.small {
+  @include symbolUtils.symbolSize(app.$smallIconSize);
+}
+
+.medium {
+  @include symbolUtils.symbolSize(app.$defaultIconSize);
+}
+
+.big {
+  @include symbolUtils.symbolSize(app.$bigIconSize);
+}
+
+.gray {
+  color: app.$textColor;
+}
+
+.primary {
+  color: app.$primaryColor;
+}
+
+.interactive {
+  @include symbolUtils.interactive();
+}
+
+.grayHighlight {
+  @include symbolUtils.highlight(app.$textBrightColor);
+}
+
+.primaryHighlight {
+  @include symbolUtils.highlight(app.$primaryBrightColor);
+}
+
+.filled {
+  @include symbolUtils.symbolFont(1);
+}

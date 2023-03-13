@@ -1,0 +1,96 @@
+@use 'app';
+@use 'symbolUtils';
+
+.button {
+  user-select: none;
+  text-decoration: none;
+  font-weight: 500;
+  border-radius: app.$borderRadius;
+  cursor: pointer;
+  transition: all 0.1s ease-in-out;
+  box-sizing: border-box;
+  white-space: nowrap;
+  background-color: transparent;
+  font-family: app.$fontFamily;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  &:active {
+    translate: 0 0.2rem;
+  }
+
+  .text {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@mixin border($color) {
+  border: 0.2rem solid $color;
+}
+
+@mixin color($textColor, $accentColor, $activeColor, $invertedColor) {
+  @include border($accentColor);
+
+  color: $textColor;
+
+  &:hover,
+  &:active {
+    background-color: $activeColor;
+    color: $invertedColor;
+    box-shadow: 0 0.0 1rem $activeColor;
+
+    @include border($activeColor);
+
+    :global(.material-symbols-rounded) {
+      color: $invertedColor;
+    }
+  }
+
+  &:active {
+    :global(.material-symbols-rounded) {
+      @include symbolUtils.symbolFont(1);
+    }
+  }
+
+  :global(.material-symbols-rounded) {
+    color: $accentColor;
+  }
+}
+
+@mixin size($paddingX, $paddingY, $fontSize, $iconSize) {
+  padding: $paddingY $paddingX;
+  font-size: $fontSize;
+
+  :global(.material-symbols-rounded) {
+    @include symbolUtils.symbolSize($iconSize);
+  }
+}
+
+.gray {
+  @include color(app.$textBrightColor, app.$textColor, app.$textBrightColor, app.$backgroundColor);
+}
+
+.primary {
+  @include color(app.$textBrightColor, app.$primaryColor, app.$primaryColor, app.$backgroundColor);
+}
+
+.big {
+  @include size(1.8rem, 0.8rem, app.$defaultFontSize, app.$defaultIconSize);
+
+  .text {
+    height: app.$defaultIconSize;
+  }
+}
+
+.medium {
+  @include size(1.3rem, 0.6rem, app.$altFontSize, app.$altIconSize);
+
+  .text {
+    height: app.$altIconSize;
+  }
+}
