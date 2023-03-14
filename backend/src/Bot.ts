@@ -84,6 +84,13 @@ export class Bot {
   private handleMessage = (channel: string, userstate: ChatUserstate, message: string, self: boolean) => {
     if (self) return;
     console.log(`<${channel}> ${userstate['display-name']}: ${message}`);
+    this.markov.save({
+      username: userstate.username ?? 'Anonymous',
+      flags: userstate.flags ?? 'NULL',
+      emotes: typeof userstate.emotes === 'object' && userstate.emotes !== null ? JSON.stringify(userstate.emotes) : 'NULL',
+      channel,
+      content: message,
+    });
 
     const channelThread = this.channels.get(channel.slice(1));
     if (!channelThread) {
@@ -96,13 +103,18 @@ export class Bot {
     display.debug.nextLine(channel, 'Chant length:', channelThread.getChantLength());
 
     if (message.startsWith('!generate')) {
-      const prompt = message.replace('!generate', '').trim();
-      const words = prompt.split(' ');
+      try {
+        const prompt = message.replace('!generate', '').trim();
+        const words = prompt.split(' ');
 
-      const seed = (words[0] ?? '').length > 0 ? words[0] : undefined;
-      const generated = this.markov.generate(seed);
+        const seed = (words[0] ?? '').length > 0 ? words[0] : undefined;
+        const generated = this.markov.generate(seed);
 
-      this.client.say(channel, generated);
+        this.client.say(channel, generated);
+      } catch (error) {
+        display.error.nextLine('Bot:handleMessage', error);
+        this.client.say(channel, 'MrDestructoid');
+      }
     }
   };
 
