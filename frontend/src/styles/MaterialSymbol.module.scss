@@ -4,7 +4,7 @@
 @import 'https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:FILL@0..1';
 
 
-.materialSymbol {
+.material-symbol {
   @include symbolUtils.symbolFont(0);
   @include symbolUtils.symbolSize();
 
@@ -44,11 +44,11 @@
   @include symbolUtils.interactive();
 }
 
-.grayHighlight {
+.gray-highlight {
   @include symbolUtils.highlight(app.$textBrightColor);
 }
 
-.primaryHighlight {
+.primary-highlight {
   @include symbolUtils.highlight(app.$primaryBrightColor);
 }
 
