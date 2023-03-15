@@ -2,17 +2,20 @@ import { defineConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
 import alias from '@rollup/plugin-alias';
 import { resolve } from 'path';
+import {
+  defaultServerPort,
+  frontendDevelopmentPath,
+  frontendProductionPath,
+} from './backend/src/constants';
 
-
-const rootDir = resolve(__dirname);
 
 export default defineConfig({
   plugins: [solidPlugin(), alias()],
 
-  root: './frontend',
+  root: frontendDevelopmentPath,
 
   server: {
-    port: 3000,
+    port: defaultServerPort,
     host: '0.0.0.0',
   },
 
@@ -20,18 +23,18 @@ export default defineConfig({
     minify: 'esbuild',
     manifest: true,
     target: 'esnext',
-    outDir: '../web',
+    outDir: frontendProductionPath,
     cssTarget: 'esnext',
     emptyOutDir: true,
   },
 
   resolve: {
     alias: [
-      { find: '#root', replacement: resolve(rootDir, '.') },
-      { find: '#components', replacement: resolve(rootDir, 'frontend/src/components') },
-      { find: '#pages', replacement: resolve(rootDir, 'frontend/src/pages') },
-      { find: '#styles', replacement: resolve(rootDir, 'frontend/src/styles') },
-      { find: '#assets', replacement: resolve(rootDir, 'frontend/src/assets') },
+      { find: '#root', replacement: resolve(frontendDevelopmentPath, '.') },
+      { find: '#components', replacement: resolve(frontendDevelopmentPath, 'src/components') },
+      { find: '#pages', replacement: resolve(frontendDevelopmentPath, 'src/pages') },
+      { find: '#styles', replacement: resolve(frontendDevelopmentPath, 'src/styles') },
+      { find: '#assets', replacement: resolve(frontendDevelopmentPath, 'src/assets') },
     ],
   },
 
