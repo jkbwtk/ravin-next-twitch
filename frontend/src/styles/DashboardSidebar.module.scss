@@ -1,0 +1,91 @@
+@use 'app';
+@use 'symbolUtils';
+
+
+.container {
+  width: 25rem;
+
+  padding: 3rem;
+  padding-right: 1rem;
+
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+
+  gap: 3rem;
+
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+.element {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+
+  gap: 1rem;
+  width: 100%;
+
+  text-decoration: none;
+  color: app.$textColor;
+  font-size: app.$altFontSize;
+  font-family: app.$fontFamily;
+
+  background-color: initial;
+  border: none;
+  padding: 0;
+
+  cursor: pointer;
+  user-select: none;
+
+  transition: all 0.1s ease-in-out;
+
+  .dropdown-arrow {
+    margin-left: auto;
+  }
+
+  &:hover {
+    transform: translateY(-0.2rem);
+  }
+}
+
+.dropdown {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+
+  width: 100%;
+}
+
+.sub-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+
+  padding: 1rem 0 0 1rem;
+  gap: 1rem;
+
+  width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+
+  transition: all 0.2s ease-in-out;
+}
+
+.active {
+  color: app.$textBrightColor;
+
+  :global(.material-symbols-rounded) {
+    @include symbolUtils.symbolFont(1);
+    color: app.$textBrightColor;
+  }
+
+  .dropdown-arrow {
+    transform: rotate(-90deg);
+  }
+}
