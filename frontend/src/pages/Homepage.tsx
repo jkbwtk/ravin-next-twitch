@@ -1,7 +1,7 @@
 import type { Component } from 'solid-js';
 
 import style from '#styles/Homepage.module.scss';
-import ravinLogo from '#assets/ravinLogo.svg';
+import ravinLogo from '#assets/ravinLogoCompact.svg';
 
 const Homepage: Component = () => {
   return (
