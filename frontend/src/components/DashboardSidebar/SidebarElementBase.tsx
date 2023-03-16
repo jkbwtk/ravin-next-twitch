@@ -7,6 +7,7 @@ export interface SidebarRoute {
   name: string;
   href: string;
   auxRoutes?: SidebarRoute[];
+  component?: Component;
 }
 
 const SidebarElementBase: Component<SidebarRoute> = (props) => {

@@ -9,10 +9,10 @@ import style from '#styles/DashboardSidebar.module.scss';
 
 
 const SidebarElementNested: Component<SidebarRoute> = (props) => {
-  const [open, setOpen] = createSignal(false);
+  const [open, setOpen] = createSignal(location.pathname.startsWith(props.href));
 
   useBeforeLeave((ev) => {
-    if (!ev.to.toString().includes(props.href)) setOpen(false);
+    if (!ev.to.toString().startsWith(props.href)) setOpen(false);
   });
 
   return (
