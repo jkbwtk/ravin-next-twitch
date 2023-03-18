@@ -16,10 +16,10 @@ interface PublicConfig {
 type Config = BotOptions;
 
 const getCredentials = (): Credentials => {
-  const login = process.env.LOGIN;
+  const login = process.env.BOT_LOGIN;
   if (login === undefined) throw new Error('Missing LOGIN environment variable');
 
-  const token = process.env.TOKEN;
+  const token = process.env.BOT_TOKEN;
   if (token === undefined) throw new Error('Missing AUTH environment variable');
 
   return { login, token };
