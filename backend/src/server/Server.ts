@@ -3,7 +3,7 @@ import express, { Express, RequestHandler } from 'express';
 import { accessControl, invalidRoute, logger } from './middlewares';
 import { apiRouter } from './routers/apiRouter';
 import compression, { CompressionOptions } from 'compression';
-import { frontendPath, frontendProductionPath } from './constants';
+import { frontendPath, frontendProductionPath } from '../constants';
 import chalk from 'chalk';
 import path from 'path';
 

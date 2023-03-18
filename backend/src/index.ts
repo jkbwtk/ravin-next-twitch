@@ -1,10 +1,10 @@
-import 'dotenv/config';
 import chalk from 'chalk';
 
-import { Bot } from './Bot';
+import { Bot } from './bot/Bot';
 import { getConfig } from './config';
 import { isDevMode, serverPort } from './constants';
-import { Server } from './Server';
+import { Server } from './server/Server';
+
 
 const handleTopLevelError = (err: unknown): void => {
   let errorMessage = 'Unknown error';

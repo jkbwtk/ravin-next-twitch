@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import { BotOptions } from './Bot';
+import { BotOptions } from './bot/Bot';
 
 const configPath = './config.json';
 

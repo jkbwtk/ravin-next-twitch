@@ -1,10 +1,10 @@
 import { appendFileSync, readFileSync } from 'fs';
 import { parse, stringify } from 'csv/sync';
-import { ExtendedMap } from './ExtendedMap';
+import { ExtendedMap } from '../lib/ExtendedMap';
 import { randomInt } from 'crypto';
 import { MarkovNode } from './MarkovNode';
-import { display } from './display';
-import { enumerate } from './utils';
+import { display } from '../lib/display';
+import { enumerate } from '../lib/utils';
 import { MarkovDebugChain } from './MarkovDebugChain';
 
 

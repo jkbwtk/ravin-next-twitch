@@ -1,9 +1,9 @@
 import { ChatUserstate, Client } from 'tmi.js';
 import { ChannelThread } from './ChannelThread';
-import { display } from './display';
-import { ExtendedMap } from './ExtendedMap';
+import { display } from '../lib/display';
+import { ExtendedMap } from '../lib/ExtendedMap';
 import { Markov } from './Markov';
-import { arrayFrom } from './utils';
+import { arrayFrom } from '../lib/utils';
 
 
 export interface BotOptions {

@@ -1,4 +1,4 @@
-import ExtendedSet from './ExtendedSet';
+import ExtendedSet from '../lib/ExtendedSet';
 import { MarkovNode } from './MarkovNode';
 
 

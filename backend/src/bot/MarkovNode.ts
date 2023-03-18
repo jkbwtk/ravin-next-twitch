@@ -1,6 +1,6 @@
-import { ExtendedMap } from './ExtendedMap';
-import ExtendedSet from './ExtendedSet';
-import { arrayFrom } from './utils';
+import { ExtendedMap } from '../lib/ExtendedMap';
+import ExtendedSet from '../lib/ExtendedSet';
+import { arrayFrom } from '../lib/utils';
 
 
 export class MarkovNode {
