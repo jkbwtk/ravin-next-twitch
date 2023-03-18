@@ -52,3 +52,4 @@ rules:
   quote-props: ["error", "as-needed"]
   space-in-parens: ["error", "never"]
   jsx-quotes: ["error", "prefer-single"]
+  new-cap: ["error", { "capIsNew": false }]

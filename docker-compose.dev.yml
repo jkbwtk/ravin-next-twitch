@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  db:
+    extends:
+      file: docker-compose.yml
+      service: db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=DEV_DB
