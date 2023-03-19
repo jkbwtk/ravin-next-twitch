@@ -2,14 +2,15 @@ import SidebarElementBase, { SidebarRoute } from '#components/DashboardSidebar/S
 import SidebarElementSwitch from '#components/DashboardSidebar/SidebarElementSwitch';
 import { hasAuxRoutes } from '#components/DashboardSidebar/SidebarUtils';
 import MaterialSymbol from '#components/MaterialSymbol';
-import { useBeforeLeave } from '@solidjs/router';
+import { useBeforeLeave, useLocation } from '@solidjs/router';
 import { Component, createSignal, For, Show } from 'solid-js';
 
 import style from '#styles/DashboardSidebar.module.scss';
 
 
 const SidebarElementNested: Component<SidebarRoute> = (props) => {
-  const [open, setOpen] = createSignal(location.pathname.startsWith(props.href));
+  const pathname = useLocation().pathname;
+  const [open, setOpen] = createSignal(pathname.startsWith(props.href));
 
   useBeforeLeave((ev) => {
     if (!ev.to.toString().startsWith(props.href)) setOpen(false);
