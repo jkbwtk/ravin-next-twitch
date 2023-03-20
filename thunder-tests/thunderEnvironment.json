@@ -1,0 +1,32 @@
+[
+  {
+    "_id": "8e1a242c-aaf9-4d20-baa5-bef613c2ed18",
+    "name": "(Local Env)",
+    "default": true,
+    "global": true,
+    "local": true,
+    "sortNum": -1,
+    "created": "2023-03-20T21:53:52.763Z",
+    "modified": "2023-03-20T21:53:52.763Z",
+    "data": []
+  },
+  {
+    "_id": "a0cbcbec-5c0b-4823-8146-b5af823641d6",
+    "name": "(Global Env)",
+    "default": false,
+    "global": true,
+    "sortNum": -2,
+    "created": "2023-03-20T22:23:40.663Z",
+    "modified": "2023-03-20T22:23:40.663Z",
+    "data": [
+      {
+        "name": "APP_URL",
+        "value": "localhost"
+      },
+      {
+        "name": "APP_PORT",
+        "value": "3000"
+      }
+    ]
+  }
+]

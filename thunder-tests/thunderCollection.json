@@ -1,0 +1,25 @@
+[
+  {
+    "_id": "39b77e1e-19f7-4aed-9437-c7435e124492",
+    "colName": "ravin-next-twitch",
+    "created": "2023-03-20T21:41:48.772Z",
+    "sortNum": 10000,
+    "folders": [
+      {
+        "_id": "940ddcfd-83f0-4613-a941-e6febdf9f6b6",
+        "name": "v1",
+        "containerId": "",
+        "created": "2023-03-20T22:04:13.370Z",
+        "sortNum": 10000,
+        "settings": {}
+      }
+    ],
+    "settings": {
+      "headers": [],
+      "tests": [],
+      "options": {
+        "baseUrl": "{{APP_URL}}:{{APP_PORT}}/api"
+      }
+    }
+  }
+]

@@ -3,9 +3,9 @@ import solidPlugin from 'vite-plugin-solid';
 import alias from '@rollup/plugin-alias';
 import { resolve } from 'path';
 import {
-  defaultServerPort,
   frontendDevelopmentPath,
   frontendProductionPath,
+  serverPort,
 } from './backend/src/constants';
 
 
@@ -15,7 +15,7 @@ export default defineConfig({
   root: frontendDevelopmentPath,
 
   server: {
-    port: defaultServerPort,
+    port: serverPort,
     host: '0.0.0.0',
   },
 
