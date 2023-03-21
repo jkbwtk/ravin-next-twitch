@@ -6,7 +6,8 @@ import {
   frontendDevelopmentPath,
   frontendProductionPath,
   serverPort,
-} from './backend/src/constants';
+} from './shared/src/constants';
+import { cwd } from 'process';
 
 
 export default defineConfig({
@@ -30,7 +31,8 @@ export default defineConfig({
 
   resolve: {
     alias: [
-      { find: '#root', replacement: resolve(frontendDevelopmentPath, '.') },
+      { find: '#shared', replacement: resolve(cwd(), 'shared/src') },
+      { find: '#types', replacement: resolve(cwd(), 'shared/src/types') },
       { find: '#components', replacement: resolve(frontendDevelopmentPath, 'src/components') },
       { find: '#pages', replacement: resolve(frontendDevelopmentPath, 'src/pages') },
       { find: '#styles', replacement: resolve(frontendDevelopmentPath, 'src/styles') },

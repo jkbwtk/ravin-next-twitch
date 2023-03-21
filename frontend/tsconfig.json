@@ -1,4 +1,9 @@
 {
+  "references": [
+    {
+      "path": "../shared"
+    }
+  ],
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
@@ -23,8 +28,11 @@
     "rootDir": "src/",
     "baseUrl": "src",
     "paths": {
-      "#root/*": [
-        "../../*"
+      "#shared/*": [
+        "../../shared/src/*"
+      ],
+      "#types/*": [
+        "../../shared/src/types/*"
       ],
       "#components/*": [
         "./components/*"

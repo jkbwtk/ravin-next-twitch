@@ -1,8 +1,14 @@
+import registerAliases from 'module-alias';
+
+if (process.env.DEV !== 'true') {
+  registerAliases();
+}
+
 import chalk from 'chalk';
 
 import { Bot } from './bot/Bot';
 import { getConfig } from './config';
-import { isDevMode, serverPort } from './constants';
+import { isDevMode, serverPort } from '#shared/constants';
 import { Server } from './server/Server';
 
 

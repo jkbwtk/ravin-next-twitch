@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-import { isDevMode } from '../constants';
+import { isDevMode } from '#shared/constants';
 import { DataSource, DataSourceOptions, EntityManager } from 'typeorm';
 
 

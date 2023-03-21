@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "../server",
+    "target": "ESNEXT",
+    "sourceMap": true,
+    "strict": true,
+    "rootDir": "./src",
+    "baseUrl": "src",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "tsBuildInfoFile": "shared.tsbuildinfo",
+    "moduleResolution": "node",
+    "module": "commonjs"
+  },
+}
