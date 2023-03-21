@@ -1,0 +1,56 @@
+@use '../app';
+
+
+.container {
+  display: flex;
+  flex-direction: column;
+
+  gap: 2rem;
+  padding: 2rem;
+
+  height: 30rem;
+  width: 30rem;
+}
+
+.segment {
+  display: flex;
+  flex-direction: column;
+
+  gap: 1.2rem;
+
+  .segment-title {
+    color: app.$textColor;
+    font-size: app.$smallFontSize;
+
+    font-weight: 500;
+  }
+
+  .entry {
+    display: flex;
+    align-items: center;
+
+    gap: 1rem;
+
+    .icon {
+      width: 4rem;
+      height: 4rem;
+
+      border-radius: 50%;
+
+      flex-shrink: 0;
+    }
+
+    .name {
+      color: app.$textBrightColor;
+      font-size: app.$altIconSize;
+
+      font-weight: 500;
+
+      width: 100%;
+      word-wrap: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}

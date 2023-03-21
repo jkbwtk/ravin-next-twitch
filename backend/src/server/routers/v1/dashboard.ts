@@ -2,7 +2,12 @@ import { faker } from '@faker-js/faker';
 import { randomInt } from 'crypto';
 import { Router as expressRouter } from 'express';
 import { invalidRoute } from '../../middlewares';
-import { GetBotConnectionStatusResponse, GetModeratorsResponse, Moderator } from '#types/api/dashboard';
+import {
+  GetBotConnectionStatusResponse,
+  GetModeratorsResponse,
+  GetTopStatsResponse,
+  Moderator,
+} from '#types/api/dashboard';
 
 export const dashboardRouter = expressRouter();
 
@@ -27,6 +32,24 @@ dashboardRouter.get('/connectionStatus', async (req, res) => {
       channel: faker.internet.userName().toLowerCase().replace('.', '_'),
       joined: !!randomInt(0, 2),
       admin: !!randomInt(0, 2),
+    },
+  };
+
+  res.json(resp);
+});
+
+dashboardRouter.get('/widgets/topStats', async (req, res) => {
+  const resp: GetTopStatsResponse = {
+    data: {
+      chatter: {
+        avatarUrl: faker.internet.avatar(),
+        displayName: faker.internet.userName(),
+      },
+      command: faker.lorem.word(),
+      emote: {
+        url: faker.image.imageUrl(),
+        name: faker.lorem.word(),
+      },
     },
   };
 

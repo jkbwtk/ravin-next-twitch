@@ -61,5 +61,26 @@
         "value": "200"
       }
     ]
+  },
+  {
+    "_id": "ab2842ae-cc05-45e5-9d4c-70f1d522ea2f",
+    "colId": "39b77e1e-19f7-4aed-9437-c7435e124492",
+    "containerId": "dd5fdd3e-ba26-429c-a47c-2c473d137f85",
+    "name": "top stats",
+    "url": "/v1/dashboard/widgets/topStats",
+    "method": "GET",
+    "sortNum": 50000,
+    "created": "2023-03-21T20:54:47.684Z",
+    "modified": "2023-03-21T23:16:50.095Z",
+    "headers": [],
+    "params": [],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      }
+    ]
   }
 ]

@@ -17,3 +17,19 @@ export interface BotConnectionStatus {
 export interface GetBotConnectionStatusResponse {
   data: BotConnectionStatus;
 }
+
+export interface TopStats {
+  chatter: {
+    avatarUrl: string;
+    displayName: string;
+  },
+  command: string;
+  emote: {
+    url: string;
+    name: string;
+  }
+}
+
+export interface GetTopStatsResponse {
+  data: TopStats;
+}

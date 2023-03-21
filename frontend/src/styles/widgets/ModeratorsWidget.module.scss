@@ -1,4 +1,4 @@
-@use 'app';
+@use '../app';
 
 
 .container {
@@ -36,6 +36,8 @@
       height: 3rem;
 
       border-radius: 50%;
+
+      flex-shrink: 0;
     }
 
     .user-name {
@@ -43,6 +45,12 @@
       font-size: app.$smallFontSize;
 
       font-weight: 500;
+
+      width: 100%;
+      word-wrap: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
 }

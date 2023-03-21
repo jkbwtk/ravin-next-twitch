@@ -3,7 +3,7 @@ import Widget from '#components/Widget';
 import AnimatedImage from '#components/AnimatedImage';
 import { GetModeratorsResponse, Moderator } from '#types/api/dashboard';
 
-import style from '#styles/ModeratorsWidget.module.scss';
+import style from '#styles/widgets/ModeratorsWidget.module.scss';
 
 
 const ModeratorComponent = (props: Moderator) => (
