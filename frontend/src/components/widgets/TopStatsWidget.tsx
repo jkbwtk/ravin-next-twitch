@@ -35,7 +35,7 @@ const TopStatsWidget: Component = () => {
         <span class={style.segmentTitle}>Top chatter</span>
 
         <div class={style.entry}>
-          <AnimatedImage class={style.icon} src={stats().chatter.avatarUrl} />
+          <AnimatedImage class={style.userAvatar} src={stats().chatter.avatarUrl} />
           <span class={style.name}>{stats().chatter.displayName}</span>
         </div>
       </div>
@@ -53,7 +53,7 @@ const TopStatsWidget: Component = () => {
         <span class={style.segmentTitle}>Top emote</span>
 
         <div class={style.entry}>
-          <AnimatedImage class={style.icon} src={stats().emote.url} />
+          <AnimatedImage class={style.emote} src={stats().emote.url} />
           <span class={style.name}>{stats().emote.name}</span>
         </div>
       </div>

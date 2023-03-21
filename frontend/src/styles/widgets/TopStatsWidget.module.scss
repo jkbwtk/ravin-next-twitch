@@ -12,6 +12,13 @@
   width: 30rem;
 }
 
+@mixin image() {
+  width: 4rem;
+  height: 4rem;
+
+  flex-shrink: 0;
+}
+
 .segment {
   display: flex;
   flex-direction: column;
@@ -31,13 +38,14 @@
 
     gap: 1rem;
 
-    .icon {
-      width: 4rem;
-      height: 4rem;
+    .user-avatar {
+      @include image();
 
       border-radius: 50%;
+    }
 
-      flex-shrink: 0;
+    .emote {
+      @include image();
     }
 
     .name {
