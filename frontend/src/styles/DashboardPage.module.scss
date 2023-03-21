@@ -1,0 +1,60 @@
+@use 'app';
+
+
+.container {
+  height: 100%;
+
+  display: grid;
+  grid-template-columns: 25rem 1fr;
+  grid-template-rows: 8rem 1fr;
+
+  background-color: app.$backgroundColor;
+
+  .logo-container {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .logo {
+      height: 2.5rem;
+
+      transition: scale 0.1s ease-in-out;
+    }
+
+    &:hover {
+      .logo {
+        scale: 1.01;
+      }
+    }
+  }
+
+  .sidebar-container {
+    overflow-y: visible;
+    overflow-x: hidden;
+
+    width: 100%;
+    height: 100%;
+  }
+
+  .top-bar-container {
+    width: 100%;
+    height: 100%;
+
+    .activity-icons {
+      height: 100%;
+      width: 100%;
+
+      box-sizing: border-box;
+      padding: 0 3rem;
+
+      gap: 3rem;
+
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+  }
+}

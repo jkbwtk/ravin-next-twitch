@@ -27,7 +27,7 @@ const SidebarElementNested: Component<SidebarRoute> = (props) => {
           [style.active]: open(),
           [style.element]: true,
         }}
-        onClick={() => setOpen(!open())}
+        onClick={() => setOpen((prev) => !prev)}
       >
         <SidebarElementBase {...props} />
         <Show when={hasAuxRoutes(props)}>

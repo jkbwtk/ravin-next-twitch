@@ -13,6 +13,7 @@ export const convertToRouteDefinitions = (parentPath: string, props: SidebarRout
       path: route.href.replace(parentPath, ''),
       component: route.component,
       children: hasAuxRoutes(route) ? convertToRouteDefinitions(route.href, route.auxRoutes) : undefined,
+      data: () => route,
     });
   }
 
