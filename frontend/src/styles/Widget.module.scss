@@ -1,0 +1,29 @@
+@use 'app';
+
+
+.container {
+  flex-shrink: 0;
+
+  width: max-content;
+}
+
+.title {
+  color: app.$textBrightColor;
+  font-size: app.$altFontSize;
+
+  font-weight: 500;
+
+  user-select: none;
+}
+
+.container-proper {
+  margin-top: 1rem;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  box-sizing: border-box;
+
+  background-color: app.$widgetColor;
+  border-radius: app.$borderRadius;
+}

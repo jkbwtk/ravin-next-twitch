@@ -12,6 +12,13 @@
         "created": "2023-03-20T22:04:13.370Z",
         "sortNum": 10000,
         "settings": {}
+      },
+      {
+        "_id": "dd5fdd3e-ba26-429c-a47c-2c473d137f85",
+        "name": "dashboard",
+        "containerId": "940ddcfd-83f0-4613-a941-e6febdf9f6b6",
+        "created": "2023-03-20T22:43:18.699Z",
+        "sortNum": 20000
       }
     ],
     "settings": {

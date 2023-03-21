@@ -19,5 +19,47 @@
         "value": "200"
       }
     ]
+  },
+  {
+    "_id": "c7195049-34e7-4989-86b5-c6043087eb4d",
+    "colId": "39b77e1e-19f7-4aed-9437-c7435e124492",
+    "containerId": "dd5fdd3e-ba26-429c-a47c-2c473d137f85",
+    "name": "moderators",
+    "url": "/v1/dashboard/widgets/moderators",
+    "method": "GET",
+    "sortNum": 30000,
+    "created": "2023-03-20T22:43:32.636Z",
+    "modified": "2023-03-21T17:37:15.189Z",
+    "headers": [],
+    "params": [],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      }
+    ]
+  },
+  {
+    "_id": "3d4dc267-a096-4a20-8f1b-7566e4e00aa1",
+    "colId": "39b77e1e-19f7-4aed-9437-c7435e124492",
+    "containerId": "dd5fdd3e-ba26-429c-a47c-2c473d137f85",
+    "name": "bot status",
+    "url": "/v1/dashboard/connectionStatus",
+    "method": "GET",
+    "sortNum": 30000,
+    "created": "2023-03-21T17:35:41.121Z",
+    "modified": "2023-03-21T17:37:05.636Z",
+    "headers": [],
+    "params": [],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      }
+    ]
   }
 ]
