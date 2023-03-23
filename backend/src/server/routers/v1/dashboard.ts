@@ -102,5 +102,3 @@ dashboardRouter.get('/widgets/recentActions', async (req, res) => {
 
   res.json(resp);
 });
-
-dashboardRouter.use('*', invalidRoute);

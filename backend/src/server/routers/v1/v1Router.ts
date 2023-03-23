@@ -11,5 +11,3 @@ v1Router.use('/test', (req, res) => res.json({
 }));
 
 v1Router.use('/dashboard', dashboardRouter);
-
-v1Router.use('*', invalidRoute);
