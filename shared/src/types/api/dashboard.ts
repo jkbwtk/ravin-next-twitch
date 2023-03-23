@@ -33,3 +33,22 @@ export interface TopStats {
 export interface GetTopStatsResponse {
   data: TopStats;
 }
+
+export type Action = {
+  date: number,
+  issuerDisplayName: string;
+  targetDisplayName: string;
+} & ({
+  type: 'ban',
+  reason: string;
+} | {
+  type: 'timeout',
+  duration: number;
+} | {
+  type: 'delete',
+  message: string;
+});
+
+export interface GetRecentActionsResponse {
+  data: Action[];
+}

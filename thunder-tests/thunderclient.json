@@ -82,5 +82,26 @@
         "value": "200"
       }
     ]
+  },
+  {
+    "_id": "419bafee-32d7-49ae-9d6b-869cc6a09b87",
+    "colId": "39b77e1e-19f7-4aed-9437-c7435e124492",
+    "containerId": "dd5fdd3e-ba26-429c-a47c-2c473d137f85",
+    "name": "recent actions",
+    "url": "/v1/dashboard/widgets/recentActions",
+    "method": "GET",
+    "sortNum": 60000,
+    "created": "2023-03-22T01:33:37.414Z",
+    "modified": "2023-03-22T01:33:55.933Z",
+    "headers": [],
+    "params": [],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      }
+    ]
   }
 ]
