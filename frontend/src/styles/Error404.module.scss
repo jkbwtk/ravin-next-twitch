@@ -10,13 +10,15 @@
   justify-content: center;
 }
 
-.code {
+.header {
   font-size: 9rem;
   font-weight: 600;
+
+  color: app.$textBrightColor;
 }
 
 .message {
-  font-size: 3.2rem;
+  font-size: app.$bigFontSize;
   font-weight: 400;
 }
 

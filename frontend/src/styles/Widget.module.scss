@@ -5,6 +5,10 @@
   flex-shrink: 0;
 
   width: max-content;
+  height: min-content;
+
+  display: grid;
+  grid-template-rows: min-content 1fr;
 }
 
 .title {
