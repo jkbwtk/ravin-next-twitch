@@ -1,0 +1,53 @@
+@use '../app';
+
+
+.container {
+  width: 100%;
+  height: 100%;
+
+  overflow-y: hidden;
+  overflow-x: auto;
+
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr;
+}
+
+.info {
+  width: 100%;
+  height: 100%;
+
+  padding: 2rem 3rem;
+
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  .icon {
+    $size: 12rem;
+
+    font-size: $size;
+    width: $size;
+    height: $size;
+  }
+
+  .header {
+    font-size: 6.4rem;
+    text-align: center;
+
+    font-weight: 500;
+    color: app.$textBrightColor;
+  }
+
+  .message {
+    font-size: app.$defaultFontSize;
+    text-align: center;
+
+    font-weight: 400;
+    color: app.$textColor;
+  }
+}

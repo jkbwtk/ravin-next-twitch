@@ -1,5 +1,6 @@
 import { SidebarRoute } from '#components/DashboardSidebar/SidebarElementBase';
 import { RouteDefinition } from '@solidjs/router';
+import { lazy } from 'solid-js';
 
 
 export type SidebarRouteWithAuxRoutes = SidebarRoute & { auxRoutes: SidebarRoute[] };
@@ -11,7 +12,7 @@ export const convertToRouteDefinitions = (parentPath: string, props: SidebarRout
   for (const route of props) {
     routes.push({
       path: route.href.replace(parentPath, ''),
-      component: route.component,
+      component: route.component ?? lazy(() => import('#pages/dashboard/FeatureNotAvailable')),
       children: hasAuxRoutes(route) ? convertToRouteDefinitions(route.href, route.auxRoutes) : undefined,
       data: () => route,
     });
