@@ -1,7 +1,8 @@
-import { Component, createMemo, createResource, For } from 'solid-js';
+import { Component, createMemo, createResource, For, Show } from 'solid-js';
 import Widget from '#components/Widget';
 import AnimatedImage from '#components/AnimatedImage';
 import { GetModeratorsResponse, Moderator } from '#types/api/dashboard';
+import FetchFallback from '#components/FetchFallback';
 
 import style from '#styles/widgets/ModeratorsWidget.module.scss';
 
@@ -30,24 +31,26 @@ const ModeratorsWidget: Component = () => {
 
   return (
     <Widget customClass={style.container} title='Moderators'>
-      <div class={style.segment}>
-        <span class={style.segmentTitle}>Online {onlineModerators().length} / {moderators().length}</span>
+      <Show when={!moderators.loading} fallback={<FetchFallback>Fetching Moderators</FetchFallback>}>
+        <div class={style.segment}>
+          <span class={style.segmentTitle}>Online {onlineModerators().length} / {moderators().length}</span>
 
-        <For each={onlineModerators()}>
-          {(moderator) => ModeratorComponent(moderator)}
-        </For>
-      </div>
+          <For each={onlineModerators()}>
+            {(moderator) => ModeratorComponent(moderator)}
+          </For>
+        </div>
 
-      <div classList={{
-        [style.segment]: true,
-        [style.offline]: true,
-      }}>
-        <span class={style.segmentTitle}>Offline {offlineModerators().length} / {moderators().length}</span>
+        <div classList={{
+          [style.segment]: true,
+          [style.offline]: true,
+        }}>
+          <span class={style.segmentTitle}>Offline {offlineModerators().length} / {moderators().length}</span>
 
-        <For each={offlineModerators()}>
-          {(moderator) => (ModeratorComponent(moderator))}
-        </For>
-      </div>
+          <For each={offlineModerators()}>
+            {(moderator) => (ModeratorComponent(moderator))}
+          </For>
+        </div>
+      </Show>
     </Widget>
   );
 };

@@ -1,0 +1,55 @@
+@use 'app';
+
+
+.spinner {
+  width: 5rem;
+  height: 5rem;
+
+  border-radius: 500rem;
+
+  border-color: app.$primaryColor;
+  border-top-color: transparent;
+  border-width: 0.5rem;
+  border-style: solid;
+
+  box-sizing: border-box;
+  position: relative;
+
+  animation: spinnerAnimation 1s linear infinite;
+  transition: transform 0.5s ease-in-out;
+}
+
+.spinner::before {
+  content: '';
+
+  width: 100%;
+  height: 100%;
+
+  box-sizing: border-box;
+
+  border-radius: 500rem;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  opacity: 0.5;
+  animation: spinnerAnimation 0.5s ease-in-out infinite;
+  animation-direction: reverse;
+
+  border-color: app.$textColor;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-width: 0.75rem;
+  border-style: solid;
+}
+
+@keyframes spinnerAnimation {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}

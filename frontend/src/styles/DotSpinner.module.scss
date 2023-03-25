@@ -1,0 +1,49 @@
+@use 'app';
+
+
+.spinner {
+  font-size: 4rem;
+
+  display: flex;
+
+  justify-content: center;
+  align-items: center;
+
+  height: 1em;
+  gap: calc(1em / 6);
+
+  // awful hack for chromium based browsers not handling aspect-ratio correctly
+  // 1.93 -> number of balls * relative ball size + number of gaps * relative gap size
+  width: calc(1em * 1.83);
+
+  .spinner-ball {
+    height: calc(100%/3);
+    aspect-ratio: 1/1;
+
+    border-radius: 500rem;
+    background-color: app.$primaryColor;
+
+    transform: translateY(100%);
+    animation: spinnerAnimation 1s ease-in-out infinite;
+  }
+
+  @for $i from 1 through 4 {
+    .spinner-ball:nth-child(#{$i}) {
+      animation-delay: 0.08s * $i;
+    }
+  }
+}
+
+@keyframes spinnerAnimation {
+  0% {
+    transform: translateY(100%);
+  }
+
+  50% {
+    transform: translateY(-100%);
+  }
+
+  100% {
+    transform: translateY(100%);
+  }
+}

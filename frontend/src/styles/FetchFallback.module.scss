@@ -1,0 +1,17 @@
+@use 'app';
+
+
+.loading {
+  margin: auto;
+
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  gap: 2rem;
+
+  span {
+    font-size: app.$altFontSize;
+    text-align: center;
+  }
+}

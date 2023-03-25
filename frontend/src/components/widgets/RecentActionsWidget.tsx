@@ -1,7 +1,8 @@
-import { Component, createMemo, createResource, For } from 'solid-js';
+import { Component, createMemo, createResource, For, Show } from 'solid-js';
 import Widget from '#components/Widget';
 import { Action, GetRecentActionsResponse } from '#types/api/dashboard';
 import ActionSwitch from '#components/widgets/RecentActionsWidget/ActionSwitch';
+import FetchFallback from '#components/FetchFallback';
 
 import style from '#styles/widgets/RecentActionsWidget.module.scss';
 
@@ -22,9 +23,11 @@ const RecentActionsWidget: Component = () => {
 
   return (
     <Widget customClass={style.container} containerClass={style.outerContainer} title='Recent actions'>
-      <For each={sortedActions()}>
-        {(action) => (ActionSwitch(action))}
-      </For>
+      <Show when={!actions.loading} fallback={<FetchFallback>Fetching Recent Actions</FetchFallback>}>
+        <For each={sortedActions()}>
+          {(action) => (ActionSwitch(action))}
+        </For>
+      </Show>
     </Widget>
   );
 };
