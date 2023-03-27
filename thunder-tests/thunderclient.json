@@ -103,5 +103,26 @@
         "value": "200"
       }
     ]
+  },
+  {
+    "_id": "576a3cb9-e7fa-4f38-be74-d1ee14f87279",
+    "colId": "39b77e1e-19f7-4aed-9437-c7435e124492",
+    "containerId": "dd5fdd3e-ba26-429c-a47c-2c473d137f85",
+    "name": "chat stats",
+    "url": "/v1/dashboard/widgets/chatStats",
+    "method": "GET",
+    "sortNum": 70000,
+    "created": "2023-03-26T01:18:31.817Z",
+    "modified": "2023-03-27T19:06:44.642Z",
+    "headers": [],
+    "params": [],
+    "tests": [
+      {
+        "type": "res-code",
+        "custom": "",
+        "action": "equal",
+        "value": "200"
+      }
+    ]
   }
 ]

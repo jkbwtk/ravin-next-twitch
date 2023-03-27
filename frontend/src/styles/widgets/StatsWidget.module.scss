@@ -1,0 +1,127 @@
+@use '../app';
+
+
+.outerContainer {
+  flex-grow: 1;
+
+  width: initial;
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+
+  padding: 2rem;
+  padding-bottom: 0.8rem;
+
+  height: 30rem;
+
+  gap: 2rem;
+}
+
+.stats-container {
+  display: flex;
+  flex-direction: column;
+
+  gap: 1rem;
+  width: min-content;
+
+  .timeframe {
+    color: app.$textColor;
+    font-size: app.$smallFontSize;
+
+    font-weight: 500;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr min-content;
+
+    gap: 1rem 1rem;
+
+    max-height: 100%;
+    width: min-content;
+    overflow-y: hidden;
+    overflow-x: hidden;
+
+    .name {
+      color: app.$textColor;
+      font-size: app.$smallFontSize;
+
+      font-weight: 500;
+
+      display: flex;
+      align-items: center;
+    }
+
+    .value {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      color: app.$textBrightColor;
+      font-size: app.$smallFontSize;
+
+      font-weight: 500;
+
+      width: 6.5rem;
+      height: 2.6rem;
+      padding: 0 0.8rem;
+
+      border-radius: 50rem;
+
+      box-sizing: border-box;
+
+      border-color: app.$textColor;
+      border-width: 0.2rem;
+      border-style: solid;
+    }
+
+    .primary {
+      border-color: app.$primaryColor;
+    }
+  }
+}
+
+.chart-container {
+  width: 100%;
+
+  min-width: 20rem;
+  max-width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.chart {
+  width: 100%;
+  margin: 0;
+
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.chart-resize-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  gap: 1rem;
+
+  color: app.$textColor;
+  font-size: app.$altFontSize;
+
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

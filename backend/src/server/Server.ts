@@ -33,12 +33,12 @@ export class Server {
     this.app.use(accessControl);
 
     this.app.use(logger);
+    this.app.use(compression(Server.compressionOptions));
     this.app.use('/api', apiRouter);
 
     if (this.devMode) {
       await this.setupVite();
     } else {
-      this.app.use(compression(Server.compressionOptions));
       this.app.use(express.static(frontendProductionPath));
 
       this.app.get('*', this.serveIndexHtml);

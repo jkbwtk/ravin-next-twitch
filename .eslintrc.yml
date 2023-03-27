@@ -53,3 +53,4 @@ rules:
   space-in-parens: ["error", "never"]
   jsx-quotes: ["error", "prefer-single"]
   new-cap: ["error", { "capIsNew": false }]
+  prefer-const: "off"

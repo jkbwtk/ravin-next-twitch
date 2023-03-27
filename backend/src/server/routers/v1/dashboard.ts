@@ -1,10 +1,10 @@
 import { faker } from '@faker-js/faker';
 import { randomInt } from 'crypto';
 import { Router as expressRouter } from 'express';
-import { invalidRoute } from '../../middlewares';
 import {
   Action,
   GetBotConnectionStatusResponse,
+  GetChatStatsResponse,
   GetModeratorsResponse,
   GetRecentActionsResponse,
   GetTopStatsResponse,
@@ -13,6 +13,12 @@ import {
 
 
 export const dashboardRouter = expressRouter();
+
+// artificial delay generator
+dashboardRouter.use(async (req, res, next) => {
+  await new Promise((resolve) => setTimeout(resolve, randomInt(10, 100)));
+  next();
+});
 
 const createRandomAdmin = (): Moderator => ({
   avatarUrl: faker.internet.avatar(),
@@ -95,9 +101,57 @@ const createRandomAction = (): Action => {
   }
 };
 
-dashboardRouter.get('/widgets/recentActions', async (req, res) => {
+dashboardRouter.get('/widgets/recentActions', (req, res) => {
   const resp: GetRecentActionsResponse = {
     data: Array.from({ length: randomInt(0, 100) }, createRandomAction),
+  };
+
+  res.json(resp);
+});
+
+
+const createRandomChatStat = (startDate: number, endDate: number, max: number): [number, number, number][] => {
+  const data: [number, number, number][] = [];
+
+  let duration = endDate - startDate;
+
+  while (duration > 0) {
+    const time = 5 * 60 * 1000;
+    const count = randomInt(0, max);
+
+    data.push([endDate - duration, time, count]);
+    duration -= time;
+  }
+
+  return data;
+};
+
+dashboardRouter.get('/widgets/chatStats', (req, res) => {
+  const date = faker.date.recent().getDate();
+  const month = faker.date.recent().getMonth();
+
+  const startDate = new Date(new Date().getFullYear(), month, date, new Date().getHours(), new Date().getMinutes()).getTime() - (5 * 60 * 60 * 1000);
+  const endDate = new Date(new Date().getFullYear(), month, date, new Date().getHours(), new Date().getMinutes()).getTime();
+
+  const messages = createRandomChatStat(startDate, endDate, 100);
+  const timeouts = createRandomChatStat(startDate, endDate, 10);
+  const bans = createRandomChatStat(startDate, endDate, 5);
+  const deleted = createRandomChatStat(startDate, endDate, 10);
+  const commands = createRandomChatStat(startDate, endDate, 20);
+
+  const resp: GetChatStatsResponse = {
+    data: {
+      dateStart: startDate,
+      dateEnd: endDate,
+
+      messagesTotal: messages.reduce((acc, [_, __, count]) => acc + count, 0),
+      timeoutsTotal: timeouts.reduce((acc, [_, __, count]) => acc + count, 0),
+      bansTotal: bans.reduce((acc, [_, __, count]) => acc + count, 0),
+      deletedTotal: deleted.reduce((acc, [_, __, count]) => acc + count, 0),
+      commandsTotal: commands.reduce((acc, [_, __, count]) => acc + count, 0),
+
+      messages,
+    },
   };
 
   res.json(resp);

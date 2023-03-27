@@ -52,3 +52,20 @@ export type Action = {
 export interface GetRecentActionsResponse {
   data: Action[];
 }
+
+export interface ChatStats {
+  dateStart: number;
+  dateEnd: number;
+
+  messagesTotal: number;
+  timeoutsTotal: number;
+  bansTotal: number;
+  deletedTotal: number;
+  commandsTotal: number;
+
+  messages: [number, number, number][]; // [timestamp, sampling duration, count]
+}
+
+export interface GetChatStatsResponse {
+  data: ChatStats;
+}
