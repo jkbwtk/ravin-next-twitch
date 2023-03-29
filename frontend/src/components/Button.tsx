@@ -1,7 +1,4 @@
-import { Component, JSX } from 'solid-js';
-import { mergeProps } from 'solid-js';
-
-import style from '#styles/ButtonBase.module.scss';
+import { JSX, mergeProps } from 'solid-js';
 import ButtonBase, {
   ButtonBaseColorTypes,
   ButtonBaseExcludedProps,
@@ -11,6 +8,8 @@ import ButtonBase, {
   getColorClass,
   getSizeClass,
 } from '#components/ButtonBase';
+
+import style from '#styles/ButtonBase.module.scss';
 
 
 export interface ButtonProps extends ButtonBaseProps {

@@ -1,4 +1,3 @@
-import type { Component } from 'solid-js';
 import { mergeProps } from 'solid-js';
 import style from '#styles/MaterialSymbol.module.scss';
 

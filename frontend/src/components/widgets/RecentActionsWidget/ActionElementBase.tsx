@@ -1,7 +1,6 @@
 
 import { timeFromNow } from '#shared/timeUtils';
 import { Action } from '#shared/types/api/dashboard';
-import { Component } from 'solid-js';
 
 import style from '#styles/widgets/RecentActionsWidget.module.scss';
 

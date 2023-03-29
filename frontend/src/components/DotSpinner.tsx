@@ -1,5 +1,3 @@
-import { Component } from 'solid-js';
-
 import style from '#styles/DotSpinner.module.scss';
 
 

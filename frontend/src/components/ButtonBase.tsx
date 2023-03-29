@@ -1,13 +1,12 @@
 import MaterialSymbol from '#components/MaterialSymbol';
-import { Component, JSX, mergeProps, Show } from 'solid-js';
-
+import { JSX, mergeProps, Show } from 'solid-js';
 
 import style from '#styles/ButtonBase.module.scss';
+
 
 export type ButtonBaseColorTypes = 'gray' | 'primary';
 export type ButtonBaseSizeTypes = 'medium' | 'big';
 export type ButtonBaseExcludedProps = 'class';
-
 
 export interface ButtonBaseProps {
   symbol?: string;

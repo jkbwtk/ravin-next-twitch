@@ -1,4 +1,4 @@
-import { Component, For } from 'solid-js';
+import { For } from 'solid-js';
 import SidebarElementSwitch from '#components/DashboardSidebar/SidebarElementSwitch';
 import { SidebarRoute } from '#components/DashboardSidebar/SidebarElementBase';
 

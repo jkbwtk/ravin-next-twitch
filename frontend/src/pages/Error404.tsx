@@ -1,7 +1,6 @@
-import type { Component } from 'solid-js';
+import Link from '#components/Link';
 
 import style from '#styles/Error404.module.scss';
-import Link from '#components/Link';
 
 
 const Error404: Component = () => {

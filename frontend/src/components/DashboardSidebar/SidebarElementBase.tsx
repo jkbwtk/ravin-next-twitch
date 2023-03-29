@@ -1,5 +1,4 @@
 import MaterialSymbol from '#components/MaterialSymbol';
-import { Component } from 'solid-js';
 
 
 export interface SidebarRoute {

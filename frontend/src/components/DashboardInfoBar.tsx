@@ -1,4 +1,4 @@
-import { Component, createResource, For, Match, Show, Switch } from 'solid-js';
+import { createResource, For, Match, Show, Switch } from 'solid-js';
 import MaterialSymbol from '#components/MaterialSymbol';
 import { Link, useRouteData } from '@solidjs/router';
 import { SidebarRoute } from '#components/DashboardSidebar/SidebarElementBase';

@@ -1,4 +1,4 @@
-import { Component, JSX } from 'solid-js';
+import { JSX } from 'solid-js';
 import { Link } from '@solidjs/router';
 import ravinLogo from '#assets/ravinLogo.svg';
 import DashboardSidebar from '#components/DashboardSidebar';

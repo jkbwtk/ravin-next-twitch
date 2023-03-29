@@ -1,10 +1,9 @@
-import { Component } from 'solid-js';
 import { mergeProps } from 'solid-js';
 import { Link as RouterLink, LinkProps as RouterLinkProps } from '@solidjs/router';
-
-import style from '#styles/ButtonBase.module.scss';
 import { ButtonProps, defaultProps } from '#components/Button';
 import ButtonBase, { ButtonBaseExcludedProps, getColorClass, getSizeClass } from '#components/ButtonBase';
+
+import style from '#styles/ButtonBase.module.scss';
 
 
 interface LinkProps extends ButtonProps{

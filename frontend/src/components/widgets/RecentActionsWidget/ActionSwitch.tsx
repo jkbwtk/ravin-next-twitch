@@ -1,4 +1,4 @@
-import { Component, Match, Switch } from 'solid-js';
+import { Match, Switch } from 'solid-js';
 import { Action } from '#shared/types/api/dashboard';
 import ActionBan from '#components/widgets/RecentActionsWidget/ActionElementBan';
 import ActionTimeout from '#components/widgets/RecentActionsWidget/ActionElementTimeout';

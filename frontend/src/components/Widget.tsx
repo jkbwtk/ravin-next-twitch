@@ -1,4 +1,4 @@
-import { Component, JSX } from 'solid-js';
+import { JSX } from 'solid-js';
 
 import style from '#styles/Widget.module.scss';
 

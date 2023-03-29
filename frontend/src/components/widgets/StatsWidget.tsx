@@ -1,4 +1,4 @@
-import { Component, createEffect, createResource, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { createEffect, createResource, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import Chart from 'chart.js/auto';
 import Widget from '#components/Widget';
 import { ChatStats, GetChatStatsResponse } from '#types/api/dashboard';

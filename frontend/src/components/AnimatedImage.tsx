@@ -1,4 +1,4 @@
-import { Component, createSignal, JSX, mergeProps } from 'solid-js';
+import { createSignal, JSX, mergeProps } from 'solid-js';
 
 import style from '#styles/AnimatedImage.module.scss';
 

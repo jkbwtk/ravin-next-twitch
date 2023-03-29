@@ -1,6 +1,4 @@
 import { useRoutes } from '@solidjs/router';
-import type { Component } from 'solid-js';
-
 import { routes } from './routes';
 
 

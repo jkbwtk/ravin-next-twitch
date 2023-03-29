@@ -3,7 +3,7 @@ import SidebarElementSwitch from '#components/DashboardSidebar/SidebarElementSwi
 import { hasAuxRoutes } from '#components/DashboardSidebar/SidebarUtils';
 import MaterialSymbol from '#components/MaterialSymbol';
 import { useBeforeLeave, useLocation } from '@solidjs/router';
-import { Component, createSignal, For, Show } from 'solid-js';
+import { createSignal, For, Show } from 'solid-js';
 
 import style from '#styles/DashboardSidebar.module.scss';
 

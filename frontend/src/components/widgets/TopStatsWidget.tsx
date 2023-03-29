@@ -1,4 +1,4 @@
-import { Component, createResource, Show } from 'solid-js';
+import { createResource, Show } from 'solid-js';
 import Widget from '#components/Widget';
 import AnimatedImage from '#components/AnimatedImage';
 import { GetTopStatsResponse, TopStats } from '#types/api/dashboard';

@@ -1,4 +1,4 @@
-import { Component, createMemo, createResource, For, Show } from 'solid-js';
+import { createMemo, createResource, For, Show } from 'solid-js';
 import Widget from '#components/Widget';
 import { Action, GetRecentActionsResponse } from '#types/api/dashboard';
 import ActionSwitch from '#components/widgets/RecentActionsWidget/ActionSwitch';

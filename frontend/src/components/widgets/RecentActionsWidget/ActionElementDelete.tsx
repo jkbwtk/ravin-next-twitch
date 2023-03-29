@@ -1,4 +1,3 @@
-import { Component } from 'solid-js';
 import MaterialSymbol from '#components/MaterialSymbol';
 import ActionElementBase from '#components/widgets/RecentActionsWidget/ActionElementBase';
 import { Action } from '#shared/types/api/dashboard';

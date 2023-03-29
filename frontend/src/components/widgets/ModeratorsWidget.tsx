@@ -1,4 +1,4 @@
-import { Component, createMemo, createResource, For, Show } from 'solid-js';
+import { createMemo, createResource, For, Show } from 'solid-js';
 import Widget from '#components/Widget';
 import AnimatedImage from '#components/AnimatedImage';
 import { GetModeratorsResponse, Moderator } from '#types/api/dashboard';

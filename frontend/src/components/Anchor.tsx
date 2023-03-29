@@ -1,5 +1,4 @@
-import { JSX } from 'solid-js';
-import { mergeProps } from 'solid-js';
+import { JSX, mergeProps } from 'solid-js';
 import ButtonBase, {
   ButtonBaseExcludedProps,
   getColorClass,

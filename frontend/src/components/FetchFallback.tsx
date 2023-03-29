@@ -1,4 +1,4 @@
-import { Component, JSX } from 'solid-js';
+import { JSX } from 'solid-js';
 import CircleSpinner from '#components/CircleSpinner';
 
 import style from '#styles/FetchFallback.module.scss';

@@ -1,5 +1,5 @@
 import Button from '#components/Button';
-import type { Component, JSX } from 'solid-js';
+import type { JSX } from 'solid-js';
 
 
 const ButtonTest: Component = () => {

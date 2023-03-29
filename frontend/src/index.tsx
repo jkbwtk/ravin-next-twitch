@@ -1,9 +1,17 @@
+import type { Component as SolidComponent } from 'solid-js';
 import { Router } from '@solidjs/router';
 import { render } from 'solid-js/web';
-
-import '#styles/index.scss';
 import App from './App';
 
+import '#styles/index.scss';
+
+
+// declared it here and not in global.d.ts because typescript was complaining about empty interfaces
+// and import.meta.env.DEV was not recognized
+declare global {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  type Component<P = {}> = SolidComponent<P>;
+}
 
 const root = document.getElementById('root');
 

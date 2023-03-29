@@ -1,4 +1,3 @@
-import { Component } from 'solid-js';
 import DashboardInfoBar from '#components/DashboardInfoBar';
 import DashboardPage from '#components/DashboardPage';
 import MaterialSymbol from '#components/MaterialSymbol';
