@@ -31,7 +31,7 @@ const SidebarElementNested: Component<SidebarRoute> = (props) => {
       >
         <SidebarElementBase {...props} />
         <Show when={hasAuxRoutes(props)}>
-          <MaterialSymbol customClass={style.dropdownArrow} symbol='arrow_back_ios_new' size='small' />
+          <MaterialSymbol class={style.dropdownArrow} symbol='arrow_back_ios_new' size='small' />
         </Show>
       </button>
 

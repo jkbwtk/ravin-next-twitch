@@ -3,7 +3,7 @@ import { createSignal, JSX, mergeProps } from 'solid-js';
 import style from '#styles/AnimatedImage.module.scss';
 
 
-const AnimatedImage: Component<{ src: string } & JSX.HTMLAttributes<HTMLImageElement>> = (props) => {
+const AnimatedImage: Component<JSX.ImgHTMLAttributes<HTMLImageElement>> = (props) => {
   const [loading, setLoading] = createSignal(true);
 
   const mergedClassList = () => mergeProps(props.classList, {
@@ -13,10 +13,10 @@ const AnimatedImage: Component<{ src: string } & JSX.HTMLAttributes<HTMLImageEle
 
   return (
     <img
-      {...props}
       class={[style.animatedImage, props.class].join(' ')}
       classList={mergedClassList()}
       onLoad={() => setLoading(false)}
+      {...props}
     />
   );
 };

@@ -9,7 +9,7 @@ import style from '#styles/DashboardPage.module.scss';
 import borders from '#styles/borders.module.scss';
 
 
-const DashboardPage: Component<JSX.HTMLAttributes<HTMLButtonElement>> = (props) => {
+const DashboardPage: ParentComponent<JSX.HTMLAttributes<HTMLDivElement>> = (props) => {
   return (
     <div class={style.container}>
       <Link href='/' classList={{

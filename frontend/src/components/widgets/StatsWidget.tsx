@@ -147,7 +147,7 @@ const StatsWidget: Component<StatsWidgetProps> = (props) => {
   });
 
   return (
-    <Widget customClass={style.container} containerClass={style.outerContainer} title='Stats'>
+    <Widget class={style.container} containerClass={style.outerContainer} title='Stats'>
       <Show
         when={stats.state === 'ready' || stats.state === 'refreshing'}
         fallback={<FetchFallback>Fetching Chat Stats</FetchFallback>}

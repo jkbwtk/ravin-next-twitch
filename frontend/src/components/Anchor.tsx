@@ -1,6 +1,5 @@
 import { JSX, mergeProps } from 'solid-js';
 import ButtonBase, {
-  ButtonBaseExcludedProps,
   getColorClass,
   getSizeClass,
 } from '#components/ButtonBase';
@@ -9,7 +8,7 @@ import { ButtonProps, defaultProps } from '#components/Button';
 import style from '#styles/ButtonBase.module.scss';
 
 
-const Anchor: Component<ButtonProps & Omit<JSX.HTMLAttributes<HTMLAnchorElement>, ButtonBaseExcludedProps>> = (userProps) => {
+const Anchor: Component<ButtonProps & JSX.AnchorHTMLAttributes<HTMLAnchorElement>> = (userProps) => {
   const props = mergeProps(defaultProps, userProps);
 
   const colorClass = getColorClass(props.color);
@@ -21,7 +20,7 @@ const Anchor: Component<ButtonProps & Omit<JSX.HTMLAttributes<HTMLAnchorElement>
         [style.button]: true,
         [colorClass]: true,
         [sizeClass]: true,
-        [props.customClass]: true,
+        [props.class]: true,
       }}
       {...props}
     >

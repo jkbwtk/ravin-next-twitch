@@ -22,7 +22,7 @@ const RecentActionsWidget: Component = () => {
   const sortedActions = createMemo(() => actions().sort((a, b) => b.date - a.date));
 
   return (
-    <Widget customClass={style.container} containerClass={style.outerContainer} title='Recent actions'>
+    <Widget class={style.container} containerClass={style.outerContainer} title='Recent actions'>
       <Show when={!actions.loading} fallback={<FetchFallback>Fetching Recent Actions</FetchFallback>}>
         <For each={sortedActions()}>
           {(action) => (ActionSwitch(action))}

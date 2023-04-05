@@ -1,7 +1,6 @@
 import { JSX, mergeProps } from 'solid-js';
 import ButtonBase, {
   ButtonBaseColorTypes,
-  ButtonBaseExcludedProps,
   ButtonBaseProps,
   ButtonBaseSizeTypes,
   defaultProps as defaultBaseProps,
@@ -15,19 +14,19 @@ import style from '#styles/ButtonBase.module.scss';
 export interface ButtonProps extends ButtonBaseProps {
   color?: ButtonBaseColorTypes;
   size?: ButtonBaseSizeTypes;
-  customClass?: string;
+  class?: string;
   draggable?: boolean;
 }
 
-export const defaultProps: Omit<Required<ButtonProps>, 'children'> = {
+export const defaultProps: Required<ButtonProps> = {
   ...defaultBaseProps,
   color: 'gray',
   size: 'medium',
-  customClass: '',
+  class: '',
   draggable: false,
 };
 
-const Button: Component<ButtonProps & Omit<JSX.HTMLAttributes<HTMLButtonElement>, ButtonBaseExcludedProps>> = (userProps) => {
+const Button: Component<ButtonProps & JSX.ButtonHTMLAttributes<HTMLButtonElement>> = (userProps) => {
   const props = mergeProps(defaultProps, userProps);
 
   const colorClass = getColorClass(props.color);
@@ -39,7 +38,7 @@ const Button: Component<ButtonProps & Omit<JSX.HTMLAttributes<HTMLButtonElement>
         [style.button]: true,
         [colorClass]: true,
         [sizeClass]: true,
-        [props.customClass]: true,
+        [props.class]: true,
       }}
       {...props}
     >
@@ -49,3 +48,10 @@ const Button: Component<ButtonProps & Omit<JSX.HTMLAttributes<HTMLButtonElement>
 };
 
 export default Button;
+
+
+(
+  <Button>
+    <span>Button</span>
+  </Button>
+);

@@ -1,9 +1,10 @@
-import type { Component as SolidComponent } from 'solid-js';
+import type { Component as SolidComponent, ParentComponent as SolidParentComponent } from 'solid-js';
 import { Router } from '@solidjs/router';
 import { render } from 'solid-js/web';
 import App from './App';
 
 import '#styles/index.scss';
+import { SessionProvider } from './providers/SessionProvider';
 
 
 // declared it here and not in global.d.ts because typescript was complaining about empty interfaces
@@ -11,6 +12,9 @@ import '#styles/index.scss';
 declare global {
   // eslint-disable-next-line @typescript-eslint/ban-types
   type Component<P = {}> = SolidComponent<P>;
+
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  type ParentComponent<P = {}> = SolidParentComponent<P>;
 }
 
 const root = document.getElementById('root');

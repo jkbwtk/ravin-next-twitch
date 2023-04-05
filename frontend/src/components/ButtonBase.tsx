@@ -1,19 +1,17 @@
 import MaterialSymbol from '#components/MaterialSymbol';
-import { JSX, mergeProps, Show } from 'solid-js';
+import { mergeProps, Show } from 'solid-js';
 
 import style from '#styles/ButtonBase.module.scss';
 
 
 export type ButtonBaseColorTypes = 'gray' | 'primary';
 export type ButtonBaseSizeTypes = 'medium' | 'big';
-export type ButtonBaseExcludedProps = 'class';
 
 export interface ButtonBaseProps {
   symbol?: string;
-  children?: JSX.HTMLAttributes<HTMLButtonElement>['children'];
 }
 
-export const defaultProps: Omit<Required<ButtonBaseProps>, 'children'> = {
+export const defaultProps: Required<ButtonBaseProps> = {
   symbol: '',
 };
 
@@ -36,7 +34,7 @@ export const getSizeClass = (size: ButtonBaseSizeTypes): string => {
 };
 
 
-const ButtonBase: Component<ButtonBaseProps> = (userProps) => {
+const ButtonBase: ParentComponent<ButtonBaseProps> = (userProps) => {
   const props = mergeProps(defaultProps, userProps);
 
   return (

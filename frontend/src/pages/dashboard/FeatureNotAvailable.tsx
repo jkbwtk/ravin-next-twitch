@@ -11,7 +11,7 @@ const FeatureNotAvailable: Component = () => {
       <div class={style.container}>
         <DashboardInfoBar />
         <div class={style.info}>
-          <MaterialSymbol symbol='warning' color='primary' customClass={style.icon} />
+          <MaterialSymbol symbol='warning' color='primary' class={style.icon} />
           <span class={style.header}>Feature not available</span>
           <span class={style.message}>Please check back later</span>
         </div>

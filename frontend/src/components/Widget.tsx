@@ -1,18 +1,15 @@
-import { JSX } from 'solid-js';
-
 import style from '#styles/Widget.module.scss';
 
 
 export interface WidgetProps {
   title: string,
   containerClass?: string;
-  customClass?: string,
-  children?: JSX.Element;
+  class?: string,
 }
 
-const Widget: Component<WidgetProps> = (props) => {
+const Widget: ParentComponent<WidgetProps> = (props) => {
   const containerClasses = [style.container, props.containerClass].join(' ');
-  const classes = [style.containerProper, props.customClass].join(' ');
+  const classes = [style.containerProper, props.class].join(' ');
 
   return (
     <div class={containerClasses}>

@@ -11,12 +11,12 @@ const defaultProps = {
   placeholder: ' ',
 };
 
-const Input: Component<InputProps> = (props) => {
-  const mergedProps = mergeProps(defaultProps, props);
+const Input: Component<InputProps> = (userProps) => {
+  const props = mergeProps(defaultProps, userProps);
 
   return (
     <div class={style.container}>
-      <input {...mergedProps} class={[style.input, mergedProps.class].join(' ')} />
+      <input class={[style.input, props.class].join(' ')} {...props} />
       <label class={style.label} for={props.id}>{props.label ?? props.placeholder}</label>
     </div>
   );

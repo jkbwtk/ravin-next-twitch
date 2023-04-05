@@ -31,7 +31,7 @@ const TopStatsWidget: Component = () => {
   });
 
   return (
-    <Widget customClass={style.container} title='Moderators'>
+    <Widget class={style.container} title='Moderators'>
       <Show when={!stats.loading} fallback={<FetchFallback>Fetching Top Stats</FetchFallback>}>
 
         <div class={style.segment}>

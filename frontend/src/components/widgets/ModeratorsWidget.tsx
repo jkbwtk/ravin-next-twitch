@@ -30,7 +30,7 @@ const ModeratorsWidget: Component = () => {
   const offlineModerators = createMemo(() => moderators().filter((moderator) => !moderator.status));
 
   return (
-    <Widget customClass={style.container} title='Moderators'>
+    <Widget class={style.container} title='Moderators'>
       <Show when={!moderators.loading} fallback={<FetchFallback>Fetching Moderators</FetchFallback>}>
         <div class={style.segment}>
           <span class={style.segmentTitle}>Online {onlineModerators().length} / {moderators().length}</span>

@@ -1,7 +1,7 @@
 import { mergeProps } from 'solid-js';
 import { Link as RouterLink, LinkProps as RouterLinkProps } from '@solidjs/router';
 import { ButtonProps, defaultProps } from '#components/Button';
-import ButtonBase, { ButtonBaseExcludedProps, getColorClass, getSizeClass } from '#components/ButtonBase';
+import ButtonBase, { getColorClass, getSizeClass } from '#components/ButtonBase';
 
 import style from '#styles/ButtonBase.module.scss';
 
@@ -10,12 +10,12 @@ interface LinkProps extends ButtonProps{
   end?: boolean;
 }
 
-const defaultLinkProps: Omit<Required<LinkProps>, 'children'> = {
+const defaultLinkProps: Required<LinkProps> = {
   ...defaultProps,
   end: true,
 };
 
-const Link: Component<LinkProps & Omit<RouterLinkProps, ButtonBaseExcludedProps>> = (userProps) => {
+const Link: Component<LinkProps & RouterLinkProps> = (userProps) => {
   const props = mergeProps(defaultLinkProps, userProps);
 
   const colorClass = getColorClass(props.color);
@@ -27,7 +27,7 @@ const Link: Component<LinkProps & Omit<RouterLinkProps, ButtonBaseExcludedProps>
         [style.button]: true,
         [colorClass]: true,
         [sizeClass]: true,
-        [props.customClass]: true,
+        [props.class]: true,
       }}
       {...props}
     >

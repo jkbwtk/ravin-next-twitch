@@ -1,4 +1,5 @@
 import { mergeProps } from 'solid-js';
+
 import style from '#styles/MaterialSymbol.module.scss';
 
 
@@ -12,7 +13,7 @@ interface MaterialSymbolProps {
   interactive?: boolean;
   highlightColor?: SymbolColorTypes | 'none';
   filled?: boolean;
-  customClass?: string;
+  class?: string;
 }
 
 const defaultProps: Required<MaterialSymbolProps> = {
@@ -22,7 +23,7 @@ const defaultProps: Required<MaterialSymbolProps> = {
   interactive: false,
   highlightColor: 'none',
   filled: false,
-  customClass: '',
+  class: '',
 };
 
 const MaterialSymbol: Component<MaterialSymbolProps> = (userProps) => {
@@ -74,7 +75,7 @@ const MaterialSymbol: Component<MaterialSymbolProps> = (userProps) => {
       [style.interactive]: props.interactive,
       [highlightColorClass]: props.interactive,
       [style.filled]: props.filled,
-      [props.customClass]: true,
+      [props.class]: true,
     }}>
       {props.symbol}
     </span>
