@@ -1,0 +1,74 @@
+@use 'app';
+
+
+$transitionDuration: 0.2s;
+$transitionTimingFunction: ease-in-out;
+$transitionStyle: $transitionDuration $transitionTimingFunction;
+
+.container {
+  position: relative;
+  box-sizing: border-box;
+
+  margin-top: calc(app.$altFontSize);
+}
+
+.label {
+  pointer-events: none;
+  position: absolute;
+  font-size: app.$altFontSize;
+
+  top: 50%;
+  left: 1rem;
+
+  transform: translateY(-50%);
+
+  transition:
+    color $transitionStyle,
+    font-size $transitionStyle,
+    top $transitionStyle,
+    transform $transitionStyle;
+}
+
+.input {
+  color: app.$textBrightColor;
+  font-size: app.$altFontSize;
+  font-family: app.$fontFamily;
+  font-weight: 500;
+
+  background-color: app.$widgetColor;
+  border-radius: app.$borderRadius;
+
+  padding: 0.8rem 1rem;
+
+  border-style: solid;
+  border-width: 1px;
+  border-color: app.$borderColor;
+
+
+  transition: border-color $transitionStyle;
+
+  &:focus {
+    outline: none;
+    border-color: app.$textColor;
+  }
+
+  &:focus + .label,
+  &:not(:placeholder-shown) + .label {
+    font-size: app.$smallFontSize;
+
+    top: 0;
+    transform: translateY(calc(-100% - 0.2rem));
+  }
+
+  &:focus + .label {
+    color: app.$textBrightColor;
+  }
+
+  &::placeholder {
+    color: transparent;
+  }
+
+  &:invalid:not(:placeholder-shown) {
+    border-color: app.$primaryColor;
+  }
+}
