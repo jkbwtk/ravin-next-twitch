@@ -7,7 +7,7 @@ const AnimatedImage: Component<JSX.ImgHTMLAttributes<HTMLImageElement>> = (props
   const [loading, setLoading] = createSignal(true);
 
   const mergedClassList = () => mergeProps(props.classList, {
-    // [style.animatedImage]: true,
+    [style.animatedImage]: true,
     [style.loaded]: !loading(),
   });
 
