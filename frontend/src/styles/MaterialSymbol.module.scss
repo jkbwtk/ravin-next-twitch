@@ -35,7 +35,23 @@
 }
 
 .gray {
-  color: app.$textColor;
+  color: app.$gray;
+}
+
+.red {
+  color: app.$red;
+}
+
+.green {
+  color: app.$green;
+}
+
+.blue {
+  color: app.$blue;
+}
+
+.yellow {
+  color: app.$yellow;
 }
 
 .primary {
@@ -47,7 +63,23 @@
 }
 
 .gray-highlight {
-  @include symbolUtils.highlight(app.$textBrightColor);
+  @include symbolUtils.highlight(app.$grayBright);
+}
+
+.red-highlight {
+  @include symbolUtils.highlight(app.$redBright);
+}
+
+.green-highlight {
+  @include symbolUtils.highlight(app.$greenBright);
+}
+
+.blue-highlight {
+  @include symbolUtils.highlight(app.$blueBright);
+}
+
+.yellow-highlight {
+  @include symbolUtils.highlight(app.$yellowBright);
 }
 
 .primary-highlight {
