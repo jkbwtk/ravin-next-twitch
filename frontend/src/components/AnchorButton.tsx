@@ -8,7 +8,7 @@ import { ButtonProps, defaultProps } from '#components/Button';
 import style from '#styles/ButtonBase.module.scss';
 
 
-const Anchor: Component<ButtonProps & JSX.AnchorHTMLAttributes<HTMLAnchorElement>> = (userProps) => {
+const AnchorButton: Component<ButtonProps & JSX.AnchorHTMLAttributes<HTMLAnchorElement>> = (userProps) => {
   const props = mergeProps(defaultProps, userProps);
 
   const colorClass = getColorClass(props.color);
@@ -29,4 +29,4 @@ const Anchor: Component<ButtonProps & JSX.AnchorHTMLAttributes<HTMLAnchorElement
   );
 };
 
-export default Anchor;
+export default AnchorButton;
