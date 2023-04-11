@@ -1,0 +1,231 @@
+@use 'app';
+@use 'sass:color';
+@use 'symbolUtils';
+
+$transitionDuration: 0.2s;
+$transitionTimingFunction: ease-in-out;
+$transitionStyle: $transitionDuration $transitionTimingFunction;
+
+.container {
+  width: calc(100% - 6rem);
+  max-width: 50rem;
+  max-height: calc(100% - 4rem);
+
+  box-sizing: border-box;
+  overflow-x: hidden;
+  overflow-y: hidden;
+
+  align-items: center;
+
+  margin: 0;
+  padding: 0;
+
+  position: fixed;
+  top: 2rem;
+  right: 50%;
+  transform: translateX(50%);
+}
+
+
+.notification {
+  list-style: none;
+  position: relative;
+
+  height: auto;
+  width: 100%;
+  box-sizing: border-box;
+
+  gap: 1.5rem 1rem;
+
+  overflow: hidden;
+  flex-shrink: 0;
+
+  display: grid;
+  grid-template-columns: min-content 1fr min-content;
+
+  align-items: center;
+  transform-origin: top;
+
+  border-radius: app.$borderRadius;
+
+  background-color: color.adjust(app.$widgetColor, $alpha: -0.25);
+  backdrop-filter: blur(1rem);
+
+  transition:
+    background-color $transitionStyle,
+    backdrop-filter $transitionStyle,
+    transform $transitionStyle,
+    opacity $transitionStyle;
+
+  animation: enterNotification 0.2s ease-in-out forwards;
+
+  &:hover {
+    background-color: color.adjust(app.$widgetColor, $alpha: -0.1);
+    backdrop-filter: blur(2rem);
+  }
+
+  &:first-of-type::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+
+    background-color: app.$textBrightColor;
+    height: 0.3rem;
+    border-radius: 500rem;
+
+    opacity: 1;
+
+    transition: opacity $transitionStyle;
+  }
+
+  &:first-of-type:hover::after {
+    opacity: 0;
+    animation-play-state: paused;
+  }
+
+  &:first-of-type:not(:hover)::after {
+    animation: progressBar var(--notification-duration) linear forwards;
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+
+    .title {
+      font-size: app.$smallFontSize;
+      font-weight: 500;
+      color: app.$textBrightColor;
+    }
+
+    p {
+      margin: 0;
+
+      color: app.$textColor;
+      font-size: app.$smallFontSize;
+      font-weight: 400;
+    }
+  }
+
+  .close-button {
+    cursor: pointer;
+    height: 100%;
+
+    &:hover :global(.material-symbols-rounded) {
+      color: app.$primaryColor;
+    }
+  }
+}
+
+.hideNotification {
+  animation: leaveNotification 0.2s ease-in-out forwards;
+}
+
+.overflow-counter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 1rem;
+  flex-shrink: 0;
+
+  align-self: center;
+  margin: 0 auto;
+
+  border-radius: 500rem;
+  background-color: app.$primaryColor;
+  color: app.$textBrightColor;
+
+  font-size: app.$smallFontSize;
+  font-weight: 500;
+
+  max-width: fit-content;
+  white-space: nowrap;
+  box-sizing: border-box;
+
+  overflow: hidden;
+
+  transition: all 0.4s ease-out;
+
+  animation: enterCounter 0.5s ease-in-out;
+}
+
+@keyframes enterCounter {
+  0% {
+    width: 0%;
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    width: 100%;
+  }
+}
+
+@keyframes enterNotification {
+  from {
+    opacity: 0;
+
+    max-height: 0;
+
+    padding: 0 1.5rem;
+    margin-bottom: 0;
+
+    border: 0.2rem solid app.$borderColor;
+    border-top-width: 0;
+    border-bottom-width: 0;
+  }
+
+  to {
+    opacity: 1;
+
+    max-height: 50rem;
+
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+
+    border: 0.2rem solid app.$borderColor;
+  }
+}
+
+@keyframes leaveNotification {
+  from {
+    opacity: 1;
+
+    max-height: 50rem;
+
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+
+    border: 0.2rem solid app.$borderColor;
+  }
+
+  to {
+    opacity: 0;
+
+    max-height: 0;
+
+    padding: 0 1.5rem;
+    margin-bottom: 0;
+
+    border: 0.2rem solid app.$borderColor;
+    border-top-width: 0;
+    border-bottom-width: 0;
+  }
+}
+
+@keyframes progressBar {
+  0% {
+    width: 100%;
+  }
+
+  100% {
+    width: 0%;
+  }
+}
