@@ -37,6 +37,8 @@ export default defineConfig({
       { find: '#pages', replacement: resolve(frontendDevelopmentPath, 'src/pages') },
       { find: '#styles', replacement: resolve(frontendDevelopmentPath, 'src/styles') },
       { find: '#assets', replacement: resolve(frontendDevelopmentPath, 'src/assets') },
+      { find: '#lib', replacement: resolve(frontendDevelopmentPath, 'src/lib') },
+      { find: '#providers', replacement: resolve(frontendDevelopmentPath, 'src/providers') },
     ],
   },
 
