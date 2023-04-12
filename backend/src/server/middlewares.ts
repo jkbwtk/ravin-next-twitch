@@ -26,3 +26,8 @@ export const accessControl: RequestHandler = (req, res, next) => {
 
   next();
 };
+
+export const notConfigured: RequestHandler = (req, res) => {
+  res.contentType('text/plain');
+  res.status(503).send('Server is not configured yet.');
+};

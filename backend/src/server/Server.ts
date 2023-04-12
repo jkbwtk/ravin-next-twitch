@@ -1,11 +1,15 @@
 import { createServer, ViteDevServer } from 'vite';
 import express, { Express, RequestHandler } from 'express';
-import { accessControl, invalidRoute, logger } from './middlewares';
+import { accessControl, invalidRoute, logger, notConfigured } from './middlewares';
 import { apiRouter } from './routers/apiRouter';
 import compression, { CompressionOptions } from 'compression';
-import { frontendPath, frontendProductionPath } from '#shared/constants';
+import { frontendPath, frontendProductionPath, isDevMode, serverPort } from '#shared/constants';
 import chalk from 'chalk';
 import path from 'path';
+import { Config } from '#lib/Config';
+import { faker } from '@faker-js/faker';
+import { display } from '#lib/display';
+import { createOnboardingRouter } from '#server/routers/onboarding';
 
 
 export class Server {
@@ -16,7 +20,7 @@ export class Server {
     level: 7,
   };
 
-  constructor(private readonly port: number, private readonly devMode: boolean) {
+  constructor(private readonly port = serverPort, private readonly devMode = isDevMode) {
     this.app = express();
   }
 
@@ -34,7 +38,17 @@ export class Server {
 
     this.app.use(logger);
     this.app.use(compression(Server.compressionOptions));
-    this.app.use('/api', apiRouter);
+
+    if (await this.isConfigured()) {
+      this.app.use('/api', apiRouter);
+
+      if (!this.devMode) { // allow access to onboarding view in dev mode
+        this.app.use('/onboarding', (req, res) => res.redirect('/'));
+      }
+    } else {
+      this.app.use('/api', notConfigured);
+      this.app.use('/onboarding', createOnboardingRouter(this.port));
+    }
 
     if (this.devMode) {
       await this.setupVite();
@@ -50,6 +64,20 @@ export class Server {
   private serveIndexHtml: RequestHandler = (req, res) => {
     res.sendFile(path.join(frontendPath, 'index.html'));
   };
+
+  private async isConfigured(): Promise<boolean> {
+    const config = await Config.getConfig();
+
+    if ((process.env.RECONFIGURE_SERVER ?? 'FALSE').toUpperCase() === 'TRUE') return false;
+
+    return (
+      config.has('botLogin') &&
+      config.has('botToken') &&
+      config.has('twitchClientId') &&
+      config.has('twitchClientSecret') &&
+      config.has('sessionSecret')
+    );
+  }
 
   public async start(): Promise<void> {
     await this.registerRoutes();

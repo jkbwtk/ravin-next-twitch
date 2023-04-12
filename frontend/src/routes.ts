@@ -23,6 +23,10 @@ export const routes: RouteDefinition[] = [
     children,
   },
   {
+    path: '/onboarding',
+    component: lazy(() => import('#pages/Onboarding')),
+  },
+  {
     path: '**',
     component: Error404,
   },

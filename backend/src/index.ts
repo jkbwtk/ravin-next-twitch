@@ -8,8 +8,8 @@ import chalk from 'chalk';
 
 import { Bot } from './bot/Bot';
 import { getConfig } from './config';
-import { isDevMode, serverPort } from '#shared/constants';
 import { Server } from './server/Server';
+import { display } from '#lib/display';
 
 
 const handleTopLevelError = (err: unknown): void => {
@@ -25,11 +25,16 @@ const handleTopLevelError = (err: unknown): void => {
   process.exit(1);
 };
 
+process.on('SIGINT', () => {
+  display.system.nextLine('Process', 'Shutting down gracefully...');
+  process.exit(0);
+});
+
 const main = async () => {
   try {
     const config = getConfig();
 
-    const server = new Server(serverPort, isDevMode);
+    const server = new Server();
     const bot = new Bot(config);
 
     await server.start();

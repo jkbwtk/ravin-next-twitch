@@ -1,7 +1,8 @@
 import 'reflect-metadata';
 
 import { isDevMode } from '#shared/constants';
-import { DataSource, DataSourceOptions, EntityManager } from 'typeorm';
+import { DataSource, DataSourceOptions, EntityManager, ObjectLiteral, Repository } from 'typeorm';
+import { Config } from '#database/entities/Config';
 
 
 export class Database {
@@ -28,6 +29,7 @@ export class Database {
 
   private static get databaseEntities(): DataSourceOptions['entities'] {
     return [
+      Config,
     ];
   }
 
@@ -53,5 +55,11 @@ export class Database {
     const dataSource = await Database.getDataSource();
 
     return dataSource.manager;
+  }
+
+  public static async getRepository<T extends ObjectLiteral>(entity: new () => T): Promise<Repository<T>> {
+    const manager = await Database.getManager();
+
+    return manager.getRepository(entity);
   }
 }

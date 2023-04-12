@@ -2,9 +2,9 @@ import type { Component as SolidComponent, ParentComponent as SolidParentCompone
 import { Router } from '@solidjs/router';
 import { render } from 'solid-js/web';
 import App from './App';
+import { NotificationProvider } from '#providers/NotificationProvider';
 
 import '#styles/index.scss';
-import { SessionProvider } from './providers/SessionProvider';
 
 
 // declared it here and not in global.d.ts because typescript was complaining about empty interfaces
@@ -22,7 +22,9 @@ const root = document.getElementById('root');
 if (root instanceof HTMLElement) {
   render(() =>
     <Router>
-      <App />
+      <NotificationProvider>
+        <App />
+      </NotificationProvider>
     </Router>
   , root);
 
