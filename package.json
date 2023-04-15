@@ -23,7 +23,7 @@
     "#database": "server/database",
     "#bot": "server/bot",
     "#server": "server/server",
-    "#routes": "server/routes"
+    "#routers": "server/routers"
   },
   "dependencies": {
     "@faker-js/faker": "^7.6.0",
