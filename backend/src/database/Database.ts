@@ -3,14 +3,28 @@ import 'reflect-metadata';
 import { isDevMode } from '#shared/constants';
 import { DataSource, DataSourceOptions, EntityManager, ObjectLiteral, Repository } from 'typeorm';
 import { Config } from '#database/entities/Config';
+import { Session } from '#database/entities/Session';
+import { User } from '#database/entities/User';
+import { Token } from '#database/entities/Token';
+import { Redis, RedisOptions } from 'ioredis';
 
 
 export class Database {
   private static instance: Database;
   private dataSource: DataSource;
+  private redisClient: Redis;
 
   private constructor() {
     this.dataSource = new DataSource(Database.databaseOptions);
+    this.redisClient = new Redis(Database.redisOptions);
+  }
+
+  private static get redisOptions(): RedisOptions {
+    return {
+      port: parseInt(process.env.REDIS_PORT ?? '6379'),
+      host: process.env.REDIS_HOST ?? 'localhost',
+      password: process.env.DB_PASSWORD ?? 'DEV_PASSWD',
+    };
   }
 
   private static get databaseOptions(): DataSourceOptions {
@@ -22,7 +36,12 @@ export class Database {
       password: process.env.DB_PASSWORD ?? 'DEV_PASSWD',
       database: isDevMode ? 'DEV_DB' : (process.env.DB_NAME ?? 'PROD_DB'),
       synchronize: true,
-      logging: false,
+      logging: isDevMode,
+      cache: {
+        type: 'ioredis',
+        ignoreErrors: false,
+        options: Database.redisOptions,
+      },
       entities: Database.databaseEntities,
     };
   }
@@ -30,6 +49,9 @@ export class Database {
   private static get databaseEntities(): DataSourceOptions['entities'] {
     return [
       Config,
+      // Session,
+      User,
+      Token,
     ];
   }
 
@@ -61,5 +83,23 @@ export class Database {
     const manager = await Database.getManager();
 
     return manager.getRepository(entity);
+  }
+
+  public static async invalidateCache(identifiers: string[]): Promise<void> {
+    const dataSource = await Database.getDataSource();
+
+    await dataSource.queryResultCache?.remove(identifiers);
+  }
+
+  public static async clearCache(): Promise<void> {
+    const dataSource = await Database.getDataSource();
+
+    await dataSource.queryResultCache?.clear();
+  }
+
+  public static async getRedisClient(): Promise<Redis> {
+    const database = Database.getInstance();
+
+    return database.redisClient;
   }
 }

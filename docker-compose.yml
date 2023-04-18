@@ -7,3 +7,7 @@ services:
       - POSTGRES_USER=${DB_USER:?DB_USER is not set}
       - POSTGRES_PASSWORD=${DB_PASSWORD:?DB_PASSWORD is not set}
       - POSTGRES_DB=${DB_NAME:-PROD_DB}
+
+  cache:
+    image: redis:alpine
+    command: redis-server --requirepass ${DB_PASSWORD:?DB_PASSWORD is not set}

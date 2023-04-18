@@ -9,3 +9,10 @@ services:
       - "5432:5432"
     environment:
       - POSTGRES_DB=DEV_DB
+
+  cache:
+    extends:
+      file: docker-compose.yml
+      service: cache
+    ports:
+      - "6379:6379"
