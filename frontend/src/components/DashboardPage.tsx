@@ -1,15 +1,21 @@
-import { JSX } from 'solid-js';
+import { JSX, Show } from 'solid-js';
 import { Link } from '@solidjs/router';
 import ravinLogo from '#assets/ravinLogo.svg';
 import DashboardSidebar from '#components/DashboardSidebar';
 import dashboardElements from '#assets/dashboardRoutes';
 import MaterialSymbol from '#components/MaterialSymbol';
+import { useSession } from '#providers/SessionProvider';
+import AnimatedImage from '#components/AnimatedImage';
 
 import style from '#styles/DashboardPage.module.scss';
 import borders from '#styles/borders.module.scss';
 
 
 const DashboardPage: ParentComponent<JSX.HTMLAttributes<HTMLDivElement>> = (props) => {
+  const [session, { logout, invalidate }] = useSession();
+
+  if (!session.loggedIn) invalidate();
+
   return (
     <div class={style.container}>
       <Link href='/' classList={{
@@ -28,7 +34,16 @@ const DashboardPage: ParentComponent<JSX.HTMLAttributes<HTMLDivElement>> = (prop
       }}>
         <div class={style.activityIcons}>
           <MaterialSymbol symbol='notifications' size='big' color='gray' interactive={true} highlightColor={'gray'} />
-          <MaterialSymbol symbol='account_circle' size='big' color='gray' interactive={true} highlightColor={'gray'} />
+          <Show
+            when={session.loggedIn}
+            fallback={<MaterialSymbol symbol='account_circle' size='big' color='gray' interactive={true} highlightColor={'gray'} />}
+          >
+            <AnimatedImage
+              class={style.avatar}
+              src={session.user?.profileImageUrl}
+              onClick={logout}
+            />
+          </Show>
         </div>
       </div>
 

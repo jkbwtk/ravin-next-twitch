@@ -5,11 +5,20 @@
   height: 100%;
 
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+
+  gap: 5rem;
 }
 
 .logo {
   width: max(50%, 20rem);
   user-select: none;
+}
+
+.avatar {
+  width: 10rem;
+  height: 10rem;
+  border-radius: 50%;
 }

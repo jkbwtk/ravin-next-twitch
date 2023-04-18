@@ -3,6 +3,7 @@ import { Router } from '@solidjs/router';
 import { render } from 'solid-js/web';
 import App from './App';
 import { NotificationProvider } from '#providers/NotificationProvider';
+import { SessionProvider } from '#providers/SessionProvider';
 
 import '#styles/index.scss';
 
@@ -23,7 +24,9 @@ if (root instanceof HTMLElement) {
   render(() =>
     <Router>
       <NotificationProvider>
-        <App />
+        <SessionProvider>
+          <App />
+        </SessionProvider>
       </NotificationProvider>
     </Router>
   , root);
@@ -37,5 +40,3 @@ if (root instanceof HTMLElement) {
 } else if (import.meta.env.DEV) {
   throw new Error('Root element not found. Did you forget to add it to your index.html? Or maybe the id attribute got misspelled?');
 }
-
-
