@@ -15,8 +15,17 @@ export const routes: RouteDefinition[] = [
     component: Homepage,
   },
   {
-    path: '/test/buttons',
-    component: lazy(() => import('#pages/ButtonTest')),
+    path: '/test',
+    children: [
+      {
+        path: '/button',
+        component: lazy(() => import('#pages/ButtonTest')),
+      },
+      {
+        path: '/notification',
+        component: lazy(() => import('#pages/NotificationTest')),
+      },
+    ],
   },
   {
     path: '/dashboard',
