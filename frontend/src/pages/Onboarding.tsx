@@ -1,7 +1,6 @@
 import Button from '#components/Button';
 import Input from '#components/Input';
 import { OnboardingForm } from '#types/api/onboarding';
-import { faker } from '@faker-js/faker';
 import AnchorText from '#components/AnchorText';
 import AnimatedImage from '#components/AnimatedImage';
 import { useNotification } from '#providers/NotificationProvider';
@@ -51,8 +50,11 @@ const Onboarding: Component = () => {
       addNotification({
         type: 'success',
         title: 'Onboarding Complete',
-        message: 'You have successfully completed the onboarding process.',
-        duration: 5000,
+        message: (<>
+          <p>You have successfully completed the onboarding process.</p>
+          <p>The server will shut down in 15 seconds</p>
+        </>),
+        duration: 15000,
       });
     } else {
       addNotification({
@@ -83,6 +85,7 @@ const Onboarding: Component = () => {
             id='adminUsername'
             label='Admin Username'
             ref={adminUsername}
+            autocomplete='off'
           />
 
           <Input
@@ -92,6 +95,7 @@ const Onboarding: Component = () => {
             id='botLogin'
             label='Bot Login'
             ref={botLogin}
+            autocomplete='off'
           />
 
           <Input
@@ -101,6 +105,7 @@ const Onboarding: Component = () => {
             id='botToken'
             label='Bot Token'
             ref={botToken}
+            autocomplete='off'
           />
 
           <Input
@@ -110,6 +115,7 @@ const Onboarding: Component = () => {
             id='twitchClientId'
             label='Twitch Client ID'
             ref={twitchClientId}
+            autocomplete='off'
           />
 
           <Input
@@ -119,27 +125,10 @@ const Onboarding: Component = () => {
             id='twitchClientSecret'
             label='Twitch Client Secret'
             ref={twitchClientSecret}
+            autocomplete='off'
           />
 
           <Button type='submit' size='big' class={style.submitButton}>Submit</Button>
-
-          <Button type='submit' size='big' class={style.submitButton} onClick={() => {
-            addNotification({
-              type: 'success',
-              title: 'Onboarding Complete',
-              message: faker.lorem.paragraph(1),
-            });
-            addNotification({
-              type: 'error',
-              title: 'Onboarding error',
-              message: faker.lorem.paragraph(1),
-            });
-            addNotification({
-              type: 'info',
-              title: 'Onboarding info',
-              message: faker.lorem.paragraph(1),
-            });
-          }}>Test notifications</Button>
         </form>
       </div>
 
