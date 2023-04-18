@@ -17,7 +17,8 @@ interface Display {
   nextLine(name: string | false, ...args: unknown[]): void,
   sameLine(name: string | false, ...args: unknown[]): void,
   log(level: number, ...msg: unknown[]): void,
-  setLogLevel(level: LOGLVL): void
+  setLogLevel(level: LOGLVL): void,
+  time(name: string, start: number, finish?: number): void;
 }
 
 enum LOGLVL {
@@ -124,6 +125,10 @@ const display: Display = {
   setLogLevel(level: LOGLVL): void {
     display.info.nextLine('display:setLogLevel', 'Changed logging level from', LOGLVL[this.logLevel], '=>', LOGLVL[level]);
     this.logLevel = level;
+  },
+
+  time(name: string, start: number, finish = performance.now()): void {
+    display.debug.nextLine('Timer', name, 'took', finish - start, 'ms');
   },
 };
 
