@@ -1,4 +1,4 @@
-import { createContext, createEffect, createMemo, createSignal, For, onCleanup, Show, useContext } from 'solid-js';
+import { createContext, createEffect, createMemo, createSignal, For, JSX, onCleanup, Show, useContext } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import MaterialSymbol, { SymbolColorType } from '#components/MaterialSymbol';
 import TemplateButton from '#components/TemplateButton';
@@ -12,7 +12,7 @@ export type NotificationType = 'success' | 'info' | 'error';
 export type Notification = {
   id: number;
   title: string;
-  message: string;
+  message: string | JSX.Element;
   type: NotificationType;
   duration?: number;
 };
@@ -194,7 +194,12 @@ export const NotificationProvider: ParentComponent = (props) => {
                 <MaterialSymbol symbol={symbol} color={color} />
                 <div class={style.content}>
                   <span class={style.title}>{notification.title}</span>
-                  <p>{notification.message}</p>
+                  <Show
+                    when={typeof notification.message !== 'string'}
+                    fallback={<p>{notification.message}</p>}
+                  >
+                    {notification.message}
+                  </Show>
                 </div>
                 <TemplateButton
                   class={style.closeButton}
