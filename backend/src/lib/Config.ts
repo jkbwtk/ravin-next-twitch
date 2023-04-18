@@ -8,10 +8,12 @@ export class Config {
   private static instance: Config;
 
   private repository: Repository<ConfigEntity>;
-  private config: ExtendedMap<string, string>;
+  public config: ExtendedMap<string, string>;
+  public shadow: ExtendedMap<string, string>;
 
   private constructor() {
     this.config = new ExtendedMap<string, string>();
+    this.shadow = new ExtendedMap<string, string>();
   }
 
   private async init(): Promise<void> {
@@ -48,17 +50,29 @@ export class Config {
     return Config.queryToMap(query);
   }
 
-  public static async get(key: string): Promise<string | undefined> {
+  public static async get(key: string, shadowed = true): Promise<string | undefined> {
     const instance = await Config.getInstance();
+
+    if (shadowed) {
+      const shadowedValue = instance.shadow.get(key);
+      if (shadowedValue !== undefined) return shadowedValue;
+    }
+
     const value = instance.config.get(key);
+    if (value !== undefined) return value;
+
+    const query = await instance.repository.findOne({ where: { key } });
+    if (query) {
+      instance.config.set(query.key, query.value);
+      return query.value;
+    }
+  }
+
+  public static async getOrFail(key: string): Promise<string> {
+    const value = await Config.get(key);
 
     if (value === undefined) {
-      const query = await instance.repository.findOne({ where: { key } });
-
-      if (query) {
-        instance.config.set(query.key, query.value);
-        return query.value;
-      }
+      throw new Error(`Config key [${key}] does not exist`);
     }
 
     return value;
@@ -84,6 +98,45 @@ export class Config {
     }
 
     return savedEntries;
+  }
+
+  public static async shadowSet(key: string, value: string): Promise<void> {
+    const instance = await Config.getInstance();
+    instance.shadow.set(key, value);
+  }
+
+  public static async shadowBatchSet(entries: [string, string][]): Promise<void> {
+    const instance = await Config.getInstance();
+
+    for (const entry of entries) {
+      instance.shadow.set(entry[0], entry[1]);
+    }
+  }
+
+  public static async shadowRestore(key: string): Promise<void> {
+    const instance = await Config.getInstance();
+
+    instance.shadow.delete(key);
+  }
+
+  public static async shadowBulkRestore(keys: string[]): Promise<void> {
+    const instance = await Config.getInstance();
+
+    for (const key of keys) {
+      instance.shadow.delete(key);
+    }
+  }
+
+  public static async shadowRestoreAll(): Promise<void> {
+    const instance = await Config.getInstance();
+
+    instance.shadow.clear();
+  }
+
+  public static async isShadowed(key: string): Promise<boolean> {
+    const instance = await Config.getInstance();
+
+    return instance.shadow.has(key);
   }
 
   public static async delete(key: string): Promise<void> {
