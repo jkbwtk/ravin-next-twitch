@@ -27,10 +27,10 @@ export class Token {
   @IsString()
   public refreshToken: string | null;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   public createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz' })
   public updatedAt: Date;
 
   public static async getTokenByUserId(userId: string): Promise<Token | null> {

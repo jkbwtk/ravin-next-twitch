@@ -24,13 +24,13 @@ export class User {
   @IsUrl()
   public profileImageUrl: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   public createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz' })
   public updatedAt: Date;
 
-  public static async getUserById(id: string): Promise<User | null> {
+  public static async getById(id: string): Promise<User | null> {
     const repository = await Database.getRepository(User);
 
     return repository.findOne({
