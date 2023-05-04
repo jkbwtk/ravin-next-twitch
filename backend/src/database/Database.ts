@@ -3,10 +3,10 @@ import 'reflect-metadata';
 import { isDevMode } from '#shared/constants';
 import { DataSource, DataSourceOptions, EntityManager, ObjectLiteral, Repository } from 'typeorm';
 import { Config } from '#database/entities/Config';
-import { Session } from '#database/entities/Session';
 import { User } from '#database/entities/User';
 import { Token } from '#database/entities/Token';
 import { Redis, RedisOptions } from 'ioredis';
+import { SystemNotification } from '#database/entities/SystemNotification';
 
 
 export class Database {
@@ -52,6 +52,7 @@ export class Database {
       // Session,
       User,
       Token,
+      SystemNotification,
     ];
   }
 

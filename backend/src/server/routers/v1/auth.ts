@@ -16,7 +16,7 @@ export const authRouter = async (): Promise<expressRouter> => {
   });
 
   passport.deserializeUser<string>(async (id, done) => {
-    const user = await UserEntity.getUserById(id);
+    const user = await UserEntity.getById(id);
 
     if (user !== null) done(null, user);
     else done(new Error('Failed to fetch user profile'));
@@ -33,7 +33,7 @@ export const authRouter = async (): Promise<expressRouter> => {
   authRouter.get('/callback', passport.authenticate('twitch', { successRedirect: '/dashboard', failureRedirect: '/' }));
 
   authRouter.get('/user', async (req, res) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // await new Promise((resolve) => setTimeout(resolve, 1000));
 
     if (req.isUnauthenticated()) return res.sendStatus(401);
     if (req.user === undefined) return res.sendStatus(401);
