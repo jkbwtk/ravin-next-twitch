@@ -14,6 +14,7 @@ import passport from 'passport';
 import { User as UserEntity } from '#database/entities/User';
 import { randomAlphanumeric } from '#lib/utils';
 import RedisStore from 'connect-redis';
+import { TokenManager } from '#server/TokenManager';
 
 
 declare global {
@@ -143,6 +144,9 @@ export class Server {
   }
 
   public async start(): Promise<void> {
+    await TokenManager.processAll();
+    await TokenManager.start();
+
     await this.registerRoutes();
 
     this.app.listen(this.port, () => {
