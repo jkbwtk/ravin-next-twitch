@@ -1,38 +1,17 @@
 import { User as UserEntity } from '#database/entities/User';
 import { Database } from '#database/Database';
-import { TwitchUser } from '#shared/types/api/auth';
 import { VerifyCallback } from 'passport-oauth2';
 import { Token } from '#database/entities/Token';
 import { validate } from 'class-validator';
-import axios from 'axios';
-import { Config } from '#lib/Config';
+import { isDevApi } from '#shared/constants';
+import { TwitchUser } from '#shared/types/twitch';
+import { revokeTokenUnsafe } from '#lib/twitch';
 
 
 export const authScopes: string[] = [
   'user:read:email',
   'moderation:read',
 ];
-
-export const revokeToken = async (token: Token): Promise<void> => {
-  console.log('Revoking token for user', token.userId);
-
-  try {
-    const resp = await axios.post(
-      'https://id.twitch.tv/oauth2/revoke',
-      {
-        client_id: await Config.getOrFail('twitchClientId'),
-        token: token.accessToken,
-      }, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      });
-
-    console.log(resp.data);
-  } catch (err) {
-    console.error(err);
-  }
-};
 
 const createToken = async (accessToken: string, refreshToken: string | null, user: UserEntity): Promise<Token> => {
   const tokenRepo = await Database.getRepository(Token);
@@ -78,18 +57,19 @@ export const verifyCallback = async (accessToken: string, refreshToken: string |
     await UserEntity.invalidateCache(profile.id);
 
     const token = await Token.getTokenByUserId(profile.id);
-    const user = await UserEntity.getUserById(profile.id) ?? await createUser(profile, token);
+    const user = await UserEntity.getById(profile.id) ?? await createUser(profile, token);
 
     if (token === null) {
       await createToken(accessToken, refreshToken, user);
     } else {
       // revoke old token if it exists and server is using OAuth ACGF
-      if (refreshToken !== null) await revokeToken(token);
+      console.log('Revoking token for user', token.userId);
+      if (refreshToken !== null && !isDevApi) await revokeTokenUnsafe(token);
 
       token.accessToken = accessToken;
       token.refreshToken = refreshToken;
 
-      await Token.createOrUpdateToken(token);
+      await Token.createOrUpdate(token);
     }
 
     // update users avatar if it has changed

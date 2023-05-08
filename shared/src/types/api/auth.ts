@@ -1,39 +1,3 @@
-export interface GetTwitchUsers {
-  cursor: string;
-  total: number;
-  data: TwitchUser[];
-}
-
-export interface TwitchUser {
-  id: string;
-  login: string;
-  display_name: string;
-  email: string;
-  type: string;
-  broadcaster_type: TwitchBroadcasterType;
-  description: string;
-  created_at: Date;
-  profile_image_url: string;
-  offline_image_url: string;
-  view_count: number;
-  game_id: TwitchGame;
-  game_name: TwitchGame;
-  title: string;
-  stream_language: string;
-  delay: number;
-}
-
-export enum TwitchBroadcasterType {
-  Affiliate = 'affiliate',
-  Empty = '',
-  Partner = 'partner',
-}
-
-export interface TwitchGame {
-  String: string;
-  Valid: boolean;
-}
-
 export interface GetMockApp {
   cursor: string;
   total: number;
