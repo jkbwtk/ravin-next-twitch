@@ -10,6 +10,9 @@ import {
   GetTopStatsResponse,
   Moderator,
 } from '#types/api/dashboard';
+import { Database } from '#database/Database';
+import { Token } from '#database/entities/Token';
+import { getModerators, getUsers } from '#lib/twitch';
 
 
 export const dashboardRouter = expressRouter();
@@ -27,11 +30,29 @@ const createRandomAdmin = (): Moderator => ({
 });
 
 dashboardRouter.get('/widgets/moderators', async (req, res) => {
-  const resp: GetModeratorsResponse = {
-    data: Array.from({ length: randomInt(1, 10) }, createRandomAdmin),
-  };
+  if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
 
-  res.json(resp);
+  try {
+    const tokenRepo = await Database.getRepository(Token);
+    const userToken = await tokenRepo.findOneOrFail({ where: { userId: req.user.id } });
+
+    const moderatorIds = (await getModerators(userToken))
+      .map((mod) => mod.user_id);
+
+    const profiles = await getUsers(userToken, { id: moderatorIds });
+
+    const resp: GetModeratorsResponse = {
+      data: profiles.map((profile) => ({
+        avatarUrl: profile.profile_image_url,
+        displayName: profile.display_name,
+        status: false,
+      })),
+    };
+
+    res.json(resp);
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 dashboardRouter.get('/connectionStatus', async (req, res) => {
