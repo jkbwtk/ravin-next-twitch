@@ -27,8 +27,6 @@ export const systemNotificationsRouter = async (): Promise<expressRouter> => {
 
     const notifications = await SystemNotification.getNotificationsByUserId(req.user.id);
 
-    console.log(notifications);
-
     const resp: GetSystemNotificationsResponse = {
       data: notifications.map(serializeNotification),
     };
@@ -40,8 +38,6 @@ export const systemNotificationsRouter = async (): Promise<expressRouter> => {
     if (!(req.user instanceof User)) return res.sendStatus(401);
 
     const body = req.body as unknown;
-    console.log(req);
-    console.log(body);
 
     if (
       typeof body !== 'object' || body === null ||
