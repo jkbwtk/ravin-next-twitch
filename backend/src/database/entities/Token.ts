@@ -49,7 +49,7 @@ export class Token {
     await Database.invalidateCache([`token:${userId}`]);
   }
 
-  public static async createOrUpdateToken(token: Token): Promise<void> {
+  public static async createOrUpdate(token: Token): Promise<Token> {
     const repository = await Database.getRepository(Token);
 
     const errors = await validate(token);
@@ -59,6 +59,20 @@ export class Token {
     }
 
     await this.invalidateCache(token.userId);
-    await repository.save(token);
+    return repository.save(token);
+  }
+
+  public static async updateOrFail(token: Token): Promise<Token> {
+    const repository = await Database.getRepository(Token);
+
+    const errors = await validate(token);
+    if (errors.length > 0) {
+      console.error(errors);
+      throw new Error('Failed to validate updated token');
+    }
+
+    await this.invalidateCache(token.userId);
+    await repository.findOneOrFail({ where: { id: token.id } });
+    return repository.save(token);
   }
 }
