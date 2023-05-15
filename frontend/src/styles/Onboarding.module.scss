@@ -59,8 +59,17 @@
 
     gap: 1rem;
 
+    width: 40rem;
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+    }
+
     .submit-button {
       margin-top: 2rem;
+
+      width: 100%;
     }
   }
 }
