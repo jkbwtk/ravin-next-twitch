@@ -1,4 +1,4 @@
-import { createResource, For, Match, Show, Switch } from 'solid-js';
+import { createMemo, createResource, For, Match, Show, Switch } from 'solid-js';
 import MaterialSymbol from '#components/MaterialSymbol';
 import { Link, useRouteData } from '@solidjs/router';
 import { SidebarRoute } from '#components/DashboardSidebar/SidebarElementBase';
@@ -43,6 +43,11 @@ const DashboardInfoBar: Component = () => {
     }
   };
 
+  const joinChannelContent = createMemo(() => {
+    if (status().joined) return { symbol: 'logout', text: 'Leave Channel' };
+    return { symbol: 'login', text: 'Join Channel' };
+  });
+
   return (
     <div classList={{
       [style.borderContainer]: true,
@@ -65,7 +70,7 @@ const DashboardInfoBar: Component = () => {
           </div>
         </div>
 
-        <Show when={!status.loading}>
+        <Show when={status.state === 'ready' || status.state === 'refreshing'}>
           <div class={style.botInfo}>
             <div class={style.info}>
               <span>Channel:</span>
@@ -80,14 +85,8 @@ const DashboardInfoBar: Component = () => {
               <MaterialSymbol symbol={parseSymbol(status().admin)} color='primary' />
             </div>
           </div>
-          <Switch>
-            <Match when={status().joined}>
-              <Button size='big' color='primary' symbol='logout' onClick={joinChannel} >Leave Channel</Button>
-            </Match>
-            <Match when={!(status().joined)}>
-              <Button size='big' color='primary' symbol='login' onClick={joinChannel} >Join Channel</Button>
-            </Match>
-          </Switch>
+
+          <Button size='big' color='primary' symbol={joinChannelContent().symbol} onClick={joinChannel} >{joinChannelContent().text}</Button>
         </Show>
       </div>
     </div>
