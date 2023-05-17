@@ -6,6 +6,7 @@ import { createProdAuthStrategy } from '#server/routers/v1/authProd';
 import { isDevApi, isDevMode } from '#shared/constants';
 import { createDevAuthStrategy } from '#server/routers/v1/authDev';
 import { authScopes } from '#server/routers/v1/authShared';
+import { display } from '#lib/display';
 
 
 export const authRouter = async (): Promise<expressRouter> => {
@@ -18,8 +19,10 @@ export const authRouter = async (): Promise<expressRouter> => {
   passport.deserializeUser<string>(async (id, done) => {
     const user = await UserEntity.getById(id);
 
-    if (user !== null) done(null, user);
-    else done(new Error('Failed to fetch user profile'));
+    if (user !== null) return done(null, user);
+
+    display.error.nextLine('authRouter:deserializeUser', 'Failed to fetch user profile');
+    done(new Error('Failed to fetch user profile'));
   });
 
   if (isDevApi) {
@@ -28,9 +31,15 @@ export const authRouter = async (): Promise<expressRouter> => {
     passport.use('twitch', await createProdAuthStrategy());
   }
 
-  authRouter.get('/twitch', passport.authenticate('twitch', { scope: authScopes, successRedirect: '/dashboard', failureRedirect: '/' }));
+  authRouter.get('/twitch',
+    passport.authenticate('twitch', { scope: authScopes, successRedirect: '/dashboard', failureRedirect: '/' }),
+    (req, res) => res.redirect('/'), // will get called if auth fails
+  );
 
-  authRouter.get('/callback', passport.authenticate('twitch', { successRedirect: '/dashboard', failureRedirect: '/' }));
+  authRouter.get('/callback',
+    passport.authenticate('twitch', { successRedirect: '/dashboard', failureRedirect: '/' }),
+    (req, res) => res.redirect('/'), // will get called if auth fails
+  );
 
   authRouter.get('/user', async (req, res) => {
     // await new Promise((resolve) => setTimeout(resolve, 1000));
