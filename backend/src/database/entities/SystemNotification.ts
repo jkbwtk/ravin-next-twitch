@@ -19,29 +19,29 @@ import {
 @Entity()
 export class SystemNotification {
   @PrimaryGeneratedColumn()
-  public id: number;
+  public id!: number;
 
   @JoinColumn()
   @Index()
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  public user: User;
+  public user!: User;
 
   @Column()
   @IsString()
-  public title: string;
+  public title!: string;
 
   @Column()
   @IsString()
-  public content: string;
+  public content!: string;
 
   @CreateDateColumn({ type: 'timestamptz' })
-  public createdAt: Date;
+  public createdAt!: Date;
 
   @UpdateDateColumn({ type: 'timestamptz' })
-  public updatedAt: Date;
+  public updatedAt!: Date;
 
   @DeleteDateColumn({ type: 'timestamptz' })
-  public deletedAt: Date | null;
+  public deletedAt!: Date | null;
 
   public static async createNotification(userId: string, title: string, content: string): Promise<SystemNotification> {
     const repository = await Database.getRepository(this);

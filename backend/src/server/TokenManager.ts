@@ -9,7 +9,7 @@ import { IsNull, Not, Repository } from 'typeorm';
 export class TokenManager {
   private static instance: TokenManager;
 
-  private repository: Repository<Token>;
+  private repository!: Repository<Token>;
   private intervalHandle: NodeJS.Timer | null = null;
 
   private options = {

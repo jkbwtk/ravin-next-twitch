@@ -7,31 +7,31 @@ import { Column, CreateDateColumn, Entity, Index, JoinColumn, OneToOne, PrimaryG
 @Entity()
 export class Token {
   @PrimaryGeneratedColumn()
-  public id: number;
+  public id!: number;
 
   @Column({ unique: true })
   @Index()
   @IsString()
-  public userId: string;
+  public userId!: string;
 
   @JoinColumn()
   @OneToOne(() => User, { onDelete: 'CASCADE' })
-  public user: User;
+  public user!: User;
 
   @Column({ unique: true })
   @IsString()
-  public accessToken: string;
+  public accessToken!: string;
 
   @Column('varchar', { unique: true, nullable: true })
   @IsOptional()
   @IsString()
-  public refreshToken: string | null;
+  public refreshToken!: string | null;
 
   @CreateDateColumn({ type: 'timestamptz' })
-  public createdAt: Date;
+  public createdAt!: Date;
 
   @UpdateDateColumn({ type: 'timestamptz' })
-  public updatedAt: Date;
+  public updatedAt!: Date;
 
   public static async getTokenByUserId(userId: string): Promise<Token | null> {
     const repository = await Database.getRepository(Token);

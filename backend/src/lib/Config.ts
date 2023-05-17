@@ -7,7 +7,7 @@ import { Repository } from 'typeorm';
 export class Config {
   private static instance: Config;
 
-  private repository: Repository<ConfigEntity>;
+  private repository!: Repository<ConfigEntity>;
   public config: ExtendedMap<string, string>;
   public shadow: ExtendedMap<string, string>;
 

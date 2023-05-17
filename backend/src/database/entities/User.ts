@@ -6,29 +6,29 @@ import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } fro
 @Entity()
 export class User {
   @PrimaryColumn()
-  public id: string;
+  public id!: string;
 
   @Column({ unique: true })
   @IsString()
-  public login: string;
+  public login!: string;
 
   @Column({ unique: true })
   @IsString()
-  public displayName: string;
+  public displayName!: string;
 
   @Column('varchar', { nullable: true })
   @IsEmail()
-  public email: string | null;
+  public email!: string | null;
 
   @Column()
   @IsUrl()
-  public profileImageUrl: string;
+  public profileImageUrl!: string;
 
   @CreateDateColumn({ type: 'timestamptz' })
-  public createdAt: Date;
+  public createdAt!: Date;
 
   @UpdateDateColumn({ type: 'timestamptz' })
-  public updatedAt: Date;
+  public updatedAt!: Date;
 
   public static async getById(id: string): Promise<User | null> {
     const repository = await Database.getRepository(User);
@@ -46,7 +46,7 @@ export class User {
     await Database.invalidateCache([`user:${id}`]);
   }
 
-  public static async createOrUpdateUser(user: User): Promise<void> {
+  public static async createOrUpdateUser(user: User): Promise<User> {
     const repository = await Database.getRepository(User);
 
     const errors = await validate(user);
@@ -56,6 +56,6 @@ export class User {
     }
 
     await this.invalidateCache(user.id);
-    await repository.save(user);
+    return repository.save(user);
   }
 }
