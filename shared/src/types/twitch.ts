@@ -213,11 +213,7 @@ export interface TwitchStreamTag {
 }
 
 export interface TwitchTeam {
-  users: {
-    user_id: string,
-    user_login: string,
-    user_name: string,
-  }[],
+  users: TwitchBriefUser[],
   background_image_url: string,
   banner: string,
   created_at: string,
@@ -314,18 +310,26 @@ export interface TwitchUser {
   created_at: string;
 }
 
-export interface TwitchModerator {
+export interface TwitchBriefUser {
   user_id: string;
   user_login: string;
   user_name: string;
 }
 
 export interface GetTwitchModerators {
-  data: TwitchModerator[];
+  data: TwitchBriefUser[];
 }
 
 export interface GetTwitchUsers {
   cursor: string;
   total: number;
   data: TwitchUser[];
+}
+
+export interface GetChatters {
+  data: TwitchBriefUser[];
+  pagination: {
+    cursor: string;
+  };
+  total: number;
 }

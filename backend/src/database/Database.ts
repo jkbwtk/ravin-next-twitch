@@ -7,6 +7,7 @@ import { User } from '#database/entities/User';
 import { Token } from '#database/entities/Token';
 import { Redis, RedisOptions } from 'ioredis';
 import { SystemNotification } from '#database/entities/SystemNotification';
+import { Channel } from '#database/entities/Channel';
 
 
 export class Database {
@@ -53,6 +54,7 @@ export class Database {
       User,
       Token,
       SystemNotification,
+      Channel,
     ];
   }
 

@@ -6,6 +6,7 @@ import { validate } from 'class-validator';
 import { isDevApi } from '#shared/constants';
 import { TwitchUser } from '#shared/types/twitch';
 import { revokeTokenUnsafe } from '#lib/twitch';
+import { Channel } from '#database/entities/Channel';
 
 
 export const authScopes: string[] = [
@@ -31,9 +32,20 @@ const createToken = async (accessToken: string, refreshToken: string | null, use
   return await tokenRepo.save(newToken);
 };
 
+const createChannel = async (user: UserEntity): Promise<Channel> => {
+  const channelRepo = await Database.getRepository(Channel);
+
+  const newChannel = channelRepo.create({
+    userId: user.id,
+  });
+
+  return await Channel.createOrUpdate(newChannel);
+};
+
 const createUser = async (profile: TwitchUser, token: Token | null): Promise<UserEntity> => {
   const userRepo = await Database.getRepository(UserEntity);
   const tokenRepo = await Database.getRepository(Token);
+  const channelRepo = await Database.getRepository(Channel);
 
   const newUser = userRepo.create({
     id: profile.id,
@@ -43,21 +55,26 @@ const createUser = async (profile: TwitchUser, token: Token | null): Promise<Use
     profileImageUrl: profile.profile_image_url,
   });
 
-  await UserEntity.createOrUpdateUser(newUser);
+  const createdUser = await UserEntity.createOrUpdateUser(newUser);
 
   // remove old token if it exists
   if (token !== null) await tokenRepo.remove(token);
 
-  return await userRepo.save(newUser);
+  // create channel for user
+  await createChannel(createdUser);
+
+  return createdUser;
 };
 
 export const verifyCallback = async (accessToken: string, refreshToken: string | null, profile: TwitchUser, done: VerifyCallback): Promise<void> => {
   try {
     await Token.invalidateCache(profile.id);
     await UserEntity.invalidateCache(profile.id);
+    await Channel.invalidateCache(profile.id);
 
     const token = await Token.getTokenByUserId(profile.id);
     const user = await UserEntity.getById(profile.id) ?? await createUser(profile, token);
+    const channel = await Channel.getChannelByUserId(profile.id) ?? await createChannel(user);
 
     if (token === null) {
       await createToken(accessToken, refreshToken, user);

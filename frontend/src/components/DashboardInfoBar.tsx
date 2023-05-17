@@ -25,13 +25,23 @@ const fetchConnectionStatus = async (): Promise<BotConnectionStatus> => {
 
 const DashboardInfoBar: Component = () => {
   const data = useRouteData<SidebarRoute>();
-  const [status] = createResource(fetchConnectionStatus, {
+  const [status, { refetch: refetchConnection }] = createResource(fetchConnectionStatus, {
     initialValue: {
       channel: '[unknown]',
       joined: false,
       admin: false,
     },
   });
+
+  const joinChannel = async (): Promise<void> => {
+    const response = await fetch('/api/v1/dashboard/joinChannel', {
+      method: 'POST',
+    });
+
+    if (response.ok) {
+      refetchConnection();
+    }
+  };
 
   return (
     <div classList={{
@@ -72,10 +82,10 @@ const DashboardInfoBar: Component = () => {
           </div>
           <Switch>
             <Match when={status().joined}>
-              <Button size='big' color='primary' symbol='logout' >Leave Channel</Button>
+              <Button size='big' color='primary' symbol='logout' onClick={joinChannel} >Leave Channel</Button>
             </Match>
             <Match when={!(status().joined)}>
-              <Button size='big' color='primary' symbol='login' >Join Channel</Button>
+              <Button size='big' color='primary' symbol='login' onClick={joinChannel} >Join Channel</Button>
             </Match>
           </Switch>
         </Show>

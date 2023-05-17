@@ -14,7 +14,7 @@ import {
   GetTwitchUsers,
   GetUsersOptions,
   RefreshAccessToken,
-  TwitchModerator,
+  TwitchBriefUser,
   TwitchUser,
 } from '#types/twitch';
 import { twitchApiUrl } from '#shared/constants';
@@ -147,6 +147,8 @@ type RequestGuardian = <T extends (
 ) => any>(settings: Partial<GuardianSettings>, func: T, ...args: Parameters<T>) => Promise<ReturnType<T>>;
 
 const requestGuardian: RequestGuardian = async (settings, func, token, ...args) => {
+  if (token.refreshToken === null) throw new InvalidRefreshToken('Refresh token is null. Token possibly owned by local user');
+
   let localToken = token;
   let localSettings = { ...defaultGuardianSettings, ...settings };
 
@@ -226,7 +228,7 @@ export async function getUsersUnsafe(token: Token, params: AtLeastOne<GetUsersOp
 export const getUsers: CloneFunction<typeof getUsersUnsafe> = async (...args) => requestGuardian({}, getUsersUnsafe, ...args);
 
 
-export async function getModeratorsUnsafe(token: Token): Promise<TwitchModerator[]> {
+export async function getModeratorsUnsafe(token: Token): Promise<TwitchBriefUser[]> {
   try {
     const response = await twitch.request<GetTwitchModerators>({
       method: 'GET',

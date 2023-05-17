@@ -13,6 +13,10 @@ import {
 import { Database } from '#database/Database';
 import { Token } from '#database/entities/Token';
 import { getModerators, getUsers } from '#lib/twitch';
+import { Channel } from '#database/entities/Channel';
+import { Config } from '#lib/Config';
+import { Bot } from '#bot/Bot';
+import { TwitchUserRepo } from '#lib/TwitchUserRepo';
 
 
 export const dashboardRouter = expressRouter();
@@ -39,7 +43,7 @@ dashboardRouter.get('/widgets/moderators', async (req, res) => {
     const moderatorIds = (await getModerators(userToken))
       .map((mod) => mod.user_id);
 
-    const profiles = await getUsers(userToken, { id: moderatorIds });
+    const profiles = await TwitchUserRepo.getAll(userToken, moderatorIds);
 
     const resp: GetModeratorsResponse = {
       data: profiles.map((profile) => ({
@@ -52,19 +56,60 @@ dashboardRouter.get('/widgets/moderators', async (req, res) => {
     res.json(resp);
   } catch (err) {
     console.error(err);
+    res.sendStatus(500);
   }
 });
 
 dashboardRouter.get('/connectionStatus', async (req, res) => {
-  const resp: GetBotConnectionStatusResponse = {
-    data: {
-      channel: faker.internet.userName().toLowerCase().replace('.', '_'),
-      joined: !!randomInt(0, 2),
-      admin: !!randomInt(0, 2),
-    },
-  };
+  if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
 
-  res.json(resp);
+  try {
+    const tokenRepo = await Database.getRepository(Token);
+    const userToken = await tokenRepo.findOneOrFail({ where: { userId: req.user.id } });
+    const channel = await Channel.getChannelByUserId(req.user.id);
+
+    const moderatorLogins = (await getModerators(userToken))
+      .map((mod) => mod.user_login);
+
+    const botLogin = await Config.getOrFail('botLogin');
+
+    const resp: GetBotConnectionStatusResponse = {
+      data: {
+        channel: req.user.login,
+        joined: channel?.joined ?? false,
+        admin: moderatorLogins.includes(botLogin) || botLogin === req.user.login,
+      },
+    };
+
+    res.json(resp);
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
+});
+
+dashboardRouter.post('/joinChannel', async (req, res) => {
+  if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
+
+  try {
+    const channel = await Channel.getChannelByUserId(req.user.id);
+    const channelRepo = await Database.getRepository(Channel);
+
+    if (channel === null) throw new Error('Channel not found');
+
+    channel.joined = !channel.joined;
+
+    await channelRepo.save(channel);
+    await Channel.invalidateCache(req.user.id);
+
+    if (channel.joined) Bot.joinChannel(req.user.login);
+    else Bot.leaveChannel(req.user.login);
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
 });
 
 dashboardRouter.get('/widgets/topStats', async (req, res) => {

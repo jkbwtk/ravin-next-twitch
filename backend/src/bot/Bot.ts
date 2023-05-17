@@ -4,52 +4,58 @@ import { display } from '../lib/display';
 import { ExtendedMap } from '../lib/ExtendedMap';
 import { Markov } from './Markov';
 import { arrayFrom } from '../lib/utils';
+import { Config } from '#lib/Config';
+import { Database } from '#database/Database';
+import { Channel } from '#database/entities/Channel';
+import { isDevMode } from '#shared/constants';
 
 
 export interface BotOptions {
-  login: string;
-  token: string;
-  channels: string | string[],
-  joinInterval?: number;
-  debug?: boolean;
-  trainingDataPath?: string;
-  ignoredUsers?: string[];
+  joinInterval: number;
+  debug: boolean;
 }
 
 export class Bot {
+  private static instance: Bot;
+
   private options: Required<BotOptions>;
-  private client: Client;
-  public markov: Markov;
+  private client!: Client;
 
   private channels: ExtendedMap<string, ChannelThread>;
 
   private static defaultOptions: Required<BotOptions> = {
-    login: 'LOGIN',
-    token: 'TOKEN',
-    channels: [],
     joinInterval: 1000,
     debug: false,
-    trainingDataPath: './training-data.csv',
-    ignoredUsers: [],
   };
 
-  constructor(options: BotOptions) {
-    this.options = { ...Bot.defaultOptions, ...options };
-
-    this.client = this.createClient();
-    this.markov = new Markov(this.options.trainingDataPath, { ignoredUsers: this.options.ignoredUsers });
-
-    this.channels = this.createChannelThreads();
-
+  private async init(): Promise<void> {
+    this.client = await this.createClient();
     this.registerEventHandlers();
+
+    await this.client.connect();
   }
 
-  private createClient(): Client {
+  public static async getInstance(options?: Partial<BotOptions>): Promise<Bot> {
+    if (!Bot.instance) {
+      Bot.instance = new Bot(options);
+      await Bot.instance.init();
+    }
+
+    return Bot.instance;
+  }
+
+  constructor(options?: Partial<BotOptions>) {
+    this.options = { ...Bot.defaultOptions, ...options ?? {} };
+
+    this.channels = new ExtendedMap();
+  }
+
+  private async createClient(): Promise<Client> {
     return new Client({
-      channels: arrayFrom(this.options.channels),
+      channels: [],
       identity: {
-        username: this.options.login,
-        password: this.options.token,
+        username: await Config.getOrFail('botLogin'),
+        password: await Config.getOrFail('botToken'),
       },
       connection: {
         secure: true,
@@ -67,16 +73,6 @@ export class Bot {
     });
   }
 
-  private createChannelThreads(): ExtendedMap<string, ChannelThread> {
-    const channels = new ExtendedMap<string, ChannelThread>();
-
-    for (const channel of this.options.channels) {
-      channels.set(channel, new ChannelThread());
-    }
-
-    return channels;
-  }
-
   private registerEventHandlers(): void {
     this.client.on('message', this.handleMessage);
   }
@@ -84,13 +80,6 @@ export class Bot {
   private handleMessage = (channel: string, userstate: ChatUserstate, message: string, self: boolean) => {
     if (self) return;
     console.log(`<${channel}> ${userstate['display-name']}: ${message}`);
-    this.markov.save({
-      username: userstate.username ?? 'Anonymous',
-      flags: userstate.flags ?? 'NULL',
-      emotes: typeof userstate.emotes === 'object' && userstate.emotes !== null ? JSON.stringify(userstate.emotes) : 'NULL',
-      channel,
-      content: message,
-    });
 
     const channelThread = this.channels.get(channel.slice(1));
     if (!channelThread) {
@@ -101,33 +90,65 @@ export class Bot {
     display.debug.nextLine(channel, 'Time since last message:', channelThread.getTimeSinceLastMessage());
     channelThread.addMessage(message, userstate.username ?? 'Anonymous');
     display.debug.nextLine(channel, 'Chant length:', channelThread.getChantLength());
-
-    if (message.startsWith('!generate')) {
-      try {
-        const prompt = message.replace('!generate', '').trim();
-        const words = prompt.split(' ');
-
-        const seed = (words[0] ?? '').length > 0 ? words[0] : undefined;
-        const generated = this.markov.generate(seed);
-
-        this.client.say(channel, generated);
-      } catch (error) {
-        display.error.nextLine('Bot:handleMessage', error);
-        this.client.say(channel, 'MrDestructoid');
-      }
-    }
   };
 
-  public async init(): Promise<void> {
-    await this.client.connect();
+  public static async start(options?: Partial<BotOptions>): Promise<void> {
+    const instance = await Bot.getInstance(options);
+
+    await instance.joinChannels();
   }
 
-  public updateConfig(options: BotOptions): void {
-    this.options = { ...this.options, ...options };
-    this.markov.updateConfig({ ignoredUsers: this.options.ignoredUsers });
+  public static async updateConfig(options: Partial<BotOptions>): Promise<void> {
+    const instance = await Bot.getInstance();
 
-    for (const channel of this.channels.values()) {
+    instance.options = { ...instance.options, ...options };
+
+    for (const channel of instance.channels.values()) {
       channel.updateConfig({});
     }
+  }
+
+  private async joinChannels(): Promise<void> {
+    if (isDevMode) {
+      display.debug.nextLine('Bot:joinChannels', 'Skipping joining channels because dev mode is enabled');
+      return;
+    }
+
+    const channelRepository = await Database.getRepository(Channel);
+    const channels = await channelRepository.find({
+      relations: {
+        user: true,
+      },
+    });
+
+    for (const channel of channels) {
+      if (!channel.joined) continue;
+
+      await Bot.joinChannel(channel.user.login);
+    }
+  }
+
+  public static async joinChannel(channel: string): Promise<void> {
+    const instance = await Bot.getInstance();
+
+    if (instance.channels.has(channel)) return;
+
+    const channelThread = new ChannelThread({});
+    instance.channels.set(channel, channelThread);
+
+    display.debug.nextLine('Bot:joinChannel', `Joining channel [${channel}]`);
+    await instance.client.join(channel);
+    display.debug.nextLine('Bot:joinChannel', `Joined channel [${channel}]`);
+  }
+
+  public static async leaveChannel(channel: string): Promise<void> {
+    const instance = await Bot.getInstance();
+
+    if (!instance.channels.has(channel)) return;
+
+    display.debug.nextLine('Bot:leaveChannel', `Leaving channel [${channel}]`);
+    instance.channels.delete(channel);
+    await instance.client.part(channel);
+    display.debug.nextLine('Bot:leaveChannel', `Left channel [${channel}]`);
   }
 }
