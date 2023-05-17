@@ -7,6 +7,7 @@ import { isDevApi } from '#shared/constants';
 import { TwitchUser } from '#shared/types/twitch';
 import { revokeTokenUnsafe } from '#lib/twitch';
 import { Channel } from '#database/entities/Channel';
+import { SystemNotification } from '#database/entities/SystemNotification';
 
 
 export const authScopes: string[] = [
@@ -94,6 +95,12 @@ export const verifyCallback = async (accessToken: string, refreshToken: string |
       user.profileImageUrl = profile.profile_image_url;
       await UserEntity.createOrUpdateUser(user);
     }
+
+    await SystemNotification.createNotification(
+      user.id,
+      'Logged in',
+      'You have successfully logged in to the dashboard.',
+    );
 
     done(null, user);
   } catch (err) {

@@ -7,6 +7,7 @@ import { isDevApi, isDevMode } from '#shared/constants';
 import { createDevAuthStrategy } from '#server/routers/v1/authDev';
 import { authScopes } from '#server/routers/v1/authShared';
 import { display } from '#lib/display';
+import { SystemNotification } from '#database/entities/SystemNotification';
 
 
 export const authRouter = async (): Promise<expressRouter> => {
@@ -60,10 +61,20 @@ export const authRouter = async (): Promise<expressRouter> => {
   });
 
   authRouter.post('/logout', (req, res) => {
-    req.logout((err) => {
+    if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
+    const user = req.user;
+
+    req.logout(async (err) => {
       if (err && isDevMode) res.status(500).send(err);
       else if (err) res.sendStatus(500);
-      else res.sendStatus(200);
+      else {
+        await SystemNotification.createNotification(
+          user.id,
+          'Logged out',
+          'You have been logged out of the dashboard.',
+        );
+        res.sendStatus(200);
+      }
     });
   });
 
