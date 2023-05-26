@@ -26,7 +26,7 @@ export const frontendPath = isDevMode ? frontendDevelopmentPath : frontendProduc
 
 export const callbackUrl = process.env.CALLBACK_URL ?? defaultCallbackUrl;
 
-export const isDevApi = process.env.DEV_API?.toLowerCase() === 'true' || isDevMode;
+export const isDevApi = process.env.DEV_API?.toLowerCase() !== 'false' && isDevMode;
 
 export const twitchApiUrl = isDevApi ? 'http://localhost:8080/mock' : 'https://api.twitch.tv/helix';
 

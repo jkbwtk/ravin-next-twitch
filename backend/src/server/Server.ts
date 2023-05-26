@@ -42,7 +42,7 @@ export class Server {
     level: 7,
   };
 
-  constructor(private readonly port = serverPort, private readonly devMode = isDevMode) {
+  constructor(private readonly port = serverPort) {
     this.app = express();
   }
 
@@ -107,7 +107,7 @@ export class Server {
     if (await this.isConfigured()) {
       this.app.use('/api', await apiRouter());
 
-      if (!this.devMode) { // allow access to onboarding view in dev mode
+      if (!isDevMode) { // allow access to onboarding view in dev mode
         this.app.use('/onboarding', (req, res) => res.redirect('/'));
       }
     } else {
@@ -115,7 +115,7 @@ export class Server {
       this.app.use('/onboarding', createOnboardingRouter(this.port));
     }
 
-    if (this.devMode) {
+    if (isDevMode) {
       await this.setupVite();
     } else {
       this.app.use(express.static(frontendProductionPath));
@@ -155,7 +155,7 @@ export class Server {
     await this.registerRoutes();
 
     this.app.listen(this.port, () => {
-      console.log(`${this.devMode ? 'Development server' : 'Server'} started on port ${chalk.green.bold(this.port)}`);
+      console.log(`${isDevMode ? 'Development server' : 'Server'} started on port ${chalk.green.bold(this.port)}`);
     });
   }
 }

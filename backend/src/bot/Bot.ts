@@ -7,7 +7,7 @@ import { arrayFrom } from '../lib/utils';
 import { Config } from '#lib/Config';
 import { Database } from '#database/Database';
 import { Channel } from '#database/entities/Channel';
-import { isDevMode } from '#shared/constants';
+import { isDevApi } from '#shared/constants';
 
 
 export interface BotOptions {
@@ -109,7 +109,7 @@ export class Bot {
   }
 
   private async joinChannels(): Promise<void> {
-    if (isDevMode) {
+    if (isDevApi) {
       display.debug.nextLine('Bot:joinChannels', 'Skipping joining channels because dev mode is enabled');
       return;
     }

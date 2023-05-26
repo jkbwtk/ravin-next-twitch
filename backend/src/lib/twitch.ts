@@ -147,8 +147,6 @@ type RequestGuardian = <T extends (
 ) => any>(settings: Partial<GuardianSettings>, func: T, ...args: Parameters<T>) => Promise<ReturnType<T>>;
 
 const requestGuardian: RequestGuardian = async (settings, func, token, ...args) => {
-  if (token.refreshToken === null) throw new InvalidRefreshToken('Refresh token is null. Token possibly owned by local user');
-
   let localToken = token;
   let localSettings = { ...defaultGuardianSettings, ...settings };
 
@@ -165,6 +163,8 @@ const requestGuardian: RequestGuardian = async (settings, func, token, ...args) 
       if (remainingNetworkErrors <= 0 || remainingTimeouts <= 0) throw err;
 
       if (err instanceof InvalidAccessToken) {
+        if (token.refreshToken === null) throw new InvalidRefreshToken('Refresh token is null. Token possibly owned by local user');
+
         localToken = await TokenManager.refresh(token);
       }
 
