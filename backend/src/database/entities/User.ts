@@ -1,7 +1,7 @@
 import { Database } from '#database/Database';
 import { Channel } from '#database/entities/Channel';
 import { IsEmail, IsString, IsUrl, validate } from 'class-validator';
-import { Column, CreateDateColumn, Entity, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 
 
 @Entity()
@@ -10,6 +10,7 @@ export class User {
   public id!: string;
 
   @Column({ unique: true })
+  @Index()
   @IsString()
   public login!: string;
 
@@ -49,8 +50,32 @@ export class User {
     });
   }
 
+  public static async getByIdOrFail(id: string): Promise<User> {
+    const user = await this.getById(id);
+    if (user === null) {
+      throw new Error(`User ${id} not found`);
+    }
+
+    return user;
+  }
+
+  public static async getByLogin(login: string): Promise<User | null> {
+    const repository = await Database.getRepository(User);
+
+    return repository.findOne({
+      where: { login },
+      relations: {
+        channel: true,
+      },
+    });
+  }
+
   public static async invalidateCache(id: string): Promise<void> {
-    await Database.invalidateCache([`user:${id}`]);
+    await Database.invalidateCache([
+      `channel:${id}`,
+      `user:${id}`,
+      `token:${id}`,
+    ]);
   }
 
   public static async createOrUpdateUser(user: User): Promise<User> {

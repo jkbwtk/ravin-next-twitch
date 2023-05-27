@@ -238,7 +238,7 @@ export async function getModeratorsUnsafe(token: Token): Promise<TwitchBriefUser
         Authorization: `Bearer ${token.accessToken}`,
       },
       params: {
-        broadcaster_id: token.userId,
+        broadcaster_id: token.user.id,
       },
     });
 

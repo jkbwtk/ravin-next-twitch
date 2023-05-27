@@ -1,6 +1,6 @@
 import { Database } from '#database/Database';
 import { User } from '#database/entities/User';
-import { IsBoolean, IsString, validate } from 'class-validator';
+import { IsBoolean, IsOptional, validate } from 'class-validator';
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 
@@ -14,9 +14,10 @@ export class Channel {
   @OneToOne(() => User, { onDelete: 'CASCADE' })
   public user!: User;
 
-  @Column({ type: 'bool', nullable: false })
+  @Column({ type: 'bool', nullable: false, default: false })
   @IsBoolean()
-  public joined = false;
+  @IsOptional()
+  public joined!: boolean;
 
   @CreateDateColumn({ type: 'timestamptz' })
   public createdAt!: Date;
@@ -24,7 +25,7 @@ export class Channel {
   @UpdateDateColumn({ type: 'timestamptz' })
   public updatedAt!: Date;
 
-  public static async getChannelByUserId(userId: string): Promise<Channel | null> {
+  public static async getByUserId(userId: string): Promise<Channel | null> {
     const repository = await Database.getRepository(Channel);
 
     return repository.findOne({
@@ -39,8 +40,21 @@ export class Channel {
     });
   }
 
-  public static async invalidateCache(id: string): Promise<void> {
-    await Database.invalidateCache([`channel:${id}`]);
+  public static async getByUserIdOrFail(userId: string): Promise<Channel> {
+    const channel = await this.getByUserId(userId);
+    if (channel === null) {
+      throw new Error(`Channel ${userId} not found`);
+    }
+
+    return channel;
+  }
+
+  public static async invalidateCache(userId: string): Promise<void> {
+    await Database.invalidateCache([
+      `channel:${userId}`,
+      `user:${userId}`,
+      `token:${userId}`,
+    ]);
   }
 
   public static async createOrUpdate(channel: Channel): Promise<Channel> {
@@ -53,6 +67,12 @@ export class Channel {
     }
 
     await this.invalidateCache(channel.user.id);
+    const existing = await this.getByUserId(channel.user.id);
+
+    if (existing !== null) {
+      return repository.save(repository.merge(existing, channel));
+    }
+
     return repository.save(channel);
   }
 }

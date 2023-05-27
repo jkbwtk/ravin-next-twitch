@@ -8,6 +8,7 @@ import { TwitchUser } from '#shared/types/twitch';
 import { revokeTokenUnsafe } from '#lib/twitch';
 import { Channel } from '#database/entities/Channel';
 import { SystemNotification } from '#database/entities/SystemNotification';
+import { display } from '#lib/display';
 
 
 export const authScopes: string[] = [
@@ -15,38 +16,30 @@ export const authScopes: string[] = [
   'moderation:read',
 ];
 
-const createToken = async (accessToken: string, refreshToken: string | null, user: UserEntity): Promise<Token> => {
+const createOrUpdateToken = async (accessToken: string, refreshToken: string | null, user: UserEntity): Promise<Token> => {
   const tokenRepo = await Database.getRepository(Token);
 
   const newToken = tokenRepo.create({
-    userId: user.id,
+    user,
     accessToken,
     refreshToken: refreshToken,
   });
 
-  const errors = await validate(newToken);
-  if (errors.length > 0) {
-    console.error(errors);
-    throw new Error('Failed to validate new token');
-  }
-
-  return await tokenRepo.save(newToken);
+  return Token.createOrUpdate(newToken);
 };
 
-const createChannel = async (user: UserEntity): Promise<Channel> => {
+const createOrUpdateChannel = async (user: UserEntity): Promise<Channel> => {
   const channelRepo = await Database.getRepository(Channel);
 
   const newChannel = channelRepo.create({
     user,
   });
 
-  return await Channel.createOrUpdate(newChannel);
+  return Channel.createOrUpdate(newChannel);
 };
 
-const createUser = async (profile: TwitchUser, token: Token | null): Promise<UserEntity> => {
+const createOrUpdateUser = async (profile: TwitchUser, token: Token | null): Promise<UserEntity> => {
   const userRepo = await Database.getRepository(UserEntity);
-  const tokenRepo = await Database.getRepository(Token);
-  const channelRepo = await Database.getRepository(Channel);
 
   const newUser = userRepo.create({
     id: profile.id,
@@ -57,12 +50,8 @@ const createUser = async (profile: TwitchUser, token: Token | null): Promise<Use
   });
 
   const createdUser = await UserEntity.createOrUpdateUser(newUser);
-
-  // remove old token if it exists
-  if (token !== null) await tokenRepo.remove(token);
-
-  // create channel for user
-  await createChannel(createdUser);
+  console.log('createdOrUpdatedUser');
+  await createOrUpdateChannel(createdUser);
 
   return createdUser;
 };
@@ -73,27 +62,23 @@ export const verifyCallback = async (accessToken: string, refreshToken: string |
     await UserEntity.invalidateCache(profile.id);
     await Channel.invalidateCache(profile.id);
 
-    const token = await Token.getTokenByUserId(profile.id);
-    const user = await UserEntity.getById(profile.id) ?? await createUser(profile, token);
-    const channel = await Channel.getChannelByUserId(profile.id) ?? await createChannel(user);
+    const tokenRepo = await Database.getRepository(Token);
+    const token = await Token.getByUserId(profile.id);
+    const user = await createOrUpdateUser(profile, token);
 
     if (token === null) {
-      await createToken(accessToken, refreshToken, user);
+      await createOrUpdateToken(accessToken, refreshToken, user);
     } else {
-      // revoke old token if it exists and server is using OAuth ACGF
-      console.log('Revoking token for user', token.userId);
-      if (refreshToken !== null && !isDevApi) await revokeTokenUnsafe(token);
+      // revoke received token if it's not a dev api
+      display.debug.nextLine('auth:verifyCallback', 'Revoking new token for user', token.user.id);
 
-      token.accessToken = accessToken;
-      token.refreshToken = refreshToken;
+      const newToken = tokenRepo.create({
+        user,
+        accessToken,
+        refreshToken: refreshToken,
+      });
 
-      await Token.createOrUpdate(token);
-    }
-
-    // update users avatar if it has changed
-    if (user.profileImageUrl !== profile.profile_image_url) {
-      user.profileImageUrl = profile.profile_image_url;
-      await UserEntity.createOrUpdateUser(user);
+      if (refreshToken !== null && !isDevApi) await revokeTokenUnsafe(newToken);
     }
 
     await SystemNotification.createNotification(
