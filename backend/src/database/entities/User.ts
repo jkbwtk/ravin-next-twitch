@@ -1,6 +1,7 @@
 import { Database } from '#database/Database';
+import { Channel } from '#database/entities/Channel';
 import { IsEmail, IsString, IsUrl, validate } from 'class-validator';
-import { Column, CreateDateColumn, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 
 
 @Entity()
@@ -24,6 +25,9 @@ export class User {
   @IsUrl()
   public profileImageUrl!: string;
 
+  @OneToOne(() => Channel, (channel) => channel.user, { onDelete: 'CASCADE' })
+  public channel!: Channel;
+
   @CreateDateColumn({ type: 'timestamptz' })
   public createdAt!: Date;
 
@@ -35,6 +39,9 @@ export class User {
 
     return repository.findOne({
       where: { id },
+      relations: {
+        channel: true,
+      },
       cache: {
         id: `user:${id}`,
         milliseconds: 3000,

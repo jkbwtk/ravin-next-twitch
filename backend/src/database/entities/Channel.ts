@@ -9,12 +9,8 @@ export class Channel {
   @PrimaryGeneratedColumn()
   public id!: number;
 
-  @Column({ unique: true })
-  @Index()
-  @IsString()
-  public userId!: string;
-
   @JoinColumn()
+  @Index()
   @OneToOne(() => User, { onDelete: 'CASCADE' })
   public user!: User;
 
@@ -32,7 +28,10 @@ export class Channel {
     const repository = await Database.getRepository(Channel);
 
     return repository.findOne({
-      where: { userId },
+      where: { user: { id: userId } },
+      relations: {
+        user: true,
+      },
       cache: {
         id: `channel:${userId}`,
         milliseconds: 3000,
@@ -53,7 +52,7 @@ export class Channel {
       throw new Error('Failed to validate new channel');
     }
 
-    await this.invalidateCache(channel.userId);
+    await this.invalidateCache(channel.user.id);
     return repository.save(channel);
   }
 }

@@ -37,7 +37,7 @@ const createChannel = async (user: UserEntity): Promise<Channel> => {
   const channelRepo = await Database.getRepository(Channel);
 
   const newChannel = channelRepo.create({
-    userId: user.id,
+    user,
   });
 
   return await Channel.createOrUpdate(newChannel);
