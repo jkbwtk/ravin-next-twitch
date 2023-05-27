@@ -9,11 +9,9 @@ import {
   GetModeratorsResponse,
   GetRecentActionsResponse,
   GetTopStatsResponse,
-  Moderator,
 } from '#types/api/dashboard';
-import { Database } from '#database/Database';
 import { Token } from '#database/entities/Token';
-import { getModerators, getUsers } from '#lib/twitch';
+import { getModerators } from '#lib/twitch';
 import { Channel } from '#database/entities/Channel';
 import { Config } from '#lib/Config';
 import { Bot } from '#bot/Bot';
@@ -26,18 +24,6 @@ dayjs.extend(utc);
 
 
 export const dashboardRouter = expressRouter();
-
-// artificial delay generator
-dashboardRouter.use(async (req, res, next) => {
-  await new Promise((resolve) => setTimeout(resolve, randomInt(10, 100)));
-  next();
-});
-
-const createRandomAdmin = (): Moderator => ({
-  avatarUrl: faker.internet.avatar(),
-  displayName: faker.internet.userName(),
-  status: !!randomInt(0, 2),
-});
 
 dashboardRouter.get('/widgets/moderators', async (req, res) => {
   if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
@@ -176,23 +162,6 @@ dashboardRouter.get('/widgets/recentActions', (req, res) => {
 
   res.json(resp);
 });
-
-
-const createRandomChatStat = (startDate: number, endDate: number, max: number): [number, number, number][] => {
-  const data: [number, number, number][] = [];
-
-  let duration = endDate - startDate;
-
-  while (duration > 0) {
-    const time = 5 * 60 * 1000;
-    const count = randomInt(0, max);
-
-    data.push([endDate - duration, time, count]);
-    duration -= time;
-  }
-
-  return data;
-};
 
 dashboardRouter.get('/widgets/chatStats', async (req, res) => {
   if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
