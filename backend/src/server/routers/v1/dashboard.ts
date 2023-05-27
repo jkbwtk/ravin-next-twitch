@@ -3,6 +3,7 @@ import { randomInt } from 'crypto';
 import { Router as expressRouter } from 'express';
 import {
   Action,
+  ChatStatFrame,
   GetBotConnectionStatusResponse,
   GetChatStatsResponse,
   GetModeratorsResponse,
@@ -17,6 +18,11 @@ import { Channel } from '#database/entities/Channel';
 import { Config } from '#lib/Config';
 import { Bot } from '#bot/Bot';
 import { TwitchUserRepo } from '#lib/TwitchUserRepo';
+import { ChannelStats } from '#database/entities/ChannelStats';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 
 export const dashboardRouter = expressRouter();
@@ -37,13 +43,12 @@ dashboardRouter.get('/widgets/moderators', async (req, res) => {
   if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
 
   try {
-    const tokenRepo = await Database.getRepository(Token);
-    const userToken = await tokenRepo.findOneOrFail({ where: { userId: req.user.id } });
+    const token = await Token.getByUserIdOrFail(req.user.id);
 
-    const moderatorIds = (await getModerators(userToken))
+    const moderatorIds = (await getModerators(token))
       .map((mod) => mod.user_id);
 
-    const profiles = await TwitchUserRepo.getAll(userToken, moderatorIds);
+    const profiles = await TwitchUserRepo.getAll(token, moderatorIds);
 
     const resp: GetModeratorsResponse = {
       data: profiles.map((profile) => ({
@@ -64,11 +69,9 @@ dashboardRouter.get('/connectionStatus', async (req, res) => {
   if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
 
   try {
-    const tokenRepo = await Database.getRepository(Token);
-    const userToken = await tokenRepo.findOneOrFail({ where: { userId: req.user.id } });
-    const channel = await Channel.getChannelByUserId(req.user.id);
+    const token = await Token.getByUserIdOrFail(req.user.id);
 
-    const moderatorLogins = (await getModerators(userToken))
+    const moderatorLogins = (await getModerators(token))
       .map((mod) => mod.user_login);
 
     const botLogin = await Config.getOrFail('botLogin');
@@ -76,7 +79,7 @@ dashboardRouter.get('/connectionStatus', async (req, res) => {
     const resp: GetBotConnectionStatusResponse = {
       data: {
         channel: req.user.login,
-        joined: channel?.joined ?? false,
+        joined: token.user.channel.joined ?? false,
         admin: moderatorLogins.includes(botLogin) || botLogin === req.user.login,
       },
     };
@@ -92,18 +95,17 @@ dashboardRouter.post('/joinChannel', async (req, res) => {
   if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
 
   try {
-    const channel = await Channel.getChannelByUserId(req.user.id);
-    const channelRepo = await Database.getRepository(Channel);
-
-    if (channel === null) throw new Error('Channel not found');
+    const channel = await Channel.getByUserIdOrFail(req.user.id);
+    console.log('Current state:', channel.joined);
 
     channel.joined = !channel.joined;
+    console.log('New state:', channel.joined);
 
-    await channelRepo.save(channel);
-    await Channel.invalidateCache(req.user.id);
+    if (channel.joined) await Bot.joinChannel(channel.user.id);
+    else await Bot.leaveChannel(channel.user.id);
 
-    if (channel.joined) Bot.joinChannel(req.user.login);
-    else Bot.leaveChannel(req.user.login);
+    const updatedChannel = await Channel.createOrUpdate(channel);
+    console.log('Updated state:', updatedChannel.joined);
 
     res.sendStatus(200);
   } catch (err) {
@@ -192,31 +194,70 @@ const createRandomChatStat = (startDate: number, endDate: number, max: number): 
   return data;
 };
 
-dashboardRouter.get('/widgets/chatStats', (req, res) => {
-  const date = faker.date.recent().getDate();
-  const month = faker.date.recent().getMonth();
+dashboardRouter.get('/widgets/chatStats', async (req, res) => {
+  if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
 
-  const startDate = new Date(new Date().getFullYear(), month, date, new Date().getHours(), new Date().getMinutes()).getTime() - (5 * 60 * 60 * 1000);
-  const endDate = new Date(new Date().getFullYear(), month, date, new Date().getHours(), new Date().getMinutes()).getTime();
+  const oldestFrameId = ChannelStats.frameIdFromDate(dayjs.utc().subtract(1, 'hour').toDate());
+  const newestFrameId = ChannelStats.frameIdFromDate();
 
-  const messages = createRandomChatStat(startDate, endDate, 100);
-  const timeouts = createRandomChatStat(startDate, endDate, 10);
-  const bans = createRandomChatStat(startDate, endDate, 5);
-  const deleted = createRandomChatStat(startDate, endDate, 10);
-  const commands = createRandomChatStat(startDate, endDate, 20);
+  const stats = await ChannelStats.getFramesBetween(req.user.id, oldestFrameId, newestFrameId);
+  const mappedStats = ChannelStats.mapFrames(stats);
+
+  let messagesTotal = 0;
+  let timeoutsTotal = 0;
+  let bansTotal = 0;
+  let deletedTotal = 0;
+  let commandsTotal = 0;
+  const frames: ChatStatFrame[] = [];
+
+  console.log(oldestFrameId, newestFrameId, newestFrameId - oldestFrameId);
+
+  for (let i = oldestFrameId; i <= newestFrameId; i += 1) {
+    const frame = mappedStats.get(i);
+
+    if (frame === undefined) {
+      frames.push({
+        timestamp: ChannelStats.dateFromFrameId(i).getTime(),
+        frameDuration: ChannelStats.frameDuration,
+
+        messages: 0,
+        timeouts: 0,
+        bans: 0,
+        deleted: 0,
+        commands: 0,
+      });
+    } else {
+      frames.push({
+        timestamp: frame.getDate().getTime(),
+        frameDuration: ChannelStats.frameDuration,
+
+        messages: frame.messages,
+        timeouts: frame.timeouts,
+        bans: frame.bans,
+        deleted: frame.deleted,
+        commands: frame.commands,
+      });
+
+      messagesTotal += frame.messages;
+      timeoutsTotal += frame.timeouts;
+      bansTotal += frame.bans;
+      deletedTotal += frame.deleted;
+      commandsTotal += frame.commands;
+    }
+  }
 
   const resp: GetChatStatsResponse = {
     data: {
-      dateStart: startDate,
-      dateEnd: endDate,
+      dateStart: ChannelStats.dateFromFrameId(oldestFrameId).getTime(),
+      dateEnd: ChannelStats.dateFromFrameId(newestFrameId).getTime(),
 
-      messagesTotal: messages.reduce((acc, [_, __, count]) => acc + count, 0),
-      timeoutsTotal: timeouts.reduce((acc, [_, __, count]) => acc + count, 0),
-      bansTotal: bans.reduce((acc, [_, __, count]) => acc + count, 0),
-      deletedTotal: deleted.reduce((acc, [_, __, count]) => acc + count, 0),
-      commandsTotal: commands.reduce((acc, [_, __, count]) => acc + count, 0),
+      messagesTotal,
+      timeoutsTotal,
+      bansTotal,
+      deletedTotal,
+      commandsTotal,
 
-      messages,
+      frames,
     },
   };
 

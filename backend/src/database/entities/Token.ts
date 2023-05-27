@@ -9,12 +9,8 @@ export class Token {
   @PrimaryGeneratedColumn()
   public id!: number;
 
-  @Column({ unique: true })
-  @Index()
-  @IsString()
-  public userId!: string;
-
   @JoinColumn()
+  @Index()
   @OneToOne(() => User, { onDelete: 'CASCADE' })
   public user!: User;
 
@@ -33,11 +29,16 @@ export class Token {
   @UpdateDateColumn({ type: 'timestamptz' })
   public updatedAt!: Date;
 
-  public static async getTokenByUserId(userId: string): Promise<Token | null> {
+  public static async getByUserId(userId: string): Promise<Token | null> {
     const repository = await Database.getRepository(Token);
 
     return repository.findOne({
-      where: { userId },
+      where: { user: { id: userId } },
+      relations: {
+        user: {
+          channel: true,
+        },
+      },
       cache: {
         id: `token:${userId}`,
         milliseconds: 3000,
@@ -45,8 +46,22 @@ export class Token {
     });
   }
 
+  public static async getByUserIdOrFail(userId: string): Promise<Token> {
+    const token = await this.getByUserId(userId);
+
+    if (token === null) {
+      throw new Error(`Token ${userId} not found`);
+    }
+
+    return token;
+  }
+
   public static async invalidateCache(userId: string): Promise<void> {
-    await Database.invalidateCache([`token:${userId}`]);
+    await Database.invalidateCache([
+      `channel:${userId}`,
+      `user:${userId}`,
+      `token:${userId}`,
+    ]);
   }
 
   public static async createOrUpdate(token: Token): Promise<Token> {
@@ -58,7 +73,13 @@ export class Token {
       throw new Error('Failed to validate new token');
     }
 
-    await this.invalidateCache(token.userId);
+    await this.invalidateCache(token.user.id);
+    const existing = await this.getByUserId(token.user.id);
+
+    if (existing !== null) {
+      return await repository.save(repository.merge(existing, token));
+    }
+
     return repository.save(token);
   }
 
@@ -71,7 +92,7 @@ export class Token {
       throw new Error('Failed to validate updated token');
     }
 
-    await this.invalidateCache(token.userId);
+    await this.invalidateCache(token.user.id);
     await repository.findOneOrFail({ where: { id: token.id } });
     return repository.save(token);
   }

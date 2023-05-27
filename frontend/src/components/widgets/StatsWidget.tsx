@@ -1,7 +1,7 @@
-import { createEffect, createResource, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { createEffect, createMemo, createResource, createSignal, onCleanup, onMount, Show } from 'solid-js';
 import Chart from 'chart.js/auto';
 import Widget from '#components/Widget';
-import { ChatStats, GetChatStatsResponse } from '#types/api/dashboard';
+import { ChatStats, ChatStatSources, GetChatStatsResponse } from '#types/api/dashboard';
 import DotSpinner from '#components/DotSpinner';
 import FetchFallback from '#components/FetchFallback';
 import { timeframe } from '#shared/timeUtils';
@@ -97,14 +97,18 @@ const createChart = (canvas: HTMLCanvasElement) => new Chart(
 );
 
 const StatsWidget: Component<StatsWidgetProps> = (props) => {
-  const [stats] = createResource(fetchChatStats);
+  const [stats, { refetch: refetchStats }] = createResource(fetchChatStats);
   const [widgetVisible, setWidgetVisible] = createSignal(false);
+  const [selectedStat, setSelectedStat] = createSignal<ChatStatSources>('messages');
 
   let chart: Chart;
   let canvasRef = document.createElement('canvas');
   let lastUpdate = 0;
   const delay = 1000;
   let updateHandle: number;
+  let fetchTimer: number | undefined;
+
+  const labelsMemo = createMemo(() => stats()?.frames.map((frame) => timeframe(frame.timestamp, frame.timestamp + frame.frameDuration)));
 
   const resizeChart = () => {
     setWidgetVisible(false);
@@ -126,11 +130,18 @@ const StatsWidget: Component<StatsWidgetProps> = (props) => {
 
     const watcher = new ResizeObserver(resizeChart);
     watcher.observe(props.containerRef);
+
+    if (fetchTimer !== undefined) clearInterval(fetchTimer);
+    fetchTimer = setInterval(() => {
+      refetchStats();
+    }, 1000 * 60 * 1) as unknown as number;
   });
 
   onCleanup(() => {
     window.removeEventListener('resize', resizeChart);
     watcher.disconnect();
+
+    if (fetchTimer !== undefined) clearInterval(fetchTimer);
   });
 
   createEffect(() => {
@@ -139,9 +150,29 @@ const StatsWidget: Component<StatsWidgetProps> = (props) => {
 
     if (chart === undefined) chart = createChart(canvasRef);
 
+    chart.data.labels = labelsMemo();
+    chart.data.datasets[0].label = selectedStat().charAt(0).toUpperCase() + selectedStat().slice(1);
 
-    chart.data.labels = stats().messages.map((row) => timeframe(row[0], row[0] + row[1]));
-    chart.data.datasets[0].data = stats().messages.map((row) => row[2]);
+    switch (selectedStat()) {
+      case 'messages':
+        chart.data.datasets[0].data = stats().frames.map((frame) => frame.messages);
+        break;
+      case 'timeouts':
+        chart.data.datasets[0].data = stats().frames.map((frame) => frame.timeouts);
+        break;
+      case 'bans':
+        chart.data.datasets[0].data = stats().frames.map((frame) => frame.bans);
+        break;
+      case 'deleted':
+        chart.data.datasets[0].data = stats().frames.map((frame) => frame.deleted);
+        break;
+      case 'commands':
+        chart.data.datasets[0].data = stats().frames.map((frame) => frame.commands);
+        break;
+
+      default:
+        break;
+    }
 
     chart.update();
   });
@@ -157,22 +188,49 @@ const StatsWidget: Component<StatsWidgetProps> = (props) => {
 
           <div class={style.stats}>
             <span class={style.name}>Messages</span>
-            <span class={style.value}>{truncateNumber(stats()?.messagesTotal)}</span>
+            <button
+              classList={{
+                [style.value]: true,
+                [style.primary]: selectedStat() === 'messages',
+              }}
+              onClick={() => setSelectedStat('messages')}
+            >{truncateNumber(stats()?.messagesTotal)}</button>
 
             <span class={style.name}>Timeouts</span>
-            <span class={style.value}>{truncateNumber(stats()?.timeoutsTotal)}</span>
+            <button
+              classList={{
+                [style.value]: true,
+                [style.primary]: selectedStat() === 'timeouts',
+              }}
+              onClick={() => setSelectedStat('timeouts')}
+            >{truncateNumber(stats()?.timeoutsTotal)}</button>
 
             <span class={style.name}>Bans</span>
-            <span class={style.value}>{truncateNumber(stats()?.bansTotal)}</span>
+            <button
+              classList={{
+                [style.value]: true,
+                [style.primary]: selectedStat() === 'bans',
+              }}
+              onClick={() => setSelectedStat('bans')}
+            >{truncateNumber(stats()?.bansTotal)}</button>
 
             <span class={style.name}>Deleted</span>
-            <span class={style.value}>{truncateNumber(stats()?.deletedTotal)}</span>
+            <button
+              classList={{
+                [style.value]: true,
+                [style.primary]: selectedStat() === 'deleted',
+              }}
+              onClick={() => setSelectedStat('deleted')}
+            >{truncateNumber(stats()?.deletedTotal)}</button>
 
             <span class={style.name}>Commands</span>
-            <span classList={{
-              [style.value]: true,
-              [style.primary]: true,
-            }}>{truncateNumber(stats()?.commandsTotal)}</span>
+            <button
+              classList={{
+                [style.value]: true,
+                [style.primary]: selectedStat() === 'commands',
+              }}
+              onClick={() => setSelectedStat('commands')}
+            >{truncateNumber(stats()?.commandsTotal)}</button>
           </div>
         </div>
 

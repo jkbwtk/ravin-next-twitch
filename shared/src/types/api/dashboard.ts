@@ -53,18 +53,20 @@ export interface GetRecentActionsResponse {
   data: Action[];
 }
 
-export interface ChatStats {
+export type ChatStatSources = 'messages' | 'timeouts' | 'bans' | 'deleted' | 'commands';
+
+export type ChatStatSourcesTotal = `${ChatStatSources}Total`;
+
+export type ChatStatFrame = {
+  timestamp: number,
+  frameDuration: number,
+} & Record<ChatStatSources, number>;
+export type ChatStats = {
   dateStart: number;
   dateEnd: number;
 
-  messagesTotal: number;
-  timeoutsTotal: number;
-  bansTotal: number;
-  deletedTotal: number;
-  commandsTotal: number;
-
-  messages: [number, number, number][]; // [timestamp, sampling duration, count]
-}
+  frames: ChatStatFrame[];
+} & Record<ChatStatSourcesTotal, number>;
 
 export interface GetChatStatsResponse {
   data: ChatStats;

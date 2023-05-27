@@ -8,6 +8,8 @@ import { Token } from '#database/entities/Token';
 import { Redis, RedisOptions } from 'ioredis';
 import { SystemNotification } from '#database/entities/SystemNotification';
 import { Channel } from '#database/entities/Channel';
+import { Message } from '#database/entities/Message';
+import { ChannelStats } from '#database/entities/ChannelStats';
 
 
 export class Database {
@@ -41,7 +43,8 @@ export class Database {
       cache: {
         type: 'ioredis',
         ignoreErrors: false,
-        options: Database.redisOptions,
+        options: { db: 1, ...Database.redisOptions },
+        alwaysEnabled: false,
       },
       entities: Database.databaseEntities,
     };
@@ -55,6 +58,8 @@ export class Database {
       Token,
       SystemNotification,
       Channel,
+      Message,
+      ChannelStats,
     ];
   }
 

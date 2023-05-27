@@ -1,9 +1,14 @@
+import { Channel } from '#database/entities/Channel';
+
+
 export interface ChannelThreadOptions {
   bufferLength?: number;
 }
 
 export class ChannelThread {
   private options: Required<ChannelThreadOptions>;
+
+  public channel: Channel;
 
   private messages: string[] = [];
   private lastMessageTimestamp = 0;
@@ -15,8 +20,10 @@ export class ChannelThread {
     bufferLength: 100,
   };
 
-  constructor(options: ChannelThreadOptions = {}) {
+  constructor(channelUser: Channel, options: ChannelThreadOptions = {}) {
     this.options = { ...ChannelThread.defaultOptions, ...options };
+
+    this.channel = channelUser;
   }
 
   public addMessage(message: string, author: string): void {
