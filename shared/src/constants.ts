@@ -31,3 +31,5 @@ export const isDevApi = process.env.DEV_API?.toLowerCase() !== 'false' && isDevM
 export const twitchApiUrl = isDevApi ? 'http://localhost:8080/mock' : 'https://api.twitch.tv/helix';
 
 export const twitchApi = (url: string): string => `${twitchApiUrl}${url}`;
+
+export const databaseLogging = process.env.DATABASE_LOGGING !== undefined ? process.env.DATABASE_LOGGING.toLowerCase() === 'true' : isDevMode;

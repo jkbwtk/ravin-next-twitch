@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-import { isDevMode } from '#shared/constants';
+import { databaseLogging, isDevMode } from '#shared/constants';
 import { DataSource, DataSourceOptions, EntityManager, ObjectLiteral, Repository } from 'typeorm';
 import { Config } from '#database/entities/Config';
 import { User } from '#database/entities/User';
@@ -40,7 +40,7 @@ export class Database {
       password: process.env.DB_PASSWORD ?? 'DEV_PASSWD',
       database: isDevMode ? 'DEV_DB' : (process.env.DB_NAME ?? 'PROD_DB'),
       synchronize: true,
-      logging: isDevMode,
+      logging: databaseLogging,
       cache: {
         type: 'ioredis',
         ignoreErrors: false,
