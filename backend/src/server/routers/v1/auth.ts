@@ -8,6 +8,7 @@ import { createDevAuthStrategy } from '#server/routers/v1/authDev';
 import { authScopes } from '#server/routers/v1/authShared';
 import { display } from '#lib/display';
 import { SystemNotification } from '#database/entities/SystemNotification';
+import { SocketServer } from '#server/SocketServer';
 
 
 export const authRouter = async (): Promise<expressRouter> => {
@@ -73,6 +74,8 @@ export const authRouter = async (): Promise<expressRouter> => {
           'Logged out',
           'You have been logged out of the dashboard.',
         );
+
+        SocketServer.disconnectUser(user.id);
         res.sendStatus(200);
       }
     });

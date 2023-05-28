@@ -6,6 +6,7 @@ import { NotificationProvider } from '#providers/NotificationProvider';
 import { SessionProvider } from '#providers/SessionProvider';
 
 import '#styles/index.scss';
+import { SocketProvider } from '#providers/SocketProvider';
 
 
 // declared it here and not in global.d.ts because typescript was complaining about empty interfaces
@@ -24,9 +25,11 @@ if (root instanceof HTMLElement) {
   render(() =>
     <NotificationProvider>
       <SessionProvider>
-        <Router>
-          <App />
-        </Router>
+        <SocketProvider>
+          <Router>
+            <App />
+          </Router>
+        </SocketProvider>
       </SessionProvider>
     </NotificationProvider>
   , root);

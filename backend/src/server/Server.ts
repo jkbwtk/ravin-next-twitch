@@ -16,6 +16,8 @@ import { randomAlphanumeric } from '#lib/utils';
 import RedisStore from 'connect-redis';
 import { TokenManager } from '#server/TokenManager';
 import { Bot } from '#bot/Bot';
+import http, { Server as HTTPServer } from 'http';
+import { SocketServer } from '#server/SocketServer';
 
 
 declare global {
@@ -35,6 +37,7 @@ declare module 'express-session' {
 }
 
 export class Server {
+  public readonly server: HTTPServer;
   public readonly app: Express;
   public vite?: ViteDevServer;
 
@@ -44,6 +47,7 @@ export class Server {
 
   constructor(private readonly port = serverPort) {
     this.app = express();
+    this.server = http.createServer(this.app);
   }
 
   private async setupVite() {
@@ -63,10 +67,10 @@ export class Server {
     return secret;
   }
 
-  private async setupSession() {
+  public static async generateSessionMiddleware(): Promise<RequestHandler> {
     const secret = await Config.get('sessionSecret') ?? await Server.generateSessionSecret();
 
-    this.app.use(session({
+    return session({
       secret,
       resave: false,
       saveUninitialized: false,
@@ -75,17 +79,19 @@ export class Server {
       cookie: {
         signed: true,
         httpOnly: true,
-        maxAge: 30 * 60 * 1000,
+        // maxAge: 30 * 60 * 1000,
       },
       store: new RedisStore({
         client: await Database.getRedisClient(),
         prefix: 'session_store:',
       }),
-      // store: new TypeormStore({
-      //   cleanupLimit: 2,
-      //   ttl: 86400,
-      // }).connect(sessionRepository),
-    }));
+    });
+  }
+
+  private async setupSession() {
+    const sessionMiddleware = await Server.generateSessionMiddleware();
+
+    this.app.use(sessionMiddleware);
 
     this.app.use(passport.initialize());
     this.app.use(passport.session());
@@ -149,14 +155,14 @@ export class Server {
     await TokenManager.start();
 
     if (await this.isConfigured()) {
+      await SocketServer.createInstance(this.server);
       await Bot.start();
     }
 
     await this.registerRoutes();
 
-    this.app.listen(this.port, () => {
+    this.server.listen(this.port, () => {
       console.log(`${isDevMode ? 'Development server' : 'Server'} started on port ${chalk.green.bold(this.port)}`);
     });
   }
 }
-
