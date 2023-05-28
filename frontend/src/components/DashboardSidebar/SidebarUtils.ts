@@ -12,7 +12,7 @@ export const convertToRouteDefinitions = (parentPath: string, props: SidebarRout
   for (const route of props) {
     routes.push({
       path: route.href.replace(parentPath, ''),
-      component: route.component ?? lazy(() => import('#pages/dashboard/FeatureNotAvailable')),
+      component: route.component ?? (hasAuxRoutes(route) ? undefined : lazy(() => import('#pages/dashboard/FeatureNotAvailable'))),
       children: hasAuxRoutes(route) ? convertToRouteDefinitions(route.href, route.auxRoutes) : undefined,
       data: () => route,
     });
