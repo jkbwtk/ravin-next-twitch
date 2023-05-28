@@ -1,15 +1,16 @@
-import { Server } from 'socket.io';
+import { BroadcastOperator, Server } from 'socket.io';
 import { Server as HTTPServer } from 'http';
 import { Server as AppServer } from '#server/Server';
 import passport from 'passport';
 import { Request } from 'express';
 import { display } from '#lib/display';
+import { ClientToServerEvents, ServerToClientEvents } from '#types/api/socket';
 
 
 export class SocketServer {
   private static instance: SocketServer;
 
-  public readonly io: Server;
+  public readonly io: Server<ClientToServerEvents, ServerToClientEvents>;
 
   public static async createInstance(httpServer: HTTPServer): Promise<SocketServer> {
     if (!SocketServer.instance) {
@@ -53,13 +54,16 @@ export class SocketServer {
     this.io.on('connection', async (socket) => {
       const req = socket.request as Request;
 
-
       if (req.isUnauthenticated() || req.user === undefined) {
         display.error.nextLine('SocketServer', 'Unauthenticated user connected');
         return socket.disconnect(true);
       }
 
       await socket.join(req.user.id);
+
+      socket.onAny((event, ...message) => {
+        console.log(event, message);
+      });
 
       display.debug.nextLine('SocketServer', 'User connected', req.user.login);
       socket.on('disconnect', () => {
@@ -74,9 +78,9 @@ export class SocketServer {
     socketServer.io.in(userId).disconnectSockets(true);
   }
 
-  public static emitToUser(userId: string, event: string, ...args: unknown[]): void {
+  public static emitToUser(userId: string, ...args: Parameters<BroadcastOperator<ServerToClientEvents, object>['emit']>): void {
     const socketServer = SocketServer.getInstance();
 
-    socketServer.io.in(userId).emit(event, ...args);
+    socketServer.io.in(userId).emit(...args);
   }
 }

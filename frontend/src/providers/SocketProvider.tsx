@@ -2,19 +2,22 @@ import { createContext, createSignal, onCleanup, onMount, ParentComponent, Show,
 import { createStore } from 'solid-js/store';
 import DotSpinner from '#components/DotSpinner';
 import { Manager, Socket } from 'socket.io-client';
+import { useSession } from '#providers/SessionProvider';
+import { ClientToServerEvents, ServerToClientEvents } from '#types/api/socket';
 
 import style from '#styles/SessionProvider.module.scss';
-import { useSession } from '#providers/SessionProvider';
 
 
 export type SocketContextState = {
   manager: Manager;
-  client: Socket;
+  client: Socket<ServerToClientEvents, ClientToServerEvents>;
 };
 
 export type SocketContextValue = [
   state: SocketContextState,
-  actions: object,
+  actions: {
+    emit: SocketContextState['client']['emit'];
+  },
 ];
 
 const defaultState: SocketContextState = {
@@ -25,14 +28,18 @@ const defaultState: SocketContextState = {
 const SocketContext = createContext<SocketContextValue>([
   defaultState,
   {
-
+    emit: () => null as unknown as Socket,
   },
 ]);
 
 export const SocketProvider: ParentComponent = (props) => {
   const [state, setState] = createStore(defaultState);
-  const [session] = useSession();
+  const [session, { pushNotification }] = useSession();
   const [loaded, setLoaded] = createSignal(false);
+
+  const emit: SocketContextState['client']['emit'] = (event, ...args) => {
+    return state.client.emit(event, ...args);
+  };
 
   const registerSocketEvents = () => {
     state.client.on('connect', () => {
@@ -46,12 +53,25 @@ export const SocketProvider: ParentComponent = (props) => {
     state.client.on('connect_error', (err) => {
       console.error(err);
     });
+
+    state.client.onAny((event, ...message) => {
+      console.log(event, message);
+    });
+  };
+
+  const registerEventHandlers = () => {
+    state.client.on('NEW_SYSTEM_NOTIFICATION', (notification) => {
+      notification.createdAt = new Date(notification.createdAt);
+
+      pushNotification(notification);
+    });
   };
 
   onMount(async () => {
     if (session.loggedIn) {
       setState('client', state.manager.socket('/'));
       registerSocketEvents();
+      registerEventHandlers();
     }
 
     setLoaded(true);
@@ -65,6 +85,7 @@ export const SocketProvider: ParentComponent = (props) => {
 
   return (
     <SocketContext.Provider value={[state, {
+      emit,
     }]}>
       <Show
         when={loaded()}

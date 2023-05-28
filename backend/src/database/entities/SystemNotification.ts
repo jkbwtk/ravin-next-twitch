@@ -1,6 +1,7 @@
 import { Database } from '#database/Database';
 import { User } from '#database/entities/User';
 import { IsString } from 'class-validator';
+import { SystemNotification as SystemNotificationClient } from '#types/api/systemNotifications';
 import {
   Column,
   CreateDateColumn,
@@ -14,6 +15,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { SocketServer } from '#server/SocketServer';
 
 
 @Entity()
@@ -52,7 +54,19 @@ export class SystemNotification {
       content,
     });
 
-    return await repository.save(notification);
+    const createdNotification = await repository.save(notification);
+
+    const clientNotification: SystemNotificationClient = {
+      id: createdNotification.id,
+      userId: createdNotification.user.id,
+      title: createdNotification.title,
+      content: createdNotification.content,
+      read: false,
+      createdAt: createdNotification.createdAt,
+    };
+
+    SocketServer.emitToUser(userId, 'NEW_SYSTEM_NOTIFICATION', clientNotification);
+    return createdNotification;
   }
 
   public static async getNotificationsByUserId(userId: string, limit = 100): Promise<SystemNotification[]> {

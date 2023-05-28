@@ -25,6 +25,7 @@ export type SessionContextValue = [
     fetchSystemNotifications: () => Promise<SystemNotification[] | null>
     markNotificationAsRead: (notification: SystemNotification) => Promise<void>;
     markAllNotificationsAsRead: () => Promise<void>;
+    pushNotification: (notification: SystemNotification) => void;
   }
 ];
 
@@ -44,6 +45,7 @@ const SessionContext = createContext<SessionContextValue>([
     fetchSystemNotifications: () => Promise.resolve(null),
     markNotificationAsRead: () => Promise.resolve(),
     markAllNotificationsAsRead: () => Promise.resolve(),
+    pushNotification: () => null,
   },
 ]);
 
@@ -171,6 +173,16 @@ export const SessionProvider: ParentComponent = (props) => {
     }
   };
 
+  const pushNotification = (notification: SystemNotification) => {
+    batch(() => {
+      setState('notifications', [...state.notifications, notification]);
+
+      if (!notification.read) {
+        setState('unreadNotifications', [...state.unreadNotifications, notification]);
+      }
+    });
+  };
+
   onMount(async () => {
     await fetchUser();
 
@@ -189,6 +201,7 @@ export const SessionProvider: ParentComponent = (props) => {
       fetchSystemNotifications,
       markNotificationAsRead,
       markAllNotificationsAsRead,
+      pushNotification,
     }]}>
       <Show
         when={loaded()}
