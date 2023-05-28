@@ -2,6 +2,7 @@ import { useNotification } from '#providers/NotificationProvider';
 import { batch, createContext, createSignal, onMount, ParentComponent, Show, useContext } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { FrontendUser, GetFrontendUser } from '#types/api/auth';
+import { GetSystemNotificationsResponse, SystemNotification } from '#shared/types/api/systemNotifications';
 import DotSpinner from '#components/DotSpinner';
 
 import style from '#styles/SessionProvider.module.scss';
@@ -10,6 +11,8 @@ import style from '#styles/SessionProvider.module.scss';
 export type SessionContextState = {
   loggedIn: boolean;
   user?: FrontendUser;
+  notifications: SystemNotification[];
+  unreadNotifications: SystemNotification[];
 };
 
 export type SessionContextValue = [
@@ -18,11 +21,17 @@ export type SessionContextValue = [
     fetchUser: () => Promise<FrontendUser | null>
     invalidate: () => void;
     logout: () => void;
+
+    fetchSystemNotifications: () => Promise<SystemNotification[] | null>
+    markNotificationAsRead: (notification: SystemNotification) => Promise<void>;
+    markAllNotificationsAsRead: () => Promise<void>;
   }
 ];
 
 const defaultState: SessionContextState = {
   loggedIn: false,
+  notifications: [],
+  unreadNotifications: [],
 };
 
 const SessionContext = createContext<SessionContextValue>([
@@ -31,6 +40,10 @@ const SessionContext = createContext<SessionContextValue>([
     fetchUser: () => Promise.resolve(null),
     invalidate: () => null,
     logout: () => null,
+
+    fetchSystemNotifications: () => Promise.resolve(null),
+    markNotificationAsRead: () => Promise.resolve(),
+    markAllNotificationsAsRead: () => Promise.resolve(),
   },
 ]);
 
@@ -86,13 +99,97 @@ export const SessionProvider: ParentComponent = (props) => {
     }
   };
 
+  const fetchSystemNotifications = async (): Promise<SystemNotification[]> => {
+    const response = await fetch('/api/v1/notifications', {
+      method: 'GET',
+      cache: 'no-store',
+    });
+
+    if (response.ok) {
+      const { data } = await response.json() as GetSystemNotificationsResponse;
+      const mapped = data.map((notification) => ({ ...notification, createdAt: new Date(notification.createdAt) }));
+      const mappedUnread = mapped.filter((notification) => !notification.read);
+
+      batch(() => {
+        setState('notifications', mapped);
+        setState('unreadNotifications', mappedUnread);
+      });
+
+      return mapped;
+    }
+
+    batch(() => {
+      setState('notifications', []);
+      setState('unreadNotifications', []);
+    });
+
+    return [];
+  };
+
+  const markNotificationAsRead = async (notification: SystemNotification) => {
+    const response = await fetch(`/api/v1/notifications/read`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id: notification.id }),
+    });
+
+    if (response.ok) {
+      await fetchSystemNotifications();
+    } else {
+      addNotification({
+        type: 'error',
+        title: 'Notification Error',
+        message: 'Failed to mark notification as read',
+        duration: 5000,
+      });
+    }
+  };
+
+  const markAllNotificationsAsRead = async () => {
+    if (state.unreadNotifications.length === 0) return;
+    const id = state.unreadNotifications.map((notification) => notification.id);
+
+    const response = await fetch(`/api/v1/notifications/read`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id }),
+    });
+
+    if (response.ok) {
+      await fetchSystemNotifications();
+    } else {
+      addNotification({
+        type: 'error',
+        title: 'Notification Error',
+        message: 'Failed to mark all notifications as read',
+        duration: 5000,
+      });
+    }
+  };
+
   onMount(async () => {
     await fetchUser();
+
+    if (state.loggedIn) {
+      await fetchSystemNotifications();
+    }
+
     setLoaded(true);
   });
 
   return (
-    <SessionContext.Provider value={[state, { invalidate, fetchUser, logout }]}>
+    <SessionContext.Provider value={[state, {
+      invalidate,
+      fetchUser,
+      logout,
+      fetchSystemNotifications,
+      markNotificationAsRead,
+      markAllNotificationsAsRead,
+    }]}>
       <Show
         when={loaded()}
         fallback={

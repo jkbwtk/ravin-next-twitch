@@ -46,7 +46,7 @@
 
     z-index: 1000;
 
-    max-height: calc(100vh - var(--notification-icon-vertical-offset));
+    max-height: calc(100vh - var(--notification-icon-vertical-offset) - 1rem);
     max-width: calc(100vw - var(--notification-icon-horizontal-offset));
 
     box-sizing: border-box;

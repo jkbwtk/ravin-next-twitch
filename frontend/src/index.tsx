@@ -22,13 +22,13 @@ const root = document.getElementById('root');
 
 if (root instanceof HTMLElement) {
   render(() =>
-    <Router>
-      <NotificationProvider>
-        <SessionProvider>
+    <NotificationProvider>
+      <SessionProvider>
+        <Router>
           <App />
-        </SessionProvider>
-      </NotificationProvider>
-    </Router>
+        </Router>
+      </SessionProvider>
+    </NotificationProvider>
   , root);
 
   const updateAppHeight = () => {

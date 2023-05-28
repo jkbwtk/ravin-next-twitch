@@ -1,84 +1,17 @@
-import { createMemo, createResource, createSignal, For, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
+import { createSignal, For, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
 import MaterialSymbol from '#components/MaterialSymbol';
-import { GetSystemNotificationsResponse, SystemNotification } from '#types/api/systemNotifications';
 import { Transition } from 'solid-transition-group';
 import { timeFromNow } from '#shared/timeUtils';
-import { useNotification } from '#providers/NotificationProvider';
 
 import style from '#styles/SystemNotificationsIcon.module.scss';
+import { useSession } from '#providers/SessionProvider';
 
-
-const fetchSystemNotifications = async (): Promise<SystemNotification[]> => {
-  const response = await fetch('/api/v1/notifications', {
-    method: 'GET',
-    cache: 'no-store',
-  });
-  const { data } = await response.json() as GetSystemNotificationsResponse;
-
-  return data.map((notification) => ({ ...notification, createdAt: new Date(notification.createdAt) }));
-};
 
 const SystemNotificationsIcon: Component = () => {
-  const [, { addNotification }] = useNotification();
-
   const [notificationOpen, setNotificationOpen] = createSignal(false);
-  const [notifications, { refetch: refetchNotifications }] = createResource(
-    fetchSystemNotifications,
-    {
-      initialValue: [],
-    },
-  );
-
-  const unreadNotifications = createMemo(() => notifications().filter((notification) => !notification.read));
-
-  const markNotificationAsRead = async (notification: SystemNotification) => {
-    const response = await fetch(`/api/v1/notifications/read`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ id: notification.id }),
-    });
-
-    if (response.ok) {
-      refetchNotifications();
-    } else {
-      addNotification({
-        type: 'error',
-        title: 'Notification Error',
-        message: 'Failed to mark notification as read',
-        duration: 5000,
-      });
-    }
-  };
-
-  const markAllNotificationsAsRead = async () => {
-    const id = unreadNotifications().map((notification) => notification.id);
-
-    if (unreadNotifications().length === 0) return;
-
-    const response = await fetch(`/api/v1/notifications/read`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ id }),
-    });
-
-    if (response.ok) {
-      refetchNotifications();
-    } else {
-      addNotification({
-        type: 'error',
-        title: 'Notification Error',
-        message: 'Failed to mark all notifications as read',
-        duration: 5000,
-      });
-    }
-  };
+  const [session, { markNotificationAsRead, markAllNotificationsAsRead }] = useSession();
 
   let containerRef = document.createElement('div');
-  let intervalTimer: number | undefined;
 
   const hideNotificationOnOutsideClick = (ev: MouseEvent) => {
     if (!containerRef.contains(ev.target as Node)) {
@@ -88,17 +21,10 @@ const SystemNotificationsIcon: Component = () => {
 
   onMount(() => {
     document.addEventListener('click', hideNotificationOnOutsideClick);
-
-    if (intervalTimer !== undefined) clearInterval(intervalTimer);
-    intervalTimer = setInterval(() => {
-      refetchNotifications();
-    }, 60000) as unknown as number;
   });
 
   onCleanup(() => {
     document.removeEventListener('click', hideNotificationOnOutsideClick);
-
-    clearInterval(intervalTimer);
   });
 
 
@@ -120,16 +46,16 @@ const SystemNotificationsIcon: Component = () => {
         }}
       >
         <MaterialSymbol
-          symbol={unreadNotifications().length > 0 ? 'notifications_active' : 'notifications'}
+          symbol={session.unreadNotifications.length > 0 ? 'notifications_active' : 'notifications'}
           size='big'
           color='gray'
-          filled={unreadNotifications().length > 0}
+          filled={session.unreadNotifications.length > 0}
           interactive={true}
           highlightColor={'gray'}
         />
 
-        <Show when={unreadNotifications().length > 0}>
-          <span class={style.counter}>{unreadNotifications().length > 9 ? '9+' : unreadNotifications().length}</span>
+        <Show when={session.unreadNotifications.length > 0}>
+          <span class={style.counter}>{session.unreadNotifications.length > 9 ? '9+' : session.unreadNotifications.length}</span>
         </Show>
       </div>
 
@@ -159,7 +85,7 @@ const SystemNotificationsIcon: Component = () => {
             </div>
 
             <div class={style.notifications}>
-              <For each={notifications().sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())}>
+              <For each={session.notifications.slice().sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())}>
                 {(notification) => (
                   <div class={style.notification}>
                     <Switch>
