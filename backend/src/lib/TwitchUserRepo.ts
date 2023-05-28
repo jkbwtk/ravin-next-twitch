@@ -16,8 +16,11 @@ export class TwitchUserRepo {
   };
 
   private static readonly cache: Map<string, CachedTwitchUser> = new ExtendedMap();
+  private static readonly idMap: Map<string, string> = new ExtendedMap();
 
   private static cacheUser(user: TwitchUser): void {
+    this.idMap.set(user.login, user.id);
+
     this.cache.set(
       user.id,
       {
@@ -66,6 +69,34 @@ export class TwitchUserRepo {
     }
   }
 
+  public static async getByLogin(token: Token, login: string): Promise<TwitchUser | null> {
+    const id = this.idMap.get(login);
+
+    if (id !== undefined) {
+      return this.get(token, id);
+    }
+
+    try {
+      display.debug.nextLine('TwitchUserRepo:getByLogin', 'Getting user', login);
+
+      const fetched = await getUsers(token, { login });
+      const user = fetched[0];
+
+      if (user === undefined) {
+        display.warning.nextLine('TwitchUserRepo:getByLogin', 'No user found for login', login);
+        return null;
+      }
+
+      this.cacheUser(user);
+      display.debug.nextLine('TwitchUserRepo:getByLogin', 'User cached', login);
+
+      return user;
+    } catch (err) {
+      display.error.nextLine('TwitchUserRepo:getByLogin', err);
+      return null;
+    }
+  }
+
   public static async getAll(token: Token, ids: string[]): Promise<TwitchUser[]> {
     try {
       display.debug.nextLine('TwitchUserRepo:getAll', 'Getting users', ids);
@@ -99,6 +130,50 @@ export class TwitchUserRepo {
       return [...cached, ...fetched];
     } catch (err) {
       display.error.nextLine('TwitchUserRepo:getAll', err);
+      return [];
+    }
+  }
+
+  public static async getAllByLogin(token: Token, logins: string[]): Promise<TwitchUser[]> {
+    try {
+      display.debug.nextLine('TwitchUserRepo:getAllByLogin', 'Getting users', logins);
+
+      const cached: TwitchUser[] = [];
+      const uncached: string[] = [];
+      let tmpId: string | undefined;
+      let tmpUser: TwitchUser | null;
+
+      for (const login of logins) {
+        tmpId = this.idMap.get(login);
+
+        if (tmpId !== undefined) {
+          tmpUser = this.getCached(tmpId);
+
+          if (tmpUser !== null) {
+            cached.push(tmpUser);
+            continue;
+          }
+        }
+
+        uncached.push(login);
+      }
+
+      if (uncached.length === 0) {
+        display.debug.nextLine('TwitchUserRepo:getAllByLogin', 'All users found in cache', logins);
+        return cached;
+      }
+
+      const fetched = await getUsers(token, { login: uncached });
+
+      for (const user of fetched) {
+        this.cacheUser(user);
+      }
+
+      display.debug.nextLine('TwitchUserRepo:getAllByLogin', 'Users cached', logins);
+
+      return [...cached, ...fetched];
+    } catch (err) {
+      display.error.nextLine('TwitchUserRepo:getAllByLogin', err);
       return [];
     }
   }

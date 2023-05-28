@@ -11,6 +11,9 @@ import { isDevApi } from '#shared/constants';
 import { Message } from '#database/entities/Message';
 import { ChannelStats } from '#database/entities/ChannelStats';
 import Deferred from '#lib/Deferred';
+import { ChannelAction } from '#database/entities/ChannelAction';
+import { TwitchUserRepo } from '#lib/TwitchUserRepo';
+import { Token } from '#database/entities/Token';
 
 
 export interface BotOptions {
@@ -128,6 +131,7 @@ export class Bot {
 
   private handleTimeout = async (channel: string, username: string, reason: string, duration: number, userstate: TimeoutUserstate) => {
     console.log(`<${channel}> ${username} has been timed out for ${duration} seconds: ${reason}`);
+    console.log(channel, username, reason, duration, userstate);
 
     const thread = this.channels.get(channel.slice(1));
     if (!thread) {
@@ -136,10 +140,24 @@ export class Bot {
     }
 
     await ChannelStats.incrementTimeouts(thread.channel.user.id);
+
+    const repository = await Database.getRepository(ChannelAction);
+    const token = await Token.getByUserIdOrFail(thread.channel.user.id);
+
+    const action = repository.create({
+      channelUser: thread.channel.user,
+      issuerDisplayName: thread.channel.user.displayName,
+      targetDisplayName: (await TwitchUserRepo.getByLogin(token, username))?.display_name ?? username,
+      data: (duration ?? 0).toString(),
+      type: 'timeout',
+    });
+
+    await repository.save(action);
   };
 
   private handleBan = async (channel: string, username: string, reason: string, userstate: BanUserstate) => {
     console.log(`<${channel}> ${username} has been banned: ${reason}`);
+    console.log(channel, username, reason, userstate);
 
     const thread = this.channels.get(channel.slice(1));
     if (!thread) {
@@ -148,10 +166,24 @@ export class Bot {
     }
 
     await ChannelStats.incrementBans(thread.channel.user.id);
+
+    const repository = await Database.getRepository(ChannelAction);
+    const token = await Token.getByUserIdOrFail(thread.channel.user.id);
+
+    const action = repository.create({
+      channelUser: thread.channel.user,
+      issuerDisplayName: thread.channel.user.displayName,
+      targetDisplayName: (await TwitchUserRepo.getByLogin(token, username))?.display_name ?? username,
+      type: 'ban',
+      data: reason ?? '[No reason given]',
+    });
+
+    await repository.save(action);
   };
 
   private handleDelete = async (channel: string, username: string, deletedMessage: string, userstate: DeleteUserstate) => {
     console.log(`<${channel}> ${username}'s message has been deleted: ${deletedMessage}`);
+    console.log(channel, username, deletedMessage, userstate);
 
     const thread = this.channels.get(channel.slice(1));
     if (!thread) {
@@ -160,6 +192,19 @@ export class Bot {
     }
 
     await ChannelStats.incrementDeleted(thread.channel.user.id);
+
+    const repository = await Database.getRepository(ChannelAction);
+    const token = await Token.getByUserIdOrFail(thread.channel.user.id);
+
+    const action = repository.create({
+      channelUser: thread.channel.user,
+      issuerDisplayName: thread.channel.user.displayName,
+      targetDisplayName: (await TwitchUserRepo.getByLogin(token, username))?.display_name ?? 'Chat Member',
+      type: 'delete',
+      data: deletedMessage,
+    });
+
+    await repository.save(action);
   };
 
   public static async start(options?: Partial<BotOptions>): Promise<void> {

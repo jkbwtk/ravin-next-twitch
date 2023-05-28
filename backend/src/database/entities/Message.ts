@@ -103,7 +103,6 @@ export class Message {
 
     message.channelUser = new User();
     message.channelUser.id = this.definedOrFail(userState['room-id'], 'room-id');
-    // message.channelUser.id = '484901215';
 
     message.username = this.definedOrFail(userState.username, 'username');
     message.displayName = this.definedOrFail(userState['display-name'], 'display-name');

@@ -19,6 +19,8 @@ import { TwitchUserRepo } from '#lib/TwitchUserRepo';
 import { ChannelStats } from '#database/entities/ChannelStats';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import { Database } from '#database/Database';
+import { ChannelAction } from '#database/entities/ChannelAction';
 
 dayjs.extend(utc);
 
@@ -118,12 +120,11 @@ dashboardRouter.get('/widgets/topStats', async (req, res) => {
   res.json(resp);
 });
 
-const createRandomAction = (): Action => {
-  const date = faker.date.recent().getTime();
-  const issuerDisplayName = faker.internet.userName();
-  const targetDisplayName = faker.internet.userName();
-
-  const type = ['ban', 'timeout', 'delete'][randomInt(0, 3)] as Action['type'];
+const createAction = (action: ChannelAction): Action => {
+  const type = action.type;
+  const date = action.createdAt.getTime();
+  const issuerDisplayName = action.issuerDisplayName;
+  const targetDisplayName = action.targetDisplayName;
 
   switch (type) {
     case 'ban':
@@ -132,7 +133,7 @@ const createRandomAction = (): Action => {
         issuerDisplayName,
         targetDisplayName,
         type,
-        reason: faker.lorem.sentence(),
+        reason: action.data,
       };
 
     case 'timeout':
@@ -141,7 +142,7 @@ const createRandomAction = (): Action => {
         issuerDisplayName,
         targetDisplayName,
         type,
-        duration: randomInt(1, 960) * 5,
+        duration: parseInt(action.data, 10),
       };
 
     default:
@@ -150,14 +151,19 @@ const createRandomAction = (): Action => {
         issuerDisplayName,
         targetDisplayName,
         type,
-        message: faker.lorem.sentence(),
+        message: action.data,
       };
   }
 };
 
-dashboardRouter.get('/widgets/recentActions', (req, res) => {
+dashboardRouter.get('/widgets/recentActions', async (req, res) => {
+  if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
+
+  const repository = await Database.getRepository(ChannelAction);
+  const stats = await repository.find({ where: { channelUser: { id: req.user.id } } });
+
   const resp: GetRecentActionsResponse = {
-    data: Array.from({ length: randomInt(0, 100) }, createRandomAction),
+    data: stats.map(createAction),
   };
 
   res.json(resp);
