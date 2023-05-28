@@ -59,6 +59,9 @@ export class TokenManager {
       where: {
         refreshToken: Not(IsNull()),
       },
+      relations: {
+        user: true,
+      },
       select: ['id'],
     });
     display.debug.nextLine('TokenManager', 'Found', tokens.length, 'tokens');
@@ -87,9 +90,11 @@ export class TokenManager {
         await this._refresh(token);
       } catch (err) {
         const error = typeof err === 'object' && err !== null && 'message' in err ? err.message : err;
+        const stack = typeof err === 'object' && err !== null && 'stack' in err ? err.stack : '';
 
         display.debug.nextLine('TokenManager', 'Failed to process token', partialToken.id);
         display.warning.nextLine('TokenManager', error);
+        display.debug.nextLine('TokenManager', stack);
 
         continue;
       }
