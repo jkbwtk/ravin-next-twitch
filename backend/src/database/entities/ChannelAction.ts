@@ -1,5 +1,8 @@
+import { Database } from '#database/Database';
 import { User } from '#database/entities/User';
-import { IsString } from 'class-validator';
+import { SocketServer } from '#server/SocketServer';
+import { createAction } from '#server/routers/v1/dashboard';
+import { IsString, validate } from 'class-validator';
 import {
   Column, CreateDateColumn,
   DeleteDateColumn, Entity,
@@ -46,4 +49,19 @@ export class ChannelAction {
 
   @DeleteDateColumn({ type: 'timestamptz' })
   public deletedAt!: Date | null;
+
+  public static async createAction(action: ChannelAction): Promise<ChannelAction> {
+    const repository = await Database.getRepository(this);
+
+    const errors = await validate(action);
+    if (errors.length > 0) {
+      console.error(errors);
+      throw new Error('Failed to validate ChannelAction');
+    }
+
+    const createdAction = await repository.save(action);
+    SocketServer.emitToUser(action.channelUser.id, 'NEW_RECENT_ACTION', createAction(action));
+
+    return createdAction;
+  }
 }

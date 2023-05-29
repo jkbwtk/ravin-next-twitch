@@ -1,5 +1,4 @@
 import { faker } from '@faker-js/faker';
-import { randomInt } from 'crypto';
 import { Router as expressRouter } from 'express';
 import {
   Action,
@@ -120,7 +119,7 @@ dashboardRouter.get('/widgets/topStats', async (req, res) => {
   res.json(resp);
 });
 
-const createAction = (action: ChannelAction): Action => {
+export const createAction = (action: ChannelAction): Action => {
   const type = action.type;
   const date = action.createdAt.getTime();
   const issuerDisplayName = action.issuerDisplayName;

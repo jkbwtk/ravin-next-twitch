@@ -2,8 +2,6 @@ import { BanUserstate, ChatUserstate, Client, DeleteUserstate, TimeoutUserstate 
 import { ChannelThread } from './ChannelThread';
 import { display } from '../lib/display';
 import { ExtendedMap } from '../lib/ExtendedMap';
-import { Markov } from './Markov';
-import { arrayFrom } from '../lib/utils';
 import { Config } from '#lib/Config';
 import { Database } from '#database/Database';
 import { Channel } from '#database/entities/Channel';
@@ -152,7 +150,7 @@ export class Bot {
       type: 'timeout',
     });
 
-    await repository.save(action);
+    await ChannelAction.createAction(action);
   };
 
   private handleBan = async (channel: string, username: string, reason: string, userstate: BanUserstate) => {
@@ -178,7 +176,7 @@ export class Bot {
       data: reason ?? '[No reason given]',
     });
 
-    await repository.save(action);
+    await ChannelAction.createAction(action);
   };
 
   private handleDelete = async (channel: string, username: string, deletedMessage: string, userstate: DeleteUserstate) => {
@@ -204,7 +202,7 @@ export class Bot {
       data: deletedMessage,
     });
 
-    await repository.save(action);
+    await ChannelAction.createAction(action);
   };
 
   public static async start(options?: Partial<BotOptions>): Promise<void> {

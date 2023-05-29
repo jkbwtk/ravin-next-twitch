@@ -1,4 +1,4 @@
-import { BroadcastOperator, Server } from 'socket.io';
+import { Server } from 'socket.io';
 import { Server as HTTPServer } from 'http';
 import { Server as AppServer } from '#server/Server';
 import passport from 'passport';
@@ -78,9 +78,9 @@ export class SocketServer {
     socketServer.io.in(userId).disconnectSockets(true);
   }
 
-  public static emitToUser(userId: string, ...args: Parameters<BroadcastOperator<ServerToClientEvents, object>['emit']>): void {
+  public static emitToUser<T extends keyof ServerToClientEvents>(userId: string, event: T, ...args: Parameters<ServerToClientEvents[T]>): void {
     const socketServer = SocketServer.getInstance();
 
-    socketServer.io.in(userId).emit(...args);
+    socketServer.io.in(userId).emit(event, ...args);
   }
 }
