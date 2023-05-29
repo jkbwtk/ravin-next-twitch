@@ -281,6 +281,7 @@ export class Bot {
       }
 
       display.debug.nextLine('Bot:leaveChannel', `Leaving channel [${channel.user.login}]`);
+      instance.channels.get(channel.user.login)?.destroy();
       instance.channels.delete(channel.user.login);
       await instance.client.part(channel.user.login);
       display.debug.nextLine('Bot:leaveChannel', `Left channel [${channel.user.login}]`);
@@ -290,5 +291,12 @@ export class Bot {
       display.warning.nextLine('Bot:leaveChannel', `Failed to leave channel [${id}]`, err);
       return false;
     }
+  }
+
+  public static getChannelThread(username: string): ChannelThread | undefined {
+    const instance = Bot.instance;
+    if (!instance) return undefined;
+
+    return instance.channels.get(username);
   }
 }

@@ -30,6 +30,9 @@ dashboardRouter.get('/widgets/moderators', async (req, res) => {
   if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
 
   try {
+    const channelThread = Bot.getChannelThread(req.user.login);
+    if (channelThread === undefined) return res.json({ data: [] });
+
     const token = await Token.getByUserIdOrFail(req.user.id);
 
     const moderatorIds = (await getModerators(token))
@@ -41,7 +44,7 @@ dashboardRouter.get('/widgets/moderators', async (req, res) => {
       data: profiles.map((profile) => ({
         avatarUrl: profile.profile_image_url,
         displayName: profile.display_name,
-        status: false,
+        status: channelThread.chatMembers.has(profile.id),
       })),
     };
 

@@ -10,6 +10,7 @@ import {
   TooManyParameters,
 } from '#lib/twitchErrors';
 import {
+  GetChatters,
   GetTwitchModerators,
   GetTwitchUsers,
   GetUsersOptions,
@@ -249,3 +250,37 @@ export async function getModeratorsUnsafe(token: Token): Promise<TwitchBriefUser
 }
 
 export const getModerators: CloneFunction<typeof getModeratorsUnsafe> = async (...args) => requestGuardian({}, getModeratorsUnsafe, ...args);
+
+
+export async function getChattersUnsafe(token: Token, first?: number, after?: string): Promise<{
+  users: TwitchBriefUser[];
+  cursor: string;
+  total: number;
+}> {
+  try {
+    const response = await twitch.request<GetChatters>({
+      method: 'GET',
+      url: 'chat/chatters',
+      headers: {
+        'Client-ID': await Config.getOrFail('twitchClientId'),
+        Authorization: `Bearer ${token.accessToken}`,
+      },
+      params: {
+        broadcaster_id: token.user.id,
+        moderator_id: token.user.id,
+        first,
+        after,
+      },
+    });
+
+    return {
+      users: response.data.data,
+      cursor: response.data.pagination.cursor,
+      total: response.data.total,
+    };
+  } catch (error) {
+    throw errorConverter(error);
+  }
+}
+
+export const getChatters: CloneFunction<typeof getChattersUnsafe> = async (...args) => requestGuardian({}, getChattersUnsafe, ...args);

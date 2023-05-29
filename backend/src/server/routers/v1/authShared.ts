@@ -14,6 +14,7 @@ import { display } from '#lib/display';
 export const authScopes: string[] = [
   'user:read:email',
   'moderation:read',
+  'moderator:read:chatters',
 ];
 
 const createOrUpdateToken = async (accessToken: string, refreshToken: string | null, user: UserEntity): Promise<Token> => {
