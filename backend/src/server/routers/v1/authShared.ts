@@ -2,7 +2,6 @@ import { User as UserEntity } from '#database/entities/User';
 import { Database } from '#database/Database';
 import { VerifyCallback } from 'passport-oauth2';
 import { Token } from '#database/entities/Token';
-import { validate } from 'class-validator';
 import { isDevApi } from '#shared/constants';
 import { TwitchUser } from '#shared/types/twitch';
 import { revokeTokenUnsafe } from '#lib/twitch';
@@ -39,7 +38,7 @@ const createOrUpdateChannel = async (user: UserEntity): Promise<Channel> => {
   return Channel.createOrUpdate(newChannel);
 };
 
-const createOrUpdateUser = async (profile: TwitchUser, token: Token | null): Promise<UserEntity> => {
+const createOrUpdateUser = async (profile: TwitchUser): Promise<UserEntity> => {
   const userRepo = await Database.getRepository(UserEntity);
 
   const newUser = userRepo.create({
@@ -65,7 +64,7 @@ export const verifyCallback = async (accessToken: string, refreshToken: string |
 
     const tokenRepo = await Database.getRepository(Token);
     const token = await Token.getByUserId(profile.id);
-    const user = await createOrUpdateUser(profile, token);
+    const user = await createOrUpdateUser(profile);
 
     if (token === null) {
       await createOrUpdateToken(accessToken, refreshToken, user);

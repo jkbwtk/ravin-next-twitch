@@ -1,7 +1,7 @@
 import { Database } from '#database/Database';
 import { User } from '#database/entities/User';
 import { IsBoolean, IsOptional, validate } from 'class-validator';
-import { Column, CreateDateColumn, Entity, Index, JoinColumn, OneToOne, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 
 @Entity()

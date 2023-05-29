@@ -1,4 +1,3 @@
-import { Channel } from '#database/entities/Channel';
 import { User } from '#database/entities/User';
 import { IsBoolean, IsDate, IsNumberString, IsString, IsUUID } from 'class-validator';
 import { BadgeInfo } from 'tmi.js';
@@ -6,9 +5,9 @@ import { Badges, ChatUserstate } from 'tmi.js';
 import {
   Column, CreateDateColumn,
   DeleteDateColumn, Entity,
-  Index, JoinColumn,
+  Index,
   ManyToOne,
-  OneToMany, PrimaryGeneratedColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
