@@ -20,6 +20,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { Database } from '#database/Database';
 import { ChannelAction } from '#database/entities/ChannelAction';
+import { Message } from '#database/entities/Message';
 
 dayjs.extend(utc);
 
@@ -105,21 +106,35 @@ dashboardRouter.post('/joinChannel', async (req, res) => {
 });
 
 dashboardRouter.get('/widgets/topStats', async (req, res) => {
-  const resp: GetTopStatsResponse = {
-    data: {
-      chatter: {
-        avatarUrl: faker.internet.avatar(),
-        displayName: faker.internet.userName(),
-      },
-      command: faker.lorem.word(),
-      emote: {
-        url: faker.image.imageUrl(96, 96),
-        name: faker.lorem.word(),
-      },
-    },
-  };
+  if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
 
-  res.json(resp);
+  try {
+    const token = await Token.getByUserIdOrFail(req.user.id);
+
+    const topChatterId = await Message.getTopChatter(req.user.id);
+    const topChatter = await TwitchUserRepo.get(token, topChatterId ?? '');
+
+    const topEmote = await Message.getTopEmote(req.user.id);
+
+    const resp: GetTopStatsResponse = {
+      data: {
+        chatter: {
+          avatarUrl: topChatter?.profile_image_url ?? '',
+          displayName: topChatter?.display_name ?? '',
+        },
+        command: faker.lorem.word(),
+        emote: {
+          url: topEmote ? `https://static-cdn.jtvnw.net/emoticons/v2/${topEmote.id}/default/dark/3.0` : '',
+          name: topEmote?.name ?? '',
+        },
+      },
+    };
+
+    res.json(resp);
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
 });
 
 export const createAction = (action: ChannelAction): Action => {

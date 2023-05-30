@@ -1,4 +1,6 @@
+import { Database } from '#database/Database';
 import { User } from '#database/entities/User';
+import { display } from '#lib/display';
 import { IsBoolean, IsDate, IsNumberString, IsString, IsUUID } from 'class-validator';
 import { BadgeInfo } from 'tmi.js';
 import { Badges, ChatUserstate } from 'tmi.js';
@@ -11,6 +13,24 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+
+export type EmotesRaw = {
+  [id: string]: string[]
+};
+
+export type EmotesUsed = {
+  [id: string]: {
+    name: string;
+    count: number;
+    positions: string[];
+  };
+};
+
+export type DatabaseEmote = {
+  id: string;
+  name: string;
+  count: number;
+};
 
 @Entity()
 export class Message {
@@ -54,7 +74,7 @@ export class Message {
   public content!: string;
 
   @Column({ type: 'jsonb', nullable: true })
-  public emotes!: { [id: string]: string[] } | null;
+  public emotes!: EmotesUsed | null;
 
   @Column({ type: 'timestamptz' })
   @IsDate()
@@ -110,7 +130,8 @@ export class Message {
 
     message.content = content;
 
-    message.emotes = userState.emotes ?? null;
+    message.emotes = this.getEmotesUsed(content, userState.emotes ?? null);
+
     message.timestamp = userState['tmi-sent-ts'] ? new Date(parseInt(userState['tmi-sent-ts'], 10)) : new Date();
 
     message.badgeInfo = userState.badgeInfo ?? null;
@@ -132,5 +153,85 @@ export class Message {
     }
 
     return value;
+  }
+
+  private static getEmotesUsed(message: string, emotes: EmotesRaw| null): EmotesUsed | null {
+    if (emotes === null) return null;
+    const result: EmotesUsed = {};
+
+    for (const [id, positions] of Object.entries(emotes)) {
+      const position = positions[0];
+      if (position === undefined) return null;
+
+      const [start, end] = position.split('-').map((x) => parseInt(x, 10));
+      if (start === undefined || end === undefined) return null;
+
+      const name = message.substring(start, end + 1);
+      if (name.length === 0) return null;
+
+      result[id] = {
+        name,
+        count: positions.length,
+        positions,
+      };
+    }
+
+    return result;
+  }
+
+  public static async getTopChatter(channelId: string): Promise<string | null> {
+    try {
+      const t1 = performance.now();
+      const repository = await Database.getRepository(Message);
+
+      const result: {
+        userId: string;
+        count: string;
+      }[] = await repository.query(`--sql
+        SELECT "userId", COUNT(*) AS "count"
+        FROM message
+        WHERE "channelUserId" = $1
+        GROUP BY "userId"
+        ORDER BY "count" DESC
+        LIMIT 1
+        `, [channelId]);
+
+      display.time('Getting top chatter', t1);
+
+      return result[0]?.userId ?? null;
+    } catch (err) {
+      display.error.nextLine('Message:getTopChatter', err);
+
+      return null;
+    }
+  }
+
+  public static async getTopEmote(channelId: string): Promise<DatabaseEmote | null> {
+    try {
+      const t1 = performance.now();
+      const repository = await Database.getRepository(Message);
+
+      const result: DatabaseEmote[] = await repository.query(`--sql
+      SELECT "id", "name", SUM("count") AS "count"
+      FROM (SELECT "emote".key AS "id", "name", "count"::INTEGER
+            FROM message
+                     CROSS JOIN LATERAL JSONB_EACH(message."emotes") AS "emote"
+                     CROSS JOIN LATERAL jsonb_object_field_text("emote".value, 'name') AS "name"
+                     CROSS JOIN LATERAL jsonb_object_field_text("emote".value, 'count') AS "count"
+            WHERE "channelUserId" = $1
+              AND MESSAGE."emotes" IS NOT NULL) AS "emotes"
+      GROUP BY "id", NAME
+      ORDER BY "count" DESC
+      LIMIT 1;
+      `, [channelId]);
+
+      display.time('Getting top emote', t1);
+
+      return result[0] ?? null;
+    } catch (err) {
+      display.error.nextLine('Message:getTopEmote', err);
+
+      return null;
+    }
   }
 }
