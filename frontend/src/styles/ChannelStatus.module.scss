@@ -1,0 +1,58 @@
+@use 'app';
+
+
+.container {
+  gap: 3rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: right;
+
+  box-sizing: border-box;
+}
+
+.bot-info {
+  display: flex;
+  gap: 2rem;
+
+  font-weight: 500;
+  font-size: app.$altFontSize;
+
+  user-select: none;
+
+  .info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .channel-name {
+      user-select: text;
+      color: app.$textBrightColor;
+
+      max-width: 20rem;
+
+      word-wrap: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  @media screen and (max-width: 1310px) {
+    .info:nth-child(3) {
+      display: none;
+    }
+  }
+
+  @media screen and (max-width: 1220px) {
+    .info:nth-child(2) {
+      display: none;
+    }
+  }
+
+  @media screen and (max-width: 1090px) {
+    .info:nth-child(1) {
+      display: none;
+    }
+  }
+}
