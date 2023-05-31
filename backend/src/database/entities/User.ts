@@ -1,12 +1,14 @@
 import { Database } from '#database/Database';
 import { Channel } from '#database/entities/Channel';
-import { IsEmail, IsString, IsUrl, validate } from 'class-validator';
+import { IsEmail, IsNumberString, IsString, IsUrl, validate } from 'class-validator';
 import { Column, CreateDateColumn, Entity, Index, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 
 
 @Entity()
 export class User {
   @PrimaryColumn()
+  @IsString({ groups: ['relation'] })
+  @IsNumberString({}, { groups: ['relation'] })
   public id!: string;
 
   @Column({ unique: true })

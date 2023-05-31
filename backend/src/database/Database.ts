@@ -11,6 +11,7 @@ import { Channel } from '#database/entities/Channel';
 import { Message } from '#database/entities/Message';
 import { ChannelStats } from '#database/entities/ChannelStats';
 import { ChannelAction } from '#database/entities/ChannelAction';
+import { Command } from '#database/entities/Command';
 
 
 export class Database {
@@ -62,6 +63,7 @@ export class Database {
       Message,
       ChannelStats,
       ChannelAction,
+      Command,
     ];
   }
 

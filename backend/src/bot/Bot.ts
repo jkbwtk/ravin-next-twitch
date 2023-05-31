@@ -12,6 +12,7 @@ import Deferred from '#lib/Deferred';
 import { ChannelAction } from '#database/entities/ChannelAction';
 import { TwitchUserRepo } from '#lib/TwitchUserRepo';
 import { Token } from '#database/entities/Token';
+import { Command } from '#database/entities/Command';
 
 
 export interface BotOptions {
@@ -107,24 +108,52 @@ export class Bot {
   };
 
   private handleMessage = async (channel: string, userstate: ChatUserstate, message: string, self: boolean) => {
-    if (self) return;
-    console.log(`<${channel}> ${userstate['display-name']}: ${message}`);
+    try {
+      if (self) return;
 
-    const instance = Message.fromChatUserState(channel, userstate, message);
-    const repository = await Database.getRepository(Message);
-    await repository.save(instance);
+      const instance = await Message.createFromChatUserState(channel, userstate, message);
+      const thread = this.channels.get(channel.slice(1));
 
-    const thread = this.channels.get(channel.slice(1));
-    if (!thread) {
-      display.warning.nextLine(`Bot:handleMessage`, `Channel thread for [${channel}] not found`);
-      return;
+      if (!thread) {
+        display.warning.nextLine('Bot:handleMessage', `Channel thread for [${channel}] not found`);
+        return;
+      }
+
+      await ChannelStats.incrementMessages(instance.channelUser.id);
+      const getTimeSinceLastMessage = thread.getTimeSinceLastMessage();
+
+      display.debug.nextLine('Bot:handleMessage', 'Time since last message:', getTimeSinceLastMessage);
+      thread.addMessage(message, userstate.username ?? 'Anonymous');
+      display.debug.nextLine('Bot:handleMessage', 'Chant length:', thread.getChantLength());
+
+      const customCommand = thread.getUsedCustomCommand(message);
+
+      if (customCommand) {
+        if (
+          customCommand.command.enabled &&
+          Date.now() - customCommand.lastUsed >= customCommand.command.cooldown * 1000 &&
+          instance.getUserLevel() >= customCommand.command.userLevel
+        ) {
+          await this.client.say(channel, customCommand.command.response);
+          await ChannelStats.incrementCommands(thread.channel.user.id);
+          await Command.incrementUsage(customCommand.command.id);
+
+          customCommand.lastUsed = Date.now();
+          return;
+        }
+      }
+
+      if (
+        thread.channel.chantingSettings.enabled &&
+        getTimeSinceLastMessage >= thread.channel.chantingSettings.interval &&
+        thread.getChantLength() >= thread.channel.chantingSettings.length
+      ) {
+        thread.chantResponded = true;
+        await this.client.say(channel, message);
+      }
+    } catch (err) {
+      display.error.nextLine('Bot:handleMessage', `Failed to handle message`, err);
     }
-
-    await ChannelStats.incrementMessages(instance.channelUser.id);
-
-    display.debug.nextLine(channel, 'Time since last message:', thread.getTimeSinceLastMessage());
-    thread.addMessage(message, userstate.username ?? 'Anonymous');
-    display.debug.nextLine(channel, 'Chant length:', thread.getChantLength());
   };
 
   private handleTimeout = async (channel: string, username: string, reason: string, duration: number, userstate: TimeoutUserstate) => {
@@ -254,6 +283,7 @@ export class Bot {
       }
 
       const channelThread = new ChannelThread(channel, {});
+      await channelThread.init();
       instance.channels.set(channel.user.login, channelThread);
 
       display.debug.nextLine('Bot:joinChannel', `Joining channel [${channel.user.login}]`);

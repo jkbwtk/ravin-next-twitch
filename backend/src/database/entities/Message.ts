@@ -1,6 +1,7 @@
 import { Database } from '#database/Database';
 import { User } from '#database/entities/User';
 import { display } from '#lib/display';
+import { UserLevel } from '#types/api/commands';
 import { IsBoolean, IsDate, IsNumberString, IsString, IsUUID } from 'class-validator';
 import { BadgeInfo } from 'tmi.js';
 import { Badges, ChatUserstate } from 'tmi.js';
@@ -114,6 +115,15 @@ export class Message {
   @DeleteDateColumn({ type: 'timestamptz' })
   public deletedAt!: Date | null;
 
+  public getUserLevel(): UserLevel {
+    if (this.badges?.broadcaster) return UserLevel.Owner;
+    if (this.mod) return UserLevel.Moderator;
+    if (this.badges?.vip) return UserLevel.VIP;
+    if (this.subscriber) return UserLevel.Subscriber;
+
+    return UserLevel.Everyone;
+  }
+
   public static fromChatUserState(channel: string, userState: ChatUserstate, content: string): Message {
     const message = new Message();
 
@@ -153,6 +163,13 @@ export class Message {
     }
 
     return value;
+  }
+
+  public static async createFromChatUserState(channel: string, userState: ChatUserstate, content: string): Promise<Message> {
+    const repository = await Database.getRepository(Message);
+    const message = Message.fromChatUserState(channel, userState, content);
+
+    return repository.save(message);
   }
 
   private static getEmotesUsed(message: string, emotes: EmotesRaw| null): EmotesUsed | null {

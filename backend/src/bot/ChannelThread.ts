@@ -1,8 +1,15 @@
 import { Channel } from '#database/entities/Channel';
 import { Token } from '#database/entities/Token';
+import { ExtendedMap } from '#lib/ExtendedMap';
 import ExtendedSet from '#lib/ExtendedSet';
 import { getChatters } from '#lib/twitch';
+import { Command } from '#database/entities/Command';
 
+
+export type CustomCommandState = {
+  lastUsed: number;
+  command: Command;
+};
 
 export interface ChannelThreadOptions {
   bufferLength?: number;
@@ -21,6 +28,7 @@ export class ChannelThread {
   public chantResponded = false;
 
   private intervals: ExtendedSet<NodeJS.Timeout> = new ExtendedSet();
+  public customCommands: ExtendedMap<string, CustomCommandState> = new ExtendedMap();
 
   private static defaultOptions: Required<ChannelThreadOptions> = {
     bufferLength: 100,
@@ -30,14 +38,25 @@ export class ChannelThread {
     this.options = { ...ChannelThread.defaultOptions, ...options };
 
     this.channel = channelUser;
+  }
 
-    this.initIntervals();
+  public async init(): Promise<void> {
+    await this.startChatMemberSyncing();
+    await this.syncCustomCommands();
+  }
+
+  public destroy(): void {
+    this.stopChatMemberSyncing();
   }
 
   public addMessage(message: string, author: string): void {
+    this.processChant(message, author);
+  }
+
+  private processChant(message: string, author: string): void {
     this.lastMessageTimestamp = Date.now();
 
-    const lastMessage = this.messages[this.messages.length - 1];
+    const lastMessage = this.messages.at(-1);
 
     if (lastMessage !== message) {
       this.resetChantLength();
@@ -81,7 +100,7 @@ export class ChannelThread {
     this.chatMembers = new ExtendedSet(mappedChatters);
   }
 
-  private async initIntervals(): Promise<void> {
+  private async startChatMemberSyncing(): Promise<void> {
     await this.syncChatMembers();
 
     this.intervals.add(setTimeout(() => {
@@ -89,7 +108,26 @@ export class ChannelThread {
     }, 1000 * 60 * 5));
   }
 
-  public destroy(): void {
+  private stopChatMemberSyncing(): void {
     this.intervals.forEach((interval) => clearInterval(interval));
+  }
+
+  public async syncCustomCommands(): Promise<void> {
+    const commands = await Command.getByChannelId(this.channel.user.id);
+
+    this.customCommands.clear();
+    for (const command of commands) {
+      this.customCommands.set(command.command, {
+        lastUsed: 0,
+        command,
+      });
+    }
+  }
+
+  public getUsedCustomCommand(message: string): CustomCommandState | null {
+    const [commandName] = message.trim().split(' ');
+
+    if (!commandName) return null;
+    return this.customCommands.get(commandName) ?? null;
   }
 }

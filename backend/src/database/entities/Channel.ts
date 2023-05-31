@@ -1,9 +1,14 @@
 import { Database } from '#database/Database';
 import { User } from '#database/entities/User';
-import { IsBoolean, IsOptional, validate } from 'class-validator';
+import { IsBoolean, IsObject, IsOptional, validate } from 'class-validator';
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 
+export type ChantingSettings = {
+  enabled: boolean;
+  interval: number;
+  length: number;
+};
 @Entity()
 export class Channel {
   @PrimaryGeneratedColumn()
@@ -19,11 +24,22 @@ export class Channel {
   @IsOptional()
   public joined!: boolean;
 
+  @Column({ type: 'json', default: Channel.defaultChantingSettings })
+  @IsObject()
+  @IsOptional()
+  public chantingSettings!: ChantingSettings;
+
   @CreateDateColumn({ type: 'timestamptz' })
   public createdAt!: Date;
 
   @UpdateDateColumn({ type: 'timestamptz' })
   public updatedAt!: Date;
+
+  public static defaultChantingSettings: ChantingSettings = {
+    enabled: false,
+    interval: 60,
+    length: 3,
+  };
 
   public static async getByUserId(userId: string): Promise<Channel | null> {
     const repository = await Database.getRepository(Channel);

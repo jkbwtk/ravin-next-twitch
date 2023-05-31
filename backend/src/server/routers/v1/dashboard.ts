@@ -1,4 +1,3 @@
-import { faker } from '@faker-js/faker';
 import { Router as expressRouter } from 'express';
 import {
   Action,
@@ -21,6 +20,7 @@ import utc from 'dayjs/plugin/utc';
 import { Database } from '#database/Database';
 import { ChannelAction } from '#database/entities/ChannelAction';
 import { Message } from '#database/entities/Message';
+import { Command } from '#database/entities/Command';
 
 dayjs.extend(utc);
 
@@ -112,7 +112,9 @@ dashboardRouter.get('/widgets/topStats', async (req, res) => {
     const token = await Token.getByUserIdOrFail(req.user.id);
 
     const topChatterId = await Message.getTopChatter(req.user.id);
-    const topChatter = await TwitchUserRepo.get(token, topChatterId ?? '');
+    const topChatter = topChatterId ? await TwitchUserRepo.get(token, topChatterId ?? '') : null;
+
+    const topCommand = await Command.getTopCommand(req.user.id);
 
     const topEmote = await Message.getTopEmote(req.user.id);
 
@@ -122,7 +124,7 @@ dashboardRouter.get('/widgets/topStats', async (req, res) => {
           avatarUrl: topChatter?.profile_image_url ?? '',
           displayName: topChatter?.display_name ?? '',
         },
-        command: faker.lorem.word(),
+        command: topCommand?.command ?? '',
         emote: {
           url: topEmote ? `https://static-cdn.jtvnw.net/emoticons/v2/${topEmote.id}/default/dark/3.0` : '',
           name: topEmote?.name ?? '',

@@ -3,6 +3,7 @@ import { dashboardRouter } from '#routers/v1/dashboard';
 import { authRouter } from '#server/routers/v1/auth';
 import { systemNotificationsRouter } from '#server/routers/v1/systemNotifications';
 import bodyParser from 'body-parser';
+import { commandsRouter } from '#server/routers/v1/commands';
 
 
 export const v1Router = async (): Promise<expressRouter> => {
@@ -20,6 +21,8 @@ export const v1Router = async (): Promise<expressRouter> => {
   v1Router.use('/auth', await authRouter());
 
   v1Router.use('/notifications', await systemNotificationsRouter());
+
+  v1Router.use('/commands', await commandsRouter());
 
   return v1Router;
 };
