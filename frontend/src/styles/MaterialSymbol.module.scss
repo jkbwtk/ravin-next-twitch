@@ -21,9 +21,20 @@
   flex-shrink: 0;
 }
 
+.smallest {
+  @include symbolUtils.symbolSize(app.$smallestIconSize);
+}
+
+.smaller {
+  @include symbolUtils.symbolSize(app.$smallerIconSize);
+}
 
 .small {
   @include symbolUtils.symbolSize(app.$smallIconSize);
+}
+
+.alt {
+  @include symbolUtils.symbolSize(app.$altIconSize);
 }
 
 .medium {

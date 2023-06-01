@@ -6,7 +6,7 @@ import style from '#styles/MaterialSymbol.module.scss';
 
 export type SymbolColorType = 'gray' | 'red' | 'green' | 'blue' | 'yellow' | 'primary';
 export type SymbolHighlightColorType = SymbolColorType | 'none';
-export type SymbolSizeType = 'small' | 'medium' | 'big';
+export type SymbolSizeType = 'smallest' | 'smaller' | 'small' | 'alt' | 'medium' | 'big';
 
 interface MaterialSymbolProps {
   symbol: string;
@@ -54,7 +54,10 @@ const MaterialSymbol: Component<MaterialSymbolProps> = (userProps) => {
   });
 
   const sizeClass = quickSwitch<string, SymbolSizeType>(props.size, {
+    smallest: style.smallest,
+    smaller: style.smaller,
     small: style.small,
+    alt: style.alt,
     medium: style.medium,
     big: style.big,
     default: style.medium,

@@ -26,7 +26,7 @@ const DashboardInfoBar: ParentComponent = (props) => {
             <For each={data.href.split('/').slice(1)}>
               {(linkName) => (
                 <>
-                  <MaterialSymbol symbol='arrow_forward_ios' color='primary' size='small' />
+                  <MaterialSymbol symbol='arrow_forward_ios' color='primary' size='smallest' />
                   <span class={style.pathElement}>{capitalize(linkName)}</span>
                 </>
               )}
