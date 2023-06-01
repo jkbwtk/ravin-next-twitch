@@ -31,7 +31,7 @@ const TopStatsWidget: Component = () => {
   });
 
   return (
-    <Widget class={style.container} title='Moderators'>
+    <Widget class={style.container} title='Top Stats'>
       <Show when={!stats.loading} fallback={<FetchFallback>Fetching Top Stats</FetchFallback>}>
 
         <div class={style.segment}>
@@ -48,7 +48,7 @@ const TopStatsWidget: Component = () => {
 
           <div class={style.entry}>
             <MaterialSymbol symbol='military_tech' color='primary' size='big' />
-            <span class={style.name}>!{stats().command}</span>
+            <span class={style.name}>{stats().command}</span>
           </div>
         </div>
 

@@ -84,7 +84,9 @@
     @include symbolUtils.symbolFont(1);
     color: app.$textBrightColor;
   }
+}
 
+.open {
   .dropdown-arrow {
     transform: rotate(-90deg);
   }

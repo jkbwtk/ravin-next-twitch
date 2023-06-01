@@ -24,8 +24,8 @@ const SidebarElementNested: Component<SidebarRoute> = (props) => {
     >
       <button
         classList={{
-          [style.active]: open(),
           [style.element]: true,
+          [style.open]: open(),
         }}
         onClick={() => setOpen((prev) => !prev)}
       >
