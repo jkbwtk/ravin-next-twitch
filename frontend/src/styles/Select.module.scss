@@ -1,0 +1,15 @@
+@use 'app' as *;
+
+
+.select {
+  option {
+    font-family: inherit;
+    color: inherit;
+    font-size: $altFontSize;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $textColor;
+  }
+}

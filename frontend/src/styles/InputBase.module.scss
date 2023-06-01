@@ -1,0 +1,59 @@
+@use 'app' as *;
+
+
+$transitionDuration: 0.2s;
+$transitionTimingFunction: ease-in-out;
+$transitionStyle: $transitionDuration $transitionTimingFunction;
+
+.input {
+  color: $textBrightColor;
+  font-size: $altFontSize;
+  font-family: $fontFamily;
+  font-weight: 500;
+
+  background-color: $widgetColor;
+  border-radius: $borderRadius;
+
+  padding: 0.8rem 1.4rem;
+
+  border-style: solid;
+  border-width: 0.1rem;
+  border-color: $borderColor;
+
+  min-width: 0px;
+
+  transition: border-color $transitionStyle;
+
+  &:focus {
+    outline: none;
+    border-color: $textColor;
+  }
+
+  &::placeholder {
+    font-weight: 400;
+  }
+
+  &:invalid:not(:placeholder-shown):not(.typing),
+  &:invalid:not(:placeholder-shown):not(:focus) {
+    border-color: $primaryColor;
+  }
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+
+  gap: 0.2rem;
+  min-width: 0;
+
+  .label {
+    margin-left: 1.4rem;
+
+    font-size: $smallFontSize;
+    color: $textBrightColor;
+
+    min-width: 0;
+
+    user-select: none;
+  }
+}
