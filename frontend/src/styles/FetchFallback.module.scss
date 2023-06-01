@@ -1,4 +1,5 @@
 @use 'app';
+@use 'animations';
 
 
 .loading {
@@ -10,21 +11,10 @@
 
   gap: 2rem;
 
-  animation: fadeIn 0.5s ease-in-out;
+  @include animations.fadeIn(0.5s);
 
   span {
     font-size: app.$altFontSize;
     text-align: center;
-  }
-}
-
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
   }
 }

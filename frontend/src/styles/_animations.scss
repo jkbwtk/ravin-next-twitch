@@ -1,0 +1,41 @@
+@use 'app';
+
+
+$defaultDuration: 0.2s;
+
+@keyframes fadeInAnimation {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@mixin fadeIn($duration: $defaultDuration, $ease: ease-in-out, $delay: 0s, $iteration: 1, $direction: normal, $fill: forwards) {
+  animation: fadeInAnimation $duration $ease $delay $iteration $direction $fill;
+}
+
+
+@keyframes fadeInSlideUp {
+  from {
+    opacity: 0;
+
+    transform: translateY(1rem);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: inherit;
+  }
+}
+
+@mixin fadeInSlideUp($duration: $defaultDuration) {
+  animation: fadeInSlideUp $duration ease-in-out;
+}
+
+@mixin fadeOutSlideDown($duration: $defaultDuration) {
+  animation: fadeInSlideUp $duration ease-in-out reverse;
+}

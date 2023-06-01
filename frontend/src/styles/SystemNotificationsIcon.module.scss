@@ -1,5 +1,6 @@
 @use 'app';
 @use 'sass:color';
+@use 'animations';
 
 
 .container {
@@ -236,23 +237,9 @@
 }
 
 .menu-open {
-  animation: menuOpenAnimation 0.2s ease-in-out;
+  @include animations.fadeInSlideUp();
 }
 
 .menu-close {
-  animation: menuOpenAnimation 0.2s ease-in-out reverse;
-}
-
-@keyframes menuOpenAnimation {
-  from {
-    opacity: 0;
-
-    transform: translateY(1rem);
-  }
-
-  to {
-    opacity: 1;
-
-    transform: inherit;
-  }
+  @include animations.fadeOutSlideDown();
 }

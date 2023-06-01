@@ -1,4 +1,5 @@
 @use 'app';
+@use 'animations';
 
 
 .container {
@@ -9,6 +10,8 @@
   justify-content: right;
 
   box-sizing: border-box;
+
+  @include animations.fadeIn(0.2s);
 }
 
 .bot-info {

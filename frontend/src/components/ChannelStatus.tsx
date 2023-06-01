@@ -4,7 +4,6 @@ import Button from '#components/Button';
 import { BotConnectionStatus, GetBotConnectionStatusResponse } from '#shared/types/api/dashboard';
 
 import style from '#styles/ChannelStatus.module.scss';
-import animations from '#styles/animations.module.scss';
 
 
 const parseSymbol = (state: boolean | undefined) => {
@@ -39,10 +38,7 @@ const ChannelStatus: Component = () => {
 
   return (
     <Show when={status.state === 'ready' || status.state === 'refreshing'} >
-      <div classList={{
-        [animations.fadeIn]: true,
-        [style.container]: true,
-      }}>
+      <div class={style.container}>
         <div class={style.botInfo}>
           <div class={style.info}>
             <span>Channel:</span>
