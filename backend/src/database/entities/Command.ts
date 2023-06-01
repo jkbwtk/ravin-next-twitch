@@ -4,6 +4,7 @@ import { Column, CreateDateColumn, DeleteDateColumn, Entity, Index, ManyToOne, P
 import { DeleteCustomCommandRequest, PatchCustomCommandRequest, PostCustomCommandRequest, UserLevel } from '#types/api/commands';
 import { IsBoolean, IsDivisibleBy, IsEnum, IsInt, isNumber, IsString, Length, Max, min, Min, validate } from 'class-validator';
 import { display } from '#lib/display';
+import { Bot } from '#bot/Bot';
 
 
 @Entity()
@@ -57,6 +58,17 @@ export class Command {
   @DeleteDateColumn({ type: 'timestamptz' })
   public destroyedAt?: Date;
 
+  public static async getById(id: number): Promise<Command | null> {
+    const repository = await Database.getRepository(Command);
+
+    return repository.findOne({
+      where: { id },
+      relations: {
+        channelUser: true,
+      },
+    });
+  }
+
   public static async getByChannelId(channelId: string): Promise<Command[]> {
     const repository = await Database.getRepository(Command);
 
@@ -74,11 +86,11 @@ export class Command {
     return repository.save(command);
   }
 
-  public static async createFromApi(request: PostCustomCommandRequest): Promise<Command> {
+  public static async createFromApi(channelId: string, request: PostCustomCommandRequest): Promise<Command> {
     const command = new Command();
 
     command.channelUser = new User();
-    command.channelUser.id = request.channelId;
+    command.channelUser.id = channelId;
 
     command.command = request.command;
     command.response = request.response;
@@ -89,19 +101,16 @@ export class Command {
     const commandErrors = await validate(command, {
       groups: ['create'],
     });
-    const userErrors = await validate(command.channelUser, {
-      groups: ['relation'],
-    });
-    if (
-      commandErrors.length > 0 ||
-      userErrors.length > 0
-    ) {
-      console.error(commandErrors, userErrors);
+    if (commandErrors.length > 0) {
+      console.error(commandErrors);
       throw new Error('Failed to validate new custom command');
     }
 
+    const createdCommand = await this.createOrUpdate(command);
 
-    return this.createOrUpdate(command);
+    await Bot.reloadChannelCommands(createdCommand.channelUser.id);
+
+    return createdCommand;
   }
 
   public static async updateFromApi(request: Partial<PatchCustomCommandRequest>): Promise<Command> {
@@ -129,19 +138,28 @@ export class Command {
       throw new Error('Failed to validate updated custom command');
     }
 
+    const t1 = performance.now();
+    const updatedCommand = await this.updateById(request.id, command);
+    display.time('Updating command', t1);
+
+    return updatedCommand;
+  }
+
+  public static async updateById(id: number, command: Command): Promise<Command> {
     const repository = await Database.getRepository(Command);
 
-    repository.update(request.id, {
-      command: command.command,
-      response: command.response,
-      userLevel: command.userLevel,
-      cooldown: command.cooldown,
-      enabled: command.enabled,
-    });
+    const t1 = performance.now();
+    await repository.update(id, command);
+    display.time('Updating command', t1);
 
-    return repository.findOneOrFail({
-      where: { id: request.id },
-    });
+    const updatedCommand = await this.getById(id);
+    if (updatedCommand === null) {
+      throw new Error('Failed to fetch updated command');
+    }
+
+    await Bot.reloadChannelCommands(updatedCommand.channelUser.id);
+
+    return updatedCommand;
   }
 
   public static async deleteFromApi(request: Partial<DeleteCustomCommandRequest>): Promise<void> {
@@ -158,7 +176,16 @@ export class Command {
   public static async deleteById(id: number): Promise<void> {
     const repository = await Database.getRepository(Command);
 
+    const target = await this.getById(id);
+    if (target === null) {
+      throw new Error('Command not found');
+    }
+
+    const t1 = performance.now();
     await repository.delete(id);
+    display.time('Deleting command', t1);
+
+    await Bot.reloadChannelCommands(target.channelUser.id);
   }
 
   public static async incrementUsage(id: number): Promise<void> {
@@ -172,7 +199,10 @@ export class Command {
       const t1 = performance.now();
       const repository = await Database.getRepository(Command);
 
-      const result = repository.findOne({ where: { channelUser: { id: channelId } } });
+      const result = repository.findOne({
+        where: { channelUser: { id: channelId } },
+        order: { usage: 'DESC' },
+      });
 
       display.time('Getting top command', t1);
 

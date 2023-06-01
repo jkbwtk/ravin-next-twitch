@@ -3,6 +3,8 @@ import { Router as expressRouter } from 'express';
 import { Command } from '#database/entities/Command';
 import { CustomCommand, GetCustomCommandsResponse } from '#types/api/commands';
 import { display } from '#lib/display';
+import { json as jsonParser } from 'body-parser';
+import { SocketServer } from '#server/SocketServer';
 
 
 const serializeCustomCommand = (command: Command): CustomCommand => ({
@@ -24,6 +26,8 @@ export const commandsRouter = async (): Promise<expressRouter> => {
     else next();
   });
 
+  commandsRouter.use(jsonParser());
+
   commandsRouter.get('/custom', async (req, res) => {
     if (!(req.user instanceof User)) return res.sendStatus(401);
 
@@ -40,7 +44,9 @@ export const commandsRouter = async (): Promise<expressRouter> => {
     try {
       if (!(req.user instanceof User)) return res.sendStatus(401);
 
-      await Command.createFromApi(req.body);
+      const command = await Command.createFromApi(req.user.id, req.body);
+      SocketServer.emitToUser(req.user.id, 'NEW_CUSTOM_COMMAND', serializeCustomCommand(command));
+
       res.sendStatus(200);
     } catch (err) {
       display.error.nextLine('APIv1:commandsRouter:custom[post]', err);
@@ -52,7 +58,9 @@ export const commandsRouter = async (): Promise<expressRouter> => {
     try {
       if (!(req.user instanceof User)) return res.sendStatus(401);
 
-      await Command.updateFromApi(req.body);
+      const command = await Command.updateFromApi(req.body);
+      SocketServer.emitToUser(req.user.id, 'UPD_CUSTOM_COMMAND', serializeCustomCommand(command));
+
       res.sendStatus(200);
     } catch (err) {
       display.error.nextLine('APIv1:commandsRouter:custom[patch]', err);
@@ -65,6 +73,8 @@ export const commandsRouter = async (): Promise<expressRouter> => {
       if (!(req.user instanceof User)) return res.sendStatus(401);
 
       await Command.deleteFromApi(req.body);
+      SocketServer.emitToUser(req.user.id, 'DEL_CUSTOM_COMMAND', req.body.id);
+
       res.sendStatus(200);
     } catch (err) {
       display.error.nextLine('APIv1:commandsRouter:custom[delete]', err);

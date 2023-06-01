@@ -169,7 +169,13 @@ export class Message {
     const repository = await Database.getRepository(Message);
     const message = Message.fromChatUserState(channel, userState, content);
 
-    return repository.save(message);
+    const t1 = performance.now();
+
+    const createdMessage = await repository.save(message);
+
+    display.time('Saving message', t1);
+
+    return createdMessage;
   }
 
   private static getEmotesUsed(message: string, emotes: EmotesRaw| null): EmotesUsed | null {

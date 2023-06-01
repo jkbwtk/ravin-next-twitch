@@ -20,10 +20,10 @@ export type GetCustomCommandsResponse = {
   data: CustomCommand[];
 };
 
-export type PostCustomCommandRequest = Omit<CustomCommand, 'id'>;
+export type PostCustomCommandRequest = Omit<CustomCommand, 'id' | 'channelId'>;
 
 export type PatchCustomCommandRequest = Partial<PostCustomCommandRequest> & Pick<CustomCommand, 'id'>;
 
 export type DeleteCustomCommandRequest = {
-  id: Pick<CustomCommand, 'id'>;
+  id: CustomCommand['id'];
 };
