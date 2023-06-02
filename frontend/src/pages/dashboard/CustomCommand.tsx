@@ -4,7 +4,7 @@ import Button from '#components/Button';
 import { CustomCommandEditorProvider, useCustomCommandEditor } from '#providers/CustomCommandEditorProvider';
 import CommandTableWidget from '#components/widgets/CommandTableWidget';
 
-import style from '#styles/dashboard/Dashboard.module.scss';
+import style from '#styles/dashboard/CustomCommands.module.scss';
 
 
 const InfoBar: Component = () => {

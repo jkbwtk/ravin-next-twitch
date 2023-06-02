@@ -1,12 +1,19 @@
 @use '../app';
 @use 'dashboard' as *;
 
+
 .container {
   @include container();
 }
 
 .widgets {
-  @include container();
+  @include widgets();
+
+  display: flex;
+  align-content: flex-start;
+
+  gap: 2rem 3rem;
+  flex-wrap: wrap;
 }
 
 
