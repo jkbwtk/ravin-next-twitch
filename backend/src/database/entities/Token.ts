@@ -1,5 +1,6 @@
 import { Database } from '#database/Database';
 import { User } from '#database/entities/User';
+import { display } from '#lib/display';
 import { IsOptional, IsString, validate } from 'class-validator';
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
@@ -50,7 +51,7 @@ export class Token {
     const token = await this.getByUserId(userId);
 
     if (token === null) {
-      throw new Error(`Token ${userId} not found`);
+      throw new Error(`Token for user ${userId} not found`);
     }
 
     return token;
@@ -73,13 +74,7 @@ export class Token {
       throw new Error('Failed to validate new token');
     }
 
-    await this.invalidateCache(token.user.id);
-    const existing = await this.getByUserId(token.user.id);
-
-    if (existing !== null) {
-      return await repository.save(repository.merge(existing, token));
-    }
-
+    if (token?.user?.id) await this.invalidateCache(token.user.id);
     return repository.save(token);
   }
 
@@ -92,8 +87,13 @@ export class Token {
       throw new Error('Failed to validate updated token');
     }
 
+    const t1 = performance.now();
+    await repository.update({ id: token.id }, token);
+    display.time('Updating token', t1);
+
     await this.invalidateCache(token.user.id);
-    await repository.findOneOrFail({ where: { id: token.id } });
-    return repository.save(token);
+    return repository.findOneOrFail({
+      where: { id: token.id },
+    });
   }
 }

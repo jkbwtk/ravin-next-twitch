@@ -82,13 +82,7 @@ export class Channel {
       throw new Error('Failed to validate new channel');
     }
 
-    await this.invalidateCache(channel.user.id);
-    const existing = await this.getByUserId(channel.user.id);
-
-    if (existing !== null) {
-      return repository.save(repository.merge(existing, channel));
-    }
-
+    if (channel?.user?.id) await this.invalidateCache(channel.user.id);
     return repository.save(channel);
   }
 }

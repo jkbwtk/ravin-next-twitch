@@ -47,8 +47,6 @@ export class Database {
         type: 'ioredis',
         ignoreErrors: false,
         options: { db: 1, ...Database.redisOptions },
-        alwaysEnabled: false,
-        duration: 0,
       },
       entities: Database.databaseEntities,
     };
