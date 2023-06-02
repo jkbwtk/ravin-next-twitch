@@ -83,4 +83,10 @@ export class SocketServer {
 
     socketServer.io.in(userId).emit(event, ...args);
   }
+
+  public static emitToAll<T extends keyof ServerToClientEvents>(event: T, ...args: Parameters<ServerToClientEvents[T]>): void {
+    const socketServer = SocketServer.getInstance();
+
+    socketServer.io.emit(event, ...args);
+  }
 }

@@ -69,6 +69,25 @@ export class SystemNotification {
     return createdNotification;
   }
 
+  public static async broadcastNotification(title: string, content: string): Promise<void> {
+    const repository = await Database.getRepository(this);
+    const userRepository = await Database.getRepository(User);
+
+    const users = await userRepository.find({});
+
+    const notifications = users.map((user) => repository.create({
+      user,
+      title,
+      content,
+    }));
+
+    const createdNotifications = await repository.save(notifications);
+
+    for (const notification of createdNotifications) {
+      SocketServer.emitToUser(notification.user.id, 'NEW_SYSTEM_NOTIFICATION', notification.serialize());
+    }
+  }
+
   public static async getNotificationsByUserId(userId: string, limit = 100): Promise<SystemNotification[]> {
     const repository = await Database.getRepository(this);
 
@@ -132,5 +151,16 @@ export class SystemNotification {
       },
       withDeleted: true,
     });
+  }
+
+  public serialize(): SystemNotificationClient {
+    return {
+      id: this.id,
+      userId: this.user.id,
+      title: this.title,
+      content: this.content,
+      read: this.deletedAt !== null,
+      createdAt: this.createdAt,
+    };
   }
 }

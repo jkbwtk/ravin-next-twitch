@@ -18,3 +18,8 @@ export interface PostSystemNotificationReadRequest {
 export interface GetSystemNotificationsReadResponse {
   data: SystemNotification[];
 }
+
+export interface PostSystemNotificationBroadcastRequest {
+  title: string;
+  content: string;
+}

@@ -26,6 +26,7 @@ export type SessionContextValue = [
     markNotificationAsRead: (notification: SystemNotification) => Promise<void>;
     markAllNotificationsAsRead: () => Promise<void>;
     pushNotification: (notification: SystemNotification) => void;
+    setNotificationsAsRead: (notificationIds: number[]) => void;
   }
 ];
 
@@ -46,6 +47,7 @@ const SessionContext = createContext<SessionContextValue>([
     markNotificationAsRead: () => Promise.resolve(),
     markAllNotificationsAsRead: () => Promise.resolve(),
     pushNotification: () => null,
+    setNotificationsAsRead: () => null,
   },
 ]);
 
@@ -118,14 +120,21 @@ export const SessionProvider: ParentComponent = (props) => {
       });
 
       return mapped;
+    } else {
+      addNotification({
+        type: 'error',
+        title: 'Notification Error',
+        message: 'Failed to fetch notifications',
+        duration: 5000,
+      });
+
+      batch(() => {
+        setState('notifications', []);
+        setState('unreadNotifications', []);
+      });
+
+      return [];
     }
-
-    batch(() => {
-      setState('notifications', []);
-      setState('unreadNotifications', []);
-    });
-
-    return [];
   };
 
   const markNotificationAsRead = async (notification: SystemNotification) => {
@@ -175,11 +184,25 @@ export const SessionProvider: ParentComponent = (props) => {
 
   const pushNotification = (notification: SystemNotification) => {
     batch(() => {
-      setState('notifications', [...state.notifications, notification]);
+      setState('notifications', (prev) => [...prev, notification]);
 
       if (!notification.read) {
-        setState('unreadNotifications', [...state.unreadNotifications, notification]);
+        setState('unreadNotifications', (prev) => [...prev, notification]);
       }
+    });
+  };
+
+  const setNotificationsAsRead = (notificationIds: number[]) => {
+    batch(() => {
+      setState('notifications', (prev) => prev.map((notification) => {
+        if (notificationIds.includes(notification.id)) {
+          return { ...notification, read: true };
+        }
+
+        return notification;
+      }));
+
+      setState('unreadNotifications', (prev) => prev.filter((notification) => !notificationIds.includes(notification.id)));
     });
   };
 
@@ -202,6 +225,7 @@ export const SessionProvider: ParentComponent = (props) => {
       markNotificationAsRead,
       markAllNotificationsAsRead,
       pushNotification,
+      setNotificationsAsRead,
     }]}>
       <Show
         when={loaded()}

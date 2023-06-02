@@ -4,7 +4,6 @@ import { SystemNotification } from './systemNotifications';
 
 
 export type ServerToClientEvents = {
-  NEW_SYSTEM_NOTIFICATION: (notification: SystemNotification) => void;
   NEW_RECENT_ACTION: (action: Action) => void;
 
   NEW_CUSTOM_COMMAND: (command: CustomCommand) => void;
@@ -12,6 +11,9 @@ export type ServerToClientEvents = {
   DEL_CUSTOM_COMMAND: (commandId: number) => void;
 
   COMMAND_EXECUTED: (status: CommandStatus) => void;
+
+  NEW_SYSTEM_NOTIFICATION: (notification: SystemNotification) => void;
+  RAD_SYSTEM_NOTIFICATION: (notificationIds: number[]) => void;
 };
 
 export type ClientToServerEvents = {

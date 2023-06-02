@@ -34,7 +34,7 @@ const SocketContext = createContext<SocketContextValue>([
 
 export const SocketProvider: ParentComponent = (props) => {
   const [state, setState] = createStore(defaultState);
-  const [session, { pushNotification }] = useSession();
+  const [session, { pushNotification, setNotificationsAsRead }] = useSession();
   const [loaded, setLoaded] = createSignal(false);
 
   const emit: SocketContextState['client']['emit'] = (event, ...args) => {
@@ -65,6 +65,8 @@ export const SocketProvider: ParentComponent = (props) => {
 
       pushNotification(notification);
     });
+
+    state.client.on('RAD_SYSTEM_NOTIFICATION', setNotificationsAsRead);
   };
 
   onMount(async () => {
