@@ -45,7 +45,6 @@ export class SocketServer {
 
     this.io.use((socket, next) => {
       const req = socket.request as Request;
-      console.log('socket middleware', req.isAuthenticated());
       if (req.isUnauthenticated()) next(new Error('Unauthenticated'));
 
       next();
@@ -62,7 +61,7 @@ export class SocketServer {
       await socket.join(req.user.id);
 
       socket.onAny((event, ...message) => {
-        console.log(event, message);
+        display.debug.nextLine('SocketServer', event, message);
       });
 
       display.debug.nextLine('SocketServer', 'User connected', req.user.login);

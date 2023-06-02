@@ -18,6 +18,7 @@ import { TokenManager } from '#server/TokenManager';
 import { Bot } from '#bot/Bot';
 import http, { Server as HTTPServer } from 'http';
 import { SocketServer } from '#server/SocketServer';
+import { display, LOGLVL } from '#lib/display';
 
 
 declare global {
@@ -163,7 +164,7 @@ export class Server {
     await this.registerRoutes();
 
     this.server.listen(this.port, () => {
-      console.log(`${isDevMode ? 'Development server' : 'Server'} started on port ${chalk.green.bold(this.port)}`);
+      display.log(LOGLVL.INFO, `${isDevMode ? 'Development server' : 'Server'} started on port ${chalk.green.bold(this.port)}`);
     });
   }
 }

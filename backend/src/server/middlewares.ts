@@ -1,9 +1,11 @@
+import { LOGLVL } from '#lib/display';
+import { display } from '#lib/display';
 import chalk from 'chalk';
 import { RequestHandler } from 'express';
 
 
 export const logger: RequestHandler = (req, res, next) => {
-  console.log(
+  display.log(LOGLVL.INFO,
     chalk.bold.yellow(req.method),
     chalk.bold.green(req.hostname),
     req.url,

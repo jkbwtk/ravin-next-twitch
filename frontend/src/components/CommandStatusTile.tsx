@@ -11,7 +11,6 @@ const CommandStatusTile: Component<CommandStatus> = (props) => {
   const [time, setTime] = createSignal(getTime());
   let intervalHandle: number | undefined = undefined;
   let progressBarRef = document.createElement('div');
-  console.log('Update', props.command.command);
 
   const recalculateTime = () => {
     setTime(getTime());
@@ -31,8 +30,6 @@ const CommandStatusTile: Component<CommandStatus> = (props) => {
   });
 
   createEffect(() => {
-    console.log(timeLeftUntilNextUse(), props.command.cooldown * 1000, timePercentage());
-
     progressBarRef.style.width = timePercentage() + '%';
     progressBarRef.style.setProperty('--timeLeft', timeLeftUntilNextUse() + 's');
 

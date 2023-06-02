@@ -87,16 +87,11 @@ dashboardRouter.post('/joinChannel', async (req, res) => {
 
   try {
     const channel = await Channel.getByUserIdOrFail(req.user.id);
-    console.log('Current state:', channel.joined);
 
     channel.joined = !channel.joined;
-    console.log('New state:', channel.joined);
 
     if (channel.joined) await Bot.joinChannel(channel.user.id);
     else await Bot.leaveChannel(channel.user.id);
-
-    const updatedChannel = await Channel.createOrUpdate(channel);
-    console.log('Updated state:', updatedChannel.joined);
 
     res.sendStatus(200);
   } catch (err) {
@@ -203,8 +198,6 @@ dashboardRouter.get('/widgets/chatStats', async (req, res) => {
   let deletedTotal = 0;
   let commandsTotal = 0;
   const frames: ChatStatFrame[] = [];
-
-  console.log(oldestFrameId, newestFrameId, newestFrameId - oldestFrameId);
 
   for (let i = oldestFrameId; i <= newestFrameId; i += 1) {
     const frame = mappedStats.get(i);

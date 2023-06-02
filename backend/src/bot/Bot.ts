@@ -1,6 +1,6 @@
 import { BanUserstate, ChatUserstate, Client, DeleteUserstate, TimeoutUserstate } from 'tmi.js';
 import { ChannelThread } from './ChannelThread';
-import { display } from '../lib/display';
+import { display, LOGLVL } from '../lib/display';
 import { ExtendedMap } from '../lib/ExtendedMap';
 import { Config } from '#lib/Config';
 import { Database } from '#database/Database';
@@ -92,8 +92,8 @@ export class Bot {
   };
 
   private static handleDisconnect = async (reason: string) => {
-    console.log('Bot:handleDisconnect', 'Disconnect event fired');
-    console.log('Bot:handleDisconnect', 'Reason:', reason);
+    display.debug.nextLine('Bot:handleDisconnect', 'Disconnect event fired');
+    display.debug.nextLine('Bot:handleDisconnect', 'Reason:', reason);
   };
 
   private static waitForConnection = async () => {
@@ -166,8 +166,7 @@ export class Bot {
   };
 
   private handleTimeout = async (channel: string, username: string, reason: string, duration: number, userstate: TimeoutUserstate) => {
-    console.log(`<${channel}> ${username} has been timed out for ${duration} seconds: ${reason}`);
-    console.log(channel, username, reason, duration, userstate);
+    display.log(LOGLVL.SPAM, `<${channel}> ${username} has been timed out for ${duration} seconds: ${reason}`);
 
     const thread = this.channels.get(channel.slice(1));
     if (!thread) {
@@ -192,8 +191,7 @@ export class Bot {
   };
 
   private handleBan = async (channel: string, username: string, reason: string, userstate: BanUserstate) => {
-    console.log(`<${channel}> ${username} has been banned: ${reason}`);
-    console.log(channel, username, reason, userstate);
+    display.log(LOGLVL.SPAM, `<${channel}> ${username} has been banned: ${reason}`);
 
     const thread = this.channels.get(channel.slice(1));
     if (!thread) {
@@ -218,8 +216,7 @@ export class Bot {
   };
 
   private handleDelete = async (channel: string, username: string, deletedMessage: string, userstate: DeleteUserstate) => {
-    console.log(`<${channel}> ${username}'s message has been deleted: ${deletedMessage}`);
-    console.log(channel, username, deletedMessage, userstate);
+    display.log(LOGLVL.SPAM, `<${channel}> ${username}'s message has been deleted: ${deletedMessage}`);
 
     const thread = this.channels.get(channel.slice(1));
     if (!thread) {

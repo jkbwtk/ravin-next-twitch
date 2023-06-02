@@ -71,7 +71,6 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
 
   const close = () => {
     setState(defaultState);
-    console.log('closing');
   };
 
   const createCommand = async (command: PostCustomCommandRequest) => {
@@ -94,8 +93,6 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
   };
 
   const updateCommand = async (command: PatchCustomCommandRequest) => {
-    console.log(command);
-
     const response = await fetch(`/api/v1/commands/custom`, {
       method: 'PATCH',
       headers: {
@@ -261,7 +258,6 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
                         min='0'
                         max='1440'
                         step='5'
-                        onInput={(ev) => console.log(ev)}
                         label='Cooldown between uses:'
                         unit='seconds'
                         value={state.command.cooldown ?? '0'}

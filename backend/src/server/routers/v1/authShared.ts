@@ -52,7 +52,6 @@ const createOrUpdateUser = async (profile: TwitchUser): Promise<UserEntity> => {
   });
 
   const createdUser = await UserEntity.createOrUpdateUser(newUser);
-  console.log('createdOrUpdatedUser');
   await createOrUpdateChannel(createdUser);
 
   return createdUser;
