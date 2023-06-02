@@ -21,9 +21,10 @@ const sidebarElements: SidebarRoute[] = [
         component: lazy(() => import('#pages/dashboard/CustomCommand')),
       },
       {
-        symbol: 'webhook',
-        name: 'Hooks',
-        href: '/dashboard/commands/hooks',
+        symbol: 'monitor_heart',
+        name: 'Status',
+        href: '/dashboard/commands/stats',
+        component: lazy(() => import('#pages/dashboard/CommandStatus')),
       },
     ],
   },

@@ -8,6 +8,7 @@ import { Command } from '#database/entities/Command';
 
 export type CustomCommandState = {
   lastUsed: number;
+  lastUsedBy?: string;
   command: Command;
 };
 

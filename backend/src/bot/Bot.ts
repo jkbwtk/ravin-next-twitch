@@ -13,6 +13,7 @@ import { ChannelAction } from '#database/entities/ChannelAction';
 import { TwitchUserRepo } from '#lib/TwitchUserRepo';
 import { Token } from '#database/entities/Token';
 import { Command } from '#database/entities/Command';
+import { SocketServer } from '#server/SocketServer';
 
 
 export interface BotOptions {
@@ -139,6 +140,14 @@ export class Bot {
           await Command.incrementUsage(customCommand.command.id);
 
           customCommand.lastUsed = Date.now();
+          customCommand.lastUsedBy = userstate['display-name'] ?? 'Chat Member';
+
+          SocketServer.emitToUser(thread.channel.user.id, 'COMMAND_EXECUTED', {
+            command: customCommand.command.serialize(),
+            lastUsed: customCommand.lastUsed,
+            lastUsedBy: customCommand.lastUsedBy,
+          });
+
           return;
         }
       }

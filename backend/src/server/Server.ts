@@ -80,6 +80,7 @@ export class Server {
         signed: true,
         httpOnly: true,
         // maxAge: 30 * 60 * 1000,
+        sameSite: 'strict',
       },
       store: new RedisStore({
         client: await Database.getRedisClient(),

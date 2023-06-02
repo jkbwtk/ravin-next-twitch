@@ -27,3 +27,13 @@ export type PatchCustomCommandRequest = Partial<PostCustomCommandRequest> & Pick
 export type DeleteCustomCommandRequest = {
   id: CustomCommand['id'];
 };
+
+export type CommandStatus = {
+  lastUsed: number;
+  lastUsedBy?: string;
+  command: CustomCommand;
+};
+
+export type GetCustomCommandsStatusResponse = {
+  data: CommandStatus[];
+};

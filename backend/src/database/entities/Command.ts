@@ -1,7 +1,7 @@
 import { Database } from '#database/Database';
 import { User } from '#database/entities/User';
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, Index, ManyToOne, PrimaryGeneratedColumn, Unique, UpdateDateColumn } from 'typeorm';
-import { DeleteCustomCommandRequest, PatchCustomCommandRequest, PostCustomCommandRequest, UserLevel } from '#types/api/commands';
+import { CustomCommand, DeleteCustomCommandRequest, PatchCustomCommandRequest, PostCustomCommandRequest, UserLevel } from '#types/api/commands';
 import { IsBoolean, IsDivisibleBy, IsEnum, IsInt, isNumber, IsString, Length, Max, min, Min, validate } from 'class-validator';
 import { display } from '#lib/display';
 import { Bot } from '#bot/Bot';
@@ -212,5 +212,17 @@ export class Command {
 
       return null;
     }
+  }
+
+  public serialize(): CustomCommand {
+    return {
+      id: this.id,
+      channelId: this.channelUser.id,
+      command: this.command,
+      response: this.response,
+      userLevel: this.userLevel,
+      cooldown: this.cooldown,
+      enabled: this.enabled,
+    };
   }
 }

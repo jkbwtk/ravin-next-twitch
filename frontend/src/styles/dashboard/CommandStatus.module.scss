@@ -1,0 +1,15 @@
+@use 'dashboard' as *;
+@use '../app' as *;
+
+
+.container {
+  @include container();
+}
+
+.commands {
+  @include widgets();
+
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+}
