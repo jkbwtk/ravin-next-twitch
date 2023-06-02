@@ -42,11 +42,13 @@ export class Database {
       database: isDevMode ? 'DEV_DB' : (process.env.DB_NAME ?? 'PROD_DB'),
       synchronize: true,
       logging: databaseLogging,
+      logger: 'advanced-console',
       cache: {
         type: 'ioredis',
         ignoreErrors: false,
         options: { db: 1, ...Database.redisOptions },
         alwaysEnabled: false,
+        duration: 0,
       },
       entities: Database.databaseEntities,
     };

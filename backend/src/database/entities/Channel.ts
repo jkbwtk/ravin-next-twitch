@@ -1,5 +1,5 @@
 import { Database } from '#database/Database';
-import { User } from '#database/entities/User';
+import type { User } from '#database/entities/User';
 import { IsBoolean, IsObject, IsOptional, validate } from 'class-validator';
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
@@ -16,7 +16,7 @@ export class Channel {
 
   @JoinColumn()
   @Index()
-  @OneToOne(() => User, { onDelete: 'CASCADE' })
+  @OneToOne('User', { onDelete: 'CASCADE' })
   public user!: User;
 
   @Column({ type: 'bool', nullable: false, default: false })
