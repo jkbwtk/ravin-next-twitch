@@ -30,8 +30,10 @@ const createOrUpdateToken = async (accessToken: string, refreshToken: string | n
 
 const createOrUpdateChannel = async (user: UserEntity): Promise<Channel> => {
   const channelRepo = await Database.getRepository(Channel);
+  const oldChannel = await Channel.getByUserId(user.id);
 
   const newChannel = channelRepo.create({
+    id: oldChannel?.id,
     user,
   });
 
