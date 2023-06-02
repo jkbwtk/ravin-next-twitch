@@ -1,0 +1,146 @@
+@use '../app' as *;
+
+.outer-container {
+  width: 100% !important;
+}
+
+.container {
+  width: 100%;
+
+  padding: 2rem;
+  background-color: none !important;
+}
+
+
+.commands-container {
+  width: 100%;
+
+  border-collapse: collapse;
+
+  th {
+    background-color: $borderColor;
+    color: $textBrightColor;
+    font-weight: 500;
+    font-size: $smallFontSize;
+    padding: 1rem 0.5rem;
+
+    width: min-content;
+  }
+
+  th:first-child {
+    border-top-left-radius: $borderRadius;
+    border-bottom-left-radius: $borderRadius;
+
+    padding-left: 2rem;
+  }
+
+  th:last-child {
+    border-top-right-radius: $borderRadius;
+    border-bottom-right-radius: $borderRadius;
+
+    padding-right: 2rem;
+  }
+
+  tr:nth-child(odd) {
+    td {
+      background-color: $backgroundColor;
+    }
+
+    td:first-child {
+      border-top-left-radius: $borderRadius;
+      border-bottom-left-radius: $borderRadius;
+    }
+
+    td:last-child {
+      border-top-right-radius: $borderRadius;
+      border-bottom-right-radius: $borderRadius;
+    }
+  }
+
+  td {
+    font-size: $altFontSize;
+
+    padding: 0.5rem 0.5rem;
+    box-sizing: border-box;
+
+    text-align: center;
+  }
+
+  @mixin textEllipsis() {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  td:nth-child(1) {
+    padding-left: 2rem;
+
+    @include textEllipsis();
+    text-align: left;
+
+    max-width: 20rem;
+  }
+
+  td:nth-child(2) {
+    @include textEllipsis();
+    text-align: left;
+    white-space: break-spaces;
+
+    max-width: 0rem; // Forces ellipsis
+  }
+
+  @mixin centeredIconContainer() {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 1rem;
+  }
+
+  td:nth-child(5) {
+    div {
+      @include centeredIconContainer();
+    }
+  }
+
+  td:nth-child(6) {
+    text-align: center;
+    padding-right: 2rem;
+
+    div {
+      @include centeredIconContainer();
+    }
+  }
+
+  colgroup {
+    col:nth-child(1) {
+      width: 20rem;
+      min-width: 20rem;
+    }
+
+    col:nth-child(3) {
+      width: 14rem;
+      min-width: 14rem;
+    }
+
+    col:nth-child(4) {
+      width: 9rem;
+      min-width: 9rem;
+    }
+
+    col:nth-child(5) {
+      width: 8rem;
+      min-width: 8rem;
+    }
+
+    col:nth-child(6) {
+      width: 9rem;
+      min-width: 9rem;
+      max-width: 9rem;
+    }
+  }
+}
+
+.disabled {
+  display: none !important;
+}

@@ -15,9 +15,10 @@ const sidebarElements: SidebarRoute[] = [
     href: '/dashboard/commands',
     auxRoutes: [
       {
-        symbol: 'add',
-        name: 'Add',
-        href: '/dashboard/commands/add',
+        symbol: 'tune',
+        name: 'Custom',
+        href: '/dashboard/commands/custom',
+        component: lazy(() => import('#pages/dashboard/CustomCommand')),
       },
       {
         symbol: 'webhook',
