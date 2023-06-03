@@ -1,0 +1,54 @@
+@use '../app';
+@use 'dashboard' as *;
+
+
+.container {
+  @include container();
+}
+
+.help-container {
+  display: flex;
+  flex-direction: column;
+
+  box-sizing: border-box;
+
+  gap: 2rem;
+  padding: 3rem;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  .entry {
+    display: flex;
+    flex-direction: column;
+
+    .title {
+      font-size: app.$defaultFontSize;
+      font-weight: 500;
+      color: app.$textBrightColor;
+
+      margin: 0.5rem 0;
+    }
+
+    p {
+      font-size: app.$smallFontSize;
+      font-weight: 400;
+      color: app.$textColor;
+
+      margin: 0.5rem 0;
+    }
+
+    .media {
+      width: min-content;
+      max-width: calc(100% - 4rem);
+
+      border-radius: app.$borderRadius;
+
+      align-self: center;
+      margin: 1rem 0;
+      box-sizing: border-box;
+
+      image-rendering: optimizeQuality;
+    }
+  }
+}

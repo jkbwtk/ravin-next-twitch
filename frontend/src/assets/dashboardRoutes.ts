@@ -63,6 +63,7 @@ const sidebarElements: SidebarRoute[] = [
     symbol: 'quick_reference',
     name: 'Help',
     href: '/dashboard/help',
+    component: lazy(() => import('#pages/dashboard/Help')),
   },
   {
     symbol: 'settings',
