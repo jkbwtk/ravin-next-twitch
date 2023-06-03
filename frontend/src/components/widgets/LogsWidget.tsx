@@ -1,0 +1,77 @@
+import { createResource, For, onCleanup, onMount } from 'solid-js';
+import { useSocket } from '#providers/SocketProvider';
+import Widget from '#components/Widget';
+import { GetMessagesResponse, Message as MessagePublic } from '#shared/types/api/logs';
+
+import style from '#styles/widgets/LogsWidget.module.scss';
+
+
+export type MessageProps = {
+  message: MessagePublic;
+};
+
+const fetchMessages = async () => {
+  const response = await fetch('/api/v1/logs/messages');
+  const { data } = await response.json() as GetMessagesResponse;
+
+  return data;
+};
+
+const LogsWidget: Component = () => {
+  const [socket] = useSocket();
+  const [messages, { mutate: setMessages }] = createResource(fetchMessages, {
+    initialValue: [],
+  });
+
+  let tableRef = document.createElement('table');
+
+  const createMessage = (message: MessagePublic) => {
+    setMessages((m) => [message, ...m.slice(0, 999)]);
+  };
+
+  onMount(() => {
+    socket.client.on('NEW_MESSAGE', createMessage);
+  });
+
+  onCleanup(() => {
+    socket.client.off('NEW_MESSAGE', createMessage);
+  });
+
+  return (
+    <Widget
+      title='Chat Logs'
+      class={style.container}
+      containerClass={style.outerContainer}
+    >
+      <table ref={tableRef} class={style.commandsContainer}>
+        <colgroup>
+          <col />
+          <col />
+          <col />
+        </colgroup>
+
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Message</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <For each={messages()}>
+            {(message) => (
+              <tr>
+                <td>{message.displayName}</td>
+                <td>{message.content}</td>
+                <td>{new Date(message.timestamp).toDateString()}</td>
+              </tr>
+            )}
+          </For>
+        </tbody>
+      </table>
+    </Widget>
+  );
+};
+
+export default LogsWidget;

@@ -4,6 +4,7 @@ import { display } from '#lib/display';
 import { UserLevel } from '#types/api/commands';
 import { IsBoolean, IsDate, IsNumberString, IsString, IsUUID } from 'class-validator';
 import { BadgeInfo } from 'tmi.js';
+import { EmotesUsed, Message as MessagePublic } from '#types/api/logs';
 import { Badges, ChatUserstate } from 'tmi.js';
 import {
   Column, CreateDateColumn,
@@ -13,18 +14,11 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { SocketServer } from '#server/SocketServer';
 
 
 export type EmotesRaw = {
   [id: string]: string[]
-};
-
-export type EmotesUsed = {
-  [id: string]: {
-    name: string;
-    count: number;
-    positions: string[];
-  };
 };
 
 export type DatabaseEmote = {
@@ -170,10 +164,10 @@ export class Message {
     const message = Message.fromChatUserState(channel, userState, content);
 
     const t1 = performance.now();
-
     const createdMessage = await repository.save(message);
-
     display.time('Saving message', t1);
+
+    SocketServer.emitToUser(message.channelUser.id, 'NEW_MESSAGE', createdMessage.serialize());
 
     return createdMessage;
   }
@@ -256,5 +250,42 @@ export class Message {
 
       return null;
     }
+  }
+
+  public static async getByChannelId(channelId: string, limit = 1000): Promise<Message[]> {
+    const repository = await Database.getRepository(Message);
+
+    const t1 = performance.now();
+    const result = await repository.find({
+      where: {
+        channelUser: {
+          id: channelId,
+        },
+      },
+      relations: {
+        channelUser: true,
+      },
+      order: {
+        timestamp: 'DESC',
+      },
+      take: limit,
+    });
+    display.time('Getting messages', t1);
+
+    return result;
+  }
+
+  public serialize(): MessagePublic {
+    return {
+      id: this.uuid,
+      channelId: this.channelUser.id,
+      channelName: this.channelName,
+      color: this.color,
+      userId: this.userId,
+      displayName: this.displayName,
+      emotes: this.emotes,
+      content: this.content,
+      timestamp: this.timestamp.getTime(),
+    };
   }
 }

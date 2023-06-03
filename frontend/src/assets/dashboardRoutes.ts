@@ -40,8 +40,9 @@ const sidebarElements: SidebarRoute[] = [
   },
   {
     symbol: 'event_note',
-    name: 'Event Log',
-    href: '/dashboard/event-log',
+    name: 'Logs',
+    href: '/dashboard/logs',
+    component: lazy(() => import('#pages/dashboard/Logs')),
   },
   {
     symbol: 'security',

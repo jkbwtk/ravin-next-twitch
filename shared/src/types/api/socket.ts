@@ -1,6 +1,7 @@
 import { CommandStatus, CustomCommand } from 'types/api/commands';
 import { Action } from './dashboard';
 import { SystemNotification } from './systemNotifications';
+import { Message } from './logs';
 
 
 export type ServerToClientEvents = {
@@ -14,6 +15,8 @@ export type ServerToClientEvents = {
 
   NEW_SYSTEM_NOTIFICATION: (notification: SystemNotification) => void;
   RAD_SYSTEM_NOTIFICATION: (notificationIds: number[]) => void;
+
+  NEW_MESSAGE: (message: Message) => void;
 };
 
 export type ClientToServerEvents = {

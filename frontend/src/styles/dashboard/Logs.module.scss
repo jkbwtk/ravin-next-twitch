@@ -1,0 +1,10 @@
+@use 'dashboard' as *;
+
+
+.container {
+  @include container();
+}
+
+.widgets {
+  @include widgets();
+}
