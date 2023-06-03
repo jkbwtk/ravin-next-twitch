@@ -16,6 +16,7 @@ interface MaterialSymbolProps {
   highlightColor?: SymbolHighlightColorType;
   filled?: boolean;
   class?: string;
+  active?: boolean;
 }
 
 const defaultProps: Required<MaterialSymbolProps> = {
@@ -26,6 +27,7 @@ const defaultProps: Required<MaterialSymbolProps> = {
   highlightColor: 'none',
   filled: false,
   class: '',
+  active: false,
 };
 
 const MaterialSymbol: Component<MaterialSymbolProps> = (userProps) => {
@@ -72,6 +74,7 @@ const MaterialSymbol: Component<MaterialSymbolProps> = (userProps) => {
       [style.interactive]: props.interactive,
       [highlightColorClass]: props.interactive,
       [style.filled]: props.filled,
+      [style.active]: props.active,
       [props.class]: true,
     }}>
       {props.symbol}

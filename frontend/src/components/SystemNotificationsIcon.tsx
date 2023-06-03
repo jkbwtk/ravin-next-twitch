@@ -51,7 +51,8 @@ const SystemNotificationsIcon: Component = () => {
           color='gray'
           filled={session.unreadNotifications.length > 0}
           interactive={true}
-          highlightColor={'gray'}
+          highlightColor='gray'
+          active={notificationOpen()}
         />
 
         <Show when={session.unreadNotifications.length > 0}>

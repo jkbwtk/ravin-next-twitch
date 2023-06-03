@@ -20,7 +20,8 @@
 @mixin highlight($highlight) {
 
   &:hover,
-  &:active {
+  &:active,
+  &:not(:not(.active)) {
     color: $highlight;
   }
 }
