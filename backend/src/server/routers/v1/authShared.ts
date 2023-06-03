@@ -63,24 +63,15 @@ export const verifyCallback = async (accessToken: string, refreshToken: string |
     await UserEntity.invalidateCache(profile.id);
     await Channel.invalidateCache(profile.id);
 
-    const tokenRepo = await Database.getRepository(Token);
     const token = await Token.getByUserId(profile.id);
     const user = await createOrUpdateUser(profile);
 
-    if (token === null) {
-      await createOrUpdateToken(accessToken, refreshToken, user);
-    } else {
-      // revoke received token if it's not a dev api
-      display.debug.nextLine('auth:verifyCallback', 'Revoking new token for user', token.user.id);
-
-      const newToken = tokenRepo.create({
-        user,
-        accessToken,
-        refreshToken: refreshToken,
-      });
-
-      if (refreshToken !== null && !isDevApi) await revokeTokenUnsafe(newToken);
+    if (token !== null) {
+      display.debug.nextLine('auth:verifyCallback', 'Revoking old token for user', token.user.id);
+      if (refreshToken !== null && !isDevApi) await revokeTokenUnsafe(user.id);
     }
+
+    await createOrUpdateToken(accessToken, refreshToken, user);
 
     await SystemNotification.createNotification(
       user.id,

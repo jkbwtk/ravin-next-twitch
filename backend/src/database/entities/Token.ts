@@ -94,6 +94,11 @@ export class Token {
     await this.invalidateCache(token.user.id);
     return repository.findOneOrFail({
       where: { id: token.id },
+      relations: {
+        user: {
+          channel: true,
+        },
+      },
     });
   }
 }

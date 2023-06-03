@@ -11,7 +11,6 @@ import { ChannelStats } from '#database/entities/ChannelStats';
 import Deferred from '#lib/Deferred';
 import { ChannelAction } from '#database/entities/ChannelAction';
 import { TwitchUserRepo } from '#lib/TwitchUserRepo';
-import { Token } from '#database/entities/Token';
 import { Command } from '#database/entities/Command';
 import { SocketServer } from '#server/SocketServer';
 
@@ -177,12 +176,11 @@ export class Bot {
     await ChannelStats.incrementTimeouts(thread.channel.user.id);
 
     const repository = await Database.getRepository(ChannelAction);
-    const token = await Token.getByUserIdOrFail(thread.channel.user.id);
 
     const action = repository.create({
       channelUser: thread.channel.user,
       issuerDisplayName: thread.channel.user.displayName,
-      targetDisplayName: (await TwitchUserRepo.getByLogin(token, username))?.display_name ?? username,
+      targetDisplayName: (await TwitchUserRepo.getByLogin(thread.channel.user.id, username))?.display_name ?? username,
       data: (duration ?? 0).toString(),
       type: 'timeout',
     });
@@ -202,12 +200,11 @@ export class Bot {
     await ChannelStats.incrementBans(thread.channel.user.id);
 
     const repository = await Database.getRepository(ChannelAction);
-    const token = await Token.getByUserIdOrFail(thread.channel.user.id);
 
     const action = repository.create({
       channelUser: thread.channel.user,
       issuerDisplayName: thread.channel.user.displayName,
-      targetDisplayName: (await TwitchUserRepo.getByLogin(token, username))?.display_name ?? username,
+      targetDisplayName: (await TwitchUserRepo.getByLogin(thread.channel.user.id, username))?.display_name ?? username,
       type: 'ban',
       data: reason ?? '[No reason given]',
     });
@@ -227,12 +224,11 @@ export class Bot {
     await ChannelStats.incrementDeleted(thread.channel.user.id);
 
     const repository = await Database.getRepository(ChannelAction);
-    const token = await Token.getByUserIdOrFail(thread.channel.user.id);
 
     const action = repository.create({
       channelUser: thread.channel.user,
       issuerDisplayName: thread.channel.user.displayName,
-      targetDisplayName: (await TwitchUserRepo.getByLogin(token, username))?.display_name ?? 'Chat Member',
+      targetDisplayName: (await TwitchUserRepo.getByLogin(thread.channel.user.id, username))?.display_name ?? 'Chat Member',
       type: 'delete',
       data: deletedMessage,
     });

@@ -1,4 +1,3 @@
-import { Token } from '#database/entities/Token';
 import { ExtendedMap } from '#lib/ExtendedMap';
 import { display } from '#lib/display';
 import { getUsers } from '#lib/twitch';
@@ -40,7 +39,7 @@ export class TwitchUserRepo {
     return null;
   }
 
-  public static async get(token: Token, id: string): Promise<TwitchUser | null> {
+  public static async get(userId: string, id: string): Promise<TwitchUser | null> {
     try {
       display.debug.nextLine('TwitchUserRepo:get', 'Getting user', id);
 
@@ -51,7 +50,7 @@ export class TwitchUserRepo {
       }
 
 
-      const fetched = await getUsers(token, { id });
+      const fetched = await getUsers(userId, { id });
       const user = fetched[0];
 
       if (user === undefined) {
@@ -69,17 +68,17 @@ export class TwitchUserRepo {
     }
   }
 
-  public static async getByLogin(token: Token, login: string): Promise<TwitchUser | null> {
+  public static async getByLogin(userId: string, login: string): Promise<TwitchUser | null> {
     const id = this.idMap.get(login);
 
     if (id !== undefined) {
-      return this.get(token, id);
+      return this.get(userId, id);
     }
 
     try {
       display.debug.nextLine('TwitchUserRepo:getByLogin', 'Getting user', login);
 
-      const fetched = await getUsers(token, { login });
+      const fetched = await getUsers(userId, { login });
       const user = fetched[0];
 
       if (user === undefined) {
@@ -97,7 +96,7 @@ export class TwitchUserRepo {
     }
   }
 
-  public static async getAll(token: Token, ids: string[]): Promise<TwitchUser[]> {
+  public static async getAll(userId: string, ids: string[]): Promise<TwitchUser[]> {
     try {
       display.debug.nextLine('TwitchUserRepo:getAll', 'Getting users', ids);
 
@@ -119,7 +118,7 @@ export class TwitchUserRepo {
         return cached;
       }
 
-      const fetched = await getUsers(token, { id: uncached });
+      const fetched = await getUsers(userId, { id: uncached });
 
       for (const user of fetched) {
         this.cacheUser(user);
@@ -134,7 +133,7 @@ export class TwitchUserRepo {
     }
   }
 
-  public static async getAllByLogin(token: Token, logins: string[]): Promise<TwitchUser[]> {
+  public static async getAllByLogin(userId: string, logins: string[]): Promise<TwitchUser[]> {
     try {
       display.debug.nextLine('TwitchUserRepo:getAllByLogin', 'Getting users', logins);
 
@@ -163,7 +162,7 @@ export class TwitchUserRepo {
         return cached;
       }
 
-      const fetched = await getUsers(token, { login: uncached });
+      const fetched = await getUsers(userId, { login: uncached });
 
       for (const user of fetched) {
         this.cacheUser(user);

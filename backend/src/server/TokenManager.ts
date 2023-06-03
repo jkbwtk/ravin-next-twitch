@@ -1,5 +1,7 @@
 import { Database } from '#database/Database';
 import { Token } from '#database/entities/Token';
+import Deferred from '#lib/Deferred';
+import { ExtendedMap } from '#lib/ExtendedMap';
 import { display } from '#lib/display';
 import { refreshTokenUnsafe, validateTokenUnsafe } from '#lib/twitch';
 import { isDevApi } from '#shared/constants';
@@ -11,6 +13,8 @@ export class TokenManager {
 
   private repository!: Repository<Token>;
   private intervalHandle: NodeJS.Timer | null = null;
+
+  private refreshQueue: ExtendedMap<string, Deferred<Token>> = new ExtendedMap();
 
   private options = {
     interval: 1000 * 60 * 60, // 1 hour
@@ -29,21 +33,31 @@ export class TokenManager {
     return TokenManager.instance;
   }
 
-  private async _refresh(token: Token): Promise<Token> {
+  private async _refresh(userId: string): Promise<Token> {
     if (isDevApi) {
+      const token = await Token.getByUserIdOrFail(userId);
       display.debug.nextLine('TokenManager', 'Skipping token refresh because dev api is enabled');
       return token;
     }
 
-    display.debug.nextLine('TokenManager', 'Refreshing token', token.id);
-    const resp = await refreshTokenUnsafe(token);
-    display.debug.nextLine('TokenManager', 'Token', token.id, 'refreshed');
+    const request = this.refreshQueue.get(userId);
+    if (request) {
+      display.debug.nextLine('TokenManager', 'Joining refresh queue for user', userId);
+      return request.promise;
+    }
 
-    token.accessToken = resp.accessToken;
-    token.refreshToken = resp.refreshToken;
+    const deferred = new Deferred<Token>();
+    this.refreshQueue.set(userId, deferred);
 
-    const newToken = await Token.updateOrFail(token);
-    display.debug.nextLine('TokenManager', 'Token', token.id, 'updated');
+    display.debug.nextLine('TokenManager', 'Refreshing token for user', userId);
+    const resp = await refreshTokenUnsafe(userId);
+    display.debug.nextLine('TokenManager', 'Token', resp.id, 'refreshed');
+
+    const newToken = await Token.updateOrFail(resp);
+    display.debug.nextLine('TokenManager', 'Token', newToken.id, 'updated');
+
+    this.refreshQueue.delete(userId);
+    deferred.resolve(newToken);
 
     return newToken;
   }
@@ -69,7 +83,7 @@ export class TokenManager {
     for (let partialToken of tokens) {
       try {
         display.debug.nextLine('TokenManager', 'Processing token', partialToken.id);
-        const token = await this.repository.preload(partialToken);
+        const token = await Token.getByUserIdOrFail(partialToken.user.id);
 
         if (token === undefined) {
           display.error.nextLine('TokenManager', 'Failed to preload token', partialToken.id);
@@ -81,13 +95,13 @@ export class TokenManager {
           continue;
         }
 
-        if (await validateTokenUnsafe(token)) {
+        if (await validateTokenUnsafe(token.user.id)) {
           display.debug.nextLine('TokenManager', 'Token', token.id, 'is valid');
           continue;
         }
 
         display.debug.nextLine('TokenManager', 'Token', token.id, 'is invalid, refreshing...');
-        await this._refresh(token);
+        await this._refresh(token.user.id);
       } catch (err) {
         const error = typeof err === 'object' && err !== null && 'message' in err ? err.message : err;
         const stack = typeof err === 'object' && err !== null && 'stack' in err ? err.stack : '';
@@ -101,10 +115,10 @@ export class TokenManager {
     }
   };
 
-  public static async refresh(token: Token): Promise<Token> {
+  public static async refresh(userId: string): Promise<Token> {
     const instance = await TokenManager.getInstance();
 
-    return instance._refresh(token);
+    return instance._refresh(userId);
   }
 
   public static async processAll(): Promise<void> {

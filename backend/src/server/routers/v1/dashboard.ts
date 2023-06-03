@@ -8,7 +8,6 @@ import {
   GetRecentActionsResponse,
   GetTopStatsResponse,
 } from '#types/api/dashboard';
-import { Token } from '#database/entities/Token';
 import { getModerators } from '#lib/twitch';
 import { Channel } from '#database/entities/Channel';
 import { Config } from '#lib/Config';
@@ -34,12 +33,10 @@ dashboardRouter.get('/widgets/moderators', async (req, res) => {
     const channelThread = Bot.getChannelThread(req.user.login);
     if (channelThread === undefined) return res.json({ data: [] });
 
-    const token = await Token.getByUserIdOrFail(req.user.id);
-
-    const moderatorIds = (await getModerators(token))
+    const moderatorIds = (await getModerators(req.user.id))
       .map((mod) => mod.user_id);
 
-    const profiles = await TwitchUserRepo.getAll(token, moderatorIds);
+    const profiles = await TwitchUserRepo.getAll(req.user.id, moderatorIds);
 
     const resp: GetModeratorsResponse = {
       data: profiles.map((profile) => ({
@@ -60,9 +57,7 @@ dashboardRouter.get('/connectionStatus', async (req, res) => {
   if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
 
   try {
-    const token = await Token.getByUserIdOrFail(req.user.id);
-
-    const moderatorLogins = (await getModerators(token))
+    const moderatorLogins = (await getModerators(req.user.id))
       .map((mod) => mod.user_login);
 
     const botLogin = await Config.getOrFail('botLogin');
@@ -70,7 +65,7 @@ dashboardRouter.get('/connectionStatus', async (req, res) => {
     const resp: GetBotConnectionStatusResponse = {
       data: {
         channel: req.user.login,
-        joined: token.user.channel.joined ?? false,
+        joined: req.user.channel.joined ?? false,
         admin: moderatorLogins.includes(botLogin) || botLogin === req.user.login,
       },
     };
@@ -104,10 +99,8 @@ dashboardRouter.get('/widgets/topStats', async (req, res) => {
   if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
 
   try {
-    const token = await Token.getByUserIdOrFail(req.user.id);
-
     const topChatterId = await Message.getTopChatter(req.user.id);
-    const topChatter = topChatterId ? await TwitchUserRepo.get(token, topChatterId ?? '') : null;
+    const topChatter = topChatterId ? await TwitchUserRepo.get(req.user.id, topChatterId ?? '') : null;
 
     const topCommand = await Command.getTopCommand(req.user.id);
 

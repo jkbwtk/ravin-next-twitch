@@ -57,8 +57,10 @@ function errorConverter(error: unknown) {
 }
 
 
-export async function validateTokenUnsafe(token: Token): Promise<boolean> {
+export async function validateTokenUnsafe(userId: string): Promise<boolean> {
   try {
+    const token = await Token.getByUserIdOrFail(userId);
+
     await twitch.request({
       method: 'GET',
       baseURL: 'https://id.twitch.tv',
@@ -79,8 +81,10 @@ export async function validateTokenUnsafe(token: Token): Promise<boolean> {
   }
 }
 
-export async function refreshTokenUnsafe(token: Token): Promise<Token> {
+export async function refreshTokenUnsafe(userId: string): Promise<Token> {
   try {
+    const token = await Token.getByUserIdOrFail(userId);
+
     const response = await twitch.request<RefreshAccessToken>({
       method: 'POST',
       baseURL: 'https://id.twitch.tv',
@@ -110,8 +114,10 @@ export async function refreshTokenUnsafe(token: Token): Promise<Token> {
   }
 }
 
-export const revokeTokenUnsafe = async (token: Token): Promise<void> => {
+export const revokeTokenUnsafe = async (userId: string): Promise<void> => {
   try {
+    const token = await Token.getByUserIdOrFail(userId);
+
     const resp = await axios.post(
       'https://id.twitch.tv/oauth2/revoke',
       {
@@ -143,12 +149,11 @@ export const defaultGuardianSettings: GuardianSettings = {
 };
 
 type RequestGuardian = <T extends (
-  token: Token,
+  userId: string,
   ...args: any[]
 ) => any>(settings: Partial<GuardianSettings>, func: T, ...args: Parameters<T>) => Promise<ReturnType<T>>;
 
-const requestGuardian: RequestGuardian = async (settings, func, token, ...args) => {
-  let localToken = token;
+const requestGuardian: RequestGuardian = async (settings, func, userId, ...args) => {
   let localSettings = { ...defaultGuardianSettings, ...settings };
 
   let remainingTimeouts = localSettings.timeouts;
@@ -157,16 +162,18 @@ const requestGuardian: RequestGuardian = async (settings, func, token, ...args) 
 
   while (true) {
     try {
-      return await func(localToken, ...args);
+      return await func(userId, ...args);
     } catch (err) {
       if (err instanceof Error) display.warning.nextLine(moduleID(func), err.message);
 
       if (remainingNetworkErrors <= 0 || remainingTimeouts <= 0) throw err;
 
       if (err instanceof InvalidAccessToken) {
+        const token = await Token.getByUserIdOrFail(userId);
         if (token.refreshToken === null) throw new InvalidRefreshToken('Refresh token is null. Token possibly owned by local user');
+        await TokenManager.refresh(userId);
 
-        localToken = await TokenManager.refresh(token);
+        continue;
       }
 
       if (err instanceof TimedOut) {
@@ -197,10 +204,10 @@ export const validateToken: CloneFunction<typeof validateTokenUnsafe> = async (.
 
 export const refreshToken: CloneFunction<typeof refreshTokenUnsafe> = async (...args) => requestGuardian({}, refreshTokenUnsafe, ...args);
 
-export const revokeToken: CloneFunction<typeof revokeTokenUnsafe> = async (...args) => requestGuardian({}, revokeTokenUnsafe, ...args);
+// export const revokeToken: CloneFunction<typeof revokeTokenUnsafe> = async (...args) => requestGuardian({}, revokeTokenUnsafe, ...args);
 
 
-export async function getUsersUnsafe(token: Token, params: AtLeastOne<GetUsersOptions>): Promise<TwitchUser[]> {
+export async function getUsersUnsafe(userId: string, params: AtLeastOne<GetUsersOptions>): Promise<TwitchUser[]> {
   const idLength = params.id ? (Array.isArray(params.id) ? params.id.length : 1) : 0;
   const loginLength = params.login ? (Array.isArray(params.login) ? params.login.length : 1) : 0;
 
@@ -210,6 +217,8 @@ export async function getUsersUnsafe(token: Token, params: AtLeastOne<GetUsersOp
 
 
   try {
+    const token = await Token.getByUserIdOrFail(userId);
+
     const response = await twitch.request<GetTwitchUsers>({
       method: 'GET',
       url: 'users',
@@ -229,8 +238,10 @@ export async function getUsersUnsafe(token: Token, params: AtLeastOne<GetUsersOp
 export const getUsers: CloneFunction<typeof getUsersUnsafe> = async (...args) => requestGuardian({}, getUsersUnsafe, ...args);
 
 
-export async function getModeratorsUnsafe(token: Token): Promise<TwitchBriefUser[]> {
+export async function getModeratorsUnsafe(userId: string): Promise<TwitchBriefUser[]> {
   try {
+    const token = await Token.getByUserIdOrFail(userId);
+
     const response = await twitch.request<GetTwitchModerators>({
       method: 'GET',
       url: 'moderation/moderators',
@@ -252,12 +263,14 @@ export async function getModeratorsUnsafe(token: Token): Promise<TwitchBriefUser
 export const getModerators: CloneFunction<typeof getModeratorsUnsafe> = async (...args) => requestGuardian({}, getModeratorsUnsafe, ...args);
 
 
-export async function getChattersUnsafe(token: Token, first?: number, after?: string): Promise<{
+export async function getChattersUnsafe(userId: string, first?: number, after?: string): Promise<{
   users: TwitchBriefUser[];
   cursor: string;
   total: number;
 }> {
   try {
+    const token = await Token.getByUserIdOrFail(userId);
+
     const response = await twitch.request<GetChatters>({
       method: 'GET',
       url: 'chat/chatters',

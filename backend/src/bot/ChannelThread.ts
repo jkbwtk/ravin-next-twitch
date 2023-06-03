@@ -1,5 +1,4 @@
 import { Channel } from '#database/entities/Channel';
-import { Token } from '#database/entities/Token';
 import { ExtendedMap } from '#lib/ExtendedMap';
 import ExtendedSet from '#lib/ExtendedSet';
 import { getChatters } from '#lib/twitch';
@@ -93,9 +92,7 @@ export class ChannelThread {
   }
 
   private async syncChatMembers(): Promise<void> {
-    const token = await Token.getByUserIdOrFail(this.channel.user.id);
-
-    const chatters = await getChatters(token, 1000);
+    const chatters = await getChatters(this.channel.user.id, 1000);
     const mappedChatters = chatters.users.map((chatter) => chatter.user_id);
 
     this.chatMembers = new ExtendedSet(mappedChatters);
