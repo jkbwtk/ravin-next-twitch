@@ -12,7 +12,7 @@ export const createProdAuthStrategy = async (): Promise<OAuth2Strategy> => {
     clientID: await Config.getOrFail('twitchClientId'),
     clientSecret: await Config.getOrFail('twitchClientSecret'),
     callbackURL: callbackUrl,
-    state: true,
+    state: false,
   }, verifyCallback,
   );
 
