@@ -34,32 +34,46 @@ export class TokenManager {
   }
 
   private async _refresh(userId: string): Promise<Token> {
-    if (isDevApi) {
-      const token = await Token.getByUserIdOrFail(userId);
-      display.debug.nextLine('TokenManager', 'Skipping token refresh because dev api is enabled');
-      return token;
+    try {
+      if (isDevApi) {
+        const token = await Token.getByUserIdOrFail(userId);
+        display.debug.nextLine('TokenManager', 'Skipping token refresh because dev api is enabled');
+        return token;
+      }
+
+      const request = this.refreshQueue.get(userId);
+      if (request) {
+        display.debug.nextLine('TokenManager', 'Joining refresh queue for user', userId);
+        return request.promise;
+      }
+
+      const deferred = new Deferred<Token>();
+      this.refreshQueue.set(userId, deferred);
+
+      display.debug.nextLine('TokenManager', 'Refreshing token for user', userId);
+      const resp = await refreshTokenUnsafe(userId);
+      display.debug.nextLine('TokenManager', 'Token', resp.id, 'refreshed');
+
+      const newToken = await Token.updateOrFail(resp);
+      display.debug.nextLine('TokenManager', 'Token', newToken.id, 'updated');
+
+      this.refreshQueue.delete(userId);
+      deferred.resolve(newToken);
+
+      return newToken;
+    } catch (err) {
+      const request = this.refreshQueue.get(userId);
+
+      if (request) {
+        request.reject(err as undefined);
+        this.refreshQueue.delete(userId);
+      }
+
+      display.debug.nextLine('TokenManager', 'Failed to refresh token for user', userId);
+      display.warning.nextLine('TokenManager', err);
     }
 
-    const request = this.refreshQueue.get(userId);
-    if (request) {
-      display.debug.nextLine('TokenManager', 'Joining refresh queue for user', userId);
-      return request.promise;
-    }
-
-    const deferred = new Deferred<Token>();
-    this.refreshQueue.set(userId, deferred);
-
-    display.debug.nextLine('TokenManager', 'Refreshing token for user', userId);
-    const resp = await refreshTokenUnsafe(userId);
-    display.debug.nextLine('TokenManager', 'Token', resp.id, 'refreshed');
-
-    const newToken = await Token.updateOrFail(resp);
-    display.debug.nextLine('TokenManager', 'Token', newToken.id, 'updated');
-
-    this.refreshQueue.delete(userId);
-    deferred.resolve(newToken);
-
-    return newToken;
+    throw new Error('Failed to refresh token');
   }
 
   private _processAll = async (): Promise<void> => {
@@ -81,39 +95,39 @@ export class TokenManager {
     display.debug.nextLine('TokenManager', 'Found', tokens.length, 'tokens');
 
     for (let partialToken of tokens) {
-      try {
-        display.debug.nextLine('TokenManager', 'Processing token', partialToken.id);
-        const token = await Token.getByUserIdOrFail(partialToken.user.id);
-
-        if (token === undefined) {
-          display.error.nextLine('TokenManager', 'Failed to preload token', partialToken.id);
-          continue;
-        }
-
-        if (token.refreshToken === null) {
-          display.debug.nextLine('TokenManager', 'Skipping token', token.id, 'because it has no refresh token');
-          continue;
-        }
-
-        if (await validateTokenUnsafe(token.user.id)) {
-          display.debug.nextLine('TokenManager', 'Token', token.id, 'is valid');
-          continue;
-        }
-
-        display.debug.nextLine('TokenManager', 'Token', token.id, 'is invalid, refreshing...');
-        await this._refresh(token.user.id);
-      } catch (err) {
-        const error = typeof err === 'object' && err !== null && 'message' in err ? err.message : err;
-        const stack = typeof err === 'object' && err !== null && 'stack' in err ? err.stack : '';
-
-        display.debug.nextLine('TokenManager', 'Failed to process token', partialToken.id);
-        display.warning.nextLine('TokenManager', error);
-        display.debug.nextLine('TokenManager', stack);
-
-        continue;
-      }
+      await this._processPartial(partialToken);
     }
   };
+
+  private async _processPartial(partialToken: Token): Promise<void> {
+    try {
+      display.debug.nextLine('TokenManager', 'Processing token', partialToken.id);
+      const token = await Token.getByUserIdOrFail(partialToken.user.id);
+
+      if (token === undefined) {
+        display.error.nextLine('TokenManager', 'Failed to preload token', partialToken.id);
+        return;
+      }
+
+      if (token.refreshToken === null) {
+        display.debug.nextLine('TokenManager', 'Skipping token', token.id, 'because it has no refresh token');
+        return;
+      }
+
+      if (await validateTokenUnsafe(token.user.id)) {
+        display.debug.nextLine('TokenManager', 'Token', token.id, 'is valid');
+        return;
+      }
+
+      display.debug.nextLine('TokenManager', 'Token', token.id, 'is invalid, refreshing...');
+      await this._refresh(token.user.id);
+    } catch (err) {
+      const error = typeof err === 'object' && err !== null && 'message' in err ? err.message : err;
+
+      display.debug.nextLine('TokenManager', 'Failed to process token', partialToken.id);
+      display.warning.nextLine('TokenManager', error);
+    }
+  }
 
   public static async refresh(userId: string): Promise<Token> {
     const instance = await TokenManager.getInstance();

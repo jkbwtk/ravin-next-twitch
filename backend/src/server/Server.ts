@@ -156,12 +156,12 @@ export class Server {
     await TokenManager.processAll();
     await TokenManager.start();
 
+    await this.registerRoutes();
+
     if (await this.isConfigured()) {
       await SocketServer.createInstance(this.server);
       await Bot.start();
     }
-
-    await this.registerRoutes();
 
     this.server.listen(this.port, () => {
       display.log(LOGLVL.INFO, `${isDevMode ? 'Development server' : 'Server'} started on port ${chalk.green.bold(this.port)}`);

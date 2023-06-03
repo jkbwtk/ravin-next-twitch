@@ -18,8 +18,10 @@ export const authScopes: string[] = [
 
 const createOrUpdateToken = async (accessToken: string, refreshToken: string | null, user: UserEntity): Promise<Token> => {
   const tokenRepo = await Database.getRepository(Token);
+  const oldToken = await Token.getByUserId(user.id);
 
   const newToken = tokenRepo.create({
+    id: oldToken?.id,
     user,
     accessToken,
     refreshToken: refreshToken,
@@ -79,7 +81,9 @@ export const verifyCallback = async (accessToken: string, refreshToken: string |
       'You have successfully logged in to the dashboard.',
     );
 
-    done(null, user);
+    const updatedUser = await UserEntity.getByIdOrFail(user.id);
+
+    done(null, updatedUser);
   } catch (err) {
     console.error(err);
     done(new Error('Failed to validate callback'));

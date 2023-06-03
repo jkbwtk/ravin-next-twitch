@@ -77,6 +77,10 @@ export class User {
       `channel:${id}`,
       `user:${id}`,
       `token:${id}`,
+
+      `channel:${id}-pagination`,
+      `user:${id}-pagination`,
+      `token:${id}-pagination`,
     ]);
   }
 

@@ -62,6 +62,10 @@ export class Token {
       `channel:${userId}`,
       `user:${userId}`,
       `token:${userId}`,
+
+      `channel:${userId}-pagination`,
+      `user:${userId}-pagination`,
+      `token:${userId}-pagination`,
     ]);
   }
 

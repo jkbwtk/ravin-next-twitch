@@ -35,12 +35,10 @@ export const authRouter = async (): Promise<expressRouter> => {
 
   authRouter.get('/twitch',
     passport.authenticate('twitch', { scope: authScopes, successRedirect: '/dashboard', failureRedirect: '/' }),
-    (req, res) => res.redirect('/'), // will get called if auth fails
   );
 
   authRouter.get('/callback',
-    passport.authenticate('twitch', { successRedirect: '/dashboard', failureRedirect: '/' }),
-    (req, res) => res.redirect('/'), // will get called if auth fails
+    passport.authenticate('twitch', { successRedirect: '/dashboard', failWithError: true }),
   );
 
   authRouter.get('/user', async (req, res) => {

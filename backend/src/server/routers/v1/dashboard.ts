@@ -88,6 +88,8 @@ dashboardRouter.post('/joinChannel', async (req, res) => {
     if (channel.joined) await Bot.joinChannel(channel.user.id);
     else await Bot.leaveChannel(channel.user.id);
 
+    await Channel.createOrUpdate(channel);
+
     res.sendStatus(200);
   } catch (err) {
     console.error(err);
