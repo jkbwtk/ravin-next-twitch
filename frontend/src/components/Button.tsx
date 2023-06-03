@@ -14,16 +14,20 @@ import style from '#styles/ButtonBase.module.scss';
 export interface ButtonProps extends ButtonBaseProps {
   color?: ButtonBaseColorTypes;
   size?: ButtonBaseSizeTypes;
-  class?: string;
+  customClass?: string;
   draggable?: boolean;
+  disabled?: boolean;
+  loading?: boolean;
 }
 
 export const defaultProps: Required<ButtonProps> = {
   ...defaultBaseProps,
   color: 'gray',
   size: 'medium',
-  class: '',
+  customClass: '',
   draggable: false,
+  disabled: false,
+  loading: false,
 };
 
 const Button: Component<ButtonProps & JSX.ButtonHTMLAttributes<HTMLButtonElement>> = (userProps) => {
@@ -38,7 +42,9 @@ const Button: Component<ButtonProps & JSX.ButtonHTMLAttributes<HTMLButtonElement
         [style.button]: true,
         [colorClass]: true,
         [sizeClass]: true,
-        [props.class]: true,
+        [style.disabled]: props.disabled,
+        [style.loading]: props.loading,
+        [props.customClass]: true,
       }}
       {...props}
     >
@@ -48,10 +54,3 @@ const Button: Component<ButtonProps & JSX.ButtonHTMLAttributes<HTMLButtonElement
 };
 
 export default Button;
-
-
-(
-  <Button>
-    <span>Button</span>
-  </Button>
-);

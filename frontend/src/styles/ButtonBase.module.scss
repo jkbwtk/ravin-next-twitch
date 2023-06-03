@@ -1,5 +1,7 @@
 @use 'app';
 @use 'symbolUtils';
+@use 'animations' as *;
+
 
 .button {
   user-select: none;
@@ -18,7 +20,7 @@
   justify-content: center;
   gap: 0.5rem;
 
-  &:active {
+  &:active:not(.disabled):not(.loading) {
     translate: 0 0.2rem;
   }
 
@@ -38,8 +40,8 @@
 
   color: $textColor;
 
-  &:hover,
-  &:active {
+  &:hover:not(.disabled):not(.loading),
+  &:active:not(.disabled):not(.loading) {
     background-color: $activeColor;
     color: $invertedColor;
     box-shadow: 0 0.0 1rem $activeColor;
@@ -51,7 +53,7 @@
     }
   }
 
-  &:active {
+  &:active:not(.disabled):not(.loading) {
     :global(.material-symbols-rounded) {
       @include symbolUtils.symbolFont(1);
     }
@@ -92,5 +94,50 @@
 
   .text {
     height: app.$altIconSize;
+  }
+}
+
+.disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.5) brightness(0.5);
+}
+
+.loading {
+  cursor: wait;
+  position: relative;
+
+  .text {
+    opacity: 0;
+  }
+
+  :global(.material-symbols-rounded) {
+    opacity: 0;
+  }
+
+  &::after {
+    content: '';
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    height: 60%;
+    aspect-ratio: 1/1;
+    font-size: inherit;
+
+    border-radius: 500rem;
+    border: 0.15em solid app.$textBrightColor;
+    border-left-color: transparent;
+
+    @include inlineAnimation(1s, linear, $iteration: infinite) {
+      from {
+        transform: translate(-50%, -50%) rotate(0deg);
+      }
+
+      to {
+        transform: translate(-50%, -50%) rotate(360deg);
+      }
+    }
   }
 }

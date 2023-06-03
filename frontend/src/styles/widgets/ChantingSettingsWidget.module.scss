@@ -1,0 +1,67 @@
+@use '../app' as *;
+@use '../animations' as *;
+
+
+.outerContainer {
+  flex-grow: 1;
+
+  width: initial;
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+
+  padding: 2rem;
+
+  height: 30rem;
+  width: 40rem;
+
+  gap: 2rem;
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+
+  gap: 1rem;
+
+  height: 100%;
+  width: 100%;
+
+  .buttons-container {
+    display: flex;
+    justify-content: right;
+    align-items: center;
+
+    gap: 1rem;
+
+    height: 100%;
+    width: 100%;
+
+    margin-top: auto;
+    padding-top: 1rem;
+
+    .warning {
+      display: flex;
+      align-items: center;
+
+      gap: 1rem;
+      width: min-content;
+
+      font-size: $smallFontSize;
+
+      margin-right: auto;
+      margin-left: 1.4rem;
+    }
+
+    .warning-show {
+      @include fadeIn(0.2s);
+    }
+
+    .warning-hide {
+      @include fadeIn(0.2s, $direction: reverse);
+    }
+  }
+}

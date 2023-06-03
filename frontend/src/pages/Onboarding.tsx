@@ -128,7 +128,7 @@ const Onboarding: Component = () => {
             autocomplete='off'
           />
 
-          <Button type='submit' size='big' class={style.submitButton}>Submit</Button>
+          <Button type='submit' size='big' customClass={style.submitButton}>Submit</Button>
         </form>
       </div>
 

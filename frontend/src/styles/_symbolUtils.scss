@@ -1,8 +1,13 @@
 @use 'app';
 
-@mixin symbolFont($fill: 0) {
-  font-variation-settings: 'FILL'$fill,
+@mixin symbolFont($fill: 0, $important: false) {
+  @if $important {
+    font-variation-settings: 'FILL'$fill !important;
+  }
 
+  @else {
+    font-variation-settings: 'FILL'$fill;
+  }
 }
 
 @mixin symbolSize($size: app.$defaultIconSize) {

@@ -27,7 +27,7 @@ const Link: Component<LinkProps & RouterLinkProps> = (userProps) => {
         [style.button]: true,
         [colorClass]: true,
         [sizeClass]: true,
-        [props.class]: true,
+        [props.customClass]: true,
       }}
       {...props}
     >

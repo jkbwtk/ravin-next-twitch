@@ -128,4 +128,8 @@ export class ChannelThread {
     if (!commandName) return null;
     return this.customCommands.get(commandName) ?? null;
   }
+
+  public async syncChannel(): Promise<void> {
+    this.channel = await Channel.getByUserIdOrFail(this.channel.user.id);
+  }
 }

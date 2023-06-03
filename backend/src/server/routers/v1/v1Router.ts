@@ -4,6 +4,7 @@ import { authRouter } from '#server/routers/v1/auth';
 import { systemNotificationsRouter } from '#server/routers/v1/systemNotifications';
 import bodyParser from 'body-parser';
 import { commandsRouter } from '#server/routers/v1/commands';
+import { channelRouter } from '#server/routers/v1/channel';
 
 
 export const v1Router = async (): Promise<expressRouter> => {
@@ -23,6 +24,8 @@ export const v1Router = async (): Promise<expressRouter> => {
   v1Router.use('/notifications', await systemNotificationsRouter());
 
   v1Router.use('/commands', await commandsRouter());
+
+  v1Router.use('/channel', await channelRouter());
 
   return v1Router;
 };

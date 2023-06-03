@@ -9,7 +9,7 @@ const Error404: Component = () => {
       <span class={style.header}>404</span>
       <span class={style.message}>Page not found</span>
 
-      <Link href='/' class={style.button} symbol='home' size='big' color='primary'>
+      <Link href='/' customClass={style.button} symbol='home' size='big' color='primary'>
         Go back to homepage
       </Link>
     </div>

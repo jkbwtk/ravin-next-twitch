@@ -343,4 +343,16 @@ export class Bot {
 
     await channelThread.syncCustomCommands();
   }
+
+  public static async reloadChannelChannel(channelId: string): Promise<void> {
+    const channel = await Channel.getByUserIdOrFail(channelId);
+    const channelThread = Bot.getChannelThread(channel.user.login);
+
+    if (!channelThread) {
+      display.warning.nextLine('Bot:reloadChannelChannel', `Channel thread for [${channel.user.login}] not found`);
+      return;
+    }
+
+    await channelThread.syncChannel();
+  }
 }

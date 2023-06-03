@@ -2,13 +2,11 @@ import { Database } from '#database/Database';
 import type { User } from '#database/entities/User';
 import { IsBoolean, IsObject, IsOptional, validate } from 'class-validator';
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { ChantingSettings, PostChantingSettingsRequest } from '#types/api/channel';
+import { display } from '#lib/display';
+import { Bot } from '#bot/Bot';
 
 
-export type ChantingSettings = {
-  enabled: boolean;
-  interval: number;
-  length: number;
-};
 @Entity()
 export class Channel {
   @PrimaryGeneratedColumn()
@@ -88,5 +86,60 @@ export class Channel {
 
     if (channel?.user?.id) await this.invalidateCache(channel.user.id);
     return repository.save(channel);
+  }
+
+  public static async updateByUserId(userId: string, channel: Channel): Promise<Channel> {
+    const repository = await Database.getRepository(Channel);
+
+    const errors = await validate(channel);
+    if (errors.length > 0) {
+      console.error(errors);
+      throw new Error('Failed to validate new channel');
+    }
+
+    const t1 = performance.now();
+    await repository.update({ user: { id: userId } }, channel);
+    display.time('Updating channel', t1);
+
+    await this.invalidateCache(userId);
+    return this.getByUserIdOrFail(userId);
+  }
+
+  private static validateChantingSettings(request: unknown): request is PostChantingSettingsRequest {
+    if (typeof request !== 'object') return false;
+    if (request === null) return false;
+
+    const { enabled, interval, length } = request as PostChantingSettingsRequest;
+
+    if (typeof enabled !== 'boolean') return false;
+    if (typeof interval !== 'number') return false;
+    if (typeof length !== 'number') return false;
+
+    if (interval < 0) return false;
+    if (length < 2) return false;
+
+    if (interval > 300) return false;
+    if (length > 100) return false;
+
+    if (interval % 5 !== 0) return false;
+    if (length % 1 !== 0) return false;
+
+    return true;
+  }
+
+  public static async updateChantingFromApi(userId: string, request: PostChantingSettingsRequest): Promise<Channel> {
+    const channel = await this.getByUserIdOrFail(userId);
+    console.log(request);
+
+    if (!this.validateChantingSettings(request)) {
+      throw new Error('Invalid chanting settings');
+    }
+
+    channel.chantingSettings = request;
+
+    const updatedChannel = await this.updateByUserId(userId, channel);
+    await Bot.reloadChannelChannel(userId);
+
+    return updatedChannel;
   }
 }

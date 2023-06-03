@@ -67,6 +67,7 @@ const sidebarElements: SidebarRoute[] = [
     symbol: 'settings',
     name: 'Settings',
     href: '/dashboard/settings',
+    component: lazy(() => import('#pages/dashboard/Settings')),
   },
 ];
 

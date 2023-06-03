@@ -20,7 +20,7 @@ const AnchorButton: Component<ButtonProps & JSX.AnchorHTMLAttributes<HTMLAnchorE
         [style.button]: true,
         [colorClass]: true,
         [sizeClass]: true,
-        [props.class]: true,
+        [props.customClass]: true,
       }}
       {...props}
     >
