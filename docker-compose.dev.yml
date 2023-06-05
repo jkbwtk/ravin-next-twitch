@@ -16,3 +16,11 @@ services:
       service: cache
     ports:
       - "6379:6379"
+
+  broker:
+    extends:
+      file: docker-compose.yml
+      service: broker
+    ports:
+      - 5672:5672
+      - 15672:15672

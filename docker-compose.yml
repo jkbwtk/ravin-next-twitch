@@ -11,3 +11,9 @@ services:
   cache:
     image: redis:alpine
     command: redis-server --requirepass ${DB_PASSWORD:?DB_PASSWORD is not set}
+
+  broker:
+    image: rabbitmq:3-management-alpine
+    environment:
+      - RABBITMQ_DEFAULT_USER=${DB_USER:?DB_USER is not set}
+      - RABBITMQ_DEFAULT_PASS=${DB_PASSWORD:?DB_PASSWORD is not set}
