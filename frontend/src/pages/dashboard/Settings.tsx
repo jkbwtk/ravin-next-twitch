@@ -4,6 +4,7 @@ import AdminConfigWidget from '#components/widgets/AdminConfigWidget';
 import ChantingSettingsWidget from '#components/widgets/ChantingSettingsWidget';
 import { useSession } from '#providers/SessionProvider';
 import { Show } from 'solid-js';
+import BroadcastSystemNotificationWidget from '#components/widgets/BroadcastSystemNotificationWidget';
 
 import style from '#styles/dashboard/Settings.module.scss';
 
@@ -21,6 +22,7 @@ const Settings: Component = () => {
 
           <Show when={session.user?.admin}>
             <AdminConfigWidget />
+            <BroadcastSystemNotificationWidget />
           </Show>
         </div>
       </div>

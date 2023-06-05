@@ -4,7 +4,6 @@ import { Router as expressRouter } from 'express';
 import { GetSystemNotificationsResponse } from '#shared/types/api/systemNotifications';
 import { SocketServer } from '#server/SocketServer';
 import { arrayFrom } from '#lib/utils';
-import { Config } from '#lib/Config';
 import { display } from '#lib/display';
 
 
@@ -56,7 +55,7 @@ export const systemNotificationsRouter = async (): Promise<expressRouter> => {
     if (!(req.user instanceof User)) return res.sendStatus(401);
 
     try {
-      if (req.user.login !== await Config.getOrFail('adminUsername')) return res.sendStatus(403);
+      if (!req.user.admin) return res.sendStatus(403);
 
       const body = req.body as unknown;
 
