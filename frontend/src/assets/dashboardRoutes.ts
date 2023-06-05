@@ -29,11 +29,6 @@ const sidebarElements: SidebarRoute[] = [
     ],
   },
   {
-    symbol: 'webhook',
-    name: 'Hooks',
-    href: '/dashboard/hooks',
-  },
-  {
     symbol: 'psychology',
     name: 'Ai',
     href: '/dashboard/ai',
@@ -43,21 +38,6 @@ const sidebarElements: SidebarRoute[] = [
     name: 'Logs',
     href: '/dashboard/logs',
     component: lazy(() => import('#pages/dashboard/Logs')),
-  },
-  {
-    symbol: 'security',
-    name: 'Moderation',
-    href: '/dashboard/moderation',
-  },
-  {
-    symbol: 'chronic',
-    name: 'Timers',
-    href: '/dashboard/timers',
-  },
-  {
-    symbol: 'database',
-    name: 'Data',
-    href: '/dashboard/data',
   },
   {
     symbol: 'quick_reference',
