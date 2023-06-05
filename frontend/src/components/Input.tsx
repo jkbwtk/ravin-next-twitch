@@ -16,7 +16,7 @@ const Input: Component<InputProps> = (userProps) => {
 
   return (
     <div class={style.container}>
-      <input class={[style.input, props.class].join(' ')} {...props} />
+      <input {...props} class={[style.input, props.class].join(' ')} />
       <label class={style.label} for={props.id}>{props.label ?? props.placeholder}</label>
     </div>
   );

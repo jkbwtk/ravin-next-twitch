@@ -1,6 +1,6 @@
 import { Database } from '#database/Database';
 import { Channel } from '#database/entities/Channel';
-import { IsEmail, IsNumberString, IsString, IsUrl, validate } from 'class-validator';
+import { IsBoolean, IsEmail, IsNumberString, IsString, IsUrl, validate } from 'class-validator';
 import { Column, CreateDateColumn, Entity, Index, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 
 
@@ -30,6 +30,10 @@ export class User {
 
   @OneToOne(() => Channel, (channel) => channel.user, { onDelete: 'CASCADE' })
   public channel!: Channel;
+
+  @Column({ default: false })
+  @IsBoolean()
+  public admin!: boolean;
 
   @CreateDateColumn({ type: 'timestamptz' })
   public createdAt!: Date;

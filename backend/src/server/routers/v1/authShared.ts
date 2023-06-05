@@ -8,6 +8,7 @@ import { revokeTokenUnsafe } from '#lib/twitch';
 import { Channel } from '#database/entities/Channel';
 import { SystemNotification } from '#database/entities/SystemNotification';
 import { display } from '#lib/display';
+import { Config } from '#lib/Config';
 
 
 export const authScopes: string[] = [
@@ -51,6 +52,7 @@ const createOrUpdateUser = async (profile: TwitchUser): Promise<UserEntity> => {
     displayName: profile.display_name,
     email: profile.email ?? null,
     profileImageUrl: profile.profile_image_url,
+    admin: await Config.get('adminUsername') === profile.login,
   });
 
   const createdUser = await UserEntity.createOrUpdateUser(newUser);

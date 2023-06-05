@@ -1,11 +1,15 @@
 import DashboardInfoBar from '#components/DashboardInfoBar';
 import DashboardPage from '#components/DashboardPage';
+import AdminConfigWidget from '#components/widgets/AdminConfigWidget';
 import ChantingSettingsWidget from '#components/widgets/ChantingSettingsWidget';
+import { useSession } from '#providers/SessionProvider';
+import { Show } from 'solid-js';
 
 import style from '#styles/dashboard/Settings.module.scss';
 
 
 const Settings: Component = () => {
+  const [session] = useSession();
   let containerRef = document.createElement('div');
 
   return (
@@ -14,6 +18,10 @@ const Settings: Component = () => {
         <DashboardInfoBar />
         <div ref={containerRef} class={style.widgets}>
           <ChantingSettingsWidget />
+
+          <Show when={session.user?.admin}>
+            <AdminConfigWidget />
+          </Show>
         </div>
       </div>
     </DashboardPage>

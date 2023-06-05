@@ -24,6 +24,7 @@ export interface FrontendUser {
   login: string;
   displayName: string;
   profileImageUrl: string;
+  admin: boolean;
 }
 
 export interface GetFrontendUser {

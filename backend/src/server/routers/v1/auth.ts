@@ -53,6 +53,7 @@ export const authRouter = async (): Promise<expressRouter> => {
         login: req.user.login,
         displayName: req.user.displayName,
         profileImageUrl: req.user.profileImageUrl,
+        admin: req.user.admin,
       },
     };
 

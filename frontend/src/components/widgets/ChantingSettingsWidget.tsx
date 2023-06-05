@@ -81,7 +81,7 @@ const ChantingSettingsWidget: Component = () => {
       addNotification({
         type: 'success',
         title: 'Settings Saved',
-        message: 'Chanting settings saved!',
+        message: 'Chanting settings have been saved successfully!',
         duration: 5000,
       });
 

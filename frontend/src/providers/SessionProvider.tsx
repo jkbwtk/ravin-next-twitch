@@ -146,9 +146,7 @@ export const SessionProvider: ParentComponent = (props) => {
       body: JSON.stringify({ id: notification.id }),
     });
 
-    if (response.ok) {
-      await fetchSystemNotifications();
-    } else {
+    if (!response.ok) {
       addNotification({
         type: 'error',
         title: 'Notification Error',
@@ -170,9 +168,7 @@ export const SessionProvider: ParentComponent = (props) => {
       body: JSON.stringify({ id }),
     });
 
-    if (response.ok) {
-      await fetchSystemNotifications();
-    } else {
+    if (!response.ok) {
       addNotification({
         type: 'error',
         title: 'Notification Error',
