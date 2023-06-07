@@ -61,14 +61,23 @@
   width: 100%;
 }
 
+.outer-sub-container {
+  contain: content;
+  width: 100%;
+
+  max-height: 0px;
+
+  transition: max-height 0.2s ease-in-out;
+}
+
 .sub-container {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-start;
 
-  padding: 1rem 0 0 1rem;
-  gap: 1rem;
+  padding: 2rem 0 0 1rem;
+  gap: 2rem;
 
   width: 100%;
   overflow: hidden;
@@ -86,7 +95,7 @@
   }
 }
 
-.open {
+.nested-active {
   .dropdown-arrow {
     transform: rotate(-90deg);
   }

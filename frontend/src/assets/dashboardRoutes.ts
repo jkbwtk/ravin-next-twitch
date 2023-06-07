@@ -26,6 +26,18 @@ const sidebarElements: SidebarRoute[] = [
         href: '/dashboard/commands/stats',
         component: lazy(() => import('#pages/dashboard/CommandStatus')),
       },
+      {
+        symbol: 'psychology',
+        name: 'Ai',
+        href: '/dashboard/commands/ai',
+        auxRoutes: [
+          {
+            symbol: 'add',
+            name: 'Add',
+            href: '/dashboard/commands/ai/add',
+          },
+        ],
+      },
     ],
   },
   {
