@@ -62,7 +62,7 @@ const BroadcastSystemNotificationWidget: Component = () => {
   };
 
   return (
-    <Widget class={style.container} containerClass={style.outerContainer} title='Broadcast System Notification'>
+    <Widget class={style.container} title='Broadcast System Notification'>
       <form class={style.settingsForm} onSubmit={handleFormSubmit}>
         <InputLabeled label='Title' for='title'>
           <InputBase

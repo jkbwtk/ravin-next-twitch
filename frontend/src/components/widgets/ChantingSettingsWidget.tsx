@@ -107,7 +107,7 @@ const ChantingSettingsWidget: Component = () => {
   });
 
   return (
-    <Widget class={style.container} containerClass={style.outerContainer} title='Chanting'>
+    <Widget class={style.container} title='Chanting'>
       <Show
         when={settings.state === 'ready'}
         fallback={<FetchFallback>Fetching Chat Stats</FetchFallback>}

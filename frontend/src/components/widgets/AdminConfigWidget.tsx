@@ -61,7 +61,7 @@ const AdminConfigWidget: Component = () => {
 
 
   return (
-    <Widget class={style.container} containerClass={style.outerContainer} title='Config'>
+    <Widget class={style.container} title='Config'>
       <form class={style.settingsForm} onSubmit={handleSubmit}>
         <Input
           type='text'

@@ -2,12 +2,6 @@
 @use '../animations' as *;
 
 
-.outerContainer {
-  flex-grow: 1;
-
-  width: initial;
-}
-
 .container {
   display: flex;
   justify-content: space-between;
