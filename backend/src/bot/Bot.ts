@@ -9,10 +9,10 @@ import { isDevApi } from '#shared/constants';
 import { Message } from '#database/entities/Message';
 import { ChannelStats } from '#database/entities/ChannelStats';
 import Deferred from '#lib/Deferred';
-import { ChannelAction } from '#database/entities/ChannelAction';
 import { TwitchUserRepo } from '#lib/TwitchUserRepo';
 import { Command } from '#database/entities/Command';
 import { SocketServer } from '#server/SocketServer';
+import { Database as Prisma } from '#database/Prisma';
 
 
 export interface BotOptions {
@@ -175,17 +175,13 @@ export class Bot {
 
     await ChannelStats.incrementTimeouts(thread.channel.user.id);
 
-    const repository = await Database.getRepository(ChannelAction);
-
-    const action = repository.create({
-      channelUser: thread.channel.user,
+    Prisma.getPrismaClient().channelAction.createAndEmit({
+      channelUserId: thread.channel.user.id,
       issuerDisplayName: thread.channel.user.displayName,
       targetDisplayName: (await TwitchUserRepo.getByLogin(thread.channel.user.id, username))?.display_name ?? username,
       data: (duration ?? 0).toString(),
       type: 'timeout',
     });
-
-    await ChannelAction.createAction(action);
   };
 
   private handleBan = async (channel: string, username: string, reason: string, userstate: BanUserstate) => {
@@ -199,17 +195,13 @@ export class Bot {
 
     await ChannelStats.incrementBans(thread.channel.user.id);
 
-    const repository = await Database.getRepository(ChannelAction);
-
-    const action = repository.create({
-      channelUser: thread.channel.user,
+    await Prisma.getPrismaClient().channelAction.createAndEmit({
+      channelUserId: thread.channel.user.id,
       issuerDisplayName: thread.channel.user.displayName,
       targetDisplayName: (await TwitchUserRepo.getByLogin(thread.channel.user.id, username))?.display_name ?? username,
       type: 'ban',
       data: reason ?? '[No reason given]',
     });
-
-    await ChannelAction.createAction(action);
   };
 
   private handleDelete = async (channel: string, username: string, deletedMessage: string, userstate: DeleteUserstate) => {
@@ -223,17 +215,13 @@ export class Bot {
 
     await ChannelStats.incrementDeleted(thread.channel.user.id);
 
-    const repository = await Database.getRepository(ChannelAction);
-
-    const action = repository.create({
-      channelUser: thread.channel.user,
+    await Prisma.getPrismaClient().channelAction.createAndEmit({
+      channelUserId: thread.channel.user.id,
       issuerDisplayName: thread.channel.user.displayName,
       targetDisplayName: (await TwitchUserRepo.getByLogin(thread.channel.user.id, username))?.display_name ?? 'Chat Member',
       type: 'delete',
       data: deletedMessage,
     });
-
-    await ChannelAction.createAction(action);
   };
 
   public static async start(options?: Partial<BotOptions>): Promise<void> {

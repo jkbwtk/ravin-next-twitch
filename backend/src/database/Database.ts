@@ -10,7 +10,6 @@ import { SystemNotification } from '#database/entities/SystemNotification';
 import { Channel } from '#database/entities/Channel';
 import { Message } from '#database/entities/Message';
 import { ChannelStats } from '#database/entities/ChannelStats';
-import { ChannelAction } from '#database/entities/ChannelAction';
 import { Command } from '#database/entities/Command';
 
 
@@ -62,7 +61,6 @@ export class Database {
       Channel,
       Message,
       ChannelStats,
-      ChannelAction,
       Command,
     ];
   }

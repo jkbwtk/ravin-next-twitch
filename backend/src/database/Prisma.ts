@@ -1,5 +1,6 @@
 import { Redis, RedisOptions } from 'ioredis';
 import { PrismaClient } from '@prisma/client';
+import { channelActionExtension } from '#database/extensions/channelAction';
 import { databaseLogging } from '#shared/constants';
 
 
@@ -24,7 +25,7 @@ export class Database {
 
   private static get prismaOptions(): ConstructorParameters<typeof PrismaClient>[0] {
     return {
-      log: databaseLogging ? ['query', 'info', 'warn', 'error'] : ['info', 'warn', 'error'],
+      log: databaseLogging ? ['query', 'info', 'warn', 'error'] : ['warn', 'error'],
       errorFormat: 'pretty',
     };
   }
@@ -32,7 +33,8 @@ export class Database {
   private static getExtendedPrisma() {
     const prisma = new PrismaClient(Database.prismaOptions);
 
-    return prisma;
+    return prisma
+      .$extends(channelActionExtension);
   }
 
   private static get redisOptions(): RedisOptions {

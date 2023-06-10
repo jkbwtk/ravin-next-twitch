@@ -1,6 +1,5 @@
 import { Router as expressRouter } from 'express';
 import {
-  Action,
   ChatStatFrame,
   GetBotConnectionStatusResponse,
   GetChatStatsResponse,
@@ -16,10 +15,9 @@ import { TwitchUserRepo } from '#lib/TwitchUserRepo';
 import { ChannelStats } from '#database/entities/ChannelStats';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { Database } from '#database/Database';
-import { ChannelAction } from '#database/entities/ChannelAction';
 import { Message } from '#database/entities/Message';
 import { Command } from '#database/entities/Command';
+import { Database } from '#database/Prisma';
 
 dayjs.extend(utc);
 
@@ -129,50 +127,13 @@ dashboardRouter.get('/widgets/topStats', async (req, res) => {
   }
 });
 
-export const createAction = (action: ChannelAction): Action => {
-  const type = action.type;
-  const date = action.createdAt.getTime();
-  const issuerDisplayName = action.issuerDisplayName;
-  const targetDisplayName = action.targetDisplayName;
-
-  switch (type) {
-    case 'ban':
-      return {
-        date,
-        issuerDisplayName,
-        targetDisplayName,
-        type,
-        reason: action.data,
-      };
-
-    case 'timeout':
-      return {
-        date,
-        issuerDisplayName,
-        targetDisplayName,
-        type,
-        duration: parseInt(action.data, 10),
-      };
-
-    default:
-      return {
-        date,
-        issuerDisplayName,
-        targetDisplayName,
-        type,
-        message: action.data,
-      };
-  }
-};
-
 dashboardRouter.get('/widgets/recentActions', async (req, res) => {
   if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
 
-  const repository = await Database.getRepository(ChannelAction);
-  const stats = await repository.find({ where: { channelUser: { id: req.user.id } } });
+  const stats = await Database.getPrismaClient().channelAction.getByUserId(req.user.id);
 
   const resp: GetRecentActionsResponse = {
-    data: stats.map(createAction),
+    data: stats.map((stat) => stat.serialize()),
   };
 
   res.json(resp);
