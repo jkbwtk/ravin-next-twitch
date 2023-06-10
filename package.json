@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@faker-js/faker": "^7.6.0",
+    "@prisma/client": "^4.15.0",
     "@rollup/plugin-alias": "^4.0.3",
     "@solidjs/router": "^0.8.0",
     "@types/passport": "^1.0.12",
@@ -63,7 +64,8 @@
     "tsconfig-paths": "^4.1.2",
     "tslib": "^2.5.0",
     "typeorm": "^0.3.12",
-    "ws": "^8.13.0"
+    "ws": "^8.13.0",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@types/compression": "^1.7.2",
@@ -80,6 +82,7 @@
     "eslint": "^8.35.0",
     "eslint-config-google": "^0.14.0",
     "postcss-scss": "^4.0.6",
+    "prisma": "^4.15.0",
     "sass": "^1.58.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.0.4",
