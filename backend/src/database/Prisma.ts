@@ -2,6 +2,7 @@ import { Redis, RedisOptions } from 'ioredis';
 import { PrismaClient } from '@prisma/client';
 import { channelActionExtension } from '#database/extensions/channelAction';
 import { databaseLogging } from '#shared/constants';
+import { configExtension } from '#database/extensions/config';
 
 
 export class Database {
@@ -34,7 +35,8 @@ export class Database {
     const prisma = new PrismaClient(Database.prismaOptions);
 
     return prisma
-      .$extends(channelActionExtension);
+      .$extends(channelActionExtension)
+      .$extends(configExtension);
   }
 
   private static get redisOptions(): RedisOptions {

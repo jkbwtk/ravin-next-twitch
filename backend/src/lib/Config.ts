@@ -1,27 +1,18 @@
-import { Database } from '#database/Database';
-import { Config as ConfigEntity } from '#database/entities/Config';
 import { ExtendedMap } from '#lib/ExtendedMap';
-import { Repository } from 'typeorm';
+import { Config as ConfigEntity } from '@prisma/client';
+import { Database } from '#database/Prisma';
 
 
 export class Config {
   private static instance: Config;
 
-  private repository!: Repository<ConfigEntity>;
+  private repository = Database.getPrismaClient().config;
   public config: ExtendedMap<string, string>;
   public shadow: ExtendedMap<string, string>;
 
   private constructor() {
     this.config = new ExtendedMap<string, string>();
     this.shadow = new ExtendedMap<string, string>();
-  }
-
-  private async init(): Promise<void> {
-    this.repository = await this.getRepository();
-  }
-
-  private async getRepository(): Promise<Repository<ConfigEntity>> {
-    return Database.getRepository(ConfigEntity);
   }
 
   private static queryToMap(query: ConfigEntity[]): ExtendedMap<string, string> {
@@ -37,7 +28,6 @@ export class Config {
   private static async getInstance(): Promise<Config> {
     if (!Config.instance) {
       Config.instance = new Config();
-      await Config.instance.init();
     }
 
     return Config.instance;
@@ -45,7 +35,7 @@ export class Config {
 
   public static async getConfig(): Promise<ExtendedMap<string, string>> {
     const instance = await Config.getInstance();
-    const query = await instance.repository.find();
+    const query = await instance.repository.findMany();
 
     return Config.queryToMap(query);
   }
@@ -61,7 +51,7 @@ export class Config {
     const value = instance.config.get(key);
     if (value !== undefined) return value;
 
-    const query = await instance.repository.findOne({ where: { key } });
+    const query = await instance.repository.findFirst({ where: { key } });
     if (query) {
       instance.config.set(query.key, query.value);
       return query.value;
@@ -80,9 +70,8 @@ export class Config {
 
   public static async set(key: string, value: string): Promise<ConfigEntity> {
     const instance = await Config.getInstance();
-    const entry = instance.repository.create({ key, value });
 
-    const savedEntry = await instance.repository.save(entry);
+    const savedEntry = await instance.repository.create({ data: { key, value } });
     instance.config.set(savedEntry.key, savedEntry.value);
 
     return savedEntry;
@@ -90,9 +79,12 @@ export class Config {
 
   public static async batchSet(entries: [string, string][]): Promise<ConfigEntity[]> {
     const instance = await Config.getInstance();
-    const entities = entries.map((entry) => instance.repository.create({ key: entry[0], value: entry[1] }));
+    const keys = entries.map((entry) => entry[0]);
+    const entities = entries.map((entry) => ({ key: entry[0], value: entry[1] }));
 
-    const savedEntries = await instance.repository.save(entities);
+    await instance.repository.createMany({ data: entities });
+    const savedEntries = await instance.repository.findMany({ where: { key: { in: keys } } });
+
     for (const entry of savedEntries) {
       instance.config.set(entry.key, entry.value);
     }
@@ -141,7 +133,7 @@ export class Config {
 
   public static async delete(key: string): Promise<void> {
     const instance = await Config.getInstance();
-    await instance.repository.delete({ key });
+    await instance.repository.delete({ where: { key } });
     instance.config.delete(key);
   }
 }

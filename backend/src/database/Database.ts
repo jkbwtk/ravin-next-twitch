@@ -2,7 +2,6 @@ import 'reflect-metadata';
 
 import { databaseLogging, isDevMode } from '#shared/constants';
 import { DataSource, DataSourceOptions, EntityManager, ObjectLiteral, Repository } from 'typeorm';
-import { Config } from '#database/entities/Config';
 import { User } from '#database/entities/User';
 import { Token } from '#database/entities/Token';
 import { Redis, RedisOptions } from 'ioredis';
@@ -53,7 +52,6 @@ export class Database {
 
   private static get databaseEntities(): DataSourceOptions['entities'] {
     return [
-      Config,
       // Session,
       User,
       Token,
