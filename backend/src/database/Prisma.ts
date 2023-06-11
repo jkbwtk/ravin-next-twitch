@@ -4,6 +4,7 @@ import { channelActionExtension } from '#database/extensions/channelAction';
 import { databaseLogging } from '#shared/constants';
 import { configExtension } from '#database/extensions/config';
 import { userExtension } from '#database/extensions/user';
+import { systemNotificationExtension } from '#database/extensions/systemNotification';
 
 
 export class Database {
@@ -38,7 +39,8 @@ export class Database {
     return prisma
       .$extends(channelActionExtension)
       .$extends(configExtension)
-      .$extends(userExtension);
+      .$extends(userExtension)
+      .$extends(systemNotificationExtension);
   }
 
   private static get redisOptions(): RedisOptions {

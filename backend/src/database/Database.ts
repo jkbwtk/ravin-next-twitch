@@ -5,7 +5,6 @@ import { DataSource, DataSourceOptions, EntityManager, ObjectLiteral, Repository
 import { User } from '#database/entities/User';
 import { Token } from '#database/entities/Token';
 import { Redis, RedisOptions } from 'ioredis';
-import { SystemNotification } from '#database/entities/SystemNotification';
 import { Channel } from '#database/entities/Channel';
 import { Message } from '#database/entities/Message';
 import { ChannelStats } from '#database/entities/ChannelStats';
@@ -55,7 +54,6 @@ export class Database {
       // Session,
       User,
       Token,
-      SystemNotification,
       Channel,
       Message,
       ChannelStats,

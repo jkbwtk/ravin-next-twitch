@@ -6,7 +6,6 @@ import { isDevApi, isDevMode } from '#shared/constants';
 import { createDevAuthStrategy } from '#server/routers/v1/authDev';
 import { authScopes } from '#server/routers/v1/authShared';
 import { display } from '#lib/display';
-import { SystemNotification } from '#database/entities/SystemNotification';
 import { SocketServer } from '#server/SocketServer';
 import { Database } from '#database/Prisma';
 
@@ -68,7 +67,7 @@ export const authRouter = async (): Promise<expressRouter> => {
       if (err && isDevMode) res.status(500).send(err);
       else if (err) res.sendStatus(500);
       else {
-        await SystemNotification.createNotification(
+        await Database.getPrismaClient().systemNotification.createNotification(
           user.id,
           'Logged out',
           'You have been logged out of the dashboard.',

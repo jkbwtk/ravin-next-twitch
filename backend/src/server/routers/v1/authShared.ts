@@ -7,7 +7,6 @@ import { isDevApi } from '#shared/constants';
 import { TwitchUser } from '#shared/types/twitch';
 import { revokeTokenUnsafe } from '#lib/twitch';
 import { Channel } from '#database/entities/Channel';
-import { SystemNotification } from '#database/entities/SystemNotification';
 import { display } from '#lib/display';
 import { Config } from '#lib/Config';
 
@@ -81,7 +80,7 @@ export const verifyCallback = async (accessToken: string, refreshToken: string |
 
     await createOrUpdateToken(accessToken, refreshToken, user);
 
-    await SystemNotification.createNotification(
+    await Prisma.getPrismaClient().systemNotification.createNotification(
       user.id,
       'Logged in',
       'You have successfully logged in to the dashboard.',

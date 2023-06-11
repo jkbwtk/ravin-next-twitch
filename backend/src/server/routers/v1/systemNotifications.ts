@@ -1,9 +1,9 @@
-import { SystemNotification } from '#database/entities/SystemNotification';
 import { Router as expressRouter } from 'express';
 import { GetSystemNotificationsResponse } from '#shared/types/api/systemNotifications';
 import { SocketServer } from '#server/SocketServer';
 import { arrayFrom } from '#lib/utils';
 import { display } from '#lib/display';
+import { Database } from '#database/Prisma';
 
 
 export const systemNotificationsRouter = async (): Promise<expressRouter> => {
@@ -18,7 +18,7 @@ export const systemNotificationsRouter = async (): Promise<expressRouter> => {
   systemNotificationsRouter.get('/', async (req, res) => {
     if (req.user === undefined) return res.sendStatus(401);
 
-    const notifications = await SystemNotification.getNotificationsByUserId(req.user.id);
+    const notifications = await Database.getPrismaClient().systemNotification.getByUserId(req.user.id);
 
     const resp: GetSystemNotificationsResponse = {
       data: notifications.map((notification) => notification.serialize()),
@@ -43,7 +43,7 @@ export const systemNotificationsRouter = async (): Promise<expressRouter> => {
       body.id.some((id) => typeof id !== 'number')
     ) return res.sendStatus(400);
 
-    await SystemNotification.deleteNotificationById(body.id);
+    await Database.getPrismaClient().systemNotification.markAsReadById(body.id);
 
     SocketServer.emitToUser(req.user.id, 'RAD_SYSTEM_NOTIFICATION', arrayFrom(body.id));
 
@@ -64,7 +64,7 @@ export const systemNotificationsRouter = async (): Promise<expressRouter> => {
         !('content' in body) || typeof body.content !== 'string'
       ) return res.sendStatus(400);
 
-      await SystemNotification.broadcastNotification(body.title, body.content);
+      await Database.getPrismaClient().systemNotification.broadcastNotification(body.title, body.content);
 
       res.sendStatus(200);
     } catch (err) {
