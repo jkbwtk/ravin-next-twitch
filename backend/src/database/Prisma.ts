@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import { channelActionExtension } from '#database/extensions/channelAction';
 import { databaseLogging } from '#shared/constants';
 import { configExtension } from '#database/extensions/config';
+import { userExtension } from '#database/extensions/user';
 
 
 export class Database {
@@ -36,7 +37,8 @@ export class Database {
 
     return prisma
       .$extends(channelActionExtension)
-      .$extends(configExtension);
+      .$extends(configExtension)
+      .$extends(userExtension);
   }
 
   private static get redisOptions(): RedisOptions {

@@ -1,0 +1,116 @@
+import { ChantingSettings } from '#shared/types/api/channel';
+import { Prisma } from '@prisma/client';
+import { z } from 'zod';
+
+
+const userWithChannel = Prisma.validator<Prisma.UserArgs>()({
+  include: {
+    channel: true,
+  },
+});
+
+export type UserWithNullableChannel = Prisma.UserGetPayload<typeof userWithChannel> & {
+  channel: {
+    chantingSettings: ChantingSettings;
+  }
+};
+
+export type UserWithChannel = UserWithNullableChannel & {
+  channel: NonNullable<UserWithNullableChannel['channel']>;
+};
+
+export const userCreateInput = z.object({
+  id: z.string(),
+  login: z.string(),
+  displayName: z.string(),
+  email: z.string().email().nullable(),
+  profileImageUrl: z.string().url(),
+  admin: z.boolean(),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
+}) satisfies z.Schema<Prisma.UserUncheckedCreateInput>;
+
+export const userExtension = Prisma.defineExtension((client) => {
+  return client.$extends({
+    model: {
+      user: {
+        async validate(config: Prisma.UserUncheckedCreateInput) {
+          return userCreateInput.safeParseAsync(config);
+        },
+        async createChannel(userId: string) {
+          await client.channel.create({
+            data: {
+              userId,
+            },
+          });
+        },
+        async getById(id: string): Promise<UserWithChannel | null> {
+          const user = await Prisma.getExtensionContext(this).findFirst({
+            where: {
+              id,
+            },
+            include: {
+              channel: true,
+            },
+          });
+
+          if (user === null) return null;
+          if (user.channel === null) {
+            await Prisma.getExtensionContext(this).createChannel(user.id);
+            return Prisma.getExtensionContext(this).getById(id);
+          }
+
+          return user as UserWithChannel;
+        },
+        async getByIdOrFail(id: string): Promise<UserWithChannel> {
+          const user = await Prisma.getExtensionContext(this).findFirst({
+            where: {
+              id,
+            },
+            include: {
+              channel: true,
+            },
+          });
+
+          if (user === null) throw new Error(`User with id ${id} not found`);
+          if (user.channel === null) {
+            await Prisma.getExtensionContext(this).createChannel(user.id);
+            return Prisma.getExtensionContext(this).getByIdOrFail(id);
+          }
+
+          return user as UserWithChannel;
+        },
+        async getByLogin(login: string): Promise<UserWithChannel | null> {
+          const user = await Prisma.getExtensionContext(this).findFirst({
+            where: {
+              login,
+            },
+            include: {
+              channel: true,
+            },
+          });
+
+          if (user === null) return null;
+          if (user.channel === null) {
+            await Prisma.getExtensionContext(this).createChannel(user.id);
+            return Prisma.getExtensionContext(this).getByLogin(login);
+          }
+
+          return user as UserWithChannel;
+        },
+      },
+    },
+    query: {
+      user: {
+        async create({ args, query }) {
+          args.data = await userCreateInput.parseAsync(args.data);
+          return query(args);
+        },
+        async update({ args, query }) {
+          args.data = await userCreateInput.partial().parseAsync(args.data);
+          return query(args);
+        },
+      },
+    },
+  });
+});

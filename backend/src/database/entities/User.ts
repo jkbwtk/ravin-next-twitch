@@ -1,6 +1,5 @@
-import { Database } from '#database/Database';
 import { Channel } from '#database/entities/Channel';
-import { IsBoolean, IsEmail, IsNumberString, IsString, IsUrl, validate } from 'class-validator';
+import { IsBoolean, IsEmail, IsNumberString, IsString, IsUrl } from 'class-validator';
 import { Column, CreateDateColumn, Entity, Index, OneToOne, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 
 
@@ -40,64 +39,4 @@ export class User {
 
   @UpdateDateColumn({ type: 'timestamptz' })
   public updatedAt!: Date;
-
-  public static async getById(id: string): Promise<User | null> {
-    const repository = await Database.getRepository(User);
-
-    return repository.findOne({
-      where: { id },
-      relations: {
-        channel: true,
-      },
-      cache: {
-        id: `user:${id}`,
-        milliseconds: 3000,
-      },
-    });
-  }
-
-  public static async getByIdOrFail(id: string): Promise<User> {
-    const user = await this.getById(id);
-    if (user === null) {
-      throw new Error(`User ${id} not found`);
-    }
-
-    return user;
-  }
-
-  public static async getByLogin(login: string): Promise<User | null> {
-    const repository = await Database.getRepository(User);
-
-    return repository.findOne({
-      where: { login },
-      relations: {
-        channel: true,
-      },
-    });
-  }
-
-  public static async invalidateCache(id: string): Promise<void> {
-    await Database.invalidateCache([
-      `channel:${id}`,
-      `user:${id}`,
-      `token:${id}`,
-
-      `channel:${id}-pagination`,
-      `user:${id}-pagination`,
-      `token:${id}-pagination`,
-    ]);
-  }
-
-  public static async createOrUpdateUser(user: User): Promise<User> {
-    const repository = await Database.getRepository(User);
-
-    const errors = await validate(user);
-    if (errors.length > 0) {
-      console.error(errors);
-      throw new Error('Failed to validate new user');
-    }
-
-    await this.invalidateCache(user.id);
-    return repository.save(user);
-  }
 }

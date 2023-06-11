@@ -1,4 +1,3 @@
-import { User } from '#database/entities/User';
 import { Router as expressRouter } from 'express';
 import { json as jsonParser } from 'body-parser';
 import { GetChantingSettingsResponse } from '#shared/types/api/channel';
@@ -18,7 +17,7 @@ export const channelRouter = async (): Promise<expressRouter> => {
   channelRouter.use(jsonParser());
 
   channelRouter.get('/settings/chanting', async (req, res) => {
-    if (!(req.user instanceof User)) return res.sendStatus(401);
+    if (req.user === undefined) return res.sendStatus(401);
 
     const response: GetChantingSettingsResponse = {
       data: req.user.channel.chantingSettings,
@@ -28,7 +27,7 @@ export const channelRouter = async (): Promise<expressRouter> => {
   });
 
   channelRouter.post('/settings/chanting', async (req, res) => {
-    if (!(req.user instanceof User)) return res.sendStatus(401);
+    if (req.user === undefined) return res.sendStatus(401);
 
     try {
       await Channel.updateChantingFromApi(req.user.id, req.body);

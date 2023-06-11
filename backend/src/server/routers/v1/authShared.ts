@@ -1,5 +1,6 @@
-import { User as UserEntity } from '#database/entities/User';
+import { User as UserEntity } from '@prisma/client';
 import { Database } from '#database/Database';
+import { Database as Prisma } from '#database/Prisma';
 import { VerifyCallback } from 'passport-oauth2';
 import { Token } from '#database/entities/Token';
 import { isDevApi } from '#shared/constants';
@@ -44,18 +45,22 @@ const createOrUpdateChannel = async (user: UserEntity): Promise<Channel> => {
 };
 
 const createOrUpdateUser = async (profile: TwitchUser): Promise<UserEntity> => {
-  const userRepo = await Database.getRepository(UserEntity);
-
-  const newUser = userRepo.create({
+  const newUser = {
     id: profile.id,
     login: profile.login,
     displayName: profile.display_name,
     email: profile.email ?? null,
     profileImageUrl: profile.profile_image_url,
     admin: await Config.get('adminUsername') === profile.login,
-  });
+  };
 
-  const createdUser = await UserEntity.createOrUpdateUser(newUser);
+  const createdUser = await Prisma.getPrismaClient().user.upsert({
+    create: newUser,
+    update: newUser,
+    where: {
+      id: newUser.id,
+    },
+  });
   await createOrUpdateChannel(createdUser);
 
   return createdUser;
@@ -64,7 +69,6 @@ const createOrUpdateUser = async (profile: TwitchUser): Promise<UserEntity> => {
 export const verifyCallback = async (accessToken: string, refreshToken: string | null, profile: TwitchUser, done: VerifyCallback): Promise<void> => {
   try {
     await Token.invalidateCache(profile.id);
-    await UserEntity.invalidateCache(profile.id);
     await Channel.invalidateCache(profile.id);
 
     const token = await Token.getByUserId(profile.id);
@@ -83,7 +87,7 @@ export const verifyCallback = async (accessToken: string, refreshToken: string |
       'You have successfully logged in to the dashboard.',
     );
 
-    const updatedUser = await UserEntity.getByIdOrFail(user.id);
+    const updatedUser = await Prisma.getPrismaClient().user.getByIdOrFail(user.id);
 
     done(null, updatedUser);
   } catch (err) {

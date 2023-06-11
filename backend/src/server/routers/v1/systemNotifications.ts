@@ -1,5 +1,4 @@
 import { SystemNotification } from '#database/entities/SystemNotification';
-import { User } from '#database/entities/User';
 import { Router as expressRouter } from 'express';
 import { GetSystemNotificationsResponse } from '#shared/types/api/systemNotifications';
 import { SocketServer } from '#server/SocketServer';
@@ -17,7 +16,7 @@ export const systemNotificationsRouter = async (): Promise<expressRouter> => {
   });
 
   systemNotificationsRouter.get('/', async (req, res) => {
-    if (!(req.user instanceof User)) return res.sendStatus(401);
+    if (req.user === undefined) return res.sendStatus(401);
 
     const notifications = await SystemNotification.getNotificationsByUserId(req.user.id);
 
@@ -29,7 +28,7 @@ export const systemNotificationsRouter = async (): Promise<expressRouter> => {
   });
 
   systemNotificationsRouter.post('/read', async (req, res) => {
-    if (!(req.user instanceof User)) return res.sendStatus(401);
+    if (req.user === undefined) return res.sendStatus(401);
 
     const body = req.body as unknown;
 
@@ -52,7 +51,7 @@ export const systemNotificationsRouter = async (): Promise<expressRouter> => {
   });
 
   systemNotificationsRouter.post('/broadcast', async (req, res) => {
-    if (!(req.user instanceof User)) return res.sendStatus(401);
+    if (req.user === undefined) return res.sendStatus(401);
 
     try {
       if (!req.user.admin) return res.sendStatus(403);

@@ -1,4 +1,3 @@
-import { User as UserEntity } from '#database/entities/User';
 import { Router as expressRouter } from 'express';
 import passport from 'passport';
 import { GetFrontendUser } from '#shared/types/api/auth';
@@ -9,6 +8,7 @@ import { authScopes } from '#server/routers/v1/authShared';
 import { display } from '#lib/display';
 import { SystemNotification } from '#database/entities/SystemNotification';
 import { SocketServer } from '#server/SocketServer';
+import { Database } from '#database/Prisma';
 
 
 export const authRouter = async (): Promise<expressRouter> => {
@@ -19,7 +19,7 @@ export const authRouter = async (): Promise<expressRouter> => {
   });
 
   passport.deserializeUser<string>(async (id, done) => {
-    const user = await UserEntity.getById(id);
+    const user = await Database.getPrismaClient().user.getById(id);
 
     if (user !== null) return done(null, user);
 

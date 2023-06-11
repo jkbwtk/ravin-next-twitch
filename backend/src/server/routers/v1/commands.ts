@@ -1,4 +1,3 @@
-import { User } from '#database/entities/User';
 import { Router as expressRouter } from 'express';
 import { Command } from '#database/entities/Command';
 import { GetCustomCommandsResponse, GetCustomCommandsStatusResponse } from '#types/api/commands';
@@ -20,7 +19,7 @@ export const commandsRouter = async (): Promise<expressRouter> => {
   commandsRouter.use(jsonParser());
 
   commandsRouter.get('/custom', async (req, res) => {
-    if (!(req.user instanceof User)) return res.sendStatus(401);
+    if (req.user === undefined) return res.sendStatus(401);
 
     const commands = await Command.getByChannelId(req.user.id);
 
@@ -33,7 +32,7 @@ export const commandsRouter = async (): Promise<expressRouter> => {
 
   commandsRouter.post('/custom', async (req, res) => {
     try {
-      if (!(req.user instanceof User)) return res.sendStatus(401);
+      if (req.user === undefined) return res.sendStatus(401);
 
       const command = await Command.createFromApi(req.user.id, req.body);
       SocketServer.emitToUser(req.user.id, 'NEW_CUSTOM_COMMAND', command.serialize());
@@ -47,7 +46,7 @@ export const commandsRouter = async (): Promise<expressRouter> => {
 
   commandsRouter.patch('/custom', async (req, res) => {
     try {
-      if (!(req.user instanceof User)) return res.sendStatus(401);
+      if (req.user === undefined) return res.sendStatus(401);
 
       const command = await Command.updateFromApi(req.body);
       SocketServer.emitToUser(req.user.id, 'UPD_CUSTOM_COMMAND', command.serialize());
@@ -61,7 +60,7 @@ export const commandsRouter = async (): Promise<expressRouter> => {
 
   commandsRouter.delete('/custom', async (req, res) => {
     try {
-      if (!(req.user instanceof User)) return res.sendStatus(401);
+      if (req.user === undefined) return res.sendStatus(401);
 
       await Command.deleteFromApi(req.body);
       SocketServer.emitToUser(req.user.id, 'DEL_CUSTOM_COMMAND', req.body.id);
@@ -75,7 +74,7 @@ export const commandsRouter = async (): Promise<expressRouter> => {
 
   commandsRouter.get('/custom/status', async (req, res) => {
     try {
-      if (!(req.user instanceof User)) return res.sendStatus(401);
+      if (req.user === undefined) return res.sendStatus(401);
 
       const channelThread = Bot.getChannelThread(req.user.login);
       if (channelThread === undefined) return res.sendStatus(404);
