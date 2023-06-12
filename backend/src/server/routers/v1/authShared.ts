@@ -1,13 +1,12 @@
 import { Token, User as UserEntity } from '@prisma/client';
-import { Database } from '#database/Database';
 import { Database as Prisma } from '#database/Prisma';
 import { VerifyCallback } from 'passport-oauth2';
 import { isDevApi } from '#shared/constants';
 import { TwitchUser } from '#shared/types/twitch';
 import { revokeTokenUnsafe } from '#lib/twitch';
-import { Channel } from '#database/entities/Channel';
 import { display } from '#lib/display';
 import { Config } from '#lib/Config';
+import { ChannelWithUser } from '#database/extensions/channel';
 
 
 export const authScopes: string[] = [
@@ -35,16 +34,26 @@ const createOrUpdateToken = async (accessToken: string, refreshToken: string | n
   });
 };
 
-const createOrUpdateChannel = async (user: UserEntity): Promise<Channel> => {
-  const channelRepo = await Database.getRepository(Channel);
-  const oldChannel = await Channel.getByUserId(user.id);
+const createOrUpdateChannel = async (user: UserEntity): Promise<ChannelWithUser> => {
+  const oldChannel = await Prisma.getPrismaClient().channel.getByUserId(user.id);
 
-  const newChannel = channelRepo.create({
+  const newChannel = {
     id: oldChannel?.id,
-    user,
+    userId: user.id,
+  };
+
+  const updated = await Prisma.getPrismaClient().channel.upsert({
+    create: newChannel,
+    update: newChannel,
+    where: {
+      userId: user.id,
+    },
+    include: {
+      user: true,
+    },
   });
 
-  return Channel.createOrUpdate(newChannel);
+  return updated as ChannelWithUser;
 };
 
 const createOrUpdateUser = async (profile: TwitchUser): Promise<UserEntity> => {
@@ -71,8 +80,6 @@ const createOrUpdateUser = async (profile: TwitchUser): Promise<UserEntity> => {
 
 export const verifyCallback = async (accessToken: string, refreshToken: string | null, profile: TwitchUser, done: VerifyCallback): Promise<void> => {
   try {
-    await Channel.invalidateCache(profile.id);
-
     const token = await Prisma.getPrismaClient().token.getByUserId(profile.id);
     const user = await createOrUpdateUser(profile);
 

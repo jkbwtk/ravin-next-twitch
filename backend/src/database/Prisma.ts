@@ -6,6 +6,7 @@ import { configExtension } from '#database/extensions/config';
 import { userExtension } from '#database/extensions/user';
 import { systemNotificationExtension } from '#database/extensions/systemNotification';
 import { tokenExtension } from '#database/extensions/token';
+import { channelExtension } from '#database/extensions/channel';
 
 
 export class Database {
@@ -42,7 +43,8 @@ export class Database {
       .$extends(configExtension)
       .$extends(userExtension)
       .$extends(systemNotificationExtension)
-      .$extends(tokenExtension);
+      .$extends(tokenExtension)
+      .$extends(channelExtension);
   }
 
   private static get redisOptions(): RedisOptions {

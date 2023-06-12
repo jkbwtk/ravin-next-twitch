@@ -1,8 +1,9 @@
-import { Channel } from '#database/entities/Channel';
 import { ExtendedMap } from '#lib/ExtendedMap';
 import ExtendedSet from '#lib/ExtendedSet';
 import { getChatters } from '#lib/twitch';
 import { Command } from '#database/entities/Command';
+import { ChannelWithUser } from '#database/extensions/channel';
+import { Database } from '#database/Prisma';
 
 
 export type CustomCommandState = {
@@ -18,7 +19,7 @@ export interface ChannelThreadOptions {
 export class ChannelThread {
   private options: Required<ChannelThreadOptions>;
 
-  public channel: Channel;
+  public channel: ChannelWithUser;
   public chatMembers: ExtendedSet<string> = new ExtendedSet();
 
   private messages: string[] = [];
@@ -34,7 +35,7 @@ export class ChannelThread {
     bufferLength: 100,
   };
 
-  constructor(channelUser: Channel, options: ChannelThreadOptions = {}) {
+  constructor(channelUser: ChannelWithUser, options: ChannelThreadOptions = {}) {
     this.options = { ...ChannelThread.defaultOptions, ...options };
 
     this.channel = channelUser;
@@ -130,6 +131,6 @@ export class ChannelThread {
   }
 
   public async syncChannel(): Promise<void> {
-    this.channel = await Channel.getByUserIdOrFail(this.channel.user.id);
+    this.channel = await Database.getPrismaClient().channel.getByUserIdOrFail(this.channel.userId);
   }
 }

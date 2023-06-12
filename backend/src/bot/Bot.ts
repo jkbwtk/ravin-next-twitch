@@ -263,7 +263,7 @@ export class Bot {
   public static async joinChannel(id: string): Promise<boolean> {
     try {
       const instance = await Bot.getInstance();
-      const channel = await Channel.getByUserIdOrFail(id);
+      const channel = await Prisma.getPrismaClient().channel.getByUserIdOrFail(id);
 
       if (instance.client.getChannels().includes(`#${channel.user.login}`)) {
         if (instance.channels.has(channel.user.login)) return true;
@@ -291,7 +291,7 @@ export class Bot {
   public static async leaveChannel(id: string): Promise<boolean> {
     try {
       const instance = await Bot.getInstance();
-      const channel = await Channel.getByUserIdOrFail(id);
+      const channel = await Prisma.getPrismaClient().channel.getByUserIdOrFail(id);
 
       if (!instance.client.getChannels().includes(`#${channel.user.login}`)) {
         if (!instance.channels.has(channel.user.login)) return true;
@@ -321,7 +321,7 @@ export class Bot {
   }
 
   public static async reloadChannelCommands(channelId: string): Promise<void> {
-    const channel = await Channel.getByUserIdOrFail(channelId);
+    const channel = await Prisma.getPrismaClient().channel.getByUserIdOrFail(channelId);
     const channelThread = Bot.getChannelThread(channel.user.login);
 
     if (!channelThread) {
@@ -333,7 +333,7 @@ export class Bot {
   }
 
   public static async reloadChannelChannel(channelId: string): Promise<void> {
-    const channel = await Channel.getByUserIdOrFail(channelId);
+    const channel = await Prisma.getPrismaClient().channel.getByUserIdOrFail(channelId);
     const channelThread = Bot.getChannelThread(channel.user.login);
 
     if (!channelThread) {

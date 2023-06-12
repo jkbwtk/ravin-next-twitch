@@ -8,7 +8,6 @@ import {
   GetTopStatsResponse,
 } from '#types/api/dashboard';
 import { getModerators } from '#lib/twitch';
-import { Channel } from '#database/entities/Channel';
 import { Config } from '#lib/Config';
 import { Bot } from '#bot/Bot';
 import { TwitchUserRepo } from '#lib/TwitchUserRepo';
@@ -79,14 +78,17 @@ dashboardRouter.post('/joinChannel', async (req, res) => {
   if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
 
   try {
-    const channel = await Channel.getByUserIdOrFail(req.user.id);
+    const channel = await Database.getPrismaClient().channel.getByUserIdOrFail(req.user.id);
 
     channel.joined = !channel.joined;
 
     if (channel.joined) await Bot.joinChannel(channel.user.id);
     else await Bot.leaveChannel(channel.user.id);
 
-    await Channel.createOrUpdate(channel);
+    await Database.getPrismaClient().channel.update({
+      where: { id: channel.id },
+      data: { joined: channel.joined },
+    });
 
     res.sendStatus(200);
   } catch (err) {

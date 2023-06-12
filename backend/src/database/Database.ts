@@ -3,7 +3,6 @@ import 'reflect-metadata';
 import { databaseLogging, isDevMode } from '#shared/constants';
 import { DataSource, DataSourceOptions, EntityManager, ObjectLiteral, Repository } from 'typeorm';
 import { User } from '#database/entities/User';
-import { Token } from '#database/entities/Token';
 import { Redis, RedisOptions } from 'ioredis';
 import { Channel } from '#database/entities/Channel';
 import { Message } from '#database/entities/Message';
@@ -53,7 +52,6 @@ export class Database {
     return [
       // Session,
       User,
-      Token,
       Channel,
       Message,
       ChannelStats,
