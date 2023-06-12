@@ -1,42 +1,36 @@
-import { Database } from '#database/Database';
-import { Token } from '#database/entities/Token';
+import { Database } from '#database/Prisma';
+import { TokenWithUserAndChannel } from '#database/extensions/token';
 import Deferred from '#lib/Deferred';
 import { ExtendedMap } from '#lib/ExtendedMap';
 import { display } from '#lib/display';
 import { refreshTokenUnsafe, validateTokenUnsafe } from '#lib/twitch';
 import { isDevApi } from '#shared/constants';
-import { IsNull, Not, Repository } from 'typeorm';
 
 
 export class TokenManager {
   private static instance: TokenManager;
 
-  private repository!: Repository<Token>;
+  private repository = Database.getPrismaClient().token;
   private intervalHandle: NodeJS.Timer | null = null;
 
-  private refreshQueue: ExtendedMap<string, Deferred<Token>> = new ExtendedMap();
+  private refreshQueue: ExtendedMap<string, Deferred<TokenWithUserAndChannel>> = new ExtendedMap();
 
   private options = {
-    interval: 1000 * 60 * 60, // 1 hour
+    refreshInterval: 1000 * 60 * 60, // 1 hour
   };
 
-  private async init(): Promise<void> {
-    this.repository = await Database.getRepository(Token);
-  }
-
-  public static async getInstance(): Promise<TokenManager> {
+  public static getInstance(): TokenManager {
     if (!TokenManager.instance) {
       TokenManager.instance = new TokenManager();
-      await TokenManager.instance.init();
     }
 
     return TokenManager.instance;
   }
 
-  private async _refresh(userId: string): Promise<Token> {
+  private async _refresh(userId: string): Promise<TokenWithUserAndChannel> {
     try {
       if (isDevApi) {
-        const token = await Token.getByUserIdOrFail(userId);
+        const token = await Database.getPrismaClient().token.getByUserIdOrFail(userId);
         display.debug.nextLine('TokenManager', 'Skipping token refresh because dev api is enabled');
         return token;
       }
@@ -47,20 +41,35 @@ export class TokenManager {
         return request.promise;
       }
 
-      const deferred = new Deferred<Token>();
+      const deferred = new Deferred<TokenWithUserAndChannel>();
       this.refreshQueue.set(userId, deferred);
 
       display.debug.nextLine('TokenManager', 'Refreshing token for user', userId);
-      const resp = await refreshTokenUnsafe(userId);
-      display.debug.nextLine('TokenManager', 'Token', resp.id, 'refreshed');
+      const refreshedToken = await refreshTokenUnsafe(userId);
+      display.debug.nextLine('TokenManager', 'Token for user', refreshedToken.userId, 'refreshed');
 
-      const newToken = await Token.updateOrFail(resp);
-      display.debug.nextLine('TokenManager', 'Token', newToken.id, 'updated');
+      const createdToken = await this.repository.update({
+        where: {
+          id: refreshedToken.id,
+        },
+        data: {
+          accessToken: refreshedToken.accessToken,
+          refreshToken: refreshedToken.refreshToken,
+        },
+        include: {
+          user: {
+            include: {
+              channel: true,
+            },
+          },
+        },
+      });
+      display.debug.nextLine('TokenManager', 'Token for user', createdToken.userId, 'updated');
 
       this.refreshQueue.delete(userId);
-      deferred.resolve(newToken);
+      deferred.resolve(createdToken);
 
-      return newToken;
+      return createdToken;
     } catch (err) {
       const request = this.refreshQueue.get(userId);
 
@@ -83,73 +92,78 @@ export class TokenManager {
     }
 
     display.debug.nextLine('TokenManager', 'Beginning token processing...');
-    const tokens = await this.repository.find({
-      where: {
-        refreshToken: Not(IsNull()),
+    const users = await Database.getPrismaClient().user.findMany({
+      // where: {
+      //   token: {
+      //     refreshToken: {
+      //       not: null,
+      //     },
+      //   },
+      // },
+      select: {
+        id: true,
       },
-      relations: {
-        user: true,
-      },
-      select: ['id'],
     });
-    display.debug.nextLine('TokenManager', 'Found', tokens.length, 'tokens');
+    display.debug.nextLine('TokenManager', 'Found', users.length, 'tokens');
 
-    for (let partialToken of tokens) {
-      await this._processPartial(partialToken);
+    for (let user of users) {
+      await this._processPartial(user.id);
     }
   };
 
-  private async _processPartial(partialToken: Token): Promise<void> {
+  private async _processPartial(userId: string): Promise<void> {
     try {
-      display.debug.nextLine('TokenManager', 'Processing token', partialToken.id);
-      const token = await Token.getByUserIdOrFail(partialToken.user.id);
+      display.debug.nextLine('TokenManager', 'Processing token for user', userId);
+      const token = await this.repository.getByUserId(userId);
 
-      if (token === undefined) {
-        display.error.nextLine('TokenManager', 'Failed to preload token', partialToken.id);
+      if (token === null) {
+        display.error.nextLine('TokenManager', 'Failed to fetch token for user', userId);
         return;
       }
 
       if (token.refreshToken === null) {
-        display.debug.nextLine('TokenManager', 'Skipping token', token.id, 'because it has no refresh token');
+        display.debug.nextLine('TokenManager', 'Skipping token for user', userId, 'because it has no refresh token');
         return;
       }
 
-      if (await validateTokenUnsafe(token.user.id)) {
-        display.debug.nextLine('TokenManager', 'Token', token.id, 'is valid');
+      if (await validateTokenUnsafe(userId)) {
+        display.debug.nextLine('TokenManager', 'Token for user', userId, 'is valid');
         return;
       }
 
-      display.debug.nextLine('TokenManager', 'Token', token.id, 'is invalid, refreshing...');
-      await this._refresh(token.user.id);
+      display.debug.nextLine('TokenManager', 'Token for user', userId, 'is invalid, refreshing...');
+      await this._refresh(userId);
     } catch (err) {
       const error = typeof err === 'object' && err !== null && 'message' in err ? err.message : err;
 
-      display.debug.nextLine('TokenManager', 'Failed to process token', partialToken.id);
+      display.debug.nextLine('TokenManager', 'Failed to process token for user', userId);
       display.warning.nextLine('TokenManager', error);
     }
   }
 
-  public static async refresh(userId: string): Promise<Token> {
-    const instance = await TokenManager.getInstance();
+  public static async refresh(userId: string): Promise<TokenWithUserAndChannel> {
+    const instance = TokenManager.getInstance();
 
     return instance._refresh(userId);
   }
 
   public static async processAll(): Promise<void> {
-    const instance = await TokenManager.getInstance();
+    const instance = TokenManager.getInstance();
 
     await instance._processAll();
   }
 
-  public static async start(): Promise<void> {
-    const instance = await TokenManager.getInstance();
+  public static start(): void {
+    const instance = TokenManager.getInstance();
 
-    await TokenManager.stop();
-    instance.intervalHandle = setInterval(instance._processAll, instance.options.interval);
+    TokenManager.stop();
+    instance.intervalHandle = setInterval(() => {
+      instance._processAll;
+    }, instance.options.refreshInterval);
   }
 
-  public static async stop(): Promise<void> {
-    const instance = await TokenManager.getInstance();
+  public static stop(): void {
+    const instance = TokenManager.getInstance();
 
     if (instance.intervalHandle !== null) {
       clearInterval(instance.intervalHandle);

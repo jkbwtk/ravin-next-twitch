@@ -1,8 +1,7 @@
-import { User as UserEntity } from '@prisma/client';
+import { Token, User as UserEntity } from '@prisma/client';
 import { Database } from '#database/Database';
 import { Database as Prisma } from '#database/Prisma';
 import { VerifyCallback } from 'passport-oauth2';
-import { Token } from '#database/entities/Token';
 import { isDevApi } from '#shared/constants';
 import { TwitchUser } from '#shared/types/twitch';
 import { revokeTokenUnsafe } from '#lib/twitch';
@@ -18,17 +17,22 @@ export const authScopes: string[] = [
 ];
 
 const createOrUpdateToken = async (accessToken: string, refreshToken: string | null, user: UserEntity): Promise<Token> => {
-  const tokenRepo = await Database.getRepository(Token);
-  const oldToken = await Token.getByUserId(user.id);
+  const oldToken = await Prisma.getPrismaClient().token.getByUserId(user.id);
 
-  const newToken = tokenRepo.create({
+  const newToken = {
     id: oldToken?.id,
-    user,
+    userId: user.id,
     accessToken,
     refreshToken: refreshToken,
-  });
+  };
 
-  return Token.createOrUpdate(newToken);
+  return Prisma.getPrismaClient().token.upsert({
+    create: newToken,
+    update: newToken,
+    where: {
+      userId: user.id,
+    },
+  });
 };
 
 const createOrUpdateChannel = async (user: UserEntity): Promise<Channel> => {
@@ -67,10 +71,9 @@ const createOrUpdateUser = async (profile: TwitchUser): Promise<UserEntity> => {
 
 export const verifyCallback = async (accessToken: string, refreshToken: string | null, profile: TwitchUser, done: VerifyCallback): Promise<void> => {
   try {
-    await Token.invalidateCache(profile.id);
     await Channel.invalidateCache(profile.id);
 
-    const token = await Token.getByUserId(profile.id);
+    const token = await Prisma.getPrismaClient().token.getByUserId(profile.id);
     const user = await createOrUpdateUser(profile);
 
     if (token !== null) {

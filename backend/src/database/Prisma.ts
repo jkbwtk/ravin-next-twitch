@@ -5,6 +5,7 @@ import { databaseLogging } from '#shared/constants';
 import { configExtension } from '#database/extensions/config';
 import { userExtension } from '#database/extensions/user';
 import { systemNotificationExtension } from '#database/extensions/systemNotification';
+import { tokenExtension } from '#database/extensions/token';
 
 
 export class Database {
@@ -40,7 +41,8 @@ export class Database {
       .$extends(channelActionExtension)
       .$extends(configExtension)
       .$extends(userExtension)
-      .$extends(systemNotificationExtension);
+      .$extends(systemNotificationExtension)
+      .$extends(tokenExtension);
   }
 
   private static get redisOptions(): RedisOptions {

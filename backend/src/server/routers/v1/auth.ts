@@ -22,8 +22,8 @@ export const authRouter = async (): Promise<expressRouter> => {
 
     if (user !== null) return done(null, user);
 
-    display.error.nextLine('authRouter:deserializeUser', 'Failed to fetch user profile');
-    done(new Error('Failed to fetch user profile'));
+    display.warning.nextLine('authRouter:deserializeUser', 'Failed to fetch user profile with id', id);
+    done(null, false);
   });
 
   if (isDevApi) {
@@ -37,7 +37,7 @@ export const authRouter = async (): Promise<expressRouter> => {
   );
 
   authRouter.get('/callback',
-    passport.authenticate('twitch', { successRedirect: '/dashboard', failWithError: true }),
+    passport.authenticate('twitch', { successRedirect: '/dashboard', failureRedirect: '/' }),
   );
 
   authRouter.get('/user', async (req, res) => {
