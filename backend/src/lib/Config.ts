@@ -71,7 +71,11 @@ export class Config {
   public static async set(key: string, value: string): Promise<ConfigEntity> {
     const instance = await Config.getInstance();
 
-    const savedEntry = await instance.repository.create({ data: { key, value } });
+    const savedEntry = await instance.repository.upsert({
+      update: { value },
+      where: { key },
+      create: { key, value },
+    });
     instance.config.set(savedEntry.key, savedEntry.value);
 
     return savedEntry;
@@ -79,11 +83,21 @@ export class Config {
 
   public static async batchSet(entries: [string, string][]): Promise<ConfigEntity[]> {
     const instance = await Config.getInstance();
-    const keys = entries.map((entry) => entry[0]);
     const entities = entries.map((entry) => ({ key: entry[0], value: entry[1] }));
 
-    await instance.repository.createMany({ data: entities });
-    const savedEntries = await instance.repository.findMany({ where: { key: { in: keys } } });
+    const savedEntries = await Database.getPrismaClient().$transaction(async (prisma) => {
+      const results: ConfigEntity[] = [];
+
+      for (const entity of entities) {
+        results.push(await prisma.config.upsert({
+          update: { value: entity.value },
+          where: { key: entity.key },
+          create: entity,
+        }));
+      }
+
+      return results;
+    });
 
     for (const entry of savedEntries) {
       instance.config.set(entry.key, entry.value);

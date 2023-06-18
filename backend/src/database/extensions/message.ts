@@ -35,7 +35,7 @@ const messageWithUser = Prisma.validator<Prisma.MessageArgs>()({
 export type MessageWithUser = Prisma.MessageGetPayload<typeof messageWithUser>;
 
 export const messageCreateInput = z.object({
-  id: z.number(),
+  id: z.number().optional(),
   uuid: z.string().uuid(),
   channelName: z.string(),
   channelUserId: z.string(),
@@ -159,7 +159,7 @@ export const messageExtension = Prisma.defineExtension((client) => {
               color: userState.color,
               userId: definedOrFail(userState['user-id'], 'user-id'),
               content,
-              emotes: Prisma.getExtensionContext(this).getEmotesUsed(userState.message, userState.emotes) ?? undefined,
+              emotes: Prisma.getExtensionContext(this).getEmotesUsed(content, userState.emotes) ?? undefined,
               timestamp: userState['tmi-sent-ts'] ? new Date(parseInt(userState['tmi-sent-ts'], 10)) : new Date(),
               badgeInfo: userState.badgeInfo,
               badges: userState.badges,
