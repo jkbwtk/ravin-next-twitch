@@ -1,8 +1,8 @@
 import { Router as expressRouter } from 'express';
 import { json as jsonParser } from 'body-parser';
 import { GetMessagesResponse } from '#shared/types/api/logs';
-import { Message } from '#database/entities/Message';
 import { display } from '#lib/display';
+import { Database } from '#database/Prisma';
 
 
 export const logsRouter = async (): Promise<expressRouter> => {
@@ -20,7 +20,7 @@ export const logsRouter = async (): Promise<expressRouter> => {
     try {
       if (req.user === undefined) return res.sendStatus(401);
 
-      const messages = await Message.getByChannelId(req.user.id);
+      const messages = await Database.getPrismaClient().message.getByChannelId(req.user.id);
 
       const response: GetMessagesResponse = {
         data: messages.map((message) => message.serialize()),

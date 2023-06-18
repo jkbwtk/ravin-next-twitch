@@ -53,3 +53,11 @@ export const randomAlphanumeric = (length: number): string => {
 
   return result;
 };
+
+export const definedOrFail = <T>(value: T | undefined, name: string): T => {
+  if (value === undefined) {
+    throw new Error(`${name} is undefined`);
+  }
+
+  return value;
+};

@@ -6,7 +6,6 @@ import { Config } from '#lib/Config';
 import { Database } from '#database/Database';
 import { Channel } from '#database/entities/Channel';
 import { isDevApi } from '#shared/constants';
-import { Message } from '#database/entities/Message';
 import { ChannelStats } from '#database/entities/ChannelStats';
 import Deferred from '#lib/Deferred';
 import { TwitchUserRepo } from '#lib/TwitchUserRepo';
@@ -111,7 +110,7 @@ export class Bot {
     try {
       if (self) return;
 
-      const instance = await Message.createFromChatUserState(channel, userstate, message);
+      const instance = await Prisma.getPrismaClient().message.createFromChatUserState(channel, userstate, message);
       const thread = this.channels.get(channel.slice(1));
 
       if (!thread) {
@@ -119,7 +118,7 @@ export class Bot {
         return;
       }
 
-      await ChannelStats.incrementMessages(instance.channelUser.id);
+      await ChannelStats.incrementMessages(instance.channelUserId);
       const getTimeSinceLastMessage = thread.getTimeSinceLastMessage();
 
       display.debug.nextLine('Bot:handleMessage', 'Time since last message:', getTimeSinceLastMessage);

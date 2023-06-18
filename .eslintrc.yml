@@ -4,8 +4,15 @@ env:
 extends:
   - google
   - "plugin:@typescript-eslint/recommended"
+  # - "plugin:@typescript-eslint/recommended-requiring-type-checking"
 parser: "@typescript-eslint/parser"
 parserOptions:
+  # project:
+  #   [
+  #     "./backend/tsconfig.json",
+  #     "./frontend/tsconfig.json",
+  #     "./shared/tsconfig.json",
+  #   ]
   ecmaVersion: 12
   sourceType: module
   ecmaFeatures:
@@ -53,3 +60,6 @@ rules:
   new-cap: ["error", { "capIsNew": false }]
   prefer-const: "off"
   "@typescript-eslint/no-non-null-assertion": "off"
+  "@typescript-eslint/no-namespace": ["error", { "allowDeclarations": true }]
+  # "@typescript-eslint/no-misused-promises": "off"
+  # "@typescript-eslint/no-floating-promises": "error"
