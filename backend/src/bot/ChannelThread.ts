@@ -1,15 +1,15 @@
 import { ExtendedMap } from '#lib/ExtendedMap';
 import ExtendedSet from '#lib/ExtendedSet';
 import { getChatters } from '#lib/twitch';
-import { Command } from '#database/entities/Command';
 import { ChannelWithUser } from '#database/extensions/channel';
 import { Database } from '#database/Prisma';
+import { CommandWithUser } from '#database/extensions/command';
 
 
 export type CustomCommandState = {
   lastUsed: number;
   lastUsedBy?: string;
-  command: Command;
+  command: CommandWithUser;
 };
 
 export interface ChannelThreadOptions {
@@ -112,7 +112,7 @@ export class ChannelThread {
   }
 
   public async syncCustomCommands(): Promise<void> {
-    const commands = await Command.getByChannelId(this.channel.user.id);
+    const commands = await Database.getPrismaClient().command.getByChannelId(this.channel.user.id);
 
     this.customCommands.clear();
     for (const command of commands) {

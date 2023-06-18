@@ -8,6 +8,7 @@ import { systemNotificationExtension } from '#database/extensions/systemNotifica
 import { tokenExtension } from '#database/extensions/token';
 import { channelExtension } from '#database/extensions/channel';
 import { messageExtension } from '#database/extensions/message';
+import { commandExtension } from '#database/extensions/command';
 
 
 export class Database {
@@ -46,7 +47,8 @@ export class Database {
       .$extends(systemNotificationExtension)
       .$extends(tokenExtension)
       .$extends(channelExtension)
-      .$extends(messageExtension);
+      .$extends(messageExtension)
+      .$extends(commandExtension);
   }
 
   private static get redisOptions(): RedisOptions {

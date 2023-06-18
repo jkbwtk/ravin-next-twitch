@@ -6,7 +6,6 @@ import { User } from '#database/entities/User';
 import { Redis, RedisOptions } from 'ioredis';
 import { Channel } from '#database/entities/Channel';
 import { ChannelStats } from '#database/entities/ChannelStats';
-import { Command } from '#database/entities/Command';
 
 
 export class Database {
@@ -53,7 +52,6 @@ export class Database {
       User,
       Channel,
       ChannelStats,
-      Command,
     ];
   }
 

@@ -70,15 +70,16 @@ model Command {
   id            Int                    @id(map: "PK_5bfa4e1cb54b62f512078f3e7cb") @default(autoincrement())
   command       String                 @db.VarChar
   response      String                 @db.VarChar
-  userLevel     command_userlevel_enum @default(dbgenerated("0"))
+  // [UserLevelPrisma]
+  userLevel     Int                    @default(0)
   cooldown      Int                    @default(10)
   enabled       Boolean                @default(false)
   usage         Int                    @default(0)
   createdAt     DateTime               @default(now()) @db.Timestamptz(6)
   updatedAt     DateTime               @default(now()) @db.Timestamptz(6)
   destroyedAt   DateTime?              @db.Timestamptz(6)
-  channelUserId String?                @db.VarChar
-  user          User?                  @relation(fields: [channelUserId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_f8b5f064eb047ce931c1b1da275")
+  channelUserId String                @db.VarChar
+  user          User                  @relation(fields: [channelUserId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_f8b5f064eb047ce931c1b1da275")
 
   @@unique([channelUserId, command], map: "UQ_acd01c76f5ef7822719573e7a2c")
   @@index([channelUserId], map: "IDX_f8b5f064eb047ce931c1b1da27")
@@ -182,14 +183,6 @@ model User {
   @@index([login], map: "IDX_a62473490b3e4578fd683235c5")
 
 	@@map("user")
-}
-
-enum command_userlevel_enum {
-  Everyone @map("0")
-  Subscriber @map("1")
-  VIP @map("2")
-  Moderator @map("3")
-  Owner @map("4")
 }
 
 enum ChannelActionType {

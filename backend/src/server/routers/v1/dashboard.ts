@@ -14,7 +14,6 @@ import { TwitchUserRepo } from '#lib/TwitchUserRepo';
 import { ChannelStats } from '#database/entities/ChannelStats';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { Command } from '#database/entities/Command';
 import { Database } from '#database/Prisma';
 
 dayjs.extend(utc);
@@ -103,7 +102,7 @@ dashboardRouter.get('/widgets/topStats', async (req, res) => {
     const topChatterId = await Database.getPrismaClient().message.getTopChatter(req.user.id);
     const topChatter = topChatterId ? await TwitchUserRepo.get(req.user.id, topChatterId ?? '') : null;
 
-    const topCommand = await Command.getTopCommand(req.user.id);
+    const topCommand = await Database.getPrismaClient().command.getTopCommand(req.user.id);
 
     const topEmote = await Database.getPrismaClient().message.getTopEmote(req.user.id);
 

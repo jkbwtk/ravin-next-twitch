@@ -9,7 +9,6 @@ import { isDevApi } from '#shared/constants';
 import { ChannelStats } from '#database/entities/ChannelStats';
 import Deferred from '#lib/Deferred';
 import { TwitchUserRepo } from '#lib/TwitchUserRepo';
-import { Command } from '#database/entities/Command';
 import { SocketServer } from '#server/SocketServer';
 import { Database as Prisma } from '#database/Prisma';
 
@@ -135,7 +134,7 @@ export class Bot {
         ) {
           await this.client.say(channel, customCommand.command.response);
           await ChannelStats.incrementCommands(thread.channel.user.id);
-          await Command.incrementUsage(customCommand.command.id);
+          await Prisma.getPrismaClient().command.incrementUsage(customCommand.command.id);
 
           customCommand.lastUsed = Date.now();
           customCommand.lastUsedBy = userstate['display-name'] ?? 'Chat Member';
