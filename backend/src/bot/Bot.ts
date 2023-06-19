@@ -3,8 +3,6 @@ import { ChannelThread } from './ChannelThread';
 import { display, LOGLVL } from '../lib/display';
 import { ExtendedMap } from '../lib/ExtendedMap';
 import { Config } from '#lib/Config';
-import { Database } from '#database/Database';
-import { Channel } from '#database/entities/Channel';
 import { isDevApi } from '#shared/constants';
 import Deferred from '#lib/Deferred';
 import { TwitchUserRepo } from '#lib/TwitchUserRepo';
@@ -243,9 +241,8 @@ export class Bot {
       return;
     }
 
-    const channelRepository = await Database.getRepository(Channel);
-    const channels = await channelRepository.find({
-      relations: {
+    const channels = await Prisma.getPrismaClient().channel.findMany({
+      include: {
         user: true,
       },
     });
@@ -253,7 +250,7 @@ export class Bot {
     for (const channel of channels) {
       if (!channel.joined) continue;
 
-      await Bot.joinChannel(channel.user.id);
+      await Bot.joinChannel(channel.userId);
     }
   }
 

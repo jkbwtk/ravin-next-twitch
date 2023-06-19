@@ -8,7 +8,7 @@ import chalk from 'chalk';
 import path from 'path';
 import { Config } from '#lib/Config';
 import { createOnboardingRouter } from '#server/routers/onboarding';
-import { Database } from '#database/Database';
+import { Database } from '#database/Prisma';
 import session from 'express-session';
 import passport from 'passport';
 import { randomAlphanumeric } from '#lib/utils';

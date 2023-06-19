@@ -40,7 +40,6 @@
     "class-validator": "^0.14.0",
     "compression": "^1.7.4",
     "connect-redis": "^7.0.1",
-    "connect-typeorm": "^2.0.0",
     "cookies": "^0.8.0",
     "cross-env": "^7.0.3",
     "csv": "^6.2.8",
@@ -64,7 +63,6 @@
     "tmi.js": "^1.8.5",
     "tsconfig-paths": "^4.1.2",
     "tslib": "^2.5.0",
-    "typeorm": "^0.3.12",
     "ws": "^8.13.0",
     "zod": "^3.21.4"
   },
