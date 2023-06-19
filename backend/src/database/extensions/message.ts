@@ -235,7 +235,6 @@ export const messageExtension = Prisma.defineExtension((client) => {
             `;
 
             display.time('Getting top emote', t1);
-            console.log(result);
 
             return result[0] ?? null;
           } catch (err) {
