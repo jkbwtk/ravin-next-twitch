@@ -6,7 +6,6 @@ import { Config } from '#lib/Config';
 import { Database } from '#database/Database';
 import { Channel } from '#database/entities/Channel';
 import { isDevApi } from '#shared/constants';
-import { ChannelStats } from '#database/entities/ChannelStats';
 import Deferred from '#lib/Deferred';
 import { TwitchUserRepo } from '#lib/TwitchUserRepo';
 import { SocketServer } from '#server/SocketServer';
@@ -117,7 +116,7 @@ export class Bot {
         return;
       }
 
-      await ChannelStats.incrementMessages(instance.channelUserId);
+      await Prisma.getPrismaClient().channelStats.incrementMessages(instance.channelUserId);
       const getTimeSinceLastMessage = thread.getTimeSinceLastMessage();
 
       display.debug.nextLine('Bot:handleMessage', 'Time since last message:', getTimeSinceLastMessage);
@@ -133,7 +132,7 @@ export class Bot {
           instance.getUserLevel() >= customCommand.command.userLevel
         ) {
           await this.client.say(channel, customCommand.command.response);
-          await ChannelStats.incrementCommands(thread.channel.user.id);
+          await Prisma.getPrismaClient().channelStats.incrementCommands(thread.channel.user.id);
           await Prisma.getPrismaClient().command.incrementUsage(customCommand.command.id);
 
           customCommand.lastUsed = Date.now();
@@ -171,7 +170,7 @@ export class Bot {
       return;
     }
 
-    await ChannelStats.incrementTimeouts(thread.channel.user.id);
+    await Prisma.getPrismaClient().channelStats.incrementTimeouts(thread.channel.user.id);
 
     Prisma.getPrismaClient().channelAction.createAndEmit({
       channelUserId: thread.channel.user.id,
@@ -191,7 +190,7 @@ export class Bot {
       return;
     }
 
-    await ChannelStats.incrementBans(thread.channel.user.id);
+    await Prisma.getPrismaClient().channelStats.incrementBans(thread.channel.user.id);
 
     await Prisma.getPrismaClient().channelAction.createAndEmit({
       channelUserId: thread.channel.user.id,
@@ -211,7 +210,7 @@ export class Bot {
       return;
     }
 
-    await ChannelStats.incrementDeleted(thread.channel.user.id);
+    await Prisma.getPrismaClient().channelStats.incrementDeleted(thread.channel.user.id);
 
     await Prisma.getPrismaClient().channelAction.createAndEmit({
       channelUserId: thread.channel.user.id,

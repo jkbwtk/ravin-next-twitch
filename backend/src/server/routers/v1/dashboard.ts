@@ -11,10 +11,10 @@ import { getModerators } from '#lib/twitch';
 import { Config } from '#lib/Config';
 import { Bot } from '#bot/Bot';
 import { TwitchUserRepo } from '#lib/TwitchUserRepo';
-import { ChannelStats } from '#database/entities/ChannelStats';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { Database } from '#database/Prisma';
+import { FRAME_DURATION } from '#database/extensions/channelStats';
 
 dayjs.extend(utc);
 
@@ -142,11 +142,11 @@ dashboardRouter.get('/widgets/recentActions', async (req, res) => {
 dashboardRouter.get('/widgets/chatStats', async (req, res) => {
   if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
 
-  const oldestFrameId = ChannelStats.frameIdFromDate(dayjs.utc().subtract(1, 'hour').toDate());
-  const newestFrameId = ChannelStats.frameIdFromDate();
+  const oldestFrameId = Database.getPrismaClient().channelStats.frameIdFromDate(dayjs.utc().subtract(1, 'hour').toDate());
+  const newestFrameId = Database.getPrismaClient().channelStats.frameIdFromDate();
 
-  const stats = await ChannelStats.getFramesBetween(req.user.id, oldestFrameId, newestFrameId);
-  const mappedStats = ChannelStats.mapFrames(stats);
+  const stats = await Database.getPrismaClient().channelStats.getFramesBetween(req.user.id, oldestFrameId, newestFrameId);
+  const mappedStats = Database.getPrismaClient().channelStats.mapFrames(stats);
 
   let messagesTotal = 0;
   let timeoutsTotal = 0;
@@ -160,8 +160,8 @@ dashboardRouter.get('/widgets/chatStats', async (req, res) => {
 
     if (frame === undefined) {
       frames.push({
-        timestamp: ChannelStats.dateFromFrameId(i).getTime(),
-        frameDuration: ChannelStats.frameDuration,
+        timestamp: Database.getPrismaClient().channelStats.dateFromFrameId(i).getTime(),
+        frameDuration: FRAME_DURATION,
 
         messages: 0,
         timeouts: 0,
@@ -172,7 +172,7 @@ dashboardRouter.get('/widgets/chatStats', async (req, res) => {
     } else {
       frames.push({
         timestamp: frame.getDate().getTime(),
-        frameDuration: ChannelStats.frameDuration,
+        frameDuration: FRAME_DURATION,
 
         messages: frame.messages,
         timeouts: frame.timeouts,
@@ -191,8 +191,8 @@ dashboardRouter.get('/widgets/chatStats', async (req, res) => {
 
   const resp: GetChatStatsResponse = {
     data: {
-      dateStart: ChannelStats.dateFromFrameId(oldestFrameId).getTime(),
-      dateEnd: ChannelStats.dateFromFrameId(newestFrameId).getTime(),
+      dateStart: Database.getPrismaClient().channelStats.dateFromFrameId(oldestFrameId).getTime(),
+      dateEnd: Database.getPrismaClient().channelStats.dateFromFrameId(newestFrameId).getTime(),
 
       messagesTotal,
       timeoutsTotal,

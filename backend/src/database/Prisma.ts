@@ -9,6 +9,7 @@ import { tokenExtension } from '#database/extensions/token';
 import { channelExtension } from '#database/extensions/channel';
 import { messageExtension } from '#database/extensions/message';
 import { commandExtension } from '#database/extensions/command';
+import { channelStatsExtension } from '#database/extensions/channelStats';
 
 
 export class Database {
@@ -48,7 +49,8 @@ export class Database {
       .$extends(tokenExtension)
       .$extends(channelExtension)
       .$extends(messageExtension)
-      .$extends(commandExtension);
+      .$extends(commandExtension)
+      .$extends(channelStatsExtension);
   }
 
   private static get redisOptions(): RedisOptions {

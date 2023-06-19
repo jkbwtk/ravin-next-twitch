@@ -5,7 +5,6 @@ import { DataSource, DataSourceOptions, EntityManager, ObjectLiteral, Repository
 import { User } from '#database/entities/User';
 import { Redis, RedisOptions } from 'ioredis';
 import { Channel } from '#database/entities/Channel';
-import { ChannelStats } from '#database/entities/ChannelStats';
 
 
 export class Database {
@@ -51,7 +50,6 @@ export class Database {
       // Session,
       User,
       Channel,
-      ChannelStats,
     ];
   }
 
