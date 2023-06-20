@@ -1,20 +1,7 @@
 import { SocketServer } from '#server/SocketServer';
 import { Action } from '#shared/types/api/dashboard';
-import { ChannelActionType, Prisma } from '@prisma/client';
-import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 
-
-export const channelActionCreateInput = z.object({
-  id: z.number().optional(),
-  issuerDisplayName: z.string(),
-  targetDisplayName: z.string(),
-  type: z.enum([ChannelActionType.ban, ChannelActionType.timeout, ChannelActionType.delete]),
-  data: z.string(),
-  createdAt: z.date().optional(),
-  updatedAt: z.date().optional(),
-  deletedAt: z.date().optional().nullable(),
-  channelUserId: z.string(),
-}) satisfies z.Schema<Prisma.ChannelActionUncheckedCreateInput>;
 
 export const channelActionExtension = Prisma.defineExtension((client) => {
   return client.$extends({
@@ -67,22 +54,6 @@ export const channelActionExtension = Prisma.defineExtension((client) => {
               }
             };
           },
-        },
-      },
-    },
-    model: {
-      channelAction: {
-        async validate(action: Prisma.ChannelActionUncheckedCreateInput) {
-          return channelActionCreateInput.safeParseAsync(action);
-        },
-      },
-    },
-  }).$extends({
-    query: {
-      channelAction: {
-        async create({ args, query }) {
-          args.data = await channelActionCreateInput.parseAsync(args.data);
-          return query(args);
         },
       },
     },

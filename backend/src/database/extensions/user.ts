@@ -1,6 +1,5 @@
 import { ChantingSettings } from '#shared/types/api/channel';
 import { Prisma } from '@prisma/client';
-import { z } from 'zod';
 
 
 const userWithChannel = Prisma.validator<Prisma.UserArgs>()({
@@ -19,24 +18,10 @@ export type UserWithChannel = UserWithNullableChannel & {
   channel: NonNullable<UserWithNullableChannel['channel']>;
 };
 
-export const userCreateInput = z.object({
-  id: z.string(),
-  login: z.string(),
-  displayName: z.string(),
-  email: z.string().email().nullable(),
-  profileImageUrl: z.string().url(),
-  admin: z.boolean(),
-  createdAt: z.date().optional(),
-  updatedAt: z.date().optional(),
-}) satisfies z.Schema<Prisma.UserUncheckedCreateInput>;
-
 export const userExtension = Prisma.defineExtension((client) => {
   return client.$extends({
     model: {
       user: {
-        async validate(config: Prisma.UserUncheckedCreateInput) {
-          return userCreateInput.safeParseAsync(config);
-        },
         async createChannel(userId: string) {
           await client.channel.create({
             data: {
@@ -97,18 +82,6 @@ export const userExtension = Prisma.defineExtension((client) => {
           }
 
           return user as UserWithChannel;
-        },
-      },
-    },
-    query: {
-      user: {
-        async create({ args, query }) {
-          args.data = await userCreateInput.parseAsync(args.data);
-          return query(args);
-        },
-        async update({ args, query }) {
-          args.data = await userCreateInput.partial().parseAsync(args.data);
-          return query(args);
         },
       },
     },

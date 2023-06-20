@@ -1,35 +1,12 @@
 import { ExtendedMap } from '#lib/ExtendedMap';
 import { display } from '#lib/display';
 import { ChannelStats, Prisma } from '@prisma/client';
-import { z } from 'zod';
 
 
 export const FRAME_DURATION = 60_000;
 
-export const channelStatsCreateInput = z.object({
-  id: z.number().min(1).optional(),
-  frameId: z.number().int().min(0),
-  messages: z.number().int().min(0).optional(),
-  timeouts: z.number().int().min(0).optional(),
-  bans: z.number().int().min(0).optional(),
-  deleted: z.number().int().min(0).optional(),
-  commands: z.number().int().min(0).optional(),
-  frameDuration: z.number().int().min(0).optional(),
-  createdAt: z.date().optional().optional(),
-  updatedAt: z.date().optional().optional(),
-  userId: z.string(),
-}) satisfies z.Schema<Prisma.ChannelStatsUncheckedCreateInput>;
-
 export const channelStatsExtension = Prisma.defineExtension((client) => {
   return client.$extends({
-    query: {
-      channelStats: {
-        async create({ args, query }) {
-          args.data = await channelStatsCreateInput.parseAsync(args.data);
-          return query(args);
-        },
-      },
-    },
     model: {
       channelStats: {
         mapFrames<T extends ChannelStats>(frames: T[]): ExtendedMap<number, T> {

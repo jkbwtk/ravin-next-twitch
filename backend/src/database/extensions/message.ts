@@ -4,7 +4,6 @@ import { UserLevel } from '#shared/types/api/commands';
 import { EmotesUsed as EmotesUsed, Message as MessagePublic } from '#shared/types/api/logs';
 import { Message, Prisma } from '@prisma/client';
 import { BadgeInfo, Badges, ChatUserstate } from 'tmi.js';
-import { z } from 'zod';
 
 
 declare global {
@@ -33,38 +32,6 @@ const messageWithUser = Prisma.validator<Prisma.MessageArgs>()({
 });
 
 export type MessageWithUser = Prisma.MessageGetPayload<typeof messageWithUser>;
-
-export const messageCreateInput = z.object({
-  id: z.number().optional(),
-  uuid: z.string().uuid(),
-  channelName: z.string(),
-  channelUserId: z.string(),
-  username: z.string(),
-  displayName: z.string(),
-  color: z.string().nullable().optional(),
-  userId: z.string(),
-  content: z.string(),
-  emotes: z.record(
-    z.string(),
-    z.object({
-      name: z.string(),
-      count: z.number(),
-      positions: z.array(z.string()),
-    }),
-  ).optional(),
-  timestamp: z.date(),
-  badgeInfo: z.record(z.string(), z.string().optional()).optional(),
-  badges: z.record(z.string(), z.string().optional()).optional(),
-  flags: z.string().nullable(),
-  messageType: z.enum(['chat', 'action', 'whisper']),
-  firstMessage: z.boolean(),
-  mod: z.boolean(),
-  subscriber: z.boolean(),
-  createdAt: z.date().optional(),
-  updatedAt: z.date().optional(),
-  deletedAt: z.date().nullable().optional(),
-}) satisfies z.Schema<Prisma.MessageUncheckedCreateInput>;
-
 
 export const messageExtension = Prisma.defineExtension((client) => {
   return client.$extends({
@@ -242,18 +209,6 @@ export const messageExtension = Prisma.defineExtension((client) => {
 
             return null;
           }
-        },
-      },
-    },
-    query: {
-      message: {
-        async create({ args, query }) {
-          args.data = await messageCreateInput.parseAsync(args.data);
-          return query(args);
-        },
-        async update({ args, query }) {
-          args.data = await messageCreateInput.partial().parseAsync(args.data);
-          return query(args);
         },
       },
     },

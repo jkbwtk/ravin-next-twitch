@@ -24,22 +24,10 @@ export const chantingSettingsValidator = z.object({
   length: z.number().min(0).max(100).int(),
 }) satisfies z.Schema<ChantingSettings>;
 
-export const channelCreateInput = z.object({
-  id: z.number().optional(),
-  joined: z.boolean().optional().default(false),
-  chantingSettings: chantingSettingsValidator.optional(),
-  createdAt: z.date().optional(),
-  updatedAt: z.date().optional(),
-  userId: z.string(),
-}) satisfies z.Schema<ChannelUncheckedCreateInput>;
-
 export const channelExtension = Prisma.defineExtension((client) => {
   return client.$extends({
     model: {
       channel: {
-        async validate(config: Prisma.ChannelUncheckedCreateInput) {
-          return channelCreateInput.safeParseAsync(config);
-        },
         async getByUserId(userId: string): Promise<ChannelWithUser | null> {
           return Prisma.getExtensionContext(this).findFirst({
             where: {
@@ -75,18 +63,6 @@ export const channelExtension = Prisma.defineExtension((client) => {
           await Bot.reloadChannelChannel(userId);
 
           return updated as ChannelWithUser;
-        },
-      },
-    },
-    query: {
-      channel: {
-        async create({ args, query }) {
-          args.data = await channelCreateInput.parseAsync(args.data);
-          return query(args);
-        },
-        async update({ args, query }) {
-          args.data = await channelCreateInput.partial().parseAsync(args.data);
-          return query(args);
         },
       },
     },

@@ -11,21 +11,7 @@ declare global {
   }
 }
 
-export const commandCreateInput = z.object({
-  id: z.number().min(1).optional(),
-  channelUserId: z.string(),
-  command: z.string().min(1).max(64),
-  response: z.string().min(1).max(512),
-  userLevel: z.nativeEnum(UserLevel),
-  cooldown: z.number().int().min(0).max(86400).multipleOf(5),
-  enabled: z.boolean(),
-  usage: z.number().int().optional(),
-  createdAt: z.date().optional(),
-  updatedAt: z.date().optional(),
-  destroyedAt: z.date().optional(),
-}) satisfies z.Schema<Prisma.CommandUncheckedCreateInput>;
-
-export const postCustomCommand = z.object({
+export const PostCustomCommandSchema = z.object({
   command: z.string().min(1).max(64),
   response: z.string().min(1).max(512),
   userLevel: z.nativeEnum(UserLevel),
@@ -33,9 +19,9 @@ export const postCustomCommand = z.object({
   enabled: z.boolean(),
 }) satisfies z.Schema<PostCustomCommandRequest>;
 
-export const patchCustomCommand = z.object({
+export const PatchCustomCommandSchema = z.object({
   id: z.number().min(1),
-}).and(postCustomCommand.partial()) satisfies z.Schema<PatchCustomCommandRequest>;
+}).and(PostCustomCommandSchema.partial()) satisfies z.Schema<PatchCustomCommandRequest>;
 
 export const commandExtension = Prisma.defineExtension((client) => {
   return client.$extends({
@@ -64,15 +50,6 @@ export const commandExtension = Prisma.defineExtension((client) => {
               };
             };
           },
-        },
-      },
-    },
-  }).$extends({
-    query: {
-      command: {
-        async create({ args, query }) {
-          args.data = await commandCreateInput.parseAsync(args.data);
-          return query(args);
         },
       },
     },
@@ -139,7 +116,7 @@ export const commandExtension = Prisma.defineExtension((client) => {
           return result;
         },
         async createFromApi(channelId: string, request: PostCustomCommandRequest) {
-          const validated = await postCustomCommand.safeParseAsync(request);
+          const validated = await PostCustomCommandSchema.safeParseAsync(request);
 
           if (!validated.success) {
             throw new Error(validated.error.message);
@@ -168,7 +145,7 @@ export const commandExtension = Prisma.defineExtension((client) => {
           return result;
         },
         async updateFromApi(request: PatchCustomCommandRequest) {
-          const validated = await patchCustomCommand.safeParseAsync(request);
+          const validated = await PatchCustomCommandSchema.safeParseAsync(request);
 
           if (!validated.success) {
             throw new Error(validated.error.message);

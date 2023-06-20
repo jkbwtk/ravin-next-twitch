@@ -2,28 +2,10 @@ import { arrayFrom } from '#lib/utils';
 import { SocketServer } from '#server/SocketServer';
 import { SystemNotification } from '#shared/types/api/systemNotifications';
 import { Prisma } from '@prisma/client';
-import { z } from 'zod';
 
-
-export const systemNotificationCreateInput = z.object({
-  id: z.number().optional(),
-  title: z.string(),
-  content: z.string(),
-  createdAt: z.date().optional(),
-  updatedAt: z.date().optional(),
-  deletedAt: z.date().optional().nullable(),
-  userId: z.string(),
-}) satisfies z.Schema<Prisma.SystemNotificationUncheckedCreateInput>;
 
 export const systemNotificationExtension = Prisma.defineExtension((client) => {
   return client.$extends({
-    model: {
-      systemNotification: {
-        async validate(config: Prisma.SystemNotificationUncheckedCreateInput) {
-          return systemNotificationCreateInput.safeParseAsync(config);
-        },
-      },
-    },
     result: {
       systemNotification: {
         serialize: {
@@ -47,18 +29,6 @@ export const systemNotificationExtension = Prisma.defineExtension((client) => {
               };
             };
           },
-        },
-      },
-    },
-    query: {
-      systemNotification: {
-        async create({ args, query }) {
-          args.data = await systemNotificationCreateInput.parseAsync(args.data);
-          return query(args);
-        },
-        async update({ args, query }) {
-          args.data = await systemNotificationCreateInput.partial().parseAsync(args.data);
-          return query(args);
         },
       },
     },
