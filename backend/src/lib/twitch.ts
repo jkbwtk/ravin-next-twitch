@@ -20,7 +20,7 @@ import {
 } from '#types/twitch';
 import { twitchApiUrl } from '#shared/constants';
 import { Config } from '#lib/Config';
-import { Database as Prisma } from '#database/Prisma';
+import { prisma } from '#database/database';
 import { display } from '#lib/display';
 import { TokenManager } from '#server/TokenManager';
 import { arrayFrom, AtLeastOne, sleep } from '#lib/utils';
@@ -59,7 +59,7 @@ function errorConverter(error: unknown) {
 
 export async function validateTokenUnsafe(userId: string): Promise<boolean> {
   try {
-    const token = await Prisma.getPrismaClient().token.getByUserIdOrFail(userId);
+    const token = await prisma.token.getByUserIdOrFail(userId);
 
     await twitch.request({
       method: 'GET',
@@ -83,7 +83,7 @@ export async function validateTokenUnsafe(userId: string): Promise<boolean> {
 
 export async function refreshTokenUnsafe(userId: string): Promise<TokenWithUserAndChannel> {
   try {
-    const token = await Prisma.getPrismaClient().token.getByUserIdOrFail(userId);
+    const token = await prisma.token.getByUserIdOrFail(userId);
 
     const response = await twitch.request<RefreshAccessToken>({
       method: 'POST',
@@ -115,7 +115,7 @@ export async function refreshTokenUnsafe(userId: string): Promise<TokenWithUserA
 
 export const revokeTokenUnsafe = async (userId: string): Promise<void> => {
   try {
-    const token = await Prisma.getPrismaClient().token.getByUserIdOrFail(userId);
+    const token = await prisma.token.getByUserIdOrFail(userId);
 
     const resp = await axios.post(
       'https://id.twitch.tv/oauth2/revoke',
@@ -169,7 +169,7 @@ const requestGuardian: RequestGuardian = async (settings, func, userId, ...args)
       if (remainingNetworkErrors <= 0 || remainingTimeouts <= 0) throw err;
 
       if (err instanceof InvalidAccessToken) {
-        const token = await Prisma.getPrismaClient().token.getByUserIdOrFail(userId);
+        const token = await prisma.token.getByUserIdOrFail(userId);
         if (token.refreshToken === null) throw new InvalidRefreshToken('Refresh token is null. Token possibly owned by local user');
         await TokenManager.refresh(userId);
 
@@ -217,7 +217,7 @@ export async function getUsersUnsafe(userId: string, params: AtLeastOne<GetUsers
 
 
   try {
-    const token = await Prisma.getPrismaClient().token.getByUserIdOrFail(userId);
+    const token = await prisma.token.getByUserIdOrFail(userId);
 
     const response = await twitch.request<GetTwitchUsers>({
       method: 'GET',
@@ -240,7 +240,7 @@ export const getUsers: CloneFunction<typeof getUsersUnsafe> = async (...args) =>
 
 export async function getModeratorsUnsafe(userId: string): Promise<TwitchBriefUser[]> {
   try {
-    const token = await Prisma.getPrismaClient().token.getByUserIdOrFail(userId);
+    const token = await prisma.token.getByUserIdOrFail(userId);
 
     const response = await twitch.request<GetTwitchModerators>({
       method: 'GET',
@@ -269,7 +269,7 @@ export async function getChattersUnsafe(userId: string, first?: number, after?: 
   total: number;
 }> {
   try {
-    const token = await Prisma.getPrismaClient().token.getByUserIdOrFail(userId);
+    const token = await prisma.token.getByUserIdOrFail(userId);
 
     const response = await twitch.request<GetChatters>({
       method: 'GET',

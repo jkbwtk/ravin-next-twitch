@@ -2,7 +2,7 @@ import { Router as expressRouter } from 'express';
 import { json as jsonParser } from 'body-parser';
 import { GetChantingSettingsResponse } from '#shared/types/api/channel';
 import { display } from '#lib/display';
-import { Database } from '#database/Prisma';
+import { prisma } from '#database/database';
 
 
 export const channelRouter = async (): Promise<expressRouter> => {
@@ -30,7 +30,7 @@ export const channelRouter = async (): Promise<expressRouter> => {
     if (req.user === undefined) return res.sendStatus(401);
 
     try {
-      await Database.getPrismaClient().channel.updateChantingFromApi(req.user.id, req.body);
+      await prisma.channel.updateChantingFromApi(req.user.id, req.body);
 
       res.sendStatus(200);
     } catch (err) {

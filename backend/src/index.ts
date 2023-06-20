@@ -6,7 +6,7 @@ if (process.env.DEV !== 'true') {
 
 import chalk from 'chalk';
 
-import { Server } from './server/Server';
+import { Server } from '#server/Server';
 import { display } from '#lib/display';
 
 

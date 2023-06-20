@@ -7,7 +7,7 @@ import { isDevApi } from '#shared/constants';
 import Deferred from '#lib/Deferred';
 import { TwitchUserRepo } from '#lib/TwitchUserRepo';
 import { SocketServer } from '#server/SocketServer';
-import { Database as Prisma } from '#database/Prisma';
+import { prisma } from '#database/database';
 
 
 export interface BotOptions {
@@ -106,7 +106,7 @@ export class Bot {
     try {
       if (self) return;
 
-      const instance = await Prisma.getPrismaClient().message.createFromChatUserState(channel, userstate, message);
+      const instance = await prisma.message.createFromChatUserState(channel, userstate, message);
       const thread = this.channels.get(channel.slice(1));
 
       if (!thread) {
@@ -114,7 +114,7 @@ export class Bot {
         return;
       }
 
-      await Prisma.getPrismaClient().channelStats.incrementMessages(instance.channelUserId);
+      await prisma.channelStats.incrementMessages(instance.channelUserId);
       const getTimeSinceLastMessage = thread.getTimeSinceLastMessage();
 
       display.debug.nextLine('Bot:handleMessage', 'Time since last message:', getTimeSinceLastMessage);
@@ -130,8 +130,8 @@ export class Bot {
           instance.getUserLevel() >= customCommand.command.userLevel
         ) {
           await this.client.say(channel, customCommand.command.response);
-          await Prisma.getPrismaClient().channelStats.incrementCommands(thread.channel.user.id);
-          await Prisma.getPrismaClient().command.incrementUsage(customCommand.command.id);
+          await prisma.channelStats.incrementCommands(thread.channel.user.id);
+          await prisma.command.incrementUsage(customCommand.command.id);
 
           customCommand.lastUsed = Date.now();
           customCommand.lastUsedBy = userstate['display-name'] ?? 'Chat Member';
@@ -168,9 +168,9 @@ export class Bot {
       return;
     }
 
-    await Prisma.getPrismaClient().channelStats.incrementTimeouts(thread.channel.user.id);
+    await prisma.channelStats.incrementTimeouts(thread.channel.user.id);
 
-    Prisma.getPrismaClient().channelAction.createAndEmit({
+    prisma.channelAction.createAndEmit({
       channelUserId: thread.channel.user.id,
       issuerDisplayName: thread.channel.user.displayName,
       targetDisplayName: (await TwitchUserRepo.getByLogin(thread.channel.user.id, username))?.display_name ?? username,
@@ -188,9 +188,9 @@ export class Bot {
       return;
     }
 
-    await Prisma.getPrismaClient().channelStats.incrementBans(thread.channel.user.id);
+    await prisma.channelStats.incrementBans(thread.channel.user.id);
 
-    await Prisma.getPrismaClient().channelAction.createAndEmit({
+    await prisma.channelAction.createAndEmit({
       channelUserId: thread.channel.user.id,
       issuerDisplayName: thread.channel.user.displayName,
       targetDisplayName: (await TwitchUserRepo.getByLogin(thread.channel.user.id, username))?.display_name ?? username,
@@ -208,9 +208,9 @@ export class Bot {
       return;
     }
 
-    await Prisma.getPrismaClient().channelStats.incrementDeleted(thread.channel.user.id);
+    await prisma.channelStats.incrementDeleted(thread.channel.user.id);
 
-    await Prisma.getPrismaClient().channelAction.createAndEmit({
+    await prisma.channelAction.createAndEmit({
       channelUserId: thread.channel.user.id,
       issuerDisplayName: thread.channel.user.displayName,
       targetDisplayName: (await TwitchUserRepo.getByLogin(thread.channel.user.id, username))?.display_name ?? 'Chat Member',
@@ -241,7 +241,7 @@ export class Bot {
       return;
     }
 
-    const channels = await Prisma.getPrismaClient().channel.findMany({
+    const channels = await prisma.channel.findMany({
       include: {
         user: true,
       },
@@ -257,7 +257,7 @@ export class Bot {
   public static async joinChannel(id: string): Promise<boolean> {
     try {
       const instance = await Bot.getInstance();
-      const channel = await Prisma.getPrismaClient().channel.getByUserIdOrFail(id);
+      const channel = await prisma.channel.getByUserIdOrFail(id);
 
       if (instance.client.getChannels().includes(`#${channel.user.login}`)) {
         if (instance.channels.has(channel.user.login)) return true;
@@ -285,7 +285,7 @@ export class Bot {
   public static async leaveChannel(id: string): Promise<boolean> {
     try {
       const instance = await Bot.getInstance();
-      const channel = await Prisma.getPrismaClient().channel.getByUserIdOrFail(id);
+      const channel = await prisma.channel.getByUserIdOrFail(id);
 
       if (!instance.client.getChannels().includes(`#${channel.user.login}`)) {
         if (!instance.channels.has(channel.user.login)) return true;
@@ -315,7 +315,7 @@ export class Bot {
   }
 
   public static async reloadChannelCommands(channelId: string): Promise<void> {
-    const channel = await Prisma.getPrismaClient().channel.getByUserIdOrFail(channelId);
+    const channel = await prisma.channel.getByUserIdOrFail(channelId);
     const channelThread = Bot.getChannelThread(channel.user.login);
 
     if (!channelThread) {
@@ -327,7 +327,7 @@ export class Bot {
   }
 
   public static async reloadChannelChannel(channelId: string): Promise<void> {
-    const channel = await Prisma.getPrismaClient().channel.getByUserIdOrFail(channelId);
+    const channel = await prisma.channel.getByUserIdOrFail(channelId);
     const channelThread = Bot.getChannelThread(channel.user.login);
 
     if (!channelThread) {

@@ -7,7 +7,7 @@ import { createDevAuthStrategy } from '#server/routers/v1/authDev';
 import { authScopes } from '#server/routers/v1/authShared';
 import { display } from '#lib/display';
 import { SocketServer } from '#server/SocketServer';
-import { Database } from '#database/Prisma';
+import { prisma } from '#database/database';
 
 
 export const authRouter = async (): Promise<expressRouter> => {
@@ -18,7 +18,7 @@ export const authRouter = async (): Promise<expressRouter> => {
   });
 
   passport.deserializeUser<string>(async (id, done) => {
-    const user = await Database.getPrismaClient().user.getById(id);
+    const user = await prisma.user.getById(id);
 
     if (user !== null) return done(null, user);
 
@@ -67,7 +67,7 @@ export const authRouter = async (): Promise<expressRouter> => {
       if (err && isDevMode) res.status(500).send(err);
       else if (err) res.sendStatus(500);
       else {
-        await Database.getPrismaClient().systemNotification.createNotification(
+        await prisma.systemNotification.createNotification(
           user.id,
           'Logged out',
           'You have been logged out of the dashboard.',

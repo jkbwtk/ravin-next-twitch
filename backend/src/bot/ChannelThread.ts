@@ -2,7 +2,7 @@ import { ExtendedMap } from '#lib/ExtendedMap';
 import ExtendedSet from '#lib/ExtendedSet';
 import { getChatters } from '#lib/twitch';
 import { ChannelWithUser } from '#database/extensions/channel';
-import { Database } from '#database/Prisma';
+import { prisma } from '#database/database';
 import { CommandWithUser } from '#database/extensions/command';
 
 
@@ -112,7 +112,7 @@ export class ChannelThread {
   }
 
   public async syncCustomCommands(): Promise<void> {
-    const commands = await Database.getPrismaClient().command.getByChannelId(this.channel.user.id);
+    const commands = await prisma.command.getByChannelId(this.channel.user.id);
 
     this.customCommands.clear();
     for (const command of commands) {
@@ -131,6 +131,6 @@ export class ChannelThread {
   }
 
   public async syncChannel(): Promise<void> {
-    this.channel = await Database.getPrismaClient().channel.getByUserIdOrFail(this.channel.userId);
+    this.channel = await prisma.channel.getByUserIdOrFail(this.channel.userId);
   }
 }

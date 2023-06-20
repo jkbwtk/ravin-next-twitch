@@ -1,4 +1,4 @@
-import { Database } from '#database/Prisma';
+import { prisma } from '#database/database';
 import { TokenWithUserAndChannel } from '#database/extensions/token';
 import Deferred from '#lib/Deferred';
 import { ExtendedMap } from '#lib/ExtendedMap';
@@ -10,7 +10,7 @@ import { isDevApi } from '#shared/constants';
 export class TokenManager {
   private static instance: TokenManager;
 
-  private repository = Database.getPrismaClient().token;
+  private repository = prisma.token;
   private intervalHandle: NodeJS.Timer | null = null;
 
   private refreshQueue: ExtendedMap<string, Deferred<TokenWithUserAndChannel>> = new ExtendedMap();
@@ -30,7 +30,7 @@ export class TokenManager {
   private async _refresh(userId: string): Promise<TokenWithUserAndChannel> {
     try {
       if (isDevApi) {
-        const token = await Database.getPrismaClient().token.getByUserIdOrFail(userId);
+        const token = await prisma.token.getByUserIdOrFail(userId);
         display.debug.nextLine('TokenManager', 'Skipping token refresh because dev api is enabled');
         return token;
       }
@@ -92,7 +92,7 @@ export class TokenManager {
     }
 
     display.debug.nextLine('TokenManager', 'Beginning token processing...');
-    const users = await Database.getPrismaClient().user.findMany({
+    const users = await prisma.user.findMany({
       // where: {
       //   token: {
       //     refreshToken: {

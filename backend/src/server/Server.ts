@@ -8,7 +8,7 @@ import chalk from 'chalk';
 import path from 'path';
 import { Config } from '#lib/Config';
 import { createOnboardingRouter } from '#server/routers/onboarding';
-import { Database } from '#database/Prisma';
+import { redis } from '#database/database';
 import session from 'express-session';
 import passport from 'passport';
 import { randomAlphanumeric } from '#lib/utils';
@@ -84,7 +84,7 @@ export class Server {
         sameSite: 'strict',
       },
       store: new RedisStore({
-        client: await Database.getRedisClient(),
+        client: redis,
         prefix: 'session_store:',
       }),
     });

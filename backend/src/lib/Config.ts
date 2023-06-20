@@ -1,12 +1,12 @@
 import { ExtendedMap } from '#lib/ExtendedMap';
 import { Config as ConfigEntity } from '@prisma/client';
-import { Database } from '#database/Prisma';
+import { prisma } from '#database/database';
 
 
 export class Config {
   private static instance: Config;
 
-  private repository = Database.getPrismaClient().config;
+  private repository = prisma.config;
   public config: ExtendedMap<string, string>;
   public shadow: ExtendedMap<string, string>;
 
@@ -85,7 +85,7 @@ export class Config {
     const instance = await Config.getInstance();
     const entities = entries.map((entry) => ({ key: entry[0], value: entry[1] }));
 
-    const savedEntries = await Database.getPrismaClient().$transaction(async (prisma) => {
+    const savedEntries = await prisma.$transaction(async (prisma) => {
       const results: ConfigEntity[] = [];
 
       for (const entity of entities) {

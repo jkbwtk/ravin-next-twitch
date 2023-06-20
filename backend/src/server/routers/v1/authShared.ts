@@ -1,5 +1,5 @@
 import { Token, User as UserEntity } from '@prisma/client';
-import { Database as Prisma } from '#database/Prisma';
+import { prisma } from '#database/database';
 import { VerifyCallback } from 'passport-oauth2';
 import { isDevApi } from '#shared/constants';
 import { TwitchUser } from '#shared/types/twitch';
@@ -16,7 +16,7 @@ export const authScopes: string[] = [
 ];
 
 const createOrUpdateToken = async (accessToken: string, refreshToken: string | null, user: UserEntity): Promise<Token> => {
-  const oldToken = await Prisma.getPrismaClient().token.getByUserId(user.id);
+  const oldToken = await prisma.token.getByUserId(user.id);
 
   const newToken = {
     id: oldToken?.id,
@@ -25,7 +25,7 @@ const createOrUpdateToken = async (accessToken: string, refreshToken: string | n
     refreshToken: refreshToken,
   };
 
-  return Prisma.getPrismaClient().token.upsert({
+  return prisma.token.upsert({
     create: newToken,
     update: newToken,
     where: {
@@ -35,14 +35,14 @@ const createOrUpdateToken = async (accessToken: string, refreshToken: string | n
 };
 
 const createOrUpdateChannel = async (user: UserEntity): Promise<ChannelWithUser> => {
-  const oldChannel = await Prisma.getPrismaClient().channel.getByUserId(user.id);
+  const oldChannel = await prisma.channel.getByUserId(user.id);
 
   const newChannel = {
     id: oldChannel?.id,
     userId: user.id,
   };
 
-  const updated = await Prisma.getPrismaClient().channel.upsert({
+  const updated = await prisma.channel.upsert({
     create: newChannel,
     update: newChannel,
     where: {
@@ -66,7 +66,7 @@ const createOrUpdateUser = async (profile: TwitchUser): Promise<UserEntity> => {
     admin: await Config.get('adminUsername') === profile.login,
   };
 
-  const createdUser = await Prisma.getPrismaClient().user.upsert({
+  const createdUser = await prisma.user.upsert({
     create: newUser,
     update: newUser,
     where: {
@@ -80,7 +80,7 @@ const createOrUpdateUser = async (profile: TwitchUser): Promise<UserEntity> => {
 
 export const verifyCallback = async (accessToken: string, refreshToken: string | null, profile: TwitchUser, done: VerifyCallback): Promise<void> => {
   try {
-    const token = await Prisma.getPrismaClient().token.getByUserId(profile.id);
+    const token = await prisma.token.getByUserId(profile.id);
     const user = await createOrUpdateUser(profile);
 
     if (token !== null) {
@@ -90,13 +90,13 @@ export const verifyCallback = async (accessToken: string, refreshToken: string |
 
     await createOrUpdateToken(accessToken, refreshToken, user);
 
-    await Prisma.getPrismaClient().systemNotification.createNotification(
+    await prisma.systemNotification.createNotification(
       user.id,
       'Logged in',
       'You have successfully logged in to the dashboard.',
     );
 
-    const updatedUser = await Prisma.getPrismaClient().user.getByIdOrFail(user.id);
+    const updatedUser = await prisma.user.getByIdOrFail(user.id);
 
     done(null, updatedUser);
   } catch (err) {

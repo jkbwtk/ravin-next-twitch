@@ -13,7 +13,7 @@ import { Bot } from '#bot/Bot';
 import { TwitchUserRepo } from '#lib/TwitchUserRepo';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { Database } from '#database/Prisma';
+import { prisma } from '#database/database';
 import { FRAME_DURATION } from '#database/extensions/channelStats';
 
 dayjs.extend(utc);
@@ -76,14 +76,14 @@ dashboardRouter.post('/joinChannel', async (req, res) => {
   if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
 
   try {
-    const channel = await Database.getPrismaClient().channel.getByUserIdOrFail(req.user.id);
+    const channel = await prisma.channel.getByUserIdOrFail(req.user.id);
 
     channel.joined = !channel.joined;
 
     if (channel.joined) await Bot.joinChannel(channel.user.id);
     else await Bot.leaveChannel(channel.user.id);
 
-    await Database.getPrismaClient().channel.update({
+    await prisma.channel.update({
       where: { id: channel.id },
       data: { joined: channel.joined },
     });
@@ -99,12 +99,12 @@ dashboardRouter.get('/widgets/topStats', async (req, res) => {
   if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
 
   try {
-    const topChatterId = await Database.getPrismaClient().message.getTopChatter(req.user.id);
+    const topChatterId = await prisma.message.getTopChatter(req.user.id);
     const topChatter = topChatterId ? await TwitchUserRepo.get(req.user.id, topChatterId ?? '') : null;
 
-    const topCommand = await Database.getPrismaClient().command.getTopCommand(req.user.id);
+    const topCommand = await prisma.command.getTopCommand(req.user.id);
 
-    const topEmote = await Database.getPrismaClient().message.getTopEmote(req.user.id);
+    const topEmote = await prisma.message.getTopEmote(req.user.id);
 
     const resp: GetTopStatsResponse = {
       data: {
@@ -130,7 +130,7 @@ dashboardRouter.get('/widgets/topStats', async (req, res) => {
 dashboardRouter.get('/widgets/recentActions', async (req, res) => {
   if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
 
-  const stats = await Database.getPrismaClient().channelAction.getByUserId(req.user.id);
+  const stats = await prisma.channelAction.getByUserId(req.user.id);
 
   const resp: GetRecentActionsResponse = {
     data: stats.map((stat) => stat.serialize()),
@@ -142,11 +142,11 @@ dashboardRouter.get('/widgets/recentActions', async (req, res) => {
 dashboardRouter.get('/widgets/chatStats', async (req, res) => {
   if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
 
-  const oldestFrameId = Database.getPrismaClient().channelStats.frameIdFromDate(dayjs.utc().subtract(1, 'hour').toDate());
-  const newestFrameId = Database.getPrismaClient().channelStats.frameIdFromDate();
+  const oldestFrameId = prisma.channelStats.frameIdFromDate(dayjs.utc().subtract(1, 'hour').toDate());
+  const newestFrameId = prisma.channelStats.frameIdFromDate();
 
-  const stats = await Database.getPrismaClient().channelStats.getFramesBetween(req.user.id, oldestFrameId, newestFrameId);
-  const mappedStats = Database.getPrismaClient().channelStats.mapFrames(stats);
+  const stats = await prisma.channelStats.getFramesBetween(req.user.id, oldestFrameId, newestFrameId);
+  const mappedStats = prisma.channelStats.mapFrames(stats);
 
   let messagesTotal = 0;
   let timeoutsTotal = 0;
@@ -160,7 +160,7 @@ dashboardRouter.get('/widgets/chatStats', async (req, res) => {
 
     if (frame === undefined) {
       frames.push({
-        timestamp: Database.getPrismaClient().channelStats.dateFromFrameId(i).getTime(),
+        timestamp: prisma.channelStats.dateFromFrameId(i).getTime(),
         frameDuration: FRAME_DURATION,
 
         messages: 0,
@@ -191,8 +191,8 @@ dashboardRouter.get('/widgets/chatStats', async (req, res) => {
 
   const resp: GetChatStatsResponse = {
     data: {
-      dateStart: Database.getPrismaClient().channelStats.dateFromFrameId(oldestFrameId).getTime(),
-      dateEnd: Database.getPrismaClient().channelStats.dateFromFrameId(newestFrameId).getTime(),
+      dateStart: prisma.channelStats.dateFromFrameId(oldestFrameId).getTime(),
+      dateEnd: prisma.channelStats.dateFromFrameId(newestFrameId).getTime(),
 
       messagesTotal,
       timeoutsTotal,
