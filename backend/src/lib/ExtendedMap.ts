@@ -1,6 +1,6 @@
 export class ExtendedMap<K, V> extends Map<K, V> {
-  constructor() {
-    super();
+  constructor(initial?: ConstructorParameters<typeof Map<K, V>>[0]) {
+    super(initial);
   }
 
   public find(finder: (value: V) => boolean): [K, V] | undefined {
