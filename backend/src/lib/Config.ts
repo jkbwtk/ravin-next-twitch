@@ -85,11 +85,11 @@ export class Config {
     const instance = await Config.getInstance();
     const entities = entries.map((entry) => ({ key: entry[0], value: entry[1] }));
 
-    const savedEntries = await prisma.$transaction(async (prisma) => {
+    const savedEntries = await prisma.$transaction(async (tx) => {
       const results: ConfigEntity[] = [];
 
       for (const entity of entities) {
-        results.push(await prisma.config.upsert({
+        results.push(await tx.config.upsert({
           update: { value: entity.value },
           where: { key: entity.key },
           create: entity,
@@ -149,5 +149,11 @@ export class Config {
     const instance = await Config.getInstance();
     await instance.repository.delete({ where: { key } });
     instance.config.delete(key);
+    instance.shadow.delete(key);
+  }
+
+  public static async clearCache(): Promise<void> {
+    const instance = await Config.getInstance();
+    instance.config.clear();
   }
 }
