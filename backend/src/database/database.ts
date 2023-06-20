@@ -19,7 +19,6 @@ export const redisOptions: RedisOptions = {
   password: process.env.DB_PASSWORD ?? 'DEV_PASSWD',
 };
 
-
 export const prismaOptions: Prisma.PrismaClientOptions = {
   log: mapOptionsToArray({
     query: databaseDebug,
@@ -30,9 +29,11 @@ export const prismaOptions: Prisma.PrismaClientOptions = {
   errorFormat: 'pretty',
 };
 
-export const redis = new Redis(redisOptions);
 
-export const prisma = new PrismaClient(prismaOptions)
+export const redis = new Redis(redisOptions);
+export const prismaBase = new PrismaClient(prismaOptions);
+
+const prismaExtended = prismaBase
   .$extends(channelActionExtension)
   .$extends(configExtension)
   .$extends(userExtension)
@@ -42,3 +43,7 @@ export const prisma = new PrismaClient(prismaOptions)
   .$extends(messageExtension)
   .$extends(commandExtension)
   .$extends(channelStatsExtension);
+
+export type ExtendedPrismaClient = typeof prismaExtended;
+
+export const prisma = prismaExtended;

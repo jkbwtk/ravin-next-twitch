@@ -8,7 +8,8 @@
     "dev": "cross-env DEV=true TS_NODE_PROJECT=./backend/tsconfig.json tsnd -r tsconfig-paths/register ./backend/src/index.ts",
     "playground": "cross-env DEV=true TS_NODE_PROJECT=./backend/tsconfig.json tsnd -r tsconfig-paths/register ./backend/src/playground.ts",
     "build": "vite build && cd ./backend && tsc -b",
-    "lint": "eslint --fix --ext .ts,.tsx ./frontend/src ./backend/src ./shared/src"
+    "lint": "eslint --fix --ext .ts,.tsx ./frontend/src ./backend/src ./shared/src",
+    "test": "vitest"
   },
   "author": "jkbwtk",
   "license": "ISC",
@@ -77,6 +78,7 @@
     "@types/ws": "^8.5.3",
     "@typescript-eslint/eslint-plugin": "^5.54.1",
     "@typescript-eslint/parser": "^5.54.1",
+    "@vitest/coverage-v8": "^0.32.2",
     "autoprefixer": "^10.4.14",
     "eslint": "^8.35.0",
     "eslint-config-google": "^0.14.0",
@@ -86,6 +88,8 @@
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.0.4",
     "vite": "^4.1.1",
-    "vite-plugin-solid": "^2.5.0"
+    "vite-plugin-solid": "^2.5.0",
+    "vitest": "^0.32.2",
+    "vitest-mock-extended": "^1.1.3"
   }
 }
