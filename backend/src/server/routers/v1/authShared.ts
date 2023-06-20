@@ -1,4 +1,4 @@
-import { Token, User as UserEntity } from '@prisma/client';
+import { Token, User } from '@prisma/client';
 import { prisma } from '#database/database';
 import { VerifyCallback } from 'passport-oauth2';
 import { isDevApi } from '#shared/constants';
@@ -15,7 +15,7 @@ export const authScopes: string[] = [
   'moderator:read:chatters',
 ];
 
-const createOrUpdateToken = async (accessToken: string, refreshToken: string | null, user: UserEntity): Promise<Token> => {
+const createOrUpdateToken = async (accessToken: string, refreshToken: string | null, user: User): Promise<Token> => {
   const oldToken = await prisma.token.getByUserId(user.id);
 
   const newToken = {
@@ -34,7 +34,7 @@ const createOrUpdateToken = async (accessToken: string, refreshToken: string | n
   });
 };
 
-const createOrUpdateChannel = async (user: UserEntity): Promise<ChannelWithUser> => {
+const createOrUpdateChannel = async (user: User): Promise<ChannelWithUser> => {
   const oldChannel = await prisma.channel.getByUserId(user.id);
 
   const newChannel = {
@@ -56,7 +56,7 @@ const createOrUpdateChannel = async (user: UserEntity): Promise<ChannelWithUser>
   return updated as ChannelWithUser;
 };
 
-const createOrUpdateUser = async (profile: TwitchUser): Promise<UserEntity> => {
+const createOrUpdateUser = async (profile: TwitchUser): Promise<User> => {
   const newUser = {
     id: profile.id,
     login: profile.login,
