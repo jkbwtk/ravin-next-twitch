@@ -165,9 +165,9 @@ export const messageExtension = Prisma.defineExtension((client) => {
           try {
             const t1 = performance.now();
 
-            const result = await client.$queryRaw<(Pick<Message, 'userId'> & { count: bigint })[]>`--sql
+            const result = await client.$queryRaw<(Pick<Message, 'userId'> & { count: bigint })[]>`
             SELECT "userId", COUNT(*) AS "count"
-            FROM message
+            FROM "Message"
             WHERE "channelUserId" = ${channelId}
             GROUP BY "userId"
             ORDER BY "count" DESC
@@ -187,15 +187,15 @@ export const messageExtension = Prisma.defineExtension((client) => {
           try {
             const t1 = performance.now();
 
-            const result = await client.$queryRaw<DatabaseEmote[]>`--sql
+            const result = await client.$queryRaw<DatabaseEmote[]>`
             SELECT "id", "name", SUM("count") AS "count"
             FROM (SELECT "emote".key AS "id", "name", "count"::INTEGER
-                  FROM message
-                          CROSS JOIN LATERAL JSONB_EACH(message."emotes") AS "emote"
+                  FROM "Message"
+                          CROSS JOIN LATERAL JSONB_EACH("Message"."emotes") AS "emote"
                           CROSS JOIN LATERAL jsonb_object_field_text("emote".value, 'name') AS "name"
                           CROSS JOIN LATERAL jsonb_object_field_text("emote".value, 'count') AS "count"
                   WHERE "channelUserId" = ${channelId}
-                    AND MESSAGE."emotes" IS NOT NULL) AS "emotes"
+                    AND "Message"."emotes" IS NOT NULL) AS "emotes"
             GROUP BY "id", NAME
             ORDER BY "count" DESC
             LIMIT 1;
