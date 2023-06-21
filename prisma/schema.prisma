@@ -12,21 +12,19 @@ datasource db {
 }
 
 model Channel {
-  id               Int      @id(map: "PK_590f33ee6ee7d76437acf362e39") @default(autoincrement())
+  id               Int      @id() @default(autoincrement())
   joined           Boolean  @default(false)
   chantingSettings Json     @default("{\"enabled\":false,\"interval\":60,\"length\":3}") @db.Json
   createdAt        DateTime @default(now()) @db.Timestamptz(6)
   updatedAt        DateTime @default(now()) @db.Timestamptz(6)
-  userId           String   @unique(map: "REL_823bae55bd81b3be6e05cff438") @db.VarChar
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_823bae55bd81b3be6e05cff4383")
+  userId           String   @unique() @db.VarChar
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([userId], map: "IDX_823bae55bd81b3be6e05cff438")
-
-  @@map("channel")
+  @@index([userId])
 }
 
 model ChannelAction {
-  id                Int       @id(map: "PK_5b901e71b2c05f24b5ae848674a") @default(autoincrement())
+  id                Int       @id() @default(autoincrement())
   issuerDisplayName String    @db.VarChar
   targetDisplayName String    @db.VarChar
   type              ChannelActionType
@@ -35,18 +33,16 @@ model ChannelAction {
   updatedAt         DateTime  @default(now()) @db.Timestamptz(6)
   deletedAt         DateTime? @db.Timestamptz(6)
   channelUserId     String   @db.VarChar
-  user              User     @relation(fields: [channelUserId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_339407b773464854a6f6500bd95")
+  user              User     @relation(fields: [channelUserId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([targetDisplayName], map: "IDX_23bad318faea5e40a916e9927c")
-  @@index([channelUserId], map: "IDX_339407b773464854a6f6500bd9")
-  @@index([type], map: "IDX_9878a4a71189746d6439077186")
-  @@index([issuerDisplayName], map: "IDX_b8ee6a840e4f256390451cd7c6")
-
-  @@map("channel_action")
+  @@index([targetDisplayName])
+  @@index([channelUserId])
+  @@index([type])
+  @@index([issuerDisplayName])
 }
 
 model ChannelStats {
-  id            Int      @id(map: "PK_41c09dac9c93ccf2794486fb42e") @default(autoincrement())
+  id            Int      @id() @default(autoincrement())
   frameId       Int
   messages      Int      @default(0)
   timeouts      Int      @default(0)
@@ -56,18 +52,16 @@ model ChannelStats {
   frameDuration Int      @default(60000)
   createdAt     DateTime @default(now()) @db.Timestamptz(6)
   updatedAt     DateTime @default(now()) @db.Timestamptz(6)
-  userId        String?  @db.VarChar
-  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_60d592fd1f156f3f8d266403f23")
+  userId        String  @db.VarChar
+  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@unique([userId, frameId], map: "UQ_6546b15c742a552095a2cef3d49")
-  @@index([userId], map: "IDX_60d592fd1f156f3f8d266403f2")
-  @@index([frameId], map: "IDX_e3e849ee7035a407f50b9d82cd")
-
-  @@map("channel_stats")
+  @@unique([userId, frameId])
+  @@index([userId])
+  @@index([frameId])
 }
 
 model Command {
-  id            Int                    @id(map: "PK_5bfa4e1cb54b62f512078f3e7cb") @default(autoincrement())
+  id            Int                    @id() @default(autoincrement())
   command       String                 @db.VarChar
   response      String                 @db.VarChar
   // [UserLevelPrisma]
@@ -79,26 +73,22 @@ model Command {
   updatedAt     DateTime               @default(now()) @db.Timestamptz(6)
   destroyedAt   DateTime?              @db.Timestamptz(6)
   channelUserId String                @db.VarChar
-  user          User                  @relation(fields: [channelUserId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_f8b5f064eb047ce931c1b1da275")
+  user          User                  @relation(fields: [channelUserId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@unique([channelUserId, command], map: "UQ_acd01c76f5ef7822719573e7a2c")
-  @@index([channelUserId], map: "IDX_f8b5f064eb047ce931c1b1da27")
-
-  @@map("command")
+  @@unique([channelUserId, command])
+  @@index([channelUserId])
 }
 
 model Config {
-  key         String    @id(map: "PK_26489c99ddbb4c91631ef5cc791") @db.VarChar(32)
+  key         String    @id() @db.VarChar(32)
   value       String
   createdAt   DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt   DateTime  @default(now()) @db.Timestamptz(6)
   destroyedAt DateTime? @db.Timestamptz(6)
-
-  @@map("config")
 }
 
 model Message {
-  id            Int       @id(map: "PK_ba01f0a3e0123651915008bc578") @default(autoincrement())
+  id            Int       @id() @default(autoincrement())
   uuid          String    @db.Uuid
   channelName   String    @db.VarChar
   username      String    @db.VarChar
@@ -123,50 +113,44 @@ model Message {
   updatedAt     DateTime  @default(now()) @db.Timestamptz(6)
   deletedAt     DateTime? @db.Timestamptz(6)
   channelUserId String   @db.VarChar
-  user          User     @relation(fields: [channelUserId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_af0575bae847727a34cd20792a1")
+  user          User     @relation(fields: [channelUserId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([uuid], map: "IDX_3c5cb33791204380214230107d")
-  @@index([userId], map: "IDX_446251f8ceb2132af01b68eb59")
-  @@index([channelUserId], map: "IDX_af0575bae847727a34cd20792a")
-  @@index([username], map: "IDX_eeb56c119826b13eb2a3a13fa4")
-  @@index([channelName], map: "IDX_f80697e2be6b6b7cebb6b2eee1")
-
-  @@map("message")
+  @@index([uuid])
+  @@index([userId])
+  @@index([channelUserId])
+  @@index([username])
+  @@index([channelName])
 }
 
 model SystemNotification {
-  id        Int       @id(map: "PK_56fb6c802e30478e98f04e6fa01") @default(autoincrement())
+  id        Int       @id() @default(autoincrement())
   title     String    @db.VarChar
   content   String    @db.VarChar
   createdAt DateTime  @default(now()) @db.Timestamptz(6)
   updatedAt DateTime  @default(now()) @db.Timestamptz(6)
   deletedAt DateTime? @db.Timestamptz(6)
   userId    String   @db.VarChar
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_9476301c3fa7a6807648e1332d2")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([userId], map: "IDX_9476301c3fa7a6807648e1332d")
-
-	@@map("system_notification")
+  @@index([userId])
 }
 
 model Token {
-  id           Int      @id(map: "PK_82fae97f905930df5d62a702fc9") @default(autoincrement())
-  accessToken  String   @unique(map: "UQ_f3db10d68154bc95175a641635a") @db.VarChar
-  refreshToken String?  @unique(map: "UQ_9075147ba4bb2ead8bac71ccc83") @db.VarChar
+  id           Int      @id() @default(autoincrement())
+  accessToken  String   @unique() @db.VarChar
+  refreshToken String?  @unique() @db.VarChar
   createdAt    DateTime @default(now()) @db.Timestamptz(6)
   updatedAt    DateTime @default(now()) @db.Timestamptz(6)
-  userId       String  @unique(map: "REL_94f168faad896c0786646fa3d4") @db.VarChar
-  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "FK_94f168faad896c0786646fa3d4a")
+  userId       String  @unique() @db.VarChar
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  @@index([userId], map: "IDX_94f168faad896c0786646fa3d4")
-
-	@@map("token")
+  @@index([userId])
 }
 
 model User {
-  id                  String                @id(map: "PK_cace4a159ff9f2512dd42373760") @db.VarChar
-  login               String                @unique(map: "UQ_a62473490b3e4578fd683235c5e") @db.VarChar
-  displayName         String                @unique(map: "UQ_059e69c318702e93998f26d1528") @db.VarChar
+  id                  String                @id() @db.VarChar
+  login               String                @unique() @db.VarChar
+  displayName         String                @unique() @db.VarChar
   email               String?               @db.VarChar
   profileImageUrl     String                @db.VarChar
   createdAt           DateTime              @default(now()) @db.Timestamptz(6)
@@ -180,9 +164,7 @@ model User {
   system_notification SystemNotification[]
   token               Token?
 
-  @@index([login], map: "IDX_a62473490b3e4578fd683235c5")
-
-	@@map("user")
+  @@index([login])
 }
 
 enum ChannelActionType {
