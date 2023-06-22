@@ -11,6 +11,7 @@ import { messageExtension } from '#database/extensions/message';
 import { commandExtension } from '#database/extensions/command';
 import { channelStatsExtension } from '#database/extensions/channelStats';
 import { mapOptionsToArray } from '#lib/utils';
+import { utilsExtension } from '#database/extensions/utils';
 
 
 export const redisOptions: RedisOptions = {
@@ -34,6 +35,7 @@ export const redis = new Redis(redisOptions);
 export const prismaBase = new PrismaClient(prismaOptions);
 
 const prismaExtended = prismaBase
+  .$extends(utilsExtension)
   .$extends(channelActionExtension)
   .$extends(configExtension)
   .$extends(userExtension)
