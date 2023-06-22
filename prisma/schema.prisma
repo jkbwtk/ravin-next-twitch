@@ -1,0 +1,170 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["clientExtensions"]
+}
+
+generator json {
+  provider = "prisma-json-types-generator"
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Channel {
+  id               Int      @id() @default(autoincrement())
+  joined           Boolean  @default(false)
+  chantingSettings Json     @default("{\"enabled\":false,\"interval\":60,\"length\":3}") @db.Json
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @default(now())
+  userId           String   @unique() @db.VarChar
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId])
+}
+
+model ChannelAction {
+  id                Int       @id() @default(autoincrement())
+  issuerDisplayName String    @db.VarChar
+  targetDisplayName String    @db.VarChar
+  type              ChannelActionType
+  data              String    @db.VarChar
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @default(now())
+  channelUserId     String   @db.VarChar
+  user              User     @relation(fields: [channelUserId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([targetDisplayName])
+  @@index([channelUserId])
+  @@index([type])
+  @@index([issuerDisplayName])
+}
+
+model ChannelStats {
+  id            Int      @id() @default(autoincrement())
+  frameId       Int
+  messages      Int      @default(0)
+  timeouts      Int      @default(0)
+  bans          Int      @default(0)
+  deleted       Int      @default(0)
+  commands      Int      @default(0)
+  frameDuration Int      @default(60000)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now())
+  userId        String  @db.VarChar
+  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([userId, frameId])
+  @@index([userId])
+  @@index([frameId])
+}
+
+model Command {
+  id            Int                    @id() @default(autoincrement())
+  command       String                 @db.VarChar
+  response      String                 @db.VarChar
+  // [UserLevelPrisma]
+  userLevel     Int                    @default(0)
+  cooldown      Int                    @default(10)
+  enabled       Boolean                @default(false)
+  usage         Int                    @default(0)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @default(now())
+  channelUserId String                @db.VarChar
+  user          User                  @relation(fields: [channelUserId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([channelUserId, command])
+  @@index([channelUserId])
+}
+
+model Config {
+  key         String    @id() @db.VarChar(32)
+  value       String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now())
+}
+
+model Message {
+  id            Int       @id() @default(autoincrement())
+  uuid          String    @db.Uuid
+  channelName   String    @db.VarChar
+  username      String    @db.VarChar
+  displayName   String    @db.VarChar
+  color         String?   @db.VarChar
+  userId        String    @db.VarChar
+  content       String    @db.VarChar
+  /// [EmotesUsedPrisma]
+  emotes        Json?
+  timestamp     DateTime 
+  /// [BadgeInfoPrisma]
+  badgeInfo     Json?
+  /// [BadgesPrisma]
+  badges        Json?
+  flags         String?   @db.VarChar
+  /// [MessagePrisma]
+  messageType   String    @db.VarChar
+  firstMessage  Boolean
+  mod           Boolean
+  subscriber    Boolean
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @default(now())
+  channelUserId String   @db.VarChar
+  user          User     @relation(fields: [channelUserId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([uuid])
+  @@index([userId])
+  @@index([channelUserId])
+  @@index([username])
+  @@index([channelName])
+}
+
+model SystemNotification {
+  id        Int       @id() @default(autoincrement())
+  title     String    @db.VarChar
+  content   String    @db.VarChar
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+  userId    String   @db.VarChar
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId])
+}
+
+model Token {
+  id           Int      @id() @default(autoincrement())
+  accessToken  String   @unique() @db.VarChar
+  refreshToken String?  @unique() @db.VarChar
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
+  userId       String  @unique() @db.VarChar
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([userId])
+}
+
+model User {
+  id                  String                @id() @db.VarChar
+  login               String                @unique() @db.VarChar
+  displayName         String                @unique() @db.VarChar
+  email               String?               @db.VarChar
+  profileImageUrl     String                @db.VarChar
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @default(now())
+  admin               Boolean               @default(false)
+  channel             Channel?
+  channel_action      ChannelAction[]
+  channel_stats       ChannelStats[]
+  command             Command[]
+  message             Message[]
+  system_notification SystemNotification[]
+  token               Token?
+
+  @@index([login])
+}
+
+enum ChannelActionType {
+  ban
+  timeout
+  delete
+}

@@ -1,4 +1,3 @@
-import { User } from '#database/entities/User';
 import { Router as expressRouter } from 'express';
 import { json as jsonParser } from 'body-parser';
 import { display } from '#lib/display';
@@ -18,7 +17,7 @@ export const adminRouter = async (): Promise<expressRouter> => {
   adminRouter.use(jsonParser());
 
   adminRouter.post('/settings/config', async (req, res) => {
-    if (!(req.user instanceof User)) return res.sendStatus(401);
+    if (req.user === undefined) return res.sendStatus(401);
 
     try {
       const changes: [string, string][] = [];

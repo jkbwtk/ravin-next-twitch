@@ -1,14 +1,12 @@
-import { User as UserEntity } from '#database/entities/User';
-import { Database } from '#database/Database';
+import { Token, User } from '@prisma/client';
+import { prisma } from '#database/database';
 import { VerifyCallback } from 'passport-oauth2';
-import { Token } from '#database/entities/Token';
 import { isDevApi } from '#shared/constants';
 import { TwitchUser } from '#shared/types/twitch';
 import { revokeTokenUnsafe } from '#lib/twitch';
-import { Channel } from '#database/entities/Channel';
-import { SystemNotification } from '#database/entities/SystemNotification';
 import { display } from '#lib/display';
 import { Config } from '#lib/Config';
+import { ChannelWithUser } from '#database/extensions/channel';
 
 
 export const authScopes: string[] = [
@@ -17,45 +15,64 @@ export const authScopes: string[] = [
   'moderator:read:chatters',
 ];
 
-const createOrUpdateToken = async (accessToken: string, refreshToken: string | null, user: UserEntity): Promise<Token> => {
-  const tokenRepo = await Database.getRepository(Token);
-  const oldToken = await Token.getByUserId(user.id);
+const createOrUpdateToken = async (accessToken: string, refreshToken: string | null, user: User): Promise<Token> => {
+  const oldToken = await prisma.token.getByUserId(user.id);
 
-  const newToken = tokenRepo.create({
+  const newToken = {
     id: oldToken?.id,
-    user,
+    userId: user.id,
     accessToken,
     refreshToken: refreshToken,
-  });
+  };
 
-  return Token.createOrUpdate(newToken);
+  return prisma.token.upsert({
+    create: newToken,
+    update: newToken,
+    where: {
+      userId: user.id,
+    },
+  });
 };
 
-const createOrUpdateChannel = async (user: UserEntity): Promise<Channel> => {
-  const channelRepo = await Database.getRepository(Channel);
-  const oldChannel = await Channel.getByUserId(user.id);
+const createOrUpdateChannel = async (user: User): Promise<ChannelWithUser> => {
+  const oldChannel = await prisma.channel.getByUserId(user.id);
 
-  const newChannel = channelRepo.create({
+  const newChannel = {
     id: oldChannel?.id,
-    user,
+    userId: user.id,
+  };
+
+  const updated = await prisma.channel.upsert({
+    create: newChannel,
+    update: newChannel,
+    where: {
+      userId: user.id,
+    },
+    include: {
+      user: true,
+    },
   });
 
-  return Channel.createOrUpdate(newChannel);
+  return updated as ChannelWithUser;
 };
 
-const createOrUpdateUser = async (profile: TwitchUser): Promise<UserEntity> => {
-  const userRepo = await Database.getRepository(UserEntity);
-
-  const newUser = userRepo.create({
+const createOrUpdateUser = async (profile: TwitchUser): Promise<User> => {
+  const newUser = {
     id: profile.id,
     login: profile.login,
     displayName: profile.display_name,
     email: profile.email ?? null,
     profileImageUrl: profile.profile_image_url,
     admin: await Config.get('adminUsername') === profile.login,
-  });
+  };
 
-  const createdUser = await UserEntity.createOrUpdateUser(newUser);
+  const createdUser = await prisma.user.upsert({
+    create: newUser,
+    update: newUser,
+    where: {
+      id: newUser.id,
+    },
+  });
   await createOrUpdateChannel(createdUser);
 
   return createdUser;
@@ -63,11 +80,7 @@ const createOrUpdateUser = async (profile: TwitchUser): Promise<UserEntity> => {
 
 export const verifyCallback = async (accessToken: string, refreshToken: string | null, profile: TwitchUser, done: VerifyCallback): Promise<void> => {
   try {
-    await Token.invalidateCache(profile.id);
-    await UserEntity.invalidateCache(profile.id);
-    await Channel.invalidateCache(profile.id);
-
-    const token = await Token.getByUserId(profile.id);
+    const token = await prisma.token.getByUserId(profile.id);
     const user = await createOrUpdateUser(profile);
 
     if (token !== null) {
@@ -77,13 +90,13 @@ export const verifyCallback = async (accessToken: string, refreshToken: string |
 
     await createOrUpdateToken(accessToken, refreshToken, user);
 
-    await SystemNotification.createNotification(
+    await prisma.systemNotification.createNotification(
       user.id,
       'Logged in',
       'You have successfully logged in to the dashboard.',
     );
 
-    const updatedUser = await UserEntity.getByIdOrFail(user.id);
+    const updatedUser = await prisma.user.getByIdOrFail(user.id);
 
     done(null, updatedUser);
   } catch (err) {

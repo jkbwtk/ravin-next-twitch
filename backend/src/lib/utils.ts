@@ -53,3 +53,23 @@ export const randomAlphanumeric = (length: number): string => {
 
   return result;
 };
+
+export const definedOrFail = <T>(value: T | undefined, name: string): T => {
+  if (value === undefined) {
+    throw new Error(`${name} is undefined`);
+  }
+
+  return value;
+};
+
+export const mapOptionsToArray = <T extends Record<string, boolean>>(options: T): Array<keyof T> => {
+  const result: Array<keyof T> = [];
+
+  for (const key in options) {
+    if (options[key]) {
+      result.push(key);
+    }
+  }
+
+  return result;
+};

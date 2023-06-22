@@ -1,9 +1,8 @@
-import { User } from '#database/entities/User';
 import { Router as expressRouter } from 'express';
 import { json as jsonParser } from 'body-parser';
 import { GetMessagesResponse } from '#shared/types/api/logs';
-import { Message } from '#database/entities/Message';
 import { display } from '#lib/display';
+import { prisma } from '#database/database';
 
 
 export const logsRouter = async (): Promise<expressRouter> => {
@@ -19,9 +18,9 @@ export const logsRouter = async (): Promise<expressRouter> => {
 
   logsRouter.get('/messages', async (req, res) => {
     try {
-      if (!(req.user instanceof User)) return res.sendStatus(401);
+      if (req.user === undefined) return res.sendStatus(401);
 
-      const messages = await Message.getByChannelId(req.user.id);
+      const messages = await prisma.message.getByChannelId(req.user.id);
 
       const response: GetMessagesResponse = {
         data: messages.map((message) => message.serialize()),

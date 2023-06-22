@@ -1,6 +1,5 @@
 import { Router as expressRouter } from 'express';
 import {
-  Action,
   ChatStatFrame,
   GetBotConnectionStatusResponse,
   GetChatStatsResponse,
@@ -9,17 +8,13 @@ import {
   GetTopStatsResponse,
 } from '#types/api/dashboard';
 import { getModerators } from '#lib/twitch';
-import { Channel } from '#database/entities/Channel';
 import { Config } from '#lib/Config';
 import { Bot } from '#bot/Bot';
 import { TwitchUserRepo } from '#lib/TwitchUserRepo';
-import { ChannelStats } from '#database/entities/ChannelStats';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
-import { Database } from '#database/Database';
-import { ChannelAction } from '#database/entities/ChannelAction';
-import { Message } from '#database/entities/Message';
-import { Command } from '#database/entities/Command';
+import { prisma } from '#database/database';
+import { FRAME_DURATION } from '#database/extensions/channelStats';
 
 dayjs.extend(utc);
 
@@ -81,14 +76,17 @@ dashboardRouter.post('/joinChannel', async (req, res) => {
   if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
 
   try {
-    const channel = await Channel.getByUserIdOrFail(req.user.id);
+    const channel = await prisma.channel.getByUserIdOrFail(req.user.id);
 
     channel.joined = !channel.joined;
 
     if (channel.joined) await Bot.joinChannel(channel.user.id);
     else await Bot.leaveChannel(channel.user.id);
 
-    await Channel.createOrUpdate(channel);
+    await prisma.channel.update({
+      where: { id: channel.id },
+      data: { joined: channel.joined },
+    });
 
     res.sendStatus(200);
   } catch (err) {
@@ -101,12 +99,12 @@ dashboardRouter.get('/widgets/topStats', async (req, res) => {
   if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
 
   try {
-    const topChatterId = await Message.getTopChatter(req.user.id);
+    const topChatterId = await prisma.message.getTopChatter(req.user.id);
     const topChatter = topChatterId ? await TwitchUserRepo.get(req.user.id, topChatterId ?? '') : null;
 
-    const topCommand = await Command.getTopCommand(req.user.id);
+    const topCommand = await prisma.command.getTopCommand(req.user.id);
 
-    const topEmote = await Message.getTopEmote(req.user.id);
+    const topEmote = await prisma.message.getTopEmote(req.user.id);
 
     const resp: GetTopStatsResponse = {
       data: {
@@ -129,50 +127,13 @@ dashboardRouter.get('/widgets/topStats', async (req, res) => {
   }
 });
 
-export const createAction = (action: ChannelAction): Action => {
-  const type = action.type;
-  const date = action.createdAt.getTime();
-  const issuerDisplayName = action.issuerDisplayName;
-  const targetDisplayName = action.targetDisplayName;
-
-  switch (type) {
-    case 'ban':
-      return {
-        date,
-        issuerDisplayName,
-        targetDisplayName,
-        type,
-        reason: action.data,
-      };
-
-    case 'timeout':
-      return {
-        date,
-        issuerDisplayName,
-        targetDisplayName,
-        type,
-        duration: parseInt(action.data, 10),
-      };
-
-    default:
-      return {
-        date,
-        issuerDisplayName,
-        targetDisplayName,
-        type,
-        message: action.data,
-      };
-  }
-};
-
 dashboardRouter.get('/widgets/recentActions', async (req, res) => {
   if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
 
-  const repository = await Database.getRepository(ChannelAction);
-  const stats = await repository.find({ where: { channelUser: { id: req.user.id } } });
+  const stats = await prisma.channelAction.getByUserId(req.user.id);
 
   const resp: GetRecentActionsResponse = {
-    data: stats.map(createAction),
+    data: stats.map((stat) => stat.serialize()),
   };
 
   res.json(resp);
@@ -181,11 +142,11 @@ dashboardRouter.get('/widgets/recentActions', async (req, res) => {
 dashboardRouter.get('/widgets/chatStats', async (req, res) => {
   if (req.isUnauthenticated() || req.user === undefined) return res.sendStatus(401);
 
-  const oldestFrameId = ChannelStats.frameIdFromDate(dayjs.utc().subtract(1, 'hour').toDate());
-  const newestFrameId = ChannelStats.frameIdFromDate();
+  const oldestFrameId = prisma.channelStats.frameIdFromDate(dayjs.utc().subtract(1, 'hour').toDate());
+  const newestFrameId = prisma.channelStats.frameIdFromDate();
 
-  const stats = await ChannelStats.getFramesBetween(req.user.id, oldestFrameId, newestFrameId);
-  const mappedStats = ChannelStats.mapFrames(stats);
+  const stats = await prisma.channelStats.getFramesBetween(req.user.id, oldestFrameId, newestFrameId);
+  const mappedStats = prisma.channelStats.mapFrames(stats);
 
   let messagesTotal = 0;
   let timeoutsTotal = 0;
@@ -199,8 +160,8 @@ dashboardRouter.get('/widgets/chatStats', async (req, res) => {
 
     if (frame === undefined) {
       frames.push({
-        timestamp: ChannelStats.dateFromFrameId(i).getTime(),
-        frameDuration: ChannelStats.frameDuration,
+        timestamp: prisma.channelStats.dateFromFrameId(i).getTime(),
+        frameDuration: FRAME_DURATION,
 
         messages: 0,
         timeouts: 0,
@@ -211,7 +172,7 @@ dashboardRouter.get('/widgets/chatStats', async (req, res) => {
     } else {
       frames.push({
         timestamp: frame.getDate().getTime(),
-        frameDuration: ChannelStats.frameDuration,
+        frameDuration: FRAME_DURATION,
 
         messages: frame.messages,
         timeouts: frame.timeouts,
@@ -230,8 +191,8 @@ dashboardRouter.get('/widgets/chatStats', async (req, res) => {
 
   const resp: GetChatStatsResponse = {
     data: {
-      dateStart: ChannelStats.dateFromFrameId(oldestFrameId).getTime(),
-      dateEnd: ChannelStats.dateFromFrameId(newestFrameId).getTime(),
+      dateStart: prisma.channelStats.dateFromFrameId(oldestFrameId).getTime(),
+      dateEnd: prisma.channelStats.dateFromFrameId(newestFrameId).getTime(),
 
       messagesTotal,
       timeoutsTotal,

@@ -1,11 +1,10 @@
-import { User } from '#database/entities/User';
 import { Router as expressRouter } from 'express';
-import { Command } from '#database/entities/Command';
 import { GetCustomCommandsResponse, GetCustomCommandsStatusResponse } from '#types/api/commands';
 import { display } from '#lib/display';
 import { json as jsonParser } from 'body-parser';
 import { SocketServer } from '#server/SocketServer';
 import { Bot } from '#bot/Bot';
+import { prisma } from '#database/database';
 
 
 export const commandsRouter = async (): Promise<expressRouter> => {
@@ -20,9 +19,9 @@ export const commandsRouter = async (): Promise<expressRouter> => {
   commandsRouter.use(jsonParser());
 
   commandsRouter.get('/custom', async (req, res) => {
-    if (!(req.user instanceof User)) return res.sendStatus(401);
+    if (req.user === undefined) return res.sendStatus(401);
 
-    const commands = await Command.getByChannelId(req.user.id);
+    const commands = await prisma.command.getByChannelId(req.user.id);
 
     const resp: GetCustomCommandsResponse = {
       data: commands.map((c) => c.serialize()),
@@ -33,9 +32,9 @@ export const commandsRouter = async (): Promise<expressRouter> => {
 
   commandsRouter.post('/custom', async (req, res) => {
     try {
-      if (!(req.user instanceof User)) return res.sendStatus(401);
+      if (req.user === undefined) return res.sendStatus(401);
 
-      const command = await Command.createFromApi(req.user.id, req.body);
+      const command = await prisma.command.createFromApi(req.user.id, req.body);
       SocketServer.emitToUser(req.user.id, 'NEW_CUSTOM_COMMAND', command.serialize());
 
       res.sendStatus(200);
@@ -47,9 +46,9 @@ export const commandsRouter = async (): Promise<expressRouter> => {
 
   commandsRouter.patch('/custom', async (req, res) => {
     try {
-      if (!(req.user instanceof User)) return res.sendStatus(401);
+      if (req.user === undefined) return res.sendStatus(401);
 
-      const command = await Command.updateFromApi(req.body);
+      const command = await prisma.command.updateFromApi(req.body);
       SocketServer.emitToUser(req.user.id, 'UPD_CUSTOM_COMMAND', command.serialize());
 
       res.sendStatus(200);
@@ -61,9 +60,9 @@ export const commandsRouter = async (): Promise<expressRouter> => {
 
   commandsRouter.delete('/custom', async (req, res) => {
     try {
-      if (!(req.user instanceof User)) return res.sendStatus(401);
+      if (req.user === undefined) return res.sendStatus(401);
 
-      await Command.deleteFromApi(req.body);
+      await prisma.command.deleteFromApi(req.body);
       SocketServer.emitToUser(req.user.id, 'DEL_CUSTOM_COMMAND', req.body.id);
 
       res.sendStatus(200);
@@ -75,7 +74,7 @@ export const commandsRouter = async (): Promise<expressRouter> => {
 
   commandsRouter.get('/custom/status', async (req, res) => {
     try {
-      if (!(req.user instanceof User)) return res.sendStatus(401);
+      if (req.user === undefined) return res.sendStatus(401);
 
       const channelThread = Bot.getChannelThread(req.user.login);
       if (channelThread === undefined) return res.sendStatus(404);

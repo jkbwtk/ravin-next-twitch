@@ -33,3 +33,5 @@ export const twitchApiUrl = isDevApi ? 'http://localhost:8080/mock' : 'https://a
 export const twitchApi = (url: string): string => `${twitchApiUrl}${url}`;
 
 export const databaseLogging = process.env.DATABASE_LOGGING !== undefined ? process.env.DATABASE_LOGGING.toLowerCase() === 'true' : isDevMode;
+
+export const databaseDebug = process.env.DATABASE_DEBUG !== undefined ? process.env.DATABASE_DEBUG.toLowerCase() === 'true' : isDevMode;

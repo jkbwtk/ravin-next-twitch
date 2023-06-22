@@ -1,4 +1,3 @@
-import { User as UserEntity } from '#database/entities/User';
 import { Router as expressRouter } from 'express';
 import passport from 'passport';
 import { GetFrontendUser } from '#shared/types/api/auth';
@@ -7,8 +6,8 @@ import { isDevApi, isDevMode } from '#shared/constants';
 import { createDevAuthStrategy } from '#server/routers/v1/authDev';
 import { authScopes } from '#server/routers/v1/authShared';
 import { display } from '#lib/display';
-import { SystemNotification } from '#database/entities/SystemNotification';
 import { SocketServer } from '#server/SocketServer';
+import { prisma } from '#database/database';
 
 
 export const authRouter = async (): Promise<expressRouter> => {
@@ -19,12 +18,12 @@ export const authRouter = async (): Promise<expressRouter> => {
   });
 
   passport.deserializeUser<string>(async (id, done) => {
-    const user = await UserEntity.getById(id);
+    const user = await prisma.user.getById(id);
 
     if (user !== null) return done(null, user);
 
-    display.error.nextLine('authRouter:deserializeUser', 'Failed to fetch user profile');
-    done(new Error('Failed to fetch user profile'));
+    display.warning.nextLine('authRouter:deserializeUser', 'Failed to fetch user profile with id', id);
+    done(null, false);
   });
 
   if (isDevApi) {
@@ -38,7 +37,7 @@ export const authRouter = async (): Promise<expressRouter> => {
   );
 
   authRouter.get('/callback',
-    passport.authenticate('twitch', { successRedirect: '/dashboard', failWithError: true }),
+    passport.authenticate('twitch', { successRedirect: '/dashboard', failureRedirect: '/' }),
   );
 
   authRouter.get('/user', async (req, res) => {
@@ -68,7 +67,7 @@ export const authRouter = async (): Promise<expressRouter> => {
       if (err && isDevMode) res.status(500).send(err);
       else if (err) res.sendStatus(500);
       else {
-        await SystemNotification.createNotification(
+        await prisma.systemNotification.createNotification(
           user.id,
           'Logged out',
           'You have been logged out of the dashboard.',

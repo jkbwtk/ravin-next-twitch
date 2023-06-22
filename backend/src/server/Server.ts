@@ -8,10 +8,9 @@ import chalk from 'chalk';
 import path from 'path';
 import { Config } from '#lib/Config';
 import { createOnboardingRouter } from '#server/routers/onboarding';
-import { Database } from '#database/Database';
+import { redis } from '#database/database';
 import session from 'express-session';
 import passport from 'passport';
-import { User as UserEntity } from '#database/entities/User';
 import { randomAlphanumeric } from '#lib/utils';
 import RedisStore from 'connect-redis';
 import { TokenManager } from '#server/TokenManager';
@@ -19,13 +18,14 @@ import { Bot } from '#bot/Bot';
 import http, { Server as HTTPServer } from 'http';
 import { SocketServer } from '#server/SocketServer';
 import { display, LOGLVL } from '#lib/display';
+import { UserWithChannel } from '#database/extensions/user';
 
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     // eslint-disable-next-line @typescript-eslint/no-empty-interface
-    interface User extends UserEntity {}
+    interface User extends UserWithChannel {}
   }
 }
 
@@ -84,7 +84,7 @@ export class Server {
         sameSite: 'strict',
       },
       store: new RedisStore({
-        client: await Database.getRedisClient(),
+        client: redis,
         prefix: 'session_store:',
       }),
     });

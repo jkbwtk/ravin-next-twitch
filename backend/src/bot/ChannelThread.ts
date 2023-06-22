@@ -1,14 +1,15 @@
-import { Channel } from '#database/entities/Channel';
 import { ExtendedMap } from '#lib/ExtendedMap';
 import ExtendedSet from '#lib/ExtendedSet';
 import { getChatters } from '#lib/twitch';
-import { Command } from '#database/entities/Command';
+import { ChannelWithUser } from '#database/extensions/channel';
+import { prisma } from '#database/database';
+import { CommandWithUser } from '#database/extensions/command';
 
 
 export type CustomCommandState = {
   lastUsed: number;
   lastUsedBy?: string;
-  command: Command;
+  command: CommandWithUser;
 };
 
 export interface ChannelThreadOptions {
@@ -18,7 +19,7 @@ export interface ChannelThreadOptions {
 export class ChannelThread {
   private options: Required<ChannelThreadOptions>;
 
-  public channel: Channel;
+  public channel: ChannelWithUser;
   public chatMembers: ExtendedSet<string> = new ExtendedSet();
 
   private messages: string[] = [];
@@ -34,7 +35,7 @@ export class ChannelThread {
     bufferLength: 100,
   };
 
-  constructor(channelUser: Channel, options: ChannelThreadOptions = {}) {
+  constructor(channelUser: ChannelWithUser, options: ChannelThreadOptions = {}) {
     this.options = { ...ChannelThread.defaultOptions, ...options };
 
     this.channel = channelUser;
@@ -111,7 +112,7 @@ export class ChannelThread {
   }
 
   public async syncCustomCommands(): Promise<void> {
-    const commands = await Command.getByChannelId(this.channel.user.id);
+    const commands = await prisma.command.getByChannelId(this.channel.user.id);
 
     this.customCommands.clear();
     for (const command of commands) {
@@ -130,6 +131,6 @@ export class ChannelThread {
   }
 
   public async syncChannel(): Promise<void> {
-    this.channel = await Channel.getByUserIdOrFail(this.channel.user.id);
+    this.channel = await prisma.channel.getByUserIdOrFail(this.channel.userId);
   }
 }
