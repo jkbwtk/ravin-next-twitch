@@ -14,7 +14,7 @@ export const systemNotificationExtension = Prisma.defineExtension((client) => {
             title: true,
             content: true,
             createdAt: true,
-            deletedAt: true,
+            readAt: true,
             userId: true,
           },
           compute(notification) {
@@ -24,7 +24,7 @@ export const systemNotificationExtension = Prisma.defineExtension((client) => {
                 userId: notification.userId,
                 title: notification.title,
                 content: notification.content,
-                read: notification.deletedAt !== null,
+                read: notification.readAt !== null,
                 createdAt: notification.createdAt,
               };
             };
@@ -92,7 +92,7 @@ export const systemNotificationExtension = Prisma.defineExtension((client) => {
               },
             },
             data: {
-              deletedAt: new Date(),
+              readAt: new Date(),
             },
           });
         },
@@ -101,7 +101,7 @@ export const systemNotificationExtension = Prisma.defineExtension((client) => {
             const targets = await prisma.systemNotification.findMany({
               where: {
                 userId: userId,
-                deletedAt: null,
+                readAt: null,
               },
               select: {
                 id: true,
@@ -117,18 +117,18 @@ export const systemNotificationExtension = Prisma.defineExtension((client) => {
                 },
               },
               data: {
-                deletedAt: new Date(),
+                readAt: new Date(),
               },
             });
           }, {
             isolationLevel: 'Serializable',
           });
         },
-        async getDeletedByUserId(userId: string) {
+        async getReadByUserId(userId: string) {
           return Prisma.getExtensionContext(this).findMany({
             where: {
               userId: userId,
-              deletedAt: {
+              readAt: {
                 not: null,
               },
             },

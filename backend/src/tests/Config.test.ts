@@ -28,14 +28,12 @@ test('getConfig should return a map with the entries in the database', async () 
       value: 'value1',
       createdAt: new Date(),
       updatedAt: new Date(),
-      destroyedAt: null,
     },
     {
       key: 'key2',
       value: 'value2',
       createdAt: new Date(),
       updatedAt: new Date(),
-      destroyedAt: null,
     },
   ]);
 
@@ -51,7 +49,6 @@ test('get should return the value for an existing key', async () => {
     value: 'value1',
     createdAt: new Date(),
     updatedAt: new Date(),
-    destroyedAt: null,
   });
 
   const result = await Config.get('key1');
@@ -75,7 +72,6 @@ test('get should return the shadowed value if it exists', async () => {
     value: 'value1',
     createdAt: new Date(),
     updatedAt: new Date(),
-    destroyedAt: null,
   });
 
   await Config.shadowSet('key1', 'shadowedValue');
@@ -92,7 +88,6 @@ test('get should return the non-shadowed value if the shadowed value does not ex
     value: 'value1',
     createdAt: new Date(),
     updatedAt: new Date(),
-    destroyedAt: null,
   });
 
   const result = await Config.get('key1');
@@ -107,7 +102,6 @@ test('getOrFail should return the value for an existing key', async () => {
     value: 'value1',
     createdAt: new Date(),
     updatedAt: new Date(),
-    destroyedAt: null,
   });
 
   const result = await Config.getOrFail('key1');
@@ -273,7 +267,6 @@ test('shadowRestore should restore the non-shadowed value for a key', async () =
     value: 'value1',
     createdAt: new Date(),
     updatedAt: new Date(),
-    destroyedAt: null,
   });
 
   await Config.set('key1', 'value1');

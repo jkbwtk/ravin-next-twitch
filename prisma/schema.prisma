@@ -31,7 +31,6 @@ model ChannelAction {
   data              String    @db.VarChar
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @default(now())
-  deletedAt         DateTime?
   channelUserId     String   @db.VarChar
   user              User     @relation(fields: [channelUserId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
@@ -71,7 +70,6 @@ model Command {
   usage         Int                    @default(0)
   createdAt     DateTime               @default(now())
   updatedAt     DateTime               @default(now())
-  destroyedAt   DateTime?             
   channelUserId String                @db.VarChar
   user          User                  @relation(fields: [channelUserId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
@@ -84,7 +82,6 @@ model Config {
   value       String
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now())
-  destroyedAt DateTime?
 }
 
 model Message {
@@ -111,7 +108,6 @@ model Message {
   subscriber    Boolean
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @default(now())
-  deletedAt     DateTime?
   channelUserId String   @db.VarChar
   user          User     @relation(fields: [channelUserId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
@@ -126,9 +122,9 @@ model SystemNotification {
   id        Int       @id() @default(autoincrement())
   title     String    @db.VarChar
   content   String    @db.VarChar
+  readAt    DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now())
-  deletedAt DateTime?
   userId    String   @db.VarChar
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
