@@ -1,5 +1,5 @@
 import { Bot } from '#bot/Bot';
-import { display } from '#lib/display';
+import { logger } from '#lib/logger';
 import { CustomCommand, PatchCustomCommandRequest, PostCustomCommandRequest, UserLevel } from '#shared/types/api/commands';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
@@ -66,7 +66,7 @@ export const commandExtension = Prisma.defineExtension((client) => {
             },
           });
 
-          display.time('Getting command by id', t1);
+          logger.time('Getting command by id', t1);
 
           return result;
         },
@@ -80,7 +80,7 @@ export const commandExtension = Prisma.defineExtension((client) => {
             },
           });
 
-          display.time('Getting commands by channel id', t1);
+          logger.time('Getting commands by channel id', t1);
 
           return result;
         },
@@ -96,7 +96,7 @@ export const commandExtension = Prisma.defineExtension((client) => {
             },
           });
 
-          display.time('Incrementing command usage', t1);
+          logger.time('Incrementing command usage', t1);
         },
         async getTopCommand(channelId: string) {
           const t1 = performance.now();
@@ -111,7 +111,7 @@ export const commandExtension = Prisma.defineExtension((client) => {
             },
           });
 
-          display.time('Getting top command', t1);
+          logger.time('Getting top command', t1);
 
           return result;
         },
@@ -138,7 +138,7 @@ export const commandExtension = Prisma.defineExtension((client) => {
             },
           });
 
-          display.time('Creating command from api', t1);
+          logger.time('Creating command from api', t1);
 
           await Bot.reloadChannelCommands(result.channelUserId);
 
@@ -167,7 +167,7 @@ export const commandExtension = Prisma.defineExtension((client) => {
             },
           });
 
-          display.time('Updating command from api', t1);
+          logger.time('Updating command from api', t1);
 
           await Bot.reloadChannelCommands(result.channelUserId);
 
@@ -180,7 +180,7 @@ export const commandExtension = Prisma.defineExtension((client) => {
             where: { id },
           });
 
-          display.time('Deleting command from api', t1);
+          logger.time('Deleting command from api', t1);
 
           return result;
         },

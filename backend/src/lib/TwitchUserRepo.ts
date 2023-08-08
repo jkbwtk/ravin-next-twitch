@@ -1,5 +1,5 @@
 import { ExtendedMap } from '#lib/ExtendedMap';
-import { display } from '#lib/display';
+import { logger } from '#lib/logger';
 import { getUsers } from '#lib/twitch';
 import { TwitchUser } from '#shared/types/twitch';
 
@@ -41,11 +41,11 @@ export class TwitchUserRepo {
 
   public static async get(userId: string, id: string): Promise<TwitchUser | null> {
     try {
-      display.debug.nextLine('TwitchUserRepo:get', 'Getting user', id);
+      logger.debug('Getting user [%s]', id, { label: ['TwitchUserRepo', 'get'] });
 
       const cached = this.getCached(id);
       if (cached !== null) {
-        display.debug.nextLine('TwitchUserRepo:get', 'User found in cache', id);
+        logger.debug('User [%s] found in cache', id, { label: ['TwitchUserRepo', 'get'] });
         return cached;
       }
 
@@ -54,16 +54,16 @@ export class TwitchUserRepo {
       const user = fetched[0];
 
       if (user === undefined) {
-        display.warning.nextLine('TwitchUserRepo:get', 'No user found for id', id);
+        logger.warn('No user found for id [%s]', id, { label: ['TwitchUserRepo', 'get'] });
         return null;
       }
 
       this.cacheUser(user);
-      display.debug.nextLine('TwitchUserRepo:get', 'User cached', id);
+      logger.debug('User [%s] cached', id, { label: ['TwitchUserRepo', 'get'] });
 
       return user;
     } catch (err) {
-      display.error.nextLine('TwitchUserRepo:get', err);
+      logger.error('Failed to get user [%s]', id, { label: ['TwitchUserRepo', 'get'], error: err });
       return null;
     }
   }
@@ -76,29 +76,29 @@ export class TwitchUserRepo {
     }
 
     try {
-      display.debug.nextLine('TwitchUserRepo:getByLogin', 'Getting user', login);
+      logger.debug('Getting user [%s]', login, { label: ['TwitchUserRepo', 'getByLogin'] });
 
       const fetched = await getUsers(userId, { login });
       const user = fetched[0];
 
       if (user === undefined) {
-        display.warning.nextLine('TwitchUserRepo:getByLogin', 'No user found for login', login);
+        logger.warn('No user found for login [%s]', login, { label: ['TwitchUserRepo', 'getByLogin'] });
         return null;
       }
 
       this.cacheUser(user);
-      display.debug.nextLine('TwitchUserRepo:getByLogin', 'User cached', login);
+      logger.debug('User [%s] cached', login, { label: ['TwitchUserRepo', 'getByLogin'] });
 
       return user;
     } catch (err) {
-      display.error.nextLine('TwitchUserRepo:getByLogin', err);
+      logger.error('Failed to get user [%s]', login, { label: ['TwitchUserRepo', 'getByLogin'], error: err });
       return null;
     }
   }
 
   public static async getAll(userId: string, ids: string[]): Promise<TwitchUser[]> {
     try {
-      display.debug.nextLine('TwitchUserRepo:getAll', 'Getting users', ids);
+      logger.debug('Getting users [%o]', ids, { label: ['TwitchUserRepo', 'getAll'] });
 
       const cached: TwitchUser[] = [];
       const uncached: string[] = [];
@@ -114,7 +114,7 @@ export class TwitchUserRepo {
       }
 
       if (uncached.length === 0) {
-        display.debug.nextLine('TwitchUserRepo:getAll', 'All users found in cache', ids);
+        logger.debug('All users found in cache [%o]', ids, { label: ['TwitchUserRepo', 'getAll'] });
         return cached;
       }
 
@@ -124,18 +124,18 @@ export class TwitchUserRepo {
         this.cacheUser(user);
       }
 
-      display.debug.nextLine('TwitchUserRepo:getAll', 'Users cached', ids);
+      logger.debug('Users cached [%o]', ids, { label: ['TwitchUserRepo', 'getAll'] });
 
       return [...cached, ...fetched];
     } catch (err) {
-      display.error.nextLine('TwitchUserRepo:getAll', err);
+      logger.error('Failed to get users [%o]', ids, { label: ['TwitchUserRepo', 'getAll'], error: err });
       return [];
     }
   }
 
   public static async getAllByLogin(userId: string, logins: string[]): Promise<TwitchUser[]> {
     try {
-      display.debug.nextLine('TwitchUserRepo:getAllByLogin', 'Getting users', logins);
+      logger.debug('Getting users [%o]', logins, { label: ['TwitchUserRepo', 'getAllByLogin'] });
 
       const cached: TwitchUser[] = [];
       const uncached: string[] = [];
@@ -158,7 +158,7 @@ export class TwitchUserRepo {
       }
 
       if (uncached.length === 0) {
-        display.debug.nextLine('TwitchUserRepo:getAllByLogin', 'All users found in cache', logins);
+        logger.debug('All users found in cache [%o]', logins, { label: ['TwitchUserRepo', 'getAllByLogin'] });
         return cached;
       }
 
@@ -168,11 +168,11 @@ export class TwitchUserRepo {
         this.cacheUser(user);
       }
 
-      display.debug.nextLine('TwitchUserRepo:getAllByLogin', 'Users cached', logins);
+      logger.debug('Users cached [%o]', logins, { label: ['TwitchUserRepo', 'getAllByLogin'] });
 
       return [...cached, ...fetched];
     } catch (err) {
-      display.error.nextLine('TwitchUserRepo:getAllByLogin', err);
+      logger.error('Failed to get users [%o]', logins, { label: ['TwitchUserRepo', 'getAllByLogin'], error: err });
       return [];
     }
   }

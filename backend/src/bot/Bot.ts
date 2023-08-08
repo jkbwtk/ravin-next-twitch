@@ -1,6 +1,5 @@
 import { BanUserstate, ChatUserstate, Client, DeleteUserstate, TimeoutUserstate } from 'tmi.js';
 import { ChannelThread } from './ChannelThread';
-import { display, LOGLVL } from '../lib/display';
 import { ExtendedMap } from '../lib/ExtendedMap';
 import { Config } from '#lib/Config';
 import { isDevApi } from '#shared/constants';
@@ -8,6 +7,7 @@ import Deferred from '#lib/Deferred';
 import { TwitchUserRepo } from '#lib/TwitchUserRepo';
 import { SocketServer } from '#server/SocketServer';
 import { prisma } from '#database/database';
+import { logger } from '#lib/logger';
 
 
 export interface BotOptions {
@@ -66,9 +66,9 @@ export class Bot {
         debug: this.options.debug,
       },
       logger: {
-        info: (msg) => display.debug.nextLine('Bot:Client', msg),
-        warn: (msg) => display.warning.nextLine('Bot:Client', msg),
-        error: (msg) => display.error.nextLine('Bot:Client', msg),
+        info: (msg) => logger.info(msg, { label: ['Bot', 'Client'] }),
+        warn: (msg) => logger.warn(msg, { label: ['Bot', 'Client'] }),
+        error: (msg) => logger.error(msg, { label: ['Bot', 'Client'] }),
       },
     });
   }
@@ -81,13 +81,13 @@ export class Bot {
   }
 
   private static handleLogon = async (deferred: Deferred<void>) => {
-    display.debug.nextLine('Bot:handleLogon', 'Logon event fired');
+    logger.debug('Logon event fired', { label: ['Bot', 'handleLogon'] });
     deferred.resolve();
   };
 
   private static handleDisconnect = async (reason: string) => {
-    display.debug.nextLine('Bot:handleDisconnect', 'Disconnect event fired');
-    display.debug.nextLine('Bot:handleDisconnect', 'Reason:', reason);
+    logger.debug('Disconnect event fired', { label: ['Bot', 'handleDisconnect'] });
+    logger.debug('Reason: %s', reason, { label: ['Bot', 'handleDisconnect'] });
   };
 
   private static waitForConnection = async () => {
@@ -110,16 +110,16 @@ export class Bot {
       const thread = this.channels.get(channel.slice(1));
 
       if (!thread) {
-        display.warning.nextLine('Bot:handleMessage', `Channel thread for [${channel}] not found`);
+        logger.warn('Channel thread for [%s] not found', channel, { label: ['Bot', 'handleMessage'] });
         return;
       }
 
       await prisma.channelStats.incrementMessages(instance.channelUserId);
       const getTimeSinceLastMessage = thread.getTimeSinceLastMessage();
 
-      display.debug.nextLine('Bot:handleMessage', 'Time since last message:', getTimeSinceLastMessage);
+      logger.debug('Time since last message: %d', getTimeSinceLastMessage, { label: ['Bot', 'handleMessage'] });
       thread.addMessage(message, userstate.username ?? 'Anonymous');
-      display.debug.nextLine('Bot:handleMessage', 'Chant length:', thread.getChantLength());
+      logger.debug('Chant length: %d', thread.getChantLength(), { label: ['Bot', 'handleMessage'] });
 
       const customCommand = thread.getUsedCustomCommand(message);
 
@@ -155,16 +155,18 @@ export class Bot {
         await this.client.say(channel, message);
       }
     } catch (err) {
-      display.error.nextLine('Bot:handleMessage', `Failed to handle message`, err);
+      logger.error('Failed to handle message', { label: ['Bot', 'handleMessage'], error: err });
     }
   };
 
   private handleTimeout = async (channel: string, username: string, reason: string, duration: number, userstate: TimeoutUserstate) => {
-    display.log(LOGLVL.SPAM, `<${channel}> ${username} has been timed out for ${duration} seconds: ${reason}`);
+    logger.debug('<%s> [%s] has been timed out for [%d] seconds: [%s]', channel, username, duration, reason, {
+      label: ['Bot', 'handleTimeout'],
+    });
 
     const thread = this.channels.get(channel.slice(1));
     if (!thread) {
-      display.warning.nextLine(`Bot:handleTimeout`, `Channel thread for [${channel}] not found`);
+      logger.warn('Channel thread for [%s] not found', channel, { label: ['Bot', 'handleTimeout'] });
       return;
     }
 
@@ -180,11 +182,11 @@ export class Bot {
   };
 
   private handleBan = async (channel: string, username: string, reason: string, userstate: BanUserstate) => {
-    display.log(LOGLVL.SPAM, `<${channel}> ${username} has been banned: ${reason}`);
+    logger.debug('<%s> [%s] has been banned: [%s]', channel, username, reason, { label: ['Bot', 'handleBan'] });
 
     const thread = this.channels.get(channel.slice(1));
     if (!thread) {
-      display.warning.nextLine(`Bot:handleBan`, `Channel thread for [${channel}] not found`);
+      logger.warn('Channel thread for [%s] not found', channel, { label: ['Bot', 'handleBan'] });
       return;
     }
 
@@ -200,11 +202,13 @@ export class Bot {
   };
 
   private handleDelete = async (channel: string, username: string, deletedMessage: string, userstate: DeleteUserstate) => {
-    display.log(LOGLVL.SPAM, `<${channel}> ${username}'s message has been deleted: ${deletedMessage}`);
+    logger.debug('<%s> [%s]\'s message has been deleted: [%s]', channel, username, deletedMessage, {
+      label: ['Bot', 'handleDelete'],
+    });
 
     const thread = this.channels.get(channel.slice(1));
     if (!thread) {
-      display.warning.nextLine(`Bot:handleDelete`, `Channel thread for [${channel}] not found`);
+      logger.warn('Channel thread for [%s] not found', channel, { label: ['Bot', 'handleDelete'] });
       return;
     }
 
@@ -237,7 +241,7 @@ export class Bot {
 
   private async joinChannels(): Promise<void> {
     if (isDevApi) {
-      display.debug.nextLine('Bot:joinChannels', 'Skipping joining channels because dev mode is enabled');
+      logger.debug('Skipping joining channels because dev mode is enabled', { label: ['Bot', 'joinChannels'] });
       return;
     }
 
@@ -262,7 +266,7 @@ export class Bot {
       if (instance.client.getChannels().includes(`#${channel.user.login}`)) {
         if (instance.channels.has(channel.user.login)) return true;
         else {
-          display.debug.nextLine('Bot:joinChannel', `Channel [${channel.user.login}] already joined, but not in channels map`);
+          logger.debug('Channel [%s] already joined, but not in channels map', channel.user.login, { label: ['Bot', 'joinChannel'] });
         }
       }
 
@@ -270,14 +274,14 @@ export class Bot {
       await channelThread.init();
       instance.channels.set(channel.user.login, channelThread);
 
-      display.debug.nextLine('Bot:joinChannel', `Joining channel [${channel.user.login}]`);
+      logger.debug('Joining channel [%s]', channel.user.login, { label: ['Bot', 'joinChannel'] });
       await Bot.waitForConnection();
       await instance.client.join(channel.user.login);
-      display.debug.nextLine('Bot:joinChannel', `Joined channel [${channel.user.login}]`);
+      logger.debug('Joined channel [%s]', channel.user.login, { label: ['Bot', 'joinChannel'] });
 
       return true;
     } catch (err) {
-      display.warning.nextLine('Bot:joinChannel', `Failed to join channel [${id}]`, err);
+      logger.warn('Failed to join channel [%s]', id, { label: ['Bot', 'joinChannel'], err });
       return false;
     }
   }
@@ -290,19 +294,19 @@ export class Bot {
       if (!instance.client.getChannels().includes(`#${channel.user.login}`)) {
         if (!instance.channels.has(channel.user.login)) return true;
         else {
-          display.debug.nextLine('Bot:leaveChannel', `Channel [${channel.user.login}] already left, but still in channels map`);
+          logger.debug('Channel [%s] already left, but still in channels map', channel.user.login, { label: ['Bot', 'leaveChannel'] });
         }
       }
 
-      display.debug.nextLine('Bot:leaveChannel', `Leaving channel [${channel.user.login}]`);
+      logger.debug('Leaving channel [%s]', channel.user.login, { label: ['Bot', 'leaveChannel'] });
       instance.channels.get(channel.user.login)?.destroy();
       instance.channels.delete(channel.user.login);
       await instance.client.part(channel.user.login);
-      display.debug.nextLine('Bot:leaveChannel', `Left channel [${channel.user.login}]`);
+      logger.debug('Left channel [%s]', channel.user.login, { label: ['Bot', 'leaveChannel'] });
 
       return true;
     } catch (err) {
-      display.warning.nextLine('Bot:leaveChannel', `Failed to leave channel [${id}]`, err);
+      logger.warn('Failed to leave channel [%s]', id, { label: ['Bot', 'leaveChannel'], err });
       return false;
     }
   }
@@ -319,7 +323,7 @@ export class Bot {
     const channelThread = Bot.getChannelThread(channel.user.login);
 
     if (!channelThread) {
-      display.warning.nextLine('Bot:reloadChannelCommands', `Channel thread for [${channel.user.login}] not found`);
+      logger.warn('Channel thread for [%s] not found', channel.user.login, { label: ['Bot', 'reloadChannelCommands'] });
       return;
     }
 
@@ -331,7 +335,7 @@ export class Bot {
     const channelThread = Bot.getChannelThread(channel.user.login);
 
     if (!channelThread) {
-      display.warning.nextLine('Bot:reloadChannelChannel', `Channel thread for [${channel.user.login}] not found`);
+      logger.warn('Channel thread for [%s] not found', channel.user.login, { label: ['Bot', 'reloadChannelChannel'] });
       return;
     }
 

@@ -7,7 +7,7 @@ if (process.env.DEV !== 'true') {
 import chalk from 'chalk';
 
 import { Server } from '#server/Server';
-import { display } from '#lib/display';
+import { logger } from '#lib/logger';
 
 
 const handleTopLevelError = (err: unknown): void => {
@@ -19,13 +19,13 @@ const handleTopLevelError = (err: unknown): void => {
     errorMessage = err;
   }
 
-  console.error(`Bot exited with error:\n${chalk.redBright.bold(errorMessage)}`);
+  logger.error(`Bot exited with error:\n${chalk.redBright.bold(errorMessage)}`);
   console.error(err);
   process.exit(1);
 };
 
 process.on('SIGINT', () => {
-  display.system.nextLine('Process', 'Shutting down gracefully...');
+  logger.info('Shutting down gracefully...', { label: 'Process' });
   process.exit(0);
 });
 

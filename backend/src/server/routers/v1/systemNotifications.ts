@@ -2,8 +2,8 @@ import { Router as expressRouter } from 'express';
 import { GetSystemNotificationsResponse } from '#shared/types/api/systemNotifications';
 import { SocketServer } from '#server/SocketServer';
 import { arrayFrom } from '#lib/utils';
-import { display } from '#lib/display';
 import { prisma } from '#database/database';
+import { logger } from '#lib/logger';
 
 
 export const systemNotificationsRouter = async (): Promise<expressRouter> => {
@@ -68,7 +68,11 @@ export const systemNotificationsRouter = async (): Promise<expressRouter> => {
 
       res.sendStatus(200);
     } catch (err) {
-      display.error.nextLine('APIv1:systemNotificationsRouter:broadcast[post]', err);
+      logger.error('Failed to broadcast system notification', {
+        label: ['APIv1', 'systemNotificationsRouter', 'broadcast'],
+        error: err,
+      });
+
       res.sendStatus(500);
     }
   });

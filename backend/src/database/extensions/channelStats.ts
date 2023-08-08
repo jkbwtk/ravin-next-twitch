@@ -1,5 +1,5 @@
 import { ExtendedMap } from '#lib/ExtendedMap';
-import { display } from '#lib/display';
+import { logger } from '#lib/logger';
 import { ChannelStats, Prisma } from '@prisma/client';
 
 
@@ -56,7 +56,7 @@ export const channelStatsExtension = Prisma.defineExtension((client) => {
             },
           });
 
-          display.time('Getting channelStats frames', t1);
+          logger.time('Getting channelStats frames', t1);
 
           return result;
         },
@@ -72,7 +72,7 @@ export const channelStatsExtension = Prisma.defineExtension((client) => {
             },
           });
 
-          display.time('Getting channelStats frame', t1);
+          logger.time('Getting channelStats frame', t1);
 
           return result;
         },
@@ -89,7 +89,7 @@ export const channelStatsExtension = Prisma.defineExtension((client) => {
             },
           });
 
-          display.time('Getting channelStats latest frame', t1);
+          logger.time('Getting channelStats latest frame', t1);
 
           return result;
         },
@@ -115,7 +115,7 @@ export const channelStatsExtension = Prisma.defineExtension((client) => {
             },
           });
 
-          display.time('Getting channelStats between dates', t1);
+          logger.time('Getting channelStats between dates', t1);
 
           return result;
         },
@@ -138,7 +138,7 @@ export const channelStatsExtension = Prisma.defineExtension((client) => {
             },
           });
 
-          display.time('Incrementing messages in channelStats', t1);
+          logger.time('Incrementing messages in channelStats', t1);
         },
         async incrementTimeouts(userId: string) {
           const frameId = Prisma.getExtensionContext(this).frameIdFromDate();
@@ -159,7 +159,7 @@ export const channelStatsExtension = Prisma.defineExtension((client) => {
             },
           });
 
-          display.time('Incrementing timeouts in channelStats', t1);
+          logger.time('Incrementing timeouts in channelStats', t1);
         },
         async incrementBans(userId: string) {
           const frameId = Prisma.getExtensionContext(this).frameIdFromDate();
@@ -180,7 +180,7 @@ export const channelStatsExtension = Prisma.defineExtension((client) => {
             },
           });
 
-          display.time('Incrementing bans in channelStats', t1);
+          logger.time('Incrementing bans in channelStats', t1);
         },
         async incrementDeleted(userId: string) {
           const frameId = Prisma.getExtensionContext(this).frameIdFromDate();
@@ -201,7 +201,7 @@ export const channelStatsExtension = Prisma.defineExtension((client) => {
             },
           });
 
-          display.time('Incrementing deleted in channelStats', t1);
+          logger.time('Incrementing deleted in channelStats', t1);
         },
         async incrementCommands(userId: string) {
           const frameId = Prisma.getExtensionContext(this).frameIdFromDate();
@@ -222,7 +222,7 @@ export const channelStatsExtension = Prisma.defineExtension((client) => {
             },
           });
 
-          display.time('Incrementing commands in channelStats', t1);
+          logger.time('Incrementing commands in channelStats', t1);
         },
       },
     },

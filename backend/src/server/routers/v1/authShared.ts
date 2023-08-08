@@ -4,9 +4,9 @@ import { VerifyCallback } from 'passport-oauth2';
 import { isDevApi } from '#shared/constants';
 import { TwitchUser } from '#shared/types/twitch';
 import { revokeTokenUnsafe } from '#lib/twitch';
-import { display } from '#lib/display';
 import { Config } from '#lib/Config';
 import { ChannelWithUser } from '#database/extensions/channel';
+import { logger } from '#lib/logger';
 
 
 export const authScopes: string[] = [
@@ -84,7 +84,7 @@ export const verifyCallback = async (accessToken: string, refreshToken: string |
     const user = await createOrUpdateUser(profile);
 
     if (token !== null) {
-      display.debug.nextLine('auth:verifyCallback', 'Revoking old token for user', token.user.id);
+      logger.debug('Revoking old token for user [%s]', token.user.id, { label: ['auth', 'verifyCallback'] });
       if (refreshToken !== null && !isDevApi) await revokeTokenUnsafe(user.id);
     }
 

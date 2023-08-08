@@ -2,7 +2,7 @@ import { prisma } from '#database/database';
 import { TokenWithUserAndChannel } from '#database/extensions/token';
 import Deferred from '#lib/Deferred';
 import { ExtendedMap } from '#lib/ExtendedMap';
-import { display } from '#lib/display';
+import { logger } from '#lib/logger';
 import { refreshTokenUnsafe, validateTokenUnsafe } from '#lib/twitch';
 import { isDevApi } from '#shared/constants';
 
@@ -31,22 +31,22 @@ export class TokenManager {
     try {
       if (isDevApi) {
         const token = await prisma.token.getByUserIdOrFail(userId);
-        display.debug.nextLine('TokenManager', 'Skipping token refresh because dev api is enabled');
+        logger.info('Skipping token refresh because dev api is enabled', { label: ['TokenManager', 'refresh'] });
         return token;
       }
 
       const request = this.refreshQueue.get(userId);
       if (request) {
-        display.debug.nextLine('TokenManager', 'Joining refresh queue for user', userId);
+        logger.debug('Joining refresh queue for user [%s]', userId, { label: ['TokenManager', 'refresh'] });
         return request.promise;
       }
 
       const deferred = new Deferred<TokenWithUserAndChannel>();
       this.refreshQueue.set(userId, deferred);
 
-      display.debug.nextLine('TokenManager', 'Refreshing token for user', userId);
+      logger.debug('Refreshing token for user [%s]', userId, { label: ['TokenManager', 'refresh'] });
       const refreshedToken = await refreshTokenUnsafe(userId);
-      display.debug.nextLine('TokenManager', 'Token for user', refreshedToken.userId, 'refreshed');
+      logger.debug('Token for user [%s] refreshed', refreshedToken.userId, { label: ['TokenManager', 'refresh'] });
 
       const createdToken = await this.repository.update({
         where: {
@@ -64,7 +64,7 @@ export class TokenManager {
           },
         },
       });
-      display.debug.nextLine('TokenManager', 'Token for user', createdToken.userId, 'updated');
+      logger.debug('Token for user [%s] updated', createdToken.userId, { label: ['TokenManager', 'refresh'] });
 
       this.refreshQueue.delete(userId);
       deferred.resolve(createdToken);
@@ -78,8 +78,7 @@ export class TokenManager {
         this.refreshQueue.delete(userId);
       }
 
-      display.debug.nextLine('TokenManager', 'Failed to refresh token for user', userId);
-      display.warning.nextLine('TokenManager', err);
+      logger.warn('Failed to refresh token for user [%s]', userId, { label: ['TokenManager', 'refresh'], error: err });
     }
 
     throw new Error('Failed to refresh token');
@@ -87,11 +86,11 @@ export class TokenManager {
 
   private _processAll = async (): Promise<void> => {
     if (isDevApi) {
-      display.debug.nextLine('TokenManager', 'Skipping token processing because dev api is enabled');
+      logger.info('Skipping token processing because dev api is enabled', { label: ['TokenManager', 'processAll'] });
       return;
     }
 
-    display.debug.nextLine('TokenManager', 'Beginning token processing...');
+    logger.info('Beginning token processing...', { label: ['TokenManager', 'processAll'] });
     const users = await prisma.user.findMany({
       // where: {
       //   token: {
@@ -104,7 +103,7 @@ export class TokenManager {
         id: true,
       },
     });
-    display.debug.nextLine('TokenManager', 'Found', users.length, 'tokens');
+    logger.debug('Found [%o] tokens', users.length, { label: ['TokenManager', 'processAll'] });
 
     for (let user of users) {
       await this._processPartial(user.id);
@@ -113,31 +112,28 @@ export class TokenManager {
 
   private async _processPartial(userId: string): Promise<void> {
     try {
-      display.debug.nextLine('TokenManager', 'Processing token for user', userId);
+      logger.debug('Processing token for user [%s]', userId, { label: ['TokenManager', 'processPartial'] });
       const token = await this.repository.getByUserId(userId);
 
       if (token === null) {
-        display.error.nextLine('TokenManager', 'Failed to fetch token for user', userId);
+        logger.warn('Failed to fetch token for user [%s]', userId, { label: ['TokenManager', 'processPartial'] });
         return;
       }
 
       if (token.refreshToken === null) {
-        display.debug.nextLine('TokenManager', 'Skipping token for user', userId, 'because it has no refresh token');
+        logger.debug('Skipping token for user [%s] because it has no refresh token', userId, { label: ['TokenManager', 'processPartial'] });
         return;
       }
 
       if (await validateTokenUnsafe(userId)) {
-        display.debug.nextLine('TokenManager', 'Token for user', userId, 'is valid');
+        logger.debug('Token for user [%s] is valid', userId, { label: ['TokenManager', 'processPartial'] });
         return;
       }
 
-      display.debug.nextLine('TokenManager', 'Token for user', userId, 'is invalid, refreshing...');
+      logger.debug('Token for user [%s] is invalid, refreshing...', userId, { label: ['TokenManager', 'processPartial'] });
       await this._refresh(userId);
     } catch (err) {
-      const error = typeof err === 'object' && err !== null && 'message' in err ? err.message : err;
-
-      display.debug.nextLine('TokenManager', 'Failed to process token for user', userId);
-      display.warning.nextLine('TokenManager', error);
+      logger.error('Failed to process token for user [%s]', userId, { label: ['TokenManager', 'processPartial'], error: err });
     }
   }
 

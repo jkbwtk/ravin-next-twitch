@@ -1,4 +1,4 @@
-import { display } from '#lib/display';
+import { logger } from '#lib/logger';
 import { definedOrFail } from '#lib/utils';
 import { UserLevel } from '#shared/types/api/commands';
 import { EmotesUsed as EmotesUsed, Message as MessagePublic } from '#shared/types/api/logs';
@@ -157,7 +157,7 @@ export const messageExtension = Prisma.defineExtension((client) => {
             },
           });
 
-          display.time('Getting messages by channel id', t1);
+          logger.time('Getting messages by channel id', t1);
 
           return result;
         },
@@ -174,11 +174,14 @@ export const messageExtension = Prisma.defineExtension((client) => {
             LIMIT 1
             `;
 
-            display.time('Getting top chatter', t1);
+            logger.time('Getting top chatter', t1);
 
             return result[0]?.userId ?? null;
           } catch (err) {
-            display.error.nextLine('Message:getTopChatter', err);
+            logger.error('Failed to get top chatter for channel [%s]', channelId, {
+              label: ['Message', 'getTopChatter'],
+              error: err,
+            });
 
             return null;
           }
@@ -201,11 +204,14 @@ export const messageExtension = Prisma.defineExtension((client) => {
             LIMIT 1;
             `;
 
-            display.time('Getting top emote', t1);
+            logger.time('Getting top emote', t1);
 
             return result[0] ?? null;
           } catch (err) {
-            display.error.nextLine('Message:getTopEmote', err);
+            logger.error('Failed to get top emote for channel [%s]', channelId, {
+              label: ['Message', 'getTopEmote'],
+              error: err,
+            });
 
             return null;
           }

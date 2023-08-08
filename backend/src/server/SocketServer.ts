@@ -3,8 +3,8 @@ import { Server as HTTPServer } from 'http';
 import { Server as AppServer } from '#server/Server';
 import passport from 'passport';
 import { Request } from 'express';
-import { display } from '#lib/display';
 import { ClientToServerEvents, ServerToClientEvents } from '#types/api/socket';
+import { logger } from '#lib/logger';
 
 
 export class SocketServer {
@@ -54,19 +54,19 @@ export class SocketServer {
       const req = socket.request as Request;
 
       if (req.isUnauthenticated() || req.user === undefined) {
-        display.error.nextLine('SocketServer', 'Unauthenticated user connected');
+        logger.warn('Unauthenticated user connected', { label: 'SocketServer' });
         return socket.disconnect(true);
       }
 
       await socket.join(req.user.id);
 
       socket.onAny((event, ...message) => {
-        display.debug.nextLine('SocketServer', event, message);
+        logger.debug('%o %o', event, message, { label: 'SocketServer' });
       });
 
-      display.debug.nextLine('SocketServer', 'User connected', req.user.login);
+      logger.debug('User connected [%s]', req.user.id, { label: 'SocketServer' });
       socket.on('disconnect', () => {
-        display.debug.nextLine('SocketServer', 'User disconnected', req.user?.login ?? '');
+        logger.debug('User disconnected [%s]', req.user?.id ?? '', { label: 'SocketServer' });
       });
     });
   }

@@ -21,10 +21,10 @@ import {
 import { twitchApiUrl } from '#shared/constants';
 import { Config } from '#lib/Config';
 import { prisma } from '#database/database';
-import { display } from '#lib/display';
 import { TokenManager } from '#server/TokenManager';
 import { arrayFrom, AtLeastOne, sleep } from '#lib/utils';
 import { TokenWithUserAndChannel } from '#database/extensions/token';
+import { logger } from '#lib/logger';
 
 
 const apiSettings = {
@@ -164,7 +164,12 @@ const requestGuardian: RequestGuardian = async (settings, func, userId, ...args)
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return await func(userId, ...args);
     } catch (err) {
-      if (err instanceof Error) display.warning.nextLine(moduleID(func), err.message);
+      if (err instanceof Error) {
+        logger.warn({
+          label: moduleID(func),
+          message: err.message,
+        });
+      }
 
       if (remainingNetworkErrors <= 0 || remainingTimeouts <= 0) throw err;
 

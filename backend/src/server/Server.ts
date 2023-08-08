@@ -1,6 +1,6 @@
 import { createServer, ViteDevServer } from 'vite';
 import express, { Express, RequestHandler } from 'express';
-import { accessControl, invalidRoute, logger, notConfigured } from './middlewares';
+import { accessControl, invalidRoute, notConfigured, requestLogger } from './middlewares';
 import { apiRouter } from '#routers/apiRouter';
 import compression, { CompressionOptions } from 'compression';
 import { frontendPath, frontendProductionPath, isDevMode, serverPort } from '#shared/constants';
@@ -17,8 +17,8 @@ import { TokenManager } from '#server/TokenManager';
 import { Bot } from '#bot/Bot';
 import http, { Server as HTTPServer } from 'http';
 import { SocketServer } from '#server/SocketServer';
-import { display, LOGLVL } from '#lib/display';
 import { UserWithChannel } from '#database/extensions/user';
+import { logger } from '#lib/logger';
 
 
 declare global {
@@ -102,7 +102,7 @@ export class Server {
   private async registerRoutes() {
     this.app.use(accessControl);
 
-    this.app.use(logger);
+    this.app.use(requestLogger);
     this.app.use(compression(Server.compressionOptions));
 
     await this.setupSession();
@@ -159,7 +159,7 @@ export class Server {
     }
 
     this.server.listen(this.port, () => {
-      display.log(LOGLVL.INFO, `${isDevMode ? 'Development server' : 'Server'} started on port ${chalk.green.bold(this.port)}`);
+      logger.info(`${isDevMode ? 'Development server' : 'Server'} started on port ${chalk.green.bold(this.port)}`, { label: ['Server', 'start'] });
     });
   }
 }
