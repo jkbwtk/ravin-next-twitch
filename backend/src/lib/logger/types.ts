@@ -47,18 +47,6 @@ export type LevelFunction<
 
 export type OmitMetadata<F> = F extends (callback: never, level: never, ...args: infer P) => infer R ? (...args: P) => R : () => void;
 
-export type LogEntry<T extends Partial<LoggerOptions>> = {
-  level: keyof MergedOptions<T>['levels'];
-  message: string;
-  label?: string | number | (string | number)[];
-  args?: AllowedLoggerTypes<T>[];
-  error?: Error | string | unknown;
-  [key: string]: unknown;
-};
-
-// export type LevelLogEntry<T extends Partial<LoggerOptions>> = Omit<LogEntry<T>, 'level'>;
-
-// Temporary fix because the above type is not working
 export type LevelLogEntry<T extends Partial<LoggerOptions>> = {
   message: string;
   label?: string | number | (string | number)[];
@@ -67,6 +55,9 @@ export type LevelLogEntry<T extends Partial<LoggerOptions>> = {
   [key: string]: unknown;
 };
 
+export type LogEntry<T extends Partial<LoggerOptions>> = LevelLogEntry<T> & {
+  level: keyof MergedOptions<T>['levels'];
+};
 
 export type TransformableEntry = {
   level: string | number | symbol;
