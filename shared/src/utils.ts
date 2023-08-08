@@ -10,3 +10,12 @@ export const quickSwitch = <T, K extends QuickSwitchKeyTypes = string>(value: Qu
 
   return cases.default;
 };
+
+type NonNull = string | number | boolean | symbol | object | bigint;
+
+export const mergeOptions = <T extends Record<string, NonNull>>(options: Partial<T>, defaults: T): T => {
+  const definedOptions = Object.entries(options)
+    .filter(([, value]) => value !== undefined) as [keyof T, NonNull][];
+
+  return Object.assign({}, defaults, Object.fromEntries(definedOptions));
+};
