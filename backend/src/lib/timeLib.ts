@@ -1,4 +1,4 @@
-const timeGenerate = (format?: string, time?: string | number) => {
+export const getFormattedTime = (format?: string, time?: string | number): string => {
   const f = format || 'hh:mm:ss';
   const date = (time === undefined) ? new Date() : new Date(time);
 
@@ -24,7 +24,7 @@ const timeGenerate = (format?: string, time?: string | number) => {
     .toFixed(0)
     .padStart(2, '0');
 
-  const ping = date.getMilliseconds()
+  const mil = date.getMilliseconds()
     .toFixed(0)
     .padStart(3, '0');
 
@@ -35,7 +35,7 @@ const timeGenerate = (format?: string, time?: string | number) => {
     .replace(/hh/g, hour)
     .replace(/mm/g, min)
     .replace(/ss/g, sec)
-    .replace(/pp/g, ping);
+    .replace(/pp/g, mil);
 };
 
-export const timeDisplay = (format?: string, time?: string | number): string => `\u001b[47m\u001b[30m${timeGenerate(format, time)}\u001b[0m`;
+export const timeDisplay = (format?: string, time?: string | number): string => `\u001b[47m\u001b[30m${getFormattedTime(format, time)}\u001b[0m`;
