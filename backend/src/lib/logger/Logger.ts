@@ -13,6 +13,7 @@ import {
   DefaultLoggerOptions,
   JsonOptions,
   LEVEL,
+  LevelLogEntry,
   LogCallback,
   LogEntry,
   LoggerLevelMethods,
@@ -225,7 +226,7 @@ export class Logger<
   public defaultLevelFunction(
     callback: LogCallback,
     level: keyof LoggerLevelMethods<T>,
-    entry: LogEntry<T> | string,
+    entry: LevelLogEntry<T> | string,
     ...args: AllowedLoggerTypes<T>[]
   ): void {
     const argsArray: AllowedLoggerTypes<T>[] = [];

@@ -56,6 +56,18 @@ export type LogEntry<T extends Partial<LoggerOptions>> = {
   [key: string]: unknown;
 };
 
+// export type LevelLogEntry<T extends Partial<LoggerOptions>> = Omit<LogEntry<T>, 'level'>;
+
+// Temporary fix because the above type is not working
+export type LevelLogEntry<T extends Partial<LoggerOptions>> = {
+  message: string;
+  label?: string | number | (string | number)[];
+  args?: AllowedLoggerTypes<T>[];
+  error?: Error | string | unknown;
+  [key: string]: unknown;
+};
+
+
 export type TransformableEntry = {
   level: string | number | symbol;
   message: string;
@@ -81,7 +93,7 @@ export type MergedOptions<T extends Partial<LoggerOptions>> = Required<Overwrite
 export type LoggerLevelMethods<T extends Partial<LoggerOptions>> = {
   [K in keyof MergedOptions<T>['levels']]: {
     (message: string, ...args: AllowedLoggerTypes<T>[]): void;
-    (entry: LogEntry<T>): void;
+    (entry: LevelLogEntry<T>): void;
   }
 };
 
