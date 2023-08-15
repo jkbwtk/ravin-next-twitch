@@ -24,7 +24,7 @@ export type AllowedLoggerTypes<T extends Partial<LoggerOptions>> = string
 | Error
 | null
 | undefined
-| Partial<Omit<LogEntry<T>, 'level' | 'args' | 'label'>>
+| Partial<LogEntry<T>>
 | object
 | Set<unknown>
 | Map<unknown, unknown>;

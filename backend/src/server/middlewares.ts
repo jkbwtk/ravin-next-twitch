@@ -1,5 +1,6 @@
 import { logger } from '#lib/logger';
-import { RequestHandler } from 'express';
+import { ServerError } from '#server/ServerError';
+import { ErrorRequestHandler, RequestHandler } from 'express';
 import onHeaders from 'on-headers';
 import onFinished from 'on-finished';
 
@@ -64,4 +65,26 @@ export const accessControl: RequestHandler = (req, res, next) => {
 export const notConfigured: RequestHandler = (req, res) => {
   res.contentType('text/plain');
   res.status(503).send('Server is not configured yet.');
+};
+
+export const catchErrors: ErrorRequestHandler = (err, req, res, next) => {
+  if (err instanceof ServerError) {
+    return res.status(err.statusCode).json({
+      statusCode: err.statusCode,
+      type: err.type,
+      message: err.message,
+    });
+  }
+
+  logger.error('Request processing failed', {
+    error: err,
+  });
+
+  if (res.headersSent) return next(err);
+
+  res.status(500).json({
+    statusCode: 500,
+    type: 'Internal Server Error',
+    message: 'Internal Server Error',
+  });
 };
