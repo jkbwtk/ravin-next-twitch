@@ -3,7 +3,7 @@ import Button from '#components/Button';
 import { useNotification } from '#providers/NotificationProvider';
 import Widget from '#components/Widget';
 import Input from '#components/Input';
-import { PostConfigRequest } from '#types/api/admin';
+import { PatchConfigRequest } from '#types/api/admin';
 
 import style from '#styles/widgets/AdminConfigWidget.module.scss';
 
@@ -24,7 +24,7 @@ const AdminConfigWidget: Component = () => {
     const twitchClientId = ev.target.elements.namedItem('twitchClientId') as HTMLInputElement;
     const twitchClientSecret = ev.target.elements.namedItem('twitchClientSecret') as HTMLInputElement;
 
-    const form: PostConfigRequest = {
+    const form: PatchConfigRequest = {
       adminUsername: adminUsername.value.length > 0 ? adminUsername.value : undefined,
       botLogin: botLogin.value.length > 0 ? botLogin.value : undefined,
       botToken: botToken.value.length > 0 ? botToken.value : undefined,
@@ -35,7 +35,7 @@ const AdminConfigWidget: Component = () => {
     setSaving(true);
 
     const resp = await fetch('/api/v1/admin/settings/config', {
-      method: 'POST',
+      method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },

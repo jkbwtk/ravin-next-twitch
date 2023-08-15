@@ -73,3 +73,5 @@ export const mapOptionsToArray = <T extends Record<string, boolean>>(options: T)
 
   return result;
 };
+
+export type AsyncLike<T> = T | Promise<T>;
