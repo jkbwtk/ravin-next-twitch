@@ -2,6 +2,8 @@ import { Request } from 'express';
 import { Middleware } from '#server/ExpressStack';
 import { ServerError } from '#server/ServerError';
 import { AnyZodObject, z, ZodError } from 'zod';
+import { Signal } from '#shared/utils';
+import { isDevMode } from '#shared/constants';
 
 export const authenticated: Middleware<object, object, {
   user: Exclude<Request['user'], undefined>;
@@ -47,4 +49,16 @@ export const validate = <T extends AnyZodObject>(schema: T): Middleware<object, 
       throw new ServerError(400, 'Invalid input');
     }
   }
+};
+
+export const requireDevMode: Middleware = (req, res, next) => {
+  if (!isDevMode) throw new ServerError(404, 'Not Found');
+
+  return [req, res, next];
+};
+
+export const waitUntilReady = (signal: Signal<boolean>): Middleware => (req, res, next) => {
+  if (!signal()) throw new ServerError(503, 'Service Temporarily Unavailable');
+
+  return [req, res, next];
 };
