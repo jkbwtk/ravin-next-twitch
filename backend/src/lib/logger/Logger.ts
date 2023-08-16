@@ -232,12 +232,14 @@ export class Logger<
     const argsArray: AllowedLoggerTypes<T>[] = [];
     let message: string;
 
-    if (typeof entry === 'object') {
-      message = entry.message;
-    } else if (typeof entry === 'string') {
+    let newEntry: Partial<LevelLogEntry<T>> = {};
+
+    if (typeof entry === 'string') {
+      newEntry.message = entry;
       message = entry;
     } else {
-      message = `${entry}`;
+      newEntry = { ...entry };
+      message = entry.message;
     }
 
     if (typeof entry === 'object' && entry.args !== undefined) {
@@ -249,6 +251,7 @@ export class Logger<
     const transformed: TransformableEntry = {
       level,
       message,
+      ...newEntry,
       [LEVEL]: level,
       [MESSAGE]: message,
       [ARGS]: argsArray,
