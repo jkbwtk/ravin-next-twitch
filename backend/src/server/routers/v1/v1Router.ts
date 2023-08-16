@@ -7,6 +7,7 @@ import { commandsRouter } from '#server/routers/v1/commands';
 import { channelRouter } from '#server/routers/v1/channel';
 import { logsRouter } from '#server/routers/v1/logs';
 import { adminRouter } from '#server/routers/v1/admin/admin.router';
+import { testRouter } from '#server/routers/v1/test/test.router';
 
 
 export const v1Router = async (): Promise<expressRouter> => {
@@ -14,10 +15,7 @@ export const v1Router = async (): Promise<expressRouter> => {
 
   v1Router.use(bodyParser.json());
 
-  v1Router.use('/test', (req, res) => res.json({
-    message: 'Test',
-    time: new Date(),
-  }));
+  v1Router.use('/test', testRouter);
 
   v1Router.use('/dashboard', dashboardRouter);
 
