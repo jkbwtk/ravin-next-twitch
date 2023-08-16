@@ -121,46 +121,46 @@ const instance = new Logger({
         'time',
       ],
     }),
-    new FileOutput({
-      format: fileJsonFormat,
-      level: Infinity,
-      filename: 'combined_json.log',
-      directory: 'logs',
-      rotationFormat: FileOutput.rotateDate,
-      maxAge: duration({ days: 7 }),
-    }),
-    new FileOutput({
-      format: fileJsonFormat,
-      level: [
-        'error',
-        'warn',
-      ],
-      filename: 'important_json.log',
-      directory: 'logs',
-      rotationFormat: FileOutput.rotateDate,
-    }),
-    new FileOutput({
-      format: prettyFormat
-        .copy()
-        .chain(Logger.removeColors),
-      level: [
-        'error',
-        'warn',
-      ],
-      filename: 'important_human.log',
-      directory: 'logs',
-      rotationFormat: FileOutput.rotateDate,
-    }),
-    new FileOutput({
-      format: prettyFormat
-        .copy()
-        .chain(Logger.removeColors),
-      level: Infinity,
-      filename: 'combined_human.log',
-      directory: 'logs',
-      rotationFormat: FileOutput.rotateDate,
-      maxFiles: 5,
-    }),
+    // new FileOutput({
+    //   format: fileJsonFormat,
+    //   level: Infinity,
+    //   filename: 'combined_json.log',
+    //   directory: 'logs',
+    //   rotationFormat: FileOutput.rotateDate,
+    //   maxAge: duration({ days: 7 }),
+    // }),
+    // new FileOutput({
+    //   format: fileJsonFormat,
+    //   level: [
+    //     'error',
+    //     'warn',
+    //   ],
+    //   filename: 'important_json.log',
+    //   directory: 'logs',
+    //   rotationFormat: FileOutput.rotateDate,
+    // }),
+    // new FileOutput({
+    //   format: prettyFormat
+    //     .copy()
+    //     .chain(Logger.removeColors),
+    //   level: [
+    //     'error',
+    //     'warn',
+    //   ],
+    //   filename: 'important_human.log',
+    //   directory: 'logs',
+    //   rotationFormat: FileOutput.rotateDate,
+    // }),
+    // new FileOutput({
+    //   format: prettyFormat
+    //     .copy()
+    //     .chain(Logger.removeColors),
+    //   level: Infinity,
+    //   filename: 'combined_human.log',
+    //   directory: 'logs',
+    //   rotationFormat: FileOutput.rotateDate,
+    //   maxFiles: 5,
+    // }),
   ],
 }).registerLevelFunction('http', (callback, level, request: HTTPLogEntry) => {
   if (level !== 'http') return;
