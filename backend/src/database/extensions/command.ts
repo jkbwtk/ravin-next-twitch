@@ -189,4 +189,6 @@ export const commandExtension = Prisma.defineExtension((client) => {
   });
 });
 
-export type CommandWithUser = NonNullable<Awaited<ReturnType<ReturnType<typeof commandExtension>['command']['getById']>>>;
+export type CommandWithUser = NonNullable<Awaited<ReturnType<ReturnType<ReturnType<
+  typeof commandExtension
+> ['$extends']['extArgs']['model']['command']['getById'] >>>>;
