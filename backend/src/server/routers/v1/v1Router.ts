@@ -5,9 +5,9 @@ import { systemNotificationsRouter } from '#server/routers/v1/systemNotification
 import bodyParser from 'body-parser';
 import { commandsRouter } from '#server/routers/v1/commands';
 import { channelRouter } from '#server/routers/v1/channel';
-import { logsRouter } from '#server/routers/v1/logs';
 import { adminRouter } from '#server/routers/v1/admin/admin.router';
 import { testRouter } from '#server/routers/v1/test/test.router';
+import { logsRouter } from '#server/routers/v1/logs/logs.router';
 
 
 export const v1Router = async (): Promise<expressRouter> => {
@@ -27,7 +27,7 @@ export const v1Router = async (): Promise<expressRouter> => {
 
   v1Router.use('/channel', await channelRouter());
 
-  v1Router.use('/logs', await logsRouter());
+  v1Router.use('/logs', logsRouter);
 
   v1Router.use('/admin', adminRouter);
 
