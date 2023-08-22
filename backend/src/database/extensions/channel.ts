@@ -1,7 +1,6 @@
 import { Bot } from '#bot/Bot';
-import { ChantingSettings, PostChantingSettingsRequest } from '#shared/types/api/channel';
+import { ChantingSettings } from '#shared/types/api/channel';
 import { Prisma } from '@prisma/client';
-import { z } from 'zod';
 
 
 declare global {
@@ -24,12 +23,6 @@ export type ChannelUncheckedCreateInput = Prisma.ChannelUncheckedCreateInput & {
   chantingSettings?: ChantingSettings;
 };
 
-export const chantingSettingsValidator = z.object({
-  enabled: z.boolean(),
-  interval: z.number().min(0).max(300).int().multipleOf(5),
-  length: z.number().min(0).max(100).int(),
-}) satisfies z.Schema<ChantingSettings>;
-
 export const channelExtension = Prisma.defineExtension((client) => {
   return client.$extends({
     model: {
@@ -49,10 +42,8 @@ export const channelExtension = Prisma.defineExtension((client) => {
           if (channel === null) throw new Error(`Channel with userId ${userId} not found`);
           return channel;
         },
-        async updateChantingFromApi(userId: string, request: PostChantingSettingsRequest): Promise<ChannelWithUser> {
-          const settings = await chantingSettingsValidator.parseAsync(request);
+        async updateChantingFromApi(userId: string, settings: ChantingSettings): Promise<ChannelWithUser> {
           const channel = await Prisma.getExtensionContext(this).getByUserIdOrFail(userId);
-
 
           const updated = await Prisma.getExtensionContext(this).update({
             where: {
