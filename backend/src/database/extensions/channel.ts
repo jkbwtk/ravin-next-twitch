@@ -4,6 +4,12 @@ import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 
 
+declare global {
+  namespace PrismaJson {
+    type ChantingSettingsPrisma = ChantingSettings;
+  }
+}
+
 const chanelWithUser = Prisma.validator<Prisma.ChannelArgs>()({
   include: {
     user: true,
