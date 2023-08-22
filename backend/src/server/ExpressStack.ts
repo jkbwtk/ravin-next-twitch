@@ -1,7 +1,9 @@
 import { AsyncLike } from '#lib/utils';
-import { NextFunction, Request, RequestHandler, Response } from 'express';
-import { RouteParameters } from 'express-serve-static-core';
+import { RequestHandler as BaseRequestHandler, NextFunction, Request, Response } from 'express';
+import { ParamsDictionary, RouteParameters } from 'express-serve-static-core';
 
+
+type RequestHandler<P = ParamsDictionary> = BaseRequestHandler<P, unknown, unknown>;
 
 export type Middleware<
   OverrideReq = object,
