@@ -7,7 +7,7 @@ import { frontendPath, frontendProductionPath, isDevMode, serverPort } from '#sh
 import chalk from 'chalk';
 import path from 'path';
 import { Config } from '#lib/Config';
-import { createOnboardingRouter } from '#server/routers/onboarding';
+import { createOnboardingRouter } from '#server/routers/onboarding/onboarding.router';
 import { redis } from '#database/database';
 import session from 'express-session';
 import passport from 'passport';
