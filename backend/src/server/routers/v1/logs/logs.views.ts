@@ -17,8 +17,6 @@ export const getMessagesView = new ExpressStack()
       };
 
       res.json(response);
-
-      return [req, res, next];
     } catch (err) {
       logger.warn('Failed to get messages', {
         error: err,

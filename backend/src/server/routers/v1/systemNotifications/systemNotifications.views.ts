@@ -21,8 +21,6 @@ export const getNotifications = new ExpressStack()
       };
 
       res.json(resp);
-
-      return [req, res, next];
     } catch (err) {
       logger.error('Failed to get notifications', {
         label: ['APIv1', 'systemNotifications', 'getNotifications'],
@@ -45,8 +43,6 @@ export const postMarkAsRead = new ExpressStack()
       SocketServer.emitToUser(req.user.id, 'RAD_SYSTEM_NOTIFICATION', arrayFrom(body.id));
 
       res.sendStatus(200);
-
-      return [req, res, next];
     } catch (err) {
       logger.error('Failed to mark notifications as read', {
         label: ['APIv1', 'systemNotifications', 'markAsRead'],
@@ -69,8 +65,6 @@ export const postBroadcastNotification = new ExpressStack()
       await prisma.systemNotification.broadcastNotification(body.title, body.content);
 
       res.sendStatus(200);
-
-      return [req, res, next];
     } catch (err) {
       logger.error('Failed to broadcast notification', {
         label: ['APIv1', 'systemNotifications', 'postBroadcastNotification'],

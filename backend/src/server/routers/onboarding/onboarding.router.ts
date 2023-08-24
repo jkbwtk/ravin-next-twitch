@@ -35,12 +35,9 @@ export const createOnboardingRouter = (port: number): Router => {
     .use((req, res, next) => {
       if (req.validated.query.key !== onboardingKey) {
         res.redirect('/');
-        return [req, res, next];
       }
 
       res.sendFile(path.join(frontendPath, 'index.html'));
-
-      return [req, res, next];
     }).unwrap());
 
   onboardingRouter.post('/submit', ...new ExpressStack()
@@ -72,8 +69,6 @@ export const createOnboardingRouter = (port: number): Router => {
       setTimeout(() => process.emit('SIGINT'), 15000);
 
       res.sendStatus(200);
-
-      return [req, res, next];
     }).unwrap());
 
 

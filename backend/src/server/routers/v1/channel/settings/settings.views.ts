@@ -17,8 +17,6 @@ export const getChantingView = new ExpressStack()
     };
 
     res.json(response);
-
-    return [req, res, next];
   });
 
 export const postChantingView = new ExpressStack()
@@ -30,8 +28,6 @@ export const postChantingView = new ExpressStack()
       await prisma.channel.updateChantingFromApi(req.user.id, req.validated.body);
 
       res.sendStatus(200);
-
-      return [req, res, next];
     } catch (err) {
       logger.error('Failed to update chanting settings', {
         label: ['APIv1', 'channel', 'settings', 'postChantingView'],
