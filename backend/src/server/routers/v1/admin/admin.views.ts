@@ -12,7 +12,7 @@ export const patchConfigView = new ExpressStack()
   .use(authenticated)
   .use(admin)
   .use(validate(PatchConfigSchema))
-  .use(async (req, res, next) => {
+  .use(async (req, res) => {
     const changes: [string, string][] = [];
 
     for (const [key, value] of Object.entries(req.validated.body)) {
@@ -24,8 +24,6 @@ export const patchConfigView = new ExpressStack()
       await Config.batchSet(changes);
 
       res.sendStatus(200);
-
-      return [req, res, next];
     } catch (err) {
       logger.error('Failed to update config', {
         label: ['APIv1', 'admin', 'patchConfigView'],

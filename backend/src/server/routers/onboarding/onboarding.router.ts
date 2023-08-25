@@ -32,7 +32,7 @@ export const createOnboardingRouter = (port: number): Router => {
 
   onboardingRouter.get('/', ...new ExpressStack()
     .use(validate(GetOnboardingSchema))
-    .use((req, res, next) => {
+    .use((req, res) => {
       if (req.validated.query.key !== onboardingKey) {
         res.redirect('/');
       }
@@ -43,7 +43,7 @@ export const createOnboardingRouter = (port: number): Router => {
   onboardingRouter.post('/submit', ...new ExpressStack()
     .useNative(json())
     .use(validate(PostSubmitOnboardingSchema))
-    .use(async (req, res, next) => {
+    .use(async (req, res) => {
       if (req.validated.body.key !== onboardingKey) throw new ServerError(401, 'Invalid key');
 
       await Config.batchSet([

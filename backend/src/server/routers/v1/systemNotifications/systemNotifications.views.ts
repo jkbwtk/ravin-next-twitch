@@ -12,7 +12,7 @@ import { json } from 'body-parser';
 
 export const getNotifications = new ExpressStack()
   .use(authenticated)
-  .use(async (req, res, next) => {
+  .use(async (req, res) => {
     try {
       const notifications = await prisma.systemNotification.getByUserId(req.user.id);
 
@@ -35,7 +35,7 @@ export const postMarkAsRead = new ExpressStack()
   .useNative(json())
   .use(authenticated)
   .use(validate(PostReadNotificationsSchema))
-  .use(async (req, res, next) => {
+  .use(async (req, res) => {
     try {
       const body = req.validated.body;
 
@@ -59,7 +59,7 @@ export const postBroadcastNotification = new ExpressStack()
   .use(authenticated)
   .use(admin)
   .use(validate(PostBroadcastNotificationSchema))
-  .use(async (req, res, next) => {
+  .use(async (req, res) => {
     try {
       const body = req.validated.body;
       await prisma.systemNotification.broadcastNotification(body.title, body.content);

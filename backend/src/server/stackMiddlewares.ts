@@ -7,13 +7,13 @@ import { isDevMode } from '#shared/constants';
 
 export const authenticated: Middleware<never, object, object, {
   user: Exclude<Request['user'], undefined>;
-}> = (req, res, next) => {
+}> = (req, res) => {
   if (req.isUnauthenticated()) throw new ServerError(401, 'Unauthorized');
   if (req.user === undefined) throw new ServerError(401, 'Unauthorized');
 
   const authReq = req as typeof req & { user: Exclude<typeof req['user'], undefined> };
 
-  return [authReq, res, next];
+  return [authReq, res];
 };
 
 export const admin: Middleware<void, {
@@ -22,7 +22,7 @@ export const admin: Middleware<void, {
   if (req.user.admin === false) throw new ServerError(403, 'Forbidden');
 };
 
-export const validate = <T extends AnyZodObject>(schema: T): Middleware<never, object, object, { validated: z.infer<T> }> => async (req, res, next) => {
+export const validate = <T extends AnyZodObject>(schema: T): Middleware<never, object, object, { validated: z.infer<T> }> => async (req, res) => {
   try {
     const validated = await schema.parseAsync({
       body: req.body,
@@ -32,7 +32,7 @@ export const validate = <T extends AnyZodObject>(schema: T): Middleware<never, o
 
     const temp = Object.assign(req, { validated });
 
-    return [temp, res, next];
+    return [temp, res];
   } catch (error) {
     if (error instanceof ZodError) {
       const invalids = error.issues.map((issue) => issue.path.pop());

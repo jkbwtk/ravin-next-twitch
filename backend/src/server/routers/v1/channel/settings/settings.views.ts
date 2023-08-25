@@ -11,7 +11,7 @@ import { json } from 'body-parser';
 export const getChantingView = new ExpressStack()
   .useNative(json())
   .use(authenticated)
-  .use(async (req, res, next) => {
+  .use(async (req, res) => {
     const response: GetChantingSettingsResponse = {
       data: req.user.channel.chantingSettings,
     };
@@ -23,7 +23,7 @@ export const postChantingView = new ExpressStack()
   .useNative(json())
   .use(authenticated)
   .use(validate(PostChantingSchema))
-  .use(async (req, res, next) => {
+  .use(async (req, res) => {
     try {
       await prisma.channel.updateChantingFromApi(req.user.id, req.validated.body);
 

@@ -7,13 +7,11 @@ import { basicSignal } from '#shared/utils';
 
 export const getTestView = new ExpressStack()
   .use(requireDevMode)
-  .use((req, res, next) => {
+  .use((req, res) => {
     res.json({
       message: 'Test!',
       time: new Date(),
     });
-
-    return [req, res, next];
   });
 
 const lazySignal = basicSignal(false);
@@ -30,11 +28,21 @@ sleep(20000).then(() => {
 export const getLazyView = new ExpressStack()
   .use(requireDevMode)
   .use(waitUntilReady(lazySignal))
-  .use((req, res, next) => {
+  .use((req, res) => {
     res.json({
       message: 'Lazy!',
       time: new Date(),
     });
+  });
 
-    return [req, res, next];
+export const getPortView = new ExpressStack<number>()
+  .use(requireDevMode)
+  .use((req, res, port) => {
+    res.json({
+      message: 'Port!',
+      localPort: req.socket.localPort,
+      remotePort: req.socket.remotePort,
+      configPort: port,
+      time: new Date(),
+    });
   });

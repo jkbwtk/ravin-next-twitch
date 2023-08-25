@@ -8,7 +8,7 @@ import { GetMessagesResponse } from '#shared/types/api/logs';
 
 export const getMessagesView = new ExpressStack()
   .use(authenticated)
-  .use(async (req, res, next) => {
+  .use(async (req, res) => {
     try {
       const messages = await prisma.message.getByChannelId(req.user.id);
 
