@@ -1,26 +1,21 @@
-import { Config } from '#lib/Config';
 import { display } from '#lib/display';
-import { ExpressStack } from '#server/ExpressStack';
-import { ServerError } from '#server/ServerError';
-import { GetOnboardingSchema, PostSubmitOnboardingSchema } from '#server/routers/onboarding/onboarding.schemas';
-import { validate } from '#server/stackMiddlewares';
-import { frontendPath } from '#shared/constants';
+import { getOnboardingView, OnboardingContext, postSubmitOnboardingView } from '#server/routers/onboarding/onboarding.views';
 import { quickSwitch } from '#shared/utils';
-import { json } from 'body-parser';
 import chalk from 'chalk';
 import { randomBytes } from 'crypto';
 import { Router } from 'express';
-import path from 'path';
 
 
 export const createOnboardingRouter = (port: number): Router => {
-  const onboardingKey = randomBytes(16).toString('hex');
-  const onboardingRouter = Router();
+  const context: OnboardingContext = {
+    key: randomBytes(16).toString('hex'),
+    port,
+  };
 
   const url = quickSwitch(port, {
-    80: `http://localhost/onboarding?key=${onboardingKey}`,
-    443: `https://localhost/onboarding?key=${onboardingKey}`,
-    default: `http://localhost:${port}/onboarding?key=${onboardingKey}`,
+    80: `http://localhost/onboarding?key=${context.key}`,
+    443: `https://localhost/onboarding?key=${context.key}`,
+    default: `http://localhost:${port}/onboarding?key=${context.key}`,
   });
 
   display.info.nextLine(
@@ -30,46 +25,11 @@ export const createOnboardingRouter = (port: number): Router => {
     'to configure the server.',
   );
 
-  onboardingRouter.get('/', ...new ExpressStack()
-    .use(validate(GetOnboardingSchema))
-    .use((req, res) => {
-      if (req.validated.query.key !== onboardingKey) {
-        res.redirect('/');
-      }
+  const onboardingRouter = Router();
 
-      res.sendFile(path.join(frontendPath, 'index.html'));
-    }).unwrap());
+  onboardingRouter.get('/', ...getOnboardingView.unwrap(context));
 
-  onboardingRouter.post('/submit', ...new ExpressStack()
-    .useNative(json())
-    .use(validate(PostSubmitOnboardingSchema))
-    .use(async (req, res) => {
-      if (req.validated.body.key !== onboardingKey) throw new ServerError(401, 'Invalid key');
-
-      await Config.batchSet([
-        ['adminUsername', req.validated.body.adminUsername],
-        ['botLogin', req.validated.body.botLogin],
-        ['botToken', req.validated.body.botToken],
-        ['twitchClientId', req.validated.body.twitchClientId],
-        ['twitchClientSecret', req.validated.body.twitchClientSecret],
-        ['sessionSecret', randomBytes(16).toString('hex')],
-      ]);
-
-      display.info.nextLine(
-        'Onboarding',
-        'Server has been configured.',
-        'To repeat this process, start the server with the RECONFIGURE_SERVER environment variable set to "TRUE".',
-      );
-
-      display.warning.nextLine(
-        'Onboarding',
-        'Server will shut down in 15 seconds.',
-      );
-
-      setTimeout(() => process.emit('SIGINT'), 15000);
-
-      res.sendStatus(200);
-    }).unwrap());
+  onboardingRouter.post('/submit', ...postSubmitOnboardingView.unwrap(context));
 
 
   return onboardingRouter;
