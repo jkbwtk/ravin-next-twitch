@@ -46,3 +46,22 @@ export const getPortView = new ExpressStack<number>()
       time: new Date(),
     });
   });
+
+export const getPreflightView = new ExpressStack()
+  .usePreflight(requireDevMode)
+  .usePreflight(() => {
+    logger.debug('Executed preflight middleware');
+  })
+  .useNative((req, res, next) => {
+    logger.debug('Executed native middleware');
+
+    next();
+  })
+  .use((req, res) => {
+    logger.debug('Executed stack middleware');
+
+    res.json({
+      message: 'Preflight!',
+      time: new Date(),
+    });
+  });

@@ -32,8 +32,8 @@ export const getNotifications = new ExpressStack()
   });
 
 export const postMarkAsRead = new ExpressStack()
+  .usePreflight(authenticated)
   .useNative(json())
-  .use(authenticated)
   .use(validate(PostReadNotificationsSchema))
   .use(async (req, res) => {
     try {
@@ -55,9 +55,9 @@ export const postMarkAsRead = new ExpressStack()
 
 
 export const postBroadcastNotification = new ExpressStack()
+  .usePreflight(authenticated)
+  .usePreflight(admin)
   .useNative(json())
-  .use(authenticated)
-  .use(admin)
   .use(validate(PostBroadcastNotificationSchema))
   .use(async (req, res) => {
     try {

@@ -38,6 +38,9 @@ export class ExpressStack<
 > {
   public readonly url: Route;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private preflightMiddlewares: Middleware<void, any, any, any, any, UnwrapParams>[] = [];
+
   private expressMiddlewares: RequestHandler[] = [];
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -48,7 +51,25 @@ export class ExpressStack<
   }
 
   public unwrap(params: UnwrapParams): Array<RequestHandler<Params> | PramsRequestHandler> {
-    return [...this.expressMiddlewares, this.execute.bind(this, params)];
+    return [this.executePreflight.bind(this, params), ...this.expressMiddlewares, this.execute.bind(this, params)];
+  }
+
+  public usePreflight<
+    R extends AsyncLike<RequestHandlerParams<Params> | void>
+  >(func: (
+    req: HandlerParams['0'],
+    res: HandlerParams['1'],
+    params: UnwrapParams
+  ) => R): ExpressStack<UnwrapParams, Route, Params, ChoseNonVoid<Awaited<R>, HandlerParams>> {
+    this.preflightMiddlewares.push(func);
+
+    return this as unknown as ExpressStack<UnwrapParams, Route, Params, ChoseNonVoid<Awaited<R>, HandlerParams>>;
+  }
+
+  public useNative(middleware: RequestHandler): this {
+    this.expressMiddlewares.push(middleware);
+
+    return this;
   }
 
   public use<
@@ -63,22 +84,31 @@ export class ExpressStack<
     return this as unknown as ExpressStack<UnwrapParams, Route, Params, ChoseNonVoid<Awaited<R>, HandlerParams>>;
   }
 
-  public useNative(middleware: RequestHandler): this {
-    this.expressMiddlewares.push(middleware);
-
-    return this;
-  }
-
   public execute: PramsRequestHandler<UnwrapParams, Params> = async (params, req, res, next) => {
-    let request = req; let response = res;
     try {
       for (const middleware of this.stackMiddlewares) {
-        const middlewareReturn = await middleware(request, response, params);
+        const middlewareReturn = await middleware(req, res, params);
 
         if (middlewareReturn) {
-          [request, response] = middlewareReturn;
+          [req, res] = middlewareReturn;
         }
       }
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public executePreflight: PramsRequestHandler<UnwrapParams, Params> = async (params, req, res, next) => {
+    try {
+      for (const middleware of this.preflightMiddlewares) {
+        const middlewareReturn = await middleware(req, res, params);
+
+        if (middlewareReturn) {
+          [req, res] = middlewareReturn;
+        }
+      }
+
+      next();
     } catch (error) {
       next(error);
     }

@@ -8,9 +8,9 @@ import { json } from 'body-parser';
 
 
 export const patchConfigView = new ExpressStack()
+  .usePreflight(authenticated)
+  .usePreflight(admin)
   .useNative(json())
-  .use(authenticated)
-  .use(admin)
   .use(validate(PatchConfigSchema))
   .use(async (req, res) => {
     const changes: [string, string][] = [];

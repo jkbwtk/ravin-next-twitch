@@ -9,8 +9,8 @@ import { json } from 'body-parser';
 
 
 export const getChantingView = new ExpressStack()
+  .usePreflight(authenticated)
   .useNative(json())
-  .use(authenticated)
   .use(async (req, res) => {
     const response: GetChantingSettingsResponse = {
       data: req.user.channel.chantingSettings,
@@ -20,8 +20,8 @@ export const getChantingView = new ExpressStack()
   });
 
 export const postChantingView = new ExpressStack()
+  .usePreflight(authenticated)
   .useNative(json())
-  .use(authenticated)
   .use(validate(PostChantingSchema))
   .use(async (req, res) => {
     try {
