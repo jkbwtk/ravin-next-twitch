@@ -1,8 +1,7 @@
 import { Bot } from '#bot/Bot';
 import { logger } from '#lib/logger';
-import { CustomCommand, PatchCustomCommandRequest, PostCustomCommandRequest, UserLevel } from '#shared/types/api/commands';
+import { CustomCommand, DeleteCustomCommandRequest, PatchCustomCommandRequest, PostCustomCommandRequest, UserLevel } from '#shared/types/api/commands';
 import { Prisma } from '@prisma/client';
-import { z } from 'zod';
 
 
 declare global {
@@ -11,17 +10,6 @@ declare global {
   }
 }
 
-export const PostCustomCommandSchema = z.object({
-  command: z.string().min(1).max(64),
-  response: z.string().min(1).max(512),
-  userLevel: z.nativeEnum(UserLevel),
-  cooldown: z.number().int().min(0).max(86400).multipleOf(5),
-  enabled: z.boolean(),
-}) satisfies z.Schema<PostCustomCommandRequest>;
-
-export const PatchCustomCommandSchema = z.object({
-  id: z.number().min(1),
-}).and(PostCustomCommandSchema.partial()) satisfies z.Schema<PatchCustomCommandRequest>;
 
 export const commandExtension = Prisma.defineExtension((client) => {
   return client.$extends({
@@ -115,23 +103,17 @@ export const commandExtension = Prisma.defineExtension((client) => {
 
           return result;
         },
-        async createFromApi(channelId: string, request: PostCustomCommandRequest) {
-          const validated = await PostCustomCommandSchema.safeParseAsync(request);
-
-          if (!validated.success) {
-            throw new Error(validated.error.message);
-          }
-
+        async createFromApi(channelId: string, command: PostCustomCommandRequest) {
           const t1 = performance.now();
 
           const result = await Prisma.getExtensionContext(this).create({
             data: {
               channelUserId: channelId,
-              command: validated.data.command,
-              response: validated.data.response,
-              userLevel: validated.data.userLevel,
-              cooldown: validated.data.cooldown,
-              enabled: validated.data.enabled,
+              command: command.command,
+              response: command.response,
+              userLevel: command.userLevel,
+              cooldown: command.cooldown,
+              enabled: command.enabled,
             },
             include: {
               user: true,
@@ -144,23 +126,17 @@ export const commandExtension = Prisma.defineExtension((client) => {
 
           return result;
         },
-        async updateFromApi(request: PatchCustomCommandRequest) {
-          const validated = await PatchCustomCommandSchema.safeParseAsync(request);
-
-          if (!validated.success) {
-            throw new Error(validated.error.message);
-          }
-
+        async updateFromApi(command: PatchCustomCommandRequest) {
           const t1 = performance.now();
 
           const result = await Prisma.getExtensionContext(this).update({
-            where: { id: validated.data.id },
+            where: { id: command.id },
             data: {
-              command: validated.data.command,
-              response: validated.data.response,
-              userLevel: validated.data.userLevel,
-              cooldown: validated.data.cooldown,
-              enabled: validated.data.enabled,
+              command: command.command,
+              response: command.response,
+              userLevel: command.userLevel,
+              cooldown: command.cooldown,
+              enabled: command.enabled,
             },
             include: {
               user: true,
@@ -173,11 +149,11 @@ export const commandExtension = Prisma.defineExtension((client) => {
 
           return result;
         },
-        async deleteFromApi(id: number) {
+        async deleteFromApi(command: DeleteCustomCommandRequest) {
           const t1 = performance.now();
 
           const result = await Prisma.getExtensionContext(this).delete({
-            where: { id },
+            where: { id: command.id },
           });
 
           logger.time('Deleting command from api', t1);

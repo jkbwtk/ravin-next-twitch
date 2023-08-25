@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import { Middleware } from '#server/ExpressStack';
 import { ServerError } from '#server/ServerError';
-import { AnyZodObject, z, ZodError } from 'zod';
+import { AnyZodObject, z, ZodError, ZodObject } from 'zod';
 import { Signal } from '#shared/utils';
 import { isDevMode } from '#shared/constants';
 
@@ -22,7 +22,13 @@ export const admin: Middleware<void, {
   if (req.user.admin === false) throw new ServerError(403, 'Forbidden');
 };
 
-export const validate = <T extends AnyZodObject>(schema: T): Middleware<never, object, object, { validated: z.infer<T> }> => async (req, res) => {
+export type ValidatorSchema = ZodObject<{
+  body?: AnyZodObject;
+  query?: AnyZodObject;
+  params?: AnyZodObject;
+}>;
+
+export const validate = <T extends ValidatorSchema>(schema: T): Middleware<never, object, object, { validated: z.infer<T> }> => async (req, res) => {
   try {
     const validated = await schema.parseAsync({
       body: req.body,
