@@ -5,7 +5,7 @@ import { AnyZodObject, z, ZodError } from 'zod';
 import { Signal } from '#shared/utils';
 import { isDevMode } from '#shared/constants';
 
-export const authenticated: Middleware<object, object, {
+export const authenticated: Middleware<never, object, object, {
   user: Exclude<Request['user'], undefined>;
 }> = (req, res, next) => {
   if (req.isUnauthenticated()) throw new ServerError(401, 'Unauthorized');
@@ -16,13 +16,13 @@ export const authenticated: Middleware<object, object, {
   return [authReq, res, next];
 };
 
-export const admin: Middleware<{
+export const admin: Middleware<void, {
   user: Exclude<Request['user'], undefined>;
-}, object, object, object, void> = (req, res, next) => {
+}> = (req) => {
   if (req.user.admin === false) throw new ServerError(403, 'Forbidden');
 };
 
-export const validate = <T extends AnyZodObject>(schema: T): Middleware<object, object, { validated: z.infer<T> }> => async (req, res, next) => {
+export const validate = <T extends AnyZodObject>(schema: T): Middleware<never, object, object, { validated: z.infer<T> }> => async (req, res, next) => {
   try {
     const validated = await schema.parseAsync({
       body: req.body,
@@ -49,10 +49,10 @@ export const validate = <T extends AnyZodObject>(schema: T): Middleware<object, 
   }
 };
 
-export const requireDevMode: Middleware<object, object, object, object, void> = (req, res, next) => {
+export const requireDevMode: Middleware<void> = () => {
   if (!isDevMode) throw new ServerError(404, 'Not Found');
 };
 
-export const waitUntilReady = (signal: Signal<boolean>): Middleware<object, object, object, object, void> => (req, res, next) => {
+export const waitUntilReady = (signal: Signal<boolean>): Middleware<void> => () => {
   if (!signal()) throw new ServerError(503, 'Service Temporarily Unavailable');
 };

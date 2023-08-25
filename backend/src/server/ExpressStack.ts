@@ -7,11 +7,11 @@ type RequestHandler<P = ParamsDictionary> = BaseRequestHandler<P, unknown, unkno
 type ChoseNonVoid<A, B> = A extends void | AsyncLike<void> | Promise<void> ? B : A;
 
 export type Middleware<
+  OptionalVoid extends void | never = never,
   OverrideReq = object,
   OverrideRes = object,
   OverrideRetReq = object,
   OverrideRetRes = object,
-  OptionalVoid extends void | never = never,
 > = <
   Req extends Request,
   Res extends Response,
