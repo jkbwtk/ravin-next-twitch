@@ -2,7 +2,7 @@ import OAuth2Strategy from 'passport-oauth2';
 import { Config } from '#lib/Config';
 import axios from 'axios';
 import { callbackUrl } from '#shared/constants';
-import { verifyCallback } from '#server/routers/v1/authShared';
+import { verifyCallback } from '#server/routers/v1/auth/authShared';
 
 
 export const createProdAuthStrategy = async (): Promise<OAuth2Strategy> => {

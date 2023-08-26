@@ -1,5 +1,4 @@
 import { Router as expressRouter } from 'express';
-import { authRouter } from '#server/routers/v1/auth';
 import bodyParser from 'body-parser';
 import { adminRouter } from '#server/routers/v1/admin/admin.router';
 import { testRouter } from '#server/routers/v1/test/test.router';
@@ -8,6 +7,7 @@ import { systemNotificationsRouter } from '#server/routers/v1/systemNotification
 import { channelRouter } from '#server/routers/v1/channel/channel.router';
 import { commandsRouter } from '#server/routers/v1/commands/commands.router';
 import { dashboardRouter } from '#server/routers/v1/dashboard/dashboard.router';
+import { authRouter } from '#server/routers/v1/auth/auth.router';
 
 
 export const v1Router = async (): Promise<expressRouter> => {
@@ -19,7 +19,7 @@ export const v1Router = async (): Promise<expressRouter> => {
 
   v1Router.use('/dashboard', dashboardRouter);
 
-  v1Router.use('/auth', await authRouter());
+  v1Router.use('/auth', authRouter);
 
   v1Router.use('/notifications', systemNotificationsRouter);
 

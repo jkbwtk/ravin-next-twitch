@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Strategy as CustomStrategy, VerifyCallback } from 'passport-custom';
 import { AccessToken, GetMockApp, MockApp } from '#types/api/auth';
-import { authScopes, verifyCallback as sharedCallback } from '#server/routers/v1/authShared';
+import { authScopes, verifyCallback as sharedCallback } from '#server/routers/v1/auth/authShared';
 import { GetTwitchUsers, TwitchUser } from '#shared/types/twitch';
 import { Config } from '#lib/Config';
 
