@@ -1,4 +1,3 @@
-import DashboardPage from '#components/DashboardPage';
 import DashboardInfoBar from '#components/DashboardInfoBar';
 import { CustomCommandEditorProvider } from '#providers/CustomCommandEditorProvider';
 import { batch, createResource, For, onCleanup, onMount } from 'solid-js';
@@ -84,18 +83,16 @@ const CommandStatus: Component = () => {
   });
 
   return (
-    <DashboardPage>
-      <CustomCommandEditorProvider>
-        <div class={style.container}>
-          <DashboardInfoBar / >
-          <div class={style.commands}>
-            <For each={statuses()}>
-              {CommandStatusTile}
-            </For>
-          </div>
+    <CustomCommandEditorProvider>
+      <div class={style.container}>
+        <DashboardInfoBar / >
+        <div class={style.commands}>
+          <For each={statuses()}>
+            {CommandStatusTile}
+          </For>
         </div>
-      </CustomCommandEditorProvider>
-    </DashboardPage>
+      </div>
+    </CustomCommandEditorProvider>
   );
 };
 

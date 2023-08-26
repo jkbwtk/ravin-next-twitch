@@ -1,4 +1,3 @@
-import DashboardPage from '#components/DashboardPage';
 import DashboardInfoBar from '#components/DashboardInfoBar';
 import Button from '#components/Button';
 import { CustomCommandEditorProvider, useCustomCommandEditor } from '#providers/CustomCommandEditorProvider';
@@ -19,16 +18,14 @@ const InfoBar: Component = () => {
 
 const CustomCommands: Component = () => {
   return (
-    <DashboardPage>
-      <CustomCommandEditorProvider>
-        <div class={style.container}>
-          <InfoBar />
-          <div class={style.widgets}>
-            <CommandTableWidget />
-          </div>
+    <CustomCommandEditorProvider>
+      <div class={style.container}>
+        <InfoBar />
+        <div class={style.widgets}>
+          <CommandTableWidget />
         </div>
-      </CustomCommandEditorProvider>
-    </DashboardPage>
+      </div>
+    </CustomCommandEditorProvider>
   );
 };
 

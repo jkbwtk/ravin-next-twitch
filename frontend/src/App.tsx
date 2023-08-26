@@ -3,10 +3,10 @@ import { routes } from './routes';
 
 
 const App: Component = () => {
-  const Route = useRoutes(routes);
+  const Routes = useRoutes(routes);
 
   return (
-    <Route />
+    <Routes />
   );
 };
 

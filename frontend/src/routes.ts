@@ -29,6 +29,7 @@ export const routes: RouteDefinition[] = [
   },
   {
     path: '/dashboard',
+    component: lazy(() => import('#pages/DashboardOutlet')),
     children,
   },
   {
