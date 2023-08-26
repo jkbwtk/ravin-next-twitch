@@ -9,7 +9,7 @@ import style from '#styles/widgets/RecentActionsWidget.module.scss';
 
 
 const fetchRecentActions = async (): Promise<Action[]> => {
-  const response = await fetch('/api/v1/dashboard/widgets/recentActions');
+  const response = await fetch('/api/v1/dashboard/widgets/recent-actions');
   const { data } = await response.json() as GetRecentActionsResponse;
 
   return data;

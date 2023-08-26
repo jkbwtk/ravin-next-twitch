@@ -12,7 +12,7 @@ const parseSymbol = (state: boolean | undefined) => {
 };
 
 const fetchConnectionStatus = async (): Promise<BotConnectionStatus> => {
-  const response = await fetch('/api/v1/dashboard/connectionStatus');
+  const response = await fetch('/api/v1/dashboard/connection-status');
   const { data } = await response.json() as GetBotConnectionStatusResponse;
 
   return data;
@@ -22,7 +22,7 @@ const ChannelStatus: Component = () => {
   const [status, { refetch: refetchConnection }] = createResource(fetchConnectionStatus);
 
   const joinChannel = async (): Promise<void> => {
-    const response = await fetch('/api/v1/dashboard/joinChannel', {
+    const response = await fetch('/api/v1/dashboard/join-channel', {
       method: 'POST',
     });
 

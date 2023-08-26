@@ -5,8 +5,8 @@ import { Router } from 'express';
 
 export const dashboardRouter = Router();
 
-dashboardRouter.get('/connectionStatus', ...getConnectionStatusView.unwrap());
+dashboardRouter.get('/connection-status', ...getConnectionStatusView.unwrap());
 
-dashboardRouter.get('/joinChannel', ...getConnectionStatusView.unwrap());
+dashboardRouter.get('/join-channel', ...getConnectionStatusView.unwrap());
 
 dashboardRouter.use('/widgets', widgetsRouter);

@@ -9,7 +9,7 @@ import style from '#styles/widgets/TopStatsWidget.module.scss';
 
 
 const fetchTopStats = async (): Promise<TopStats> => {
-  const response = await fetch('/api/v1/dashboard/widgets/topStats');
+  const response = await fetch('/api/v1/dashboard/widgets/top-stats');
   const { data } = await response.json() as GetTopStatsResponse;
 
   return data;

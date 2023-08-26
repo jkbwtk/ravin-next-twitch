@@ -11,7 +11,7 @@ import style from '#styles/widgets/StatsWidget.module.scss';
 
 
 const fetchChatStats = async (): Promise<ChatStats> => {
-  const response = await fetch('/api/v1/dashboard/widgets/chatStats');
+  const response = await fetch('/api/v1/dashboard/widgets/chat-stats');
   const { data } = await response.json() as GetChatStatsResponse;
 
   return data;

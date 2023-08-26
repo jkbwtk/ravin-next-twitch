@@ -6,8 +6,8 @@ export const widgetsRouter = Router();
 
 widgetsRouter.get('/moderators', ...getModeratorsView.unwrap());
 
-widgetsRouter.get('/topStats', ...getTopStatsView.unwrap());
+widgetsRouter.get('/top-stats', ...getTopStatsView.unwrap());
 
-widgetsRouter.get('/recentActions', ...getRecentActionsView.unwrap());
+widgetsRouter.get('/recent-actions', ...getRecentActionsView.unwrap());
 
-widgetsRouter.get('/chatStats', ...getChatStatsView.unwrap());
+widgetsRouter.get('/chat-stats', ...getChatStatsView.unwrap());
