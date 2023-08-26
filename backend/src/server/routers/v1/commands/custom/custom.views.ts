@@ -4,7 +4,7 @@ import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
 import { ServerError } from '#server/ServerError';
 import { SocketServer } from '#server/SocketServer';
-import { DeleteCustomCommandSchema, PatchCustomCommandSchema, PostCustomCommandSchema } from '#server/routers/v1/commands/commands.schemas';
+import { DeleteCustomCommandSchema, PatchCustomCommandSchema, PostCustomCommandSchema } from '#server/routers/v1/commands/custom/custom.schemas';
 import { authenticated, validate } from '#server/stackMiddlewares';
 import { GetCustomCommandsResponse, GetCustomCommandsStatusResponse } from '#shared/types/api/commands';
 import { json } from 'body-parser';
