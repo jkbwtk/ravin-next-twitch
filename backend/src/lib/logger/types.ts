@@ -20,6 +20,7 @@ export type LogCallback = (entry: TransformableEntry) => void;
 
 export type AllowedLoggerTypes<T extends Partial<LoggerOptions>> = string
 | number
+| boolean
 | Array<unknown>
 | Error
 | null
