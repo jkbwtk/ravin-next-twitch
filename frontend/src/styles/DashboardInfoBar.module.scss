@@ -1,4 +1,5 @@
 @use 'app';
+@use 'animations' as *;
 
 
 .border-container {
@@ -52,6 +53,12 @@
 
       text-decoration: none;
       border: none;
+
+      transition: color $defaultDuration;
+
+      &:hover {
+        color: app.$textBrightColor;
+      }
     }
 
     .path-element:last-child {

@@ -11,6 +11,7 @@ const capitalize = (str: string) => str[0].toUpperCase() + str.slice(1);
 
 const DashboardInfoBar: ParentComponent = (props) => {
   const data = useRouteData<SidebarRoute>();
+  let pathAccumulator = [''];
 
   return (
     <div classList={{
@@ -24,12 +25,16 @@ const DashboardInfoBar: ParentComponent = (props) => {
           <div class={style.path}>
             <Link href='/' class={style.pathElement}>Home</Link>
             <For each={data.href.split('/').slice(1)}>
-              {(linkName) => (
-                <>
-                  <MaterialSymbol symbol='arrow_forward_ios' color='primary' size='smallest' />
-                  <span class={style.pathElement}>{capitalize(linkName)}</span>
-                </>
-              )}
+              {(part) => {
+                pathAccumulator.push(part);
+
+                return (
+                  <>
+                    <MaterialSymbol symbol='arrow_forward_ios' color='primary' size='smallest' />
+                    <Link href={pathAccumulator.join('/')} class={style.pathElement}>{capitalize(part)}</Link>
+                  </>
+                );
+              }}
             </For>
           </div>
         </div>

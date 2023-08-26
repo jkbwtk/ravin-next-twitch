@@ -23,7 +23,7 @@ const sidebarElements: SidebarRoute[] = [
       {
         symbol: 'monitor_heart',
         name: 'Status',
-        href: '/dashboard/commands/stats',
+        href: '/dashboard/commands/status',
         component: lazy(() => import('#pages/dashboard/CommandStatus')),
       },
       {
