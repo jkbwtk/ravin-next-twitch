@@ -43,6 +43,7 @@
     "compression": "^1.7.4",
     "connect-redis": "^7.0.1",
     "cookies": "^0.8.0",
+    "croner": "^7.0.1",
     "cross-env": "^7.0.3",
     "csv": "^6.2.8",
     "dayjs": "^1.11.7",

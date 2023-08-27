@@ -148,7 +148,6 @@ export class Server {
   }
 
   public async start(): Promise<void> {
-    await TokenManager.processAll();
     await TokenManager.start();
 
     await this.registerRoutes();

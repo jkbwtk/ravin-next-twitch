@@ -4,6 +4,7 @@ import { getChatters } from '#lib/twitch';
 import { ChannelWithUser } from '#database/extensions/channel';
 import { prisma } from '#database/database';
 import { CommandWithUser } from '#database/extensions/command';
+import { Cron } from 'croner';
 
 
 export type CustomCommandState = {
@@ -27,8 +28,8 @@ export class ChannelThread {
   private chantParticipants: Set<string> = new Set();
   private chantCounter = 0;
   public chantResponded = false;
-
-  private intervals: ExtendedSet<NodeJS.Timeout> = new ExtendedSet();
+  public readonly refreshChatMembersJobName: string;
+  private jobs: ExtendedMap<string, Cron> = new ExtendedMap();
   public customCommands: ExtendedMap<string, CustomCommandState> = new ExtendedMap();
 
   private static defaultOptions: Required<ChannelThreadOptions> = {
@@ -39,6 +40,8 @@ export class ChannelThread {
     this.options = { ...ChannelThread.defaultOptions, ...options };
 
     this.channel = channelUser;
+
+    this.refreshChatMembersJobName = `ChannelThread:${this.channel.user.login}:refreshChatMembers`;
   }
 
   public async init(): Promise<void> {
@@ -48,6 +51,9 @@ export class ChannelThread {
 
   public destroy(): void {
     this.stopChatMemberSyncing();
+
+    this.jobs.forEach((job) => job.stop());
+    this.jobs.clear();
   }
 
   public addMessage(message: string, author: string): void {
@@ -100,15 +106,20 @@ export class ChannelThread {
   }
 
   private async startChatMemberSyncing(): Promise<void> {
-    await this.syncChatMembers();
+    const job = Cron('0 */5 * * * *', {
+      name: this.refreshChatMembersJobName,
+    }, async () => {
+      await this.syncChatMembers();
+    });
 
-    this.intervals.add(setTimeout(() => {
-      this.syncChatMembers();
-    }, 1000 * 60 * 5));
+    await job.trigger();
+
+    this.jobs.set(this.refreshChatMembersJobName, job);
   }
 
   private stopChatMemberSyncing(): void {
-    this.intervals.forEach((interval) => clearInterval(interval));
+    this.jobs.get(this.refreshChatMembersJobName)?.stop();
+    this.jobs.delete(this.refreshChatMembersJobName);
   }
 
   public async syncCustomCommands(): Promise<void> {

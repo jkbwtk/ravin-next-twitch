@@ -5,19 +5,19 @@ import { ExtendedMap } from '#lib/ExtendedMap';
 import { logger } from '#lib/logger';
 import { refreshTokenUnsafe, validateTokenUnsafe } from '#lib/twitch';
 import { isDevApi } from '#shared/constants';
+import { Cron } from 'croner';
 
 
 export class TokenManager {
   private static instance: TokenManager;
 
   private repository = prisma.token;
-  private intervalHandle: NodeJS.Timer | null = null;
+  private refreshJob = new Cron('? * * * *', {
+    name: 'TokenManager:refreshTokens',
+    paused: true,
+  }, TokenManager.processAll);
 
   private refreshQueue: ExtendedMap<string, Deferred<TokenWithUserAndChannel>> = new ExtendedMap();
-
-  private options = {
-    refreshInterval: 1000 * 60 * 60, // 1 hour
-  };
 
   public static getInstance(): TokenManager {
     if (!TokenManager.instance) {
@@ -149,20 +149,17 @@ export class TokenManager {
     await instance._processAll();
   }
 
-  public static start(): void {
+  public static async start(): Promise<void> {
     const instance = TokenManager.getInstance();
 
-    TokenManager.stop();
-    instance.intervalHandle = setInterval(() => {
-      instance._processAll;
-    }, instance.options.refreshInterval);
+    instance.refreshJob.resume();
+    await instance.refreshJob.trigger();
   }
 
   public static stop(): void {
     const instance = TokenManager.getInstance();
 
-    if (instance.intervalHandle !== null) {
-      clearInterval(instance.intervalHandle);
-    }
+    // TODO: add additional start/stop logic (refreshJob can't be started again after it's stopped)
+    instance.refreshJob.stop();
   }
 }
