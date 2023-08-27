@@ -23,7 +23,10 @@ const DashboardInfoBar: ParentComponent = (props) => {
         <div class={style.locationInfo}>
           <div class={style.title}>{data.name}</div>
           <div class={style.path}>
-            <Link href='/' class={style.pathElement}>Home</Link>
+            <Link href='/' class={style.pathElement}>
+              <MaterialSymbol symbol='home' color='gray' interactive size='small' highlightColor='primary' />
+            </Link>
+
             <For each={data.href.split('/').slice(1)}>
               {(part) => {
                 pathAccumulator.push(part);
