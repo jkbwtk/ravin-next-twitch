@@ -7,6 +7,7 @@ export interface SidebarRoute {
   href: string;
   auxRoutes?: SidebarRoute[];
   component?: Component;
+  adminOnly?: boolean;
 }
 
 const SidebarElementBase: Component<SidebarRoute> = (props) => {

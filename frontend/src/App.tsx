@@ -1,9 +1,9 @@
 import { useRoutes } from '@solidjs/router';
-import { routes } from './routes';
+import { getRoutes } from './routes';
 
 
 const App: Component = () => {
-  const Routes = useRoutes(routes);
+  const Routes = useRoutes(getRoutes());
 
   return (
     <Routes />

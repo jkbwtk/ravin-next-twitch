@@ -1,5 +1,6 @@
 import { SidebarRoute } from '#components/DashboardSidebar/SidebarElementBase';
 import Redirect from '#pages/Redirect';
+import { arrayFrom } from '#shared/utils';
 import { RouteDefinition } from '@solidjs/router';
 import { lazy } from 'solid-js';
 
@@ -29,4 +30,19 @@ export const convertToRouteDefinitions = (parentPath: string, props: SidebarRout
   }
 
   return routes;
+};
+
+export const recursiveRouteFilter = (routes: RouteDefinition[], filter: (route: RouteDefinition) => boolean): RouteDefinition[] => {
+  const filteredRoutes: RouteDefinition[] = [];
+
+  for (const route of routes) {
+    if (filter(route)) {
+      if (route.children) {
+        route.children = recursiveRouteFilter(arrayFrom(route.children), filter);
+      }
+      filteredRoutes.push(route);
+    }
+  }
+
+  return filteredRoutes;
 };

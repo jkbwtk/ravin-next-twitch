@@ -65,3 +65,7 @@ export const basicSignal = <T>(defaultValue: T): Signal<T> => {
 
   return signal;
 };
+
+export const arrayFrom = <T>(variable: T[] | T): T[] => {
+  return Array.isArray(variable) ? variable.slice() : [variable];
+};
