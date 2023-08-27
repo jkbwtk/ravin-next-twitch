@@ -5,6 +5,7 @@ generator client {
 generator json {
   provider = "prisma-json-types-generator"
 }
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -24,15 +25,15 @@ model Channel {
 }
 
 model ChannelAction {
-  id                Int       @id() @default(autoincrement())
-  issuerDisplayName String    @db.VarChar
-  targetDisplayName String    @db.VarChar
+  id                Int               @id() @default(autoincrement())
+  issuerDisplayName String            @db.VarChar
+  targetDisplayName String            @db.VarChar
   type              ChannelActionType
-  data              String    @db.VarChar
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @default(now())
-  channelUserId     String   @db.VarChar
-  user              User     @relation(fields: [channelUserId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  data              String            @db.VarChar
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @default(now())
+  channelUserId     String            @db.VarChar
+  user              User              @relation(fields: [channelUserId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([targetDisplayName])
   @@index([channelUserId])
@@ -51,8 +52,8 @@ model ChannelStats {
   frameDuration Int      @default(60000)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now())
-  userId        String  @db.VarChar
-  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  userId        String   @db.VarChar
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([userId, frameId])
   @@index([userId])
@@ -60,54 +61,54 @@ model ChannelStats {
 }
 
 model Command {
-  id            Int                    @id() @default(autoincrement())
-  command       String                 @db.VarChar
-  response      String                 @db.VarChar
+  id            Int      @id() @default(autoincrement())
+  command       String   @db.VarChar
+  response      String   @db.VarChar
   // [UserLevelPrisma]
-  userLevel     Int                    @default(0)
-  cooldown      Int                    @default(10)
-  enabled       Boolean                @default(false)
-  usage         Int                    @default(0)
-  createdAt     DateTime               @default(now())
-  updatedAt     DateTime               @default(now())
-  channelUserId String                @db.VarChar
-  user          User                  @relation(fields: [channelUserId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  userLevel     Int      @default(0)
+  cooldown      Int      @default(10)
+  enabled       Boolean  @default(false)
+  usage         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now())
+  channelUserId String   @db.VarChar
+  user          User     @relation(fields: [channelUserId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([channelUserId, command])
   @@index([channelUserId])
 }
 
 model Config {
-  key         String    @id() @db.VarChar(32)
-  value       String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now())
+  key       String   @id() @db.VarChar(32)
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
 model Message {
-  id            Int       @id() @default(autoincrement())
-  uuid          String    @db.Uuid
-  channelName   String    @db.VarChar
-  username      String    @db.VarChar
-  displayName   String    @db.VarChar
-  color         String?   @db.VarChar
-  userId        String    @db.VarChar
-  content       String    @db.VarChar
+  id            Int      @id() @default(autoincrement())
+  uuid          String   @db.Uuid
+  channelName   String   @db.VarChar
+  username      String   @db.VarChar
+  displayName   String   @db.VarChar
+  color         String?  @db.VarChar
+  userId        String   @db.VarChar
+  content       String   @db.VarChar
   /// [EmotesUsedPrisma]
   emotes        Json?
-  timestamp     DateTime 
+  timestamp     DateTime
   /// [BadgeInfoPrisma]
   badgeInfo     Json?
   /// [BadgesPrisma]
   badges        Json?
-  flags         String?   @db.VarChar
+  flags         String?  @db.VarChar
   /// [MessagePrisma]
-  messageType   String    @db.VarChar
+  messageType   String   @db.VarChar
   firstMessage  Boolean
   mod           Boolean
   subscriber    Boolean
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now())
   channelUserId String   @db.VarChar
   user          User     @relation(fields: [channelUserId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
@@ -125,8 +126,8 @@ model SystemNotification {
   readAt    DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @default(now())
-  userId    String   @db.VarChar
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  userId    String    @db.VarChar
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([userId])
 }
@@ -137,21 +138,21 @@ model Token {
   refreshToken String?  @unique() @db.VarChar
   createdAt    DateTime @default(now())
   updatedAt    DateTime @default(now())
-  userId       String  @unique() @db.VarChar
-  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  userId       String   @unique() @db.VarChar
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([userId])
 }
 
 model User {
-  id                  String                @id() @db.VarChar
-  login               String                @unique() @db.VarChar
-  displayName         String                @unique() @db.VarChar
-  email               String?               @db.VarChar
-  profileImageUrl     String                @db.VarChar
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @default(now())
-  admin               Boolean               @default(false)
+  id                  String               @id() @db.VarChar
+  login               String               @unique() @db.VarChar
+  displayName         String               @unique() @db.VarChar
+  email               String?              @db.VarChar
+  profileImageUrl     String               @db.VarChar
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @default(now())
+  admin               Boolean              @default(false)
   channel             Channel?
   channel_action      ChannelAction[]
   channel_stats       ChannelStats[]
