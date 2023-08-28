@@ -50,8 +50,8 @@ export const getScheduledJobsView = new ExpressStack()
           return {
             name: job.name ?? null,
             cron: job.getPattern() ?? null,
-            nextRun: nextRun ? nextRun.toISOString() : null,
-            lastRun: lastRun ? lastRun.toISOString() : null,
+            nextRun: nextRun ? nextRun.getTime() : null,
+            lastRun: lastRun ? lastRun.getTime() : null,
             maxRuns: maxRuns === Infinity ? null : maxRuns,
             isRunning: job.isRunning(),
             isStopped: job.isStopped(),
