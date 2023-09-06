@@ -1,0 +1,15 @@
+@use 'dashboard' as *;
+
+
+.container {
+  @include container();
+}
+
+.widgets {
+  @include widgets();
+
+  display: flex;
+  align-content: flex-start;
+
+  flex-wrap: wrap;
+}

@@ -58,6 +58,13 @@ const sidebarElements: SidebarRoute[] = [
     component: lazy(() => import('#pages/dashboard/Help')),
   },
   {
+    symbol: 'admin_panel_settings',
+    name: 'Admin',
+    href: '/dashboard/admin',
+    adminOnly: true,
+    component: lazy(() => import('#pages/dashboard/Admin')),
+  },
+  {
     symbol: 'settings',
     name: 'Settings',
     href: '/dashboard/settings',
