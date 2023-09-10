@@ -62,8 +62,8 @@ export const definedOrFail = <T>(value: T | undefined, name: string): T => {
   return value;
 };
 
-export const mapOptionsToArray = <T extends Record<string, boolean>>(options: T): Array<keyof T> => {
-  const result: Array<keyof T> = [];
+export const mapOptionsToArray = <T extends string >(options: Record<T, boolean>): Array<T> => {
+  const result: Array<T> = [];
 
   for (const key in options) {
     if (options[key]) {
