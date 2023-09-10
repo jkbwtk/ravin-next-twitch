@@ -22,3 +22,6 @@ export type ServerToClientEvents = {
 export type ClientToServerEvents = {
   TEST_NOTIFICATION: (test: string) => void;
 };
+
+// eslint-disable-next-line @typescript-eslint/ban-types
+export type SocketRoom = 'admin' | (string & {});

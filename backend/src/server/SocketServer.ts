@@ -3,8 +3,9 @@ import { Server as HTTPServer } from 'http';
 import { Server as AppServer } from '#server/Server';
 import passport from 'passport';
 import { Request } from 'express';
-import { ClientToServerEvents, ServerToClientEvents } from '#types/api/socket';
+import { ClientToServerEvents, ServerToClientEvents, SocketRoom } from '#types/api/socket';
 import { logger } from '#lib/logger';
+import { mapOptionsToArray } from '#lib/utils';
 
 
 export class SocketServer {
@@ -58,7 +59,12 @@ export class SocketServer {
         return socket.disconnect(true);
       }
 
-      await socket.join(req.user.id);
+      const rooms: SocketRoom[] = mapOptionsToArray<SocketRoom>({
+        [req.user.id]: true,
+        admin: req.user.admin,
+      });
+
+      await socket.join(rooms);
 
       socket.onAny((event, ...message) => {
         logger.debug('%o %o', event, message, { label: 'SocketServer' });
@@ -81,6 +87,12 @@ export class SocketServer {
     const socketServer = SocketServer.getInstance();
 
     socketServer.io.in(userId).emit(event, ...args);
+  }
+
+  public static emitToRoom<T extends keyof ServerToClientEvents>(room: SocketRoom, event: T, ...args: Parameters<ServerToClientEvents[T]>): void {
+    const socketServer = SocketServer.getInstance();
+
+    socketServer.io.in(room).emit(event, ...args);
   }
 
   public static emitToAll<T extends keyof ServerToClientEvents>(event: T, ...args: Parameters<ServerToClientEvents[T]>): void {
