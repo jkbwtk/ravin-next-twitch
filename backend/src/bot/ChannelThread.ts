@@ -4,7 +4,7 @@ import { getChatters } from '#lib/twitch';
 import { ChannelWithUser } from '#database/extensions/channel';
 import { prisma } from '#database/database';
 import { CommandWithUser } from '#database/extensions/command';
-import { Cron } from 'croner';
+import { ExtendedCron } from '#lib/ExtendedCron';
 
 
 export type CustomCommandState = {
@@ -29,7 +29,7 @@ export class ChannelThread {
   private chantCounter = 0;
   public chantResponded = false;
   public readonly refreshChatMembersJobName: string;
-  private jobs: ExtendedMap<string, Cron> = new ExtendedMap();
+  private jobs: ExtendedMap<string, ExtendedCron> = new ExtendedMap();
   public customCommands: ExtendedMap<string, CustomCommandState> = new ExtendedMap();
 
   private static defaultOptions: Required<ChannelThreadOptions> = {
@@ -106,7 +106,7 @@ export class ChannelThread {
   }
 
   private async startChatMemberSyncing(): Promise<void> {
-    const job = Cron('0 */5 * * * *', {
+    const job = new ExtendedCron('0 */5 * * * *', {
       name: this.refreshChatMembersJobName,
     }, async () => {
       await this.syncChatMembers();

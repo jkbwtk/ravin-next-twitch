@@ -1,18 +1,18 @@
 import { prisma } from '#database/database';
 import { TokenWithUserAndChannel } from '#database/extensions/token';
 import Deferred from '#lib/Deferred';
+import { ExtendedCron } from '#lib/ExtendedCron';
 import { ExtendedMap } from '#lib/ExtendedMap';
 import { logger } from '#lib/logger';
 import { refreshTokenUnsafe, validateTokenUnsafe } from '#lib/twitch';
 import { isDevApi } from '#shared/constants';
-import { Cron } from 'croner';
 
 
 export class TokenManager {
   private static instance: TokenManager;
 
   private repository = prisma.token;
-  private refreshJob = new Cron('? * * * *', {
+  private refreshJob = new ExtendedCron('? * * * *', {
     name: 'TokenManager:refreshTokens',
     paused: true,
   }, TokenManager.processAll);
