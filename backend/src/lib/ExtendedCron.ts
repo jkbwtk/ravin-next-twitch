@@ -1,3 +1,4 @@
+import { ScheduledJob } from '#shared/types/api/admin';
 import Cron, { CronOptions } from 'croner';
 
 
@@ -34,5 +35,28 @@ export class ExtendedCron<T = undefined> extends Cron {
 
   public static unregisterEffect(middleware: ExtendedCronCallback<void>): void {
     ExtendedCron.effects = ExtendedCron.effects.filter((m) => m !== middleware);
+  }
+
+  public static get scheduledJobs(): ExtendedCron[] {
+    return Cron.scheduledJobs as ExtendedCron[];
+  }
+
+  public serialize(): ScheduledJob {
+    const lastRun = this.currentRun();
+    const nextRun = this.nextRun();
+    const maxRuns = this.options.maxRuns ?? null;
+
+    const job: ScheduledJob = {
+      name: this.name ?? null,
+      cron: this.getPattern() ?? null,
+      nextRun: nextRun ? nextRun.getTime() : null,
+      lastRun: lastRun ? lastRun.getTime() : null,
+      maxRuns: maxRuns === Infinity ? null : maxRuns,
+      isRunning: this.isRunning(),
+      isStopped: this.isStopped(),
+      isBusy: this.isBusy(),
+    };
+
+    return job;
   }
 }
