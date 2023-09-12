@@ -37,9 +37,9 @@ const RecentActionsWidget: Component = () => {
 
   return (
     <Widget class={style.container} containerClass={style.outerContainer} title='Recent actions'>
-      <Show when={!actions.loading} fallback={<FetchFallback>Fetching Recent Actions</FetchFallback>}>
+      <Show when={actions.state === 'ready'} fallback={<FetchFallback>Fetching Recent Actions</FetchFallback>}>
         <For each={sortedActions()}>
-          {(action) => (ActionSwitch(action))}
+          {(action) => <ActionSwitch {...action} />}
         </For>
       </Show>
     </Widget>
