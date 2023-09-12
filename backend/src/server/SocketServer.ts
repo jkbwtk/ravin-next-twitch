@@ -6,6 +6,7 @@ import { Request } from 'express';
 import { ClientToServerEvents, ServerToClientEvents, SocketRoom } from '#types/api/socket';
 import { logger } from '#lib/logger';
 import { mapOptionsToArray } from '#lib/utils';
+import { ExtendedCron } from '#lib/ExtendedCron';
 
 
 export class SocketServer {
@@ -17,6 +18,10 @@ export class SocketServer {
     if (!SocketServer.instance) {
       SocketServer.instance = new SocketServer(httpServer);
       await SocketServer.instance.registerRoutes();
+
+      ExtendedCron.registerEffect((self) => {
+        SocketServer.emitToRoom('admin', 'RUN_CRON_JOB', self.serialize());
+      });
 
       return SocketServer.instance;
     } else {

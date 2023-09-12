@@ -1,0 +1,64 @@
+@use './app' as *;
+@use './animations' as *;
+
+
+.job {
+  display: grid;
+
+  grid-template-columns: min-content auto;
+  gap: 0.5rem;
+
+  align-items: center;
+
+  font-size: $smallFontSize;
+
+  width: 100%;
+
+  .status-symbol {
+    @include inlineAnimation(4s, linear, 0s, infinite) {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  }
+
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .header {
+    width: 100%;
+
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+
+    font-size: $tinyFontSize;
+
+    // .name {}
+
+    .pattern {
+      color: $textBrightColor;
+    }
+  }
+
+  .property {
+    width: 100%;
+    display: flex;
+
+    font-family: $monoFontFamily;
+    gap: 0.5rem;
+
+    // .name {}
+
+    .value {
+      color: $textBrightColor;
+    }
+  }
+}

@@ -2,6 +2,7 @@ import { CommandStatus, CustomCommand } from 'types/api/commands';
 import { Action } from './dashboard';
 import { SystemNotification } from './systemNotifications';
 import { Message } from './logs';
+import { ScheduledJob } from 'types/api/admin';
 
 
 export type ServerToClientEvents = {
@@ -17,6 +18,8 @@ export type ServerToClientEvents = {
   RAD_SYSTEM_NOTIFICATION: (notificationIds: number[]) => void;
 
   NEW_MESSAGE: (message: Message) => void;
+
+  RUN_CRON_JOB: (job: ScheduledJob) => void;
 };
 
 export type ClientToServerEvents = {

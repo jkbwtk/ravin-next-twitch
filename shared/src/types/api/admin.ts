@@ -9,7 +9,8 @@ export type ConfigRequest = {
 export type PatchConfigRequest = Partial<ConfigRequest>;
 
 export type ScheduledJob = {
-  name: string | null;
+  name: string;
+  originalName: string;
   cron: string | null;
   nextRun: number | null,
   lastRun: number | null,
@@ -17,6 +18,7 @@ export type ScheduledJob = {
   isRunning: boolean,
   isStopped: boolean,
   isBusy: boolean,
+  creationTimestamp: number,
 };
 
 export type GetScheduledJobsResponse = {

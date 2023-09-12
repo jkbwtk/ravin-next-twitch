@@ -1,0 +1,22 @@
+@use '../app' as *;
+@use '../animations' as *;
+
+
+.outerContainer {
+  width: 40rem;
+  min-height: 30rem;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+
+  justify-content: space-between;
+
+  padding: 2rem;
+
+  width: 40rem;
+  max-height: 50rem;
+
+  gap: 2rem;
+}

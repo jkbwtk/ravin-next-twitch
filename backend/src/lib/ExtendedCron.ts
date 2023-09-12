@@ -1,5 +1,6 @@
 import { ScheduledJob } from '#shared/types/api/admin';
 import Cron, { CronOptions } from 'croner';
+import { createHash } from 'crypto';
 
 
 export type ExtendedCronOptions<T> = Exclude<CronOptions, 'context' | 'name'> & {
@@ -10,10 +11,31 @@ export type ExtendedCronOptions<T> = Exclude<CronOptions, 'context' | 'name'> & 
 export type ExtendedCronCallback<T> = (self: ExtendedCron<T>, context: T) => void;
 
 export class ExtendedCron<T = undefined> extends Cron {
+  public creationTimestamp: number;
+  public originalName: string;
   private static effects: ExtendedCronCallback<void>[] = [];
 
   constructor(pattern: string | Date, options: ExtendedCronOptions<T>, callback: ExtendedCronCallback<T>) {
+    const creationTimestamp = performance.now();
+    const originalName = options.name;
+
+    const shortHash = ExtendedCron.hash(creationTimestamp, options.name, pattern.toString());
+    options.name = [options.name, shortHash].join(':');
+
     super(pattern, options, ExtendedCron.callbackWrapper(callback));
+
+    this.creationTimestamp = creationTimestamp;
+    this.originalName = originalName;
+  }
+
+  private static hash(creationTimestamp: number, name: string, pattern?: string): string {
+    const hash = createHash('md5');
+
+    hash.update(name);
+    hash.update(pattern ?? '');
+    hash.update(creationTimestamp.toString());
+
+    return hash.digest('hex').slice(0, 8);
   }
 
   private static callbackWrapper<T>(callback: ExtendedCronCallback<T>): ExtendedCronCallback<T> {
@@ -47,7 +69,8 @@ export class ExtendedCron<T = undefined> extends Cron {
     const maxRuns = this.options.maxRuns ?? null;
 
     const job: ScheduledJob = {
-      name: this.name ?? null,
+      name: this.name!,
+      originalName: this.originalName,
       cron: this.getPattern() ?? null,
       nextRun: nextRun ? nextRun.getTime() : null,
       lastRun: lastRun ? lastRun.getTime() : null,
@@ -55,6 +78,7 @@ export class ExtendedCron<T = undefined> extends Cron {
       isRunning: this.isRunning(),
       isStopped: this.isStopped(),
       isBusy: this.isBusy(),
+      creationTimestamp: this.creationTimestamp,
     };
 
     return job;
