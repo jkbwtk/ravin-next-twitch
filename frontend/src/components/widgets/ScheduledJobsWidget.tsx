@@ -29,9 +29,10 @@ const ScheduledJobsWidget: Component = () => {
   const handleJob = (job: ScheduledJob) => {
     mutateJobs((oldJobs) => {
       return oldJobs
-        .filter((oldJob) => oldJob.creationTimestamp !== job.creationTimestamp)
-        .concat(job)
-        .sort(sortJobs);
+        .map((oldJob) => {
+          if (oldJob.creationTimestamp !== job.creationTimestamp) return oldJob;
+          else return job;
+        });
     });
   };
 

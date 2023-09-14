@@ -3,19 +3,20 @@
 
 
 .outerContainer {
-  width: 40rem;
+  width: 100%;
   min-height: 30rem;
 }
 
 .container {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
 
-  justify-content: space-between;
+  align-content: flex-start;
+  flex-wrap: wrap;
 
   padding: 2rem;
 
-  width: 40rem;
+  width: 100%;
   max-height: 50rem;
 
   gap: 2rem;

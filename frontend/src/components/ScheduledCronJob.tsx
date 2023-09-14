@@ -36,22 +36,26 @@ const ScheduledCronJob: Component<ScheduledCronJobProps> = (props) => {
   return <div class={style.job}>
     <Switch>
       <Match when={props.isRunning}>
-        <MaterialSymbol symbol='autorenew' size='big' color='blue' class={style.statusSymbol} />
+        <MaterialSymbol symbol='play_arrow' size='big' color='green' />
       </Match>
       <Match when={!props.isRunning}>
-        <MaterialSymbol symbol='paused' size='big' color='yellow' />
+        <MaterialSymbol symbol='paused' size='big' color='gray' />
       </Match>
       <Match when={props.isStopped}>
-        <MaterialSymbol symbol='close' size='big' color='red' />
+        <MaterialSymbol symbol='error' size='big' color='red' />
       </Match>
     </Switch>
 
 
     <div>
       <span class={style.header}>
-        <span class={style.name}>{props.originalName},</span>
-        <span class={style.pattern}>{props.cron}</span>
+        <span class={style.name}>{props.originalName}</span>
       </span>
+
+      <div class={style.property}>
+        <span class={style.name}>Pattern:</span>
+        <span class={style.value}>{props.cron}</span>
+      </div>
 
       <div class={style.property}>
         <span class={style.name}>Next run:</span>
