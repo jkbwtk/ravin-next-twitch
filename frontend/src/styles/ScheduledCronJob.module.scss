@@ -12,19 +12,8 @@
 
   font-size: $smallFontSize;
 
-  width: 100%;
-
-  .status-symbol {
-    @include inlineAnimation(4s, linear, 0s, infinite) {
-      from {
-        transform: rotate(0deg);
-      }
-
-      to {
-        transform: rotate(360deg);
-      }
-    }
-  }
+  height: min-content;
+  width: min-content;
 
   span {
     overflow: hidden;
@@ -33,17 +22,13 @@
   }
 
   .header {
-    width: 100%;
-
     display: flex;
     flex-direction: row;
     gap: 0.5rem;
 
     font-size: $tinyFontSize;
 
-    // .name {}
-
-    .pattern {
+    .name {
       color: $textBrightColor;
     }
   }
