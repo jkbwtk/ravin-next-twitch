@@ -13,7 +13,10 @@ export type ExtendedCronCallback<T> = (self: ExtendedCron<T>, context: T) => voi
 export class ExtendedCron<T = undefined> extends Cron {
   public creationTimestamp: number;
   public originalName: string;
-  private static effects: ExtendedCronCallback<void>[] = [];
+
+  private static createEffects: ExtendedCronCallback<void>[] = [];
+  private static runEffects: ExtendedCronCallback<void>[] = [];
+  private static deleteEffects: ExtendedCronCallback<void>[] = [];
 
   constructor(pattern: string | Date, options: ExtendedCronOptions<T>, callback: ExtendedCronCallback<T>) {
     const creationTimestamp = performance.now();
@@ -26,6 +29,8 @@ export class ExtendedCron<T = undefined> extends Cron {
 
     this.creationTimestamp = creationTimestamp;
     this.originalName = originalName;
+
+    ExtendedCron.processCreateEffects(this);
   }
 
   private static hash(creationTimestamp: number, name: string, pattern?: string): string {
@@ -41,26 +46,59 @@ export class ExtendedCron<T = undefined> extends Cron {
   private static callbackWrapper<T>(callback: ExtendedCronCallback<T>): ExtendedCronCallback<T> {
     return (self, ctx) => {
       callback(self, ctx);
-      ExtendedCron.processEffects(self);
+      ExtendedCron.processRunEffects(self);
     };
   }
 
-  private static processEffects(self: ExtendedCron<void>) {
-    for (const effect of ExtendedCron.effects) {
+  private static processEffects(self: ExtendedCron<void>, effects: ExtendedCronCallback<void>[]): void {
+    for (const effect of effects) {
       effect(self, undefined);
     }
   }
 
-  public static registerEffect(middleware: ExtendedCronCallback<void>): void {
-    ExtendedCron.effects.push(middleware);
+  private static processCreateEffects(self: ExtendedCron<void>) {
+    ExtendedCron.processEffects(self, ExtendedCron.createEffects);
   }
 
-  public static unregisterEffect(middleware: ExtendedCronCallback<void>): void {
-    ExtendedCron.effects = ExtendedCron.effects.filter((m) => m !== middleware);
+  private static processRunEffects(self: ExtendedCron<void>) {
+    ExtendedCron.processEffects(self, ExtendedCron.runEffects);
+  }
+
+  private static processDeleteEffects(self: ExtendedCron<void>) {
+    ExtendedCron.processEffects(self, ExtendedCron.deleteEffects);
+  }
+
+  public static registerCreateEffect(effect: ExtendedCronCallback<void>): void {
+    ExtendedCron.createEffects.push(effect);
+  }
+
+  public static unregisterCreateEffect(effect: ExtendedCronCallback<void>): void {
+    ExtendedCron.createEffects = ExtendedCron.createEffects.filter((m) => m !== effect);
+  }
+
+  public static registerRunEffect(effect: ExtendedCronCallback<void>): void {
+    ExtendedCron.runEffects.push(effect);
+  }
+
+  public static unregisterRunEffect(effect: ExtendedCronCallback<void>): void {
+    ExtendedCron.runEffects = ExtendedCron.runEffects.filter((m) => m !== effect);
+  }
+
+  public static registerDeleteEffect(effect: ExtendedCronCallback<void>): void {
+    ExtendedCron.deleteEffects.push(effect);
+  }
+
+  public static unregisterDeleteEffect(effect: ExtendedCronCallback<void>): void {
+    ExtendedCron.deleteEffects = ExtendedCron.deleteEffects.filter((m) => m !== effect);
   }
 
   public static get scheduledJobs(): ExtendedCron[] {
     return Cron.scheduledJobs as ExtendedCron[];
+  }
+
+  public stop(): void {
+    super.stop();
+    ExtendedCron.processDeleteEffects(this);
   }
 
   public serialize(): ScheduledJob {

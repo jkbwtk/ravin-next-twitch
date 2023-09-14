@@ -26,7 +26,13 @@ const ScheduledJobsWidget: Component = () => {
   const [jobs, { mutate: mutateJobs }] = createResource(fetchChantingSettings, { initialValue: [] });
   const [timer, setTimer] = createSignal(Date.now());
 
-  const handleJob = (job: ScheduledJob) => {
+  const handleJobCreation = (job: ScheduledJob) => {
+    mutateJobs((oldJobs) => {
+      return [...oldJobs, job].sort(sortJobs);
+    });
+  };
+
+  const handleJobUpdate = (job: ScheduledJob) => {
     mutateJobs((oldJobs) => {
       return oldJobs
         .map((oldJob) => {
@@ -36,11 +42,19 @@ const ScheduledJobsWidget: Component = () => {
     });
   };
 
+  const handleJobDeletion = (creationTimestamp: number) => {
+    mutateJobs((oldJobs) => {
+      return oldJobs.filter((oldJob) => oldJob.creationTimestamp !== creationTimestamp);
+    });
+  };
+
   let intervalHandle: undefined | number = undefined;
 
 
   onMount(() => {
-    socket.client.on('RUN_CRON_JOB', handleJob);
+    socket.client.on('NEW_CRON_JOB', handleJobCreation);
+    socket.client.on('UPD_CRON_JOB', handleJobUpdate);
+    socket.client.on('DEL_CRON_JOB', handleJobDeletion);
 
     onMount(() => {
       intervalHandle = setInterval(() => {
@@ -50,7 +64,9 @@ const ScheduledJobsWidget: Component = () => {
   });
 
   onCleanup(() => {
-    socket.client.off('RUN_CRON_JOB', handleJob);
+    socket.client.off('NEW_CRON_JOB', handleJobCreation);
+    socket.client.off('UPD_CRON_JOB', handleJobUpdate);
+    socket.client.off('DEL_CRON_JOB', handleJobDeletion);
 
     if (intervalHandle) {
       clearInterval(intervalHandle);

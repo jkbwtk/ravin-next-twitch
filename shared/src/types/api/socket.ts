@@ -19,7 +19,9 @@ export type ServerToClientEvents = {
 
   NEW_MESSAGE: (message: Message) => void;
 
-  RUN_CRON_JOB: (job: ScheduledJob) => void;
+  NEW_CRON_JOB: (job: ScheduledJob) => void;
+  UPD_CRON_JOB: (job: ScheduledJob) => void;
+  DEL_CRON_JOB: (creationTimestamp: number) => void;
 };
 
 export type ClientToServerEvents = {
