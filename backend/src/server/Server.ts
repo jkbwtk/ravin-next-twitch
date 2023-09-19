@@ -1,7 +1,7 @@
 import { createServer, ViteDevServer } from 'vite';
 import express, { Express, RequestHandler } from 'express';
 import { accessControl, invalidRoute, notConfigured, requestLogger } from './middlewares';
-import { apiRouter } from '#routers/apiRouter';
+import { createApiRouter } from '#routers/apiRouter';
 import compression, { CompressionOptions } from 'compression';
 import { frontendPath, frontendProductionPath, isDevMode, serverPort } from '#shared/constants';
 import chalk from 'chalk';
@@ -108,7 +108,7 @@ export class Server {
     await this.setupSession();
 
     if (await this.isConfigured()) {
-      this.app.use('/api', await apiRouter());
+      this.app.use('/api', await createApiRouter());
 
       if (!isDevMode) { // allow access to onboarding view in dev mode
         this.app.use('/onboarding', (req, res) => res.redirect('/'));
@@ -148,11 +148,11 @@ export class Server {
   }
 
   public async start(): Promise<void> {
-    await TokenManager.start();
-
     await this.registerRoutes();
 
     if (await this.isConfigured()) {
+      await TokenManager.start();
+
       await SocketServer.createInstance(this.server);
       await Bot.start();
     }

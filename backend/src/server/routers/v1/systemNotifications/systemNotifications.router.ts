@@ -2,10 +2,14 @@ import { getNotifications, postBroadcastNotification, postMarkAsRead } from '#se
 import { Router } from 'express';
 
 
-export const systemNotificationsRouter = Router();
+export const createSystemNotificationsRouter = (): Router => {
+  const systemNotificationsRouter = Router();
 
-systemNotificationsRouter.get('/', ...getNotifications.unwrap());
+  systemNotificationsRouter.get('/', ...getNotifications.unwrap());
 
-systemNotificationsRouter.post('/read', ...postMarkAsRead.unwrap());
+  systemNotificationsRouter.post('/read', ...postMarkAsRead.unwrap());
 
-systemNotificationsRouter.post('/broadcast', ...postBroadcastNotification.unwrap());
+  systemNotificationsRouter.post('/broadcast', ...postBroadcastNotification.unwrap());
+
+  return systemNotificationsRouter;
+};

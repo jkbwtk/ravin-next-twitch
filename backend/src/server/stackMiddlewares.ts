@@ -2,7 +2,6 @@ import { Request } from 'express';
 import { Middleware } from '#server/ExpressStack';
 import { ServerError } from '#server/ServerError';
 import { AnyZodObject, z, ZodError, ZodObject } from 'zod';
-import { Signal } from '#shared/utils';
 import { isDevMode } from '#shared/constants';
 
 export const authenticated: Middleware<never, object, object, {
@@ -59,6 +58,6 @@ export const requireDevMode: Middleware<void> = () => {
   if (!isDevMode) throw new ServerError(404, 'Not Found');
 };
 
-export const waitUntilReady = (signal: Signal<boolean>): Middleware<void> => () => {
+export const waitUntilReady = (signal: () => boolean): Middleware<void> => () => {
   if (!signal()) throw new ServerError(503, 'Service Temporarily Unavailable');
 };
