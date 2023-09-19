@@ -1,12 +1,16 @@
 import { getConnectionStatusView, postJoinChannelView } from '#server/routers/v1/dashboard/dashboard.views';
-import { widgetsRouter } from '#server/routers/v1/dashboard/widgets/widgets.router';
+import { createWidgetsRouter } from '#server/routers/v1/dashboard/widgets/widgets.router';
 import { Router } from 'express';
 
 
-export const dashboardRouter = Router();
+export const createDashboardRouter = (): Router => {
+  const dashboardRouter = Router();
 
-dashboardRouter.get('/connection-status', ...getConnectionStatusView.unwrap());
+  dashboardRouter.get('/connection-status', ...getConnectionStatusView.unwrap());
 
-dashboardRouter.post('/join-channel', ...postJoinChannelView.unwrap());
+  dashboardRouter.post('/join-channel', ...postJoinChannelView.unwrap());
 
-dashboardRouter.use('/widgets', widgetsRouter);
+  dashboardRouter.use('/widgets', createWidgetsRouter());
+
+  return dashboardRouter;
+};

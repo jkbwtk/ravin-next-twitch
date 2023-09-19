@@ -2,12 +2,16 @@ import { getTwitchCallback, getTwitchStrategy, getUserView, postLogoutView } fro
 import { Router } from 'express';
 
 
-export const authRouter = Router();
+export const createAuthRouter = (): Router => {
+  const authRouter = Router();
 
-authRouter.get('/user', ...getUserView.unwrap());
+  authRouter.get('/user', ...getUserView.unwrap());
 
-authRouter.post('/logout', ...postLogoutView.unwrap());
+  authRouter.post('/logout', ...postLogoutView.unwrap());
 
-authRouter.get('/twitch', ...getTwitchStrategy.unwrap());
+  authRouter.get('/twitch', ...getTwitchStrategy.unwrap());
 
-authRouter.get('/callback', ...getTwitchCallback.unwrap());
+  authRouter.get('/callback', ...getTwitchCallback.unwrap());
+
+  return authRouter;
+};

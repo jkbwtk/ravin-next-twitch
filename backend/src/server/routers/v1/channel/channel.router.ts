@@ -1,7 +1,11 @@
-import { settingsRouter } from '#server/routers/v1/channel/settings/settings.router';
-import { Router as expressRouter } from 'express';
+import { createSettingsRouter } from '#server/routers/v1/channel/settings/settings.router';
+import { Router } from 'express';
 
 
-export const channelRouter = expressRouter();
+export const createChannelRouter = (): Router => {
+  const channelRouter = Router();
 
-channelRouter.use('/settings', settingsRouter);
+  channelRouter.use('/settings', createSettingsRouter());
+
+  return channelRouter;
+};

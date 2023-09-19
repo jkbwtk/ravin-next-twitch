@@ -2,8 +2,12 @@ import { getScheduledJobsView, patchConfigView } from '#server/routers/v1/admin/
 import { Router } from 'express';
 
 
-export const adminRouter = Router();
+export const createAdminRouter = (): Router => {
+  const adminRouter = Router();
 
-adminRouter.patch('/settings/config', ...patchConfigView.unwrap());
+  adminRouter.patch('/settings/config', ...patchConfigView.unwrap());
 
-adminRouter.get('/scheduled-jobs', ...getScheduledJobsView.unwrap());
+  adminRouter.get('/scheduled-jobs', ...getScheduledJobsView.unwrap());
+
+  return adminRouter;
+};

@@ -3,12 +3,16 @@ import { serverPort } from '#shared/constants';
 import { Router } from 'express';
 
 
-export const testRouter = Router();
+export const createTestRouter = (): Router => {
+  const testRouter = Router();
 
-testRouter.get('/', ...getTestView.unwrap());
+  testRouter.get('/', ...getTestView.unwrap());
 
-testRouter.get('/lazy', ...getLazyView.unwrap());
+  testRouter.get('/lazy', ...getLazyView.unwrap());
 
-testRouter.get('/port', ...getPortView.unwrap(serverPort));
+  testRouter.get('/port', ...getPortView.unwrap(serverPort));
 
-testRouter.get('/preflight', ...getPreflightView.unwrap());
+  testRouter.get('/preflight', ...getPreflightView.unwrap());
+
+  return testRouter;
+};

@@ -2,12 +2,16 @@ import { getChatStatsView, getModeratorsView, getRecentActionsView, getTopStatsV
 import { Router } from 'express';
 
 
-export const widgetsRouter = Router();
+export const createWidgetsRouter = (): Router => {
+  const widgetsRouter = Router();
 
-widgetsRouter.get('/moderators', ...getModeratorsView.unwrap());
+  widgetsRouter.get('/moderators', ...getModeratorsView.unwrap());
 
-widgetsRouter.get('/top-stats', ...getTopStatsView.unwrap());
+  widgetsRouter.get('/top-stats', ...getTopStatsView.unwrap());
 
-widgetsRouter.get('/recent-actions', ...getRecentActionsView.unwrap());
+  widgetsRouter.get('/recent-actions', ...getRecentActionsView.unwrap());
 
-widgetsRouter.get('/chat-stats', ...getChatStatsView.unwrap());
+  widgetsRouter.get('/chat-stats', ...getChatStatsView.unwrap());
+
+  return widgetsRouter;
+};

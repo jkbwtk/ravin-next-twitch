@@ -8,14 +8,18 @@ import {
 import { Router } from 'express';
 
 
-export const customRouter = Router();
+export const createCustomRouter = (): Router => {
+  const customRouter = Router();
 
-customRouter.get('/', ...getCustomCommandsView.unwrap());
+  customRouter.get('/', ...getCustomCommandsView.unwrap());
 
-customRouter.post('/', ...postCustomCommandsView.unwrap());
+  customRouter.post('/', ...postCustomCommandsView.unwrap());
 
-customRouter.patch('/', ...patchCustomCommandsView.unwrap());
+  customRouter.patch('/', ...patchCustomCommandsView.unwrap());
 
-customRouter.delete('/', ...deleteCustomCommandsView.unwrap());
+  customRouter.delete('/', ...deleteCustomCommandsView.unwrap());
 
-customRouter.get('/status', ...getCustomCommandsStatusView.unwrap());
+  customRouter.get('/status', ...getCustomCommandsStatusView.unwrap());
+
+  return customRouter;
+};

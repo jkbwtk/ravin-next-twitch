@@ -1,7 +1,11 @@
-import { customRouter } from '#server/routers/v1/commands/custom/custom.router';
+import { createCustomRouter } from '#server/routers/v1/commands/custom/custom.router';
 import { Router } from 'express';
 
 
-export const commandsRouter = Router();
+export const createCommandsRouter = (): Router => {
+  const commandsRouter = Router();
 
-commandsRouter.use('/custom', customRouter);
+  commandsRouter.use('/custom', createCustomRouter());
+
+  return commandsRouter;
+};
