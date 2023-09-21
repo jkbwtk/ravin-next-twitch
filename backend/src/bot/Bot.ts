@@ -115,11 +115,6 @@ export class Bot {
       }
 
       await prisma.channelStats.incrementMessages(instance.channelUserId);
-      const getTimeSinceLastMessage = thread.getTimeSinceLastMessage();
-
-      logger.debug('Time since last message: %d', getTimeSinceLastMessage, { label: ['Bot', 'handleMessage'] });
-      thread.addMessage(message, userstate.username ?? 'Anonymous');
-      logger.debug('Chant length: %d', thread.getChantLength(), { label: ['Bot', 'handleMessage'] });
 
       const customCommand = thread.getUsedCustomCommand(message);
 
@@ -141,19 +136,10 @@ export class Bot {
             lastUsed: customCommand.lastUsed,
             lastUsedBy: customCommand.lastUsedBy,
           });
-
-          return;
         }
       }
 
-      if (
-        thread.channel.chantingSettings.enabled &&
-        getTimeSinceLastMessage >= thread.channel.chantingSettings.interval &&
-        thread.getChantLength() >= thread.channel.chantingSettings.length
-      ) {
-        thread.chantResponded = true;
-        await this.client.say(channel, message);
-      }
+      await thread.handleMessage(instance);
     } catch (err) {
       logger.error('Failed to handle message', { label: ['Bot', 'handleMessage'], error: err });
     }
@@ -270,7 +256,7 @@ export class Bot {
         }
       }
 
-      const channelThread = new ChannelThread(channel, {});
+      const channelThread = new ChannelThread(instance.client, channel, {});
       await channelThread.init();
       instance.channels.set(channel.user.login, channelThread);
 

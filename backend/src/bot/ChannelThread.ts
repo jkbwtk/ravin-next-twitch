@@ -5,6 +5,11 @@ import { ChannelWithUser } from '#database/extensions/channel';
 import { prisma } from '#database/database';
 import { CommandWithUser } from '#database/extensions/command';
 import { ExtendedCron } from '#lib/ExtendedCron';
+import { Client } from 'tmi.js';
+import { ChantHandler } from '#bot/ChantHandler';
+import { Message } from '@prisma/client';
+import { mergeOptions } from '#shared/utils';
+import { CacheFIFO } from '#lib/CacheArray';
 
 
 export type CustomCommandState = {
@@ -14,32 +19,31 @@ export type CustomCommandState = {
 };
 
 export interface ChannelThreadOptions {
-  bufferLength?: number;
+  messageCacheSize?: number;
 }
 
 export class ChannelThread {
   private options: Required<ChannelThreadOptions>;
 
-  public channel: ChannelWithUser;
   public chatMembers: ExtendedSet<string> = new ExtendedSet();
 
-  private messages: string[] = [];
-  private lastMessageTimestamp = 0;
-  private chantParticipants: Set<string> = new Set();
-  private chantCounter = 0;
-  public chantResponded = false;
+  public chantHandler: ChantHandler;
+
+  public messages: CacheFIFO<string>;
   public readonly refreshChatMembersJobName: string;
   private jobs: ExtendedMap<string, ExtendedCron> = new ExtendedMap();
   public customCommands: ExtendedMap<string, CustomCommandState> = new ExtendedMap();
 
   private static defaultOptions: Required<ChannelThreadOptions> = {
-    bufferLength: 100,
+    messageCacheSize: 100,
   };
 
-  constructor(channelUser: ChannelWithUser, options: ChannelThreadOptions = {}) {
-    this.options = { ...ChannelThread.defaultOptions, ...options };
+  constructor(public client: Client, public channel: ChannelWithUser, options: ChannelThreadOptions = {}) {
+    this.options = mergeOptions(options, ChannelThread.defaultOptions);
 
-    this.channel = channelUser;
+    this.chantHandler = new ChantHandler(this);
+
+    this.messages = new CacheFIFO(this.options.messageCacheSize);
 
     this.refreshChatMembersJobName = `ChannelThread:${this.channel.user.login}:refreshChatMembers`;
   }
@@ -56,46 +60,16 @@ export class ChannelThread {
     this.jobs.clear();
   }
 
-  public addMessage(message: string, author: string): void {
-    this.processChant(message, author);
-  }
+  public async handleMessage(message: Message): Promise<void> {
+    await this.chantHandler.handleMessage(message);
 
-  private processChant(message: string, author: string): void {
-    this.lastMessageTimestamp = Date.now();
-
-    const lastMessage = this.messages.at(-1);
-
-    if (lastMessage !== message) {
-      this.resetChantLength();
-    }
-
-    if (!this.chantParticipants.has(author)) {
-      this.chantCounter += 1;
-      this.chantParticipants.add(author);
-    }
-
-    this.messages.push(message);
-
-    if (this.messages.length > this.options.bufferLength) {
-      this.messages.shift();
-    }
-  }
-
-  public getTimeSinceLastMessage(): number {
-    return Date.now() - this.lastMessageTimestamp;
-  }
-
-  public getChantLength(): number {
-    return this.chantCounter;
-  }
-
-  public resetChantLength(): void {
-    this.chantCounter = 0;
-    this.chantParticipants.clear();
+    this.messages.push(message.content);
   }
 
   public updateConfig(options: ChannelThreadOptions): void {
     this.options = { ...this.options, ...options };
+
+    this.messages.setMaxLength(this.options.messageCacheSize);
   }
 
   private async syncChatMembers(): Promise<void> {
