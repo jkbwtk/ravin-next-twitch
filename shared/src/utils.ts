@@ -13,11 +13,11 @@ export const quickSwitch = <T, K extends QuickSwitchKeyTypes = string>(value: Qu
 
 type NonNull = string | number | boolean | symbol | object | bigint;
 
-export const mergeOptions = <T extends Record<string, NonNull>>(options: Partial<T>, defaults: T): T => {
+export const mergeOptions = <T extends Record<string, NonNull>>(options: T, defaults: RequiredDefaults<T>): Required<T> => {
   const definedOptions = Object.entries(options)
     .filter(([, value]) => value !== undefined) as [keyof T, NonNull][];
 
-  return Object.assign({}, defaults, Object.fromEntries(definedOptions));
+  return Object.assign({}, defaults, Object.fromEntries(definedOptions)) as Required<T>;
 };
 
 export type Signal<T> = {
@@ -69,3 +69,11 @@ export const basicSignal = <T>(defaultValue: T): Signal<T> => {
 export const arrayFrom = <T>(variable: T[] | T): T[] => {
   return Array.isArray(variable) ? variable.slice() : [variable];
 };
+
+// https://stackoverflow.com/questions/57593022/reverse-required-and-optional-properties
+type OptionalKeys<T> = {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  [K in keyof T]-?: {} extends Pick<T, K> ? K : never
+}[keyof T];
+
+export type RequiredDefaults<T extends Record<string, unknown>> = Required<Pick<T, OptionalKeys<T>>>;

@@ -7,8 +7,7 @@ import path from 'path';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import duration, { Duration } from 'dayjs/plugin/duration';
-import { Assembler } from '#lib/Assembler';
-import { mergeOptions } from '#shared/utils';
+import { mergeOptions, RequiredDefaults } from '#shared/utils';
 
 
 dayjs.extend(duration);
@@ -39,30 +38,25 @@ export class FileOutput extends LoggerOutput {
   private openFile: OpenFile | null = null;
   private lastCleanup = 0;
 
-  static defaultOptions: Required<FileOutputOptions> & {
-    extension: string;
-    basename: string;
-  } = {
-      format: new Assembler(),
-      level: 0,
-      directory: 'logs',
-      filename: 'stdout.log',
-      rotationFormat: false,
-      cleanupInterval: dayjs.duration({ hours: 1 }),
-      maxAge: false,
-      maxFiles: false,
-      extension: 'NOT UPDATED',
-      basename: 'NOT UPDATED',
-    };
+  private extension: string;
+  private basename: string;
 
-  protected options: typeof FileOutput.defaultOptions;
+  static defaultOptions: RequiredDefaults<FileOutputOptions> = {
+    directory: 'logs',
+    rotationFormat: false,
+    cleanupInterval: dayjs.duration({ hours: 1 }),
+    maxAge: false,
+    maxFiles: false,
+  };
+
+  protected options: Required<FileOutputOptions>;
 
   constructor(options: FileOutputOptions) {
     super();
     this.options = mergeOptions(options, FileOutput.defaultOptions);
 
-    this.options.extension = path.extname(this.options.filename);
-    this.options.basename = path.basename(this.options.filename, this.options.extension);
+    this.extension = path.extname(this.options.filename);
+    this.basename = path.basename(this.options.filename, this.extension);
 
     this.createDirectory();
   }
@@ -87,9 +81,9 @@ export class FileOutput extends LoggerOutput {
 
   private getFilePath(): string {
     const fullName = [
-      this.options.basename,
+      this.basename,
       this.options.rotationFormat ? this.options.rotationFormat() : '',
-      this.options.extension,
+      this.extension,
     ].join('');
 
     return path.join(
@@ -103,8 +97,8 @@ export class FileOutput extends LoggerOutput {
 
     return files.filter((file) =>
       file.isFile() &&
-      file.name.startsWith(this.options.basename) &&
-      file.name.endsWith(this.options.extension),
+      file.name.startsWith(this.basename) &&
+      file.name.endsWith(this.extension),
     ).map((file) => ({
       dirent: file,
       path: path.join(this.options.directory, file.name),

@@ -8,7 +8,7 @@ import { ExtendedCron } from '#lib/ExtendedCron';
 import { Client } from 'tmi.js';
 import { ChantHandler } from '#bot/ChantHandler';
 import { Message } from '@prisma/client';
-import { mergeOptions } from '#shared/utils';
+import { mergeOptions, RequiredDefaults } from '#shared/utils';
 import { CacheFIFO } from '#lib/CacheArray';
 
 
@@ -18,9 +18,9 @@ export type CustomCommandState = {
   command: CommandWithUser;
 };
 
-export interface ChannelThreadOptions {
+export type ChannelThreadOptions = {
   messageCacheSize?: number;
-}
+};
 
 export class ChannelThread {
   private options: Required<ChannelThreadOptions>;
@@ -34,7 +34,7 @@ export class ChannelThread {
   private jobs: ExtendedMap<string, ExtendedCron> = new ExtendedMap();
   public customCommands: ExtendedMap<string, CustomCommandState> = new ExtendedMap();
 
-  private static defaultOptions: Required<ChannelThreadOptions> = {
+  private static defaultOptions: RequiredDefaults<ChannelThreadOptions> = {
     messageCacheSize: 100,
   };
 
