@@ -16,7 +16,7 @@ export class ChantHandler {
     const lastMessage = this.channelThread.messages.at(-1);
     const timestamp = Date.now();
 
-    if (message.content !== lastMessage) this.resetChant();
+    if (this.compareMessages(lastMessage, message.content)) this.resetChant();
 
     if (!this.chantParticipants.has(message.userId)) {
       this.chantParticipants.add(message.userId);
@@ -25,7 +25,7 @@ export class ChantHandler {
     if (
       !chantingSettings.enabled ||
       this.chantResponded ||
-      this.lastChantTimestamp + chantingSettings.interval > timestamp ||
+      this.lastChantTimestamp + chantingSettings.interval * 1000 > timestamp ||
       this.chantParticipants.size < chantingSettings.length
     ) return;
 
@@ -44,6 +44,14 @@ export class ChantHandler {
         error: err,
       });
     }
+  }
+
+  private compareMessages(a: string | undefined, b: string | undefined): boolean {
+    if (a === undefined && b !== undefined) return false;
+    if (a !== undefined && b === undefined) return false;
+    if (a === undefined || b === undefined) return true; // should be && but || is used for type checking
+
+    return a.toLowerCase() === b.toLowerCase();
   }
 
   private resetChant(): void {
