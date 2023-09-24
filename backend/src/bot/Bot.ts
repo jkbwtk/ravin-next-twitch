@@ -139,7 +139,7 @@ export class Bot {
         }
       }
 
-      await thread.handleMessage(instance);
+      await thread.handleMessage(self, instance);
     } catch (err) {
       logger.error('Failed to handle message', { label: ['Bot', 'handleMessage'], error: err });
     }

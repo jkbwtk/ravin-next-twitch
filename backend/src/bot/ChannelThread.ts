@@ -60,8 +60,8 @@ export class ChannelThread {
     this.jobs.clear();
   }
 
-  public async handleMessage(message: Message): Promise<void> {
-    await this.chantHandler.handleMessage(message);
+  public async handleMessage(self: boolean, message: Message): Promise<void> {
+    await this.chantHandler.handleMessage(self, message);
 
     this.messages.push(message.content);
   }

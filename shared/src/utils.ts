@@ -13,7 +13,7 @@ export const quickSwitch = <T, K extends QuickSwitchKeyTypes = string>(value: Qu
 
 type NonNull = string | number | boolean | symbol | object | bigint;
 
-export const mergeOptions = <T extends Record<string, NonNull>>(options: T, defaults: RequiredDefaults<T>): Required<T> => {
+export const mergeOptions = <T extends Record<string, NonNull>>(options: T, defaults: RequiredDefaults<T> | Required<T>): Required<T> => {
   const definedOptions = Object.entries(options)
     .filter(([, value]) => value !== undefined) as [keyof T, NonNull][];
 
