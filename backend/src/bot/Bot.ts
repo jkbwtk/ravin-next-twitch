@@ -116,29 +116,6 @@ export class Bot {
 
       await prisma.channelStats.incrementMessages(instance.channelUserId);
 
-      const customCommand = thread.getUsedCustomCommand(message);
-
-      if (customCommand) {
-        if (
-          customCommand.command.enabled &&
-          Date.now() - customCommand.lastUsed >= customCommand.command.cooldown * 1000 &&
-          instance.getUserLevel() >= customCommand.command.userLevel
-        ) {
-          await this.client.say(channel, customCommand.command.response);
-          await prisma.channelStats.incrementCommands(thread.channel.user.id);
-          await prisma.command.incrementUsage(customCommand.command.id);
-
-          customCommand.lastUsed = Date.now();
-          customCommand.lastUsedBy = userstate['display-name'] ?? 'Chat Member';
-
-          SocketServer.emitToUser(thread.channel.user.id, 'COMMAND_EXECUTED', {
-            command: customCommand.command.serialize(),
-            lastUsed: customCommand.lastUsed,
-            lastUsedBy: customCommand.lastUsedBy,
-          });
-        }
-      }
-
       await thread.handleMessage(self, instance);
     } catch (err) {
       logger.error('Failed to handle message', { label: ['Bot', 'handleMessage'], error: err });
@@ -313,7 +290,7 @@ export class Bot {
       return;
     }
 
-    await channelThread.syncCustomCommands();
+    await channelThread.commandHandler.syncCustomCommands();
   }
 
   public static async reloadChannelChannel(channelId: string): Promise<void> {

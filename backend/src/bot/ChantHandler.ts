@@ -1,8 +1,8 @@
 import type { ChannelThread } from '#bot/ChannelThread';
+import { MessageWithUser } from '#database/extensions/message';
 import ExtendedSet from '#lib/ExtendedSet';
 import { logger } from '#lib/logger';
 import { mergeOptions, RequiredDefaults } from '#shared/utils';
-import { Message } from '@prisma/client';
 
 
 export type ChantHandlerOptions = {
@@ -46,7 +46,7 @@ export class ChantHandler {
     this.options = mergeOptions(options, ChantHandler.defaultOptions);
   }
 
-  public async handleMessage(self: boolean, message: Message): Promise<void> {
+  public async handleMessage(self: boolean, message: MessageWithUser): Promise<void> {
     // filter out ignored users
     if (this.options.ignoredUsernames.includes(message.username.toLowerCase())) return;
 

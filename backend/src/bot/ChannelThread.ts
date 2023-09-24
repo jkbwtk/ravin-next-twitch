@@ -3,20 +3,14 @@ import ExtendedSet from '#lib/ExtendedSet';
 import { getChatters } from '#lib/twitch';
 import { ChannelWithUser } from '#database/extensions/channel';
 import { prisma } from '#database/database';
-import { CommandWithUser } from '#database/extensions/command';
 import { ExtendedCron } from '#lib/ExtendedCron';
 import { Client } from 'tmi.js';
 import { ChantHandler } from '#bot/ChantHandler';
-import { Message } from '@prisma/client';
 import { mergeOptions, RequiredDefaults } from '#shared/utils';
 import { CacheFIFO } from '#lib/CacheArray';
+import { CommandHandler } from '#bot/CommandHandler';
+import { MessageWithUser } from '#database/extensions/message';
 
-
-export type CustomCommandState = {
-  lastUsed: number;
-  lastUsedBy?: string;
-  command: CommandWithUser;
-};
 
 export type ChannelThreadOptions = {
   messageCacheSize?: number;
@@ -28,11 +22,11 @@ export class ChannelThread {
   public chatMembers: ExtendedSet<string> = new ExtendedSet();
 
   public chantHandler: ChantHandler;
+  public commandHandler: CommandHandler;
 
   public messages: CacheFIFO<string>;
   public readonly refreshChatMembersJobName: string;
   private jobs: ExtendedMap<string, ExtendedCron> = new ExtendedMap();
-  public customCommands: ExtendedMap<string, CustomCommandState> = new ExtendedMap();
 
   private static defaultOptions: RequiredDefaults<ChannelThreadOptions> = {
     messageCacheSize: 100,
@@ -41,16 +35,17 @@ export class ChannelThread {
   constructor(public client: Client, public channel: ChannelWithUser, options: ChannelThreadOptions = {}) {
     this.options = mergeOptions(options, ChannelThread.defaultOptions);
 
-    this.chantHandler = new ChantHandler(this);
-
     this.messages = new CacheFIFO(this.options.messageCacheSize);
+
+    this.chantHandler = new ChantHandler(this);
+    this.commandHandler = new CommandHandler(this);
 
     this.refreshChatMembersJobName = `ChannelThread:${this.channel.user.login}:refreshChatMembers`;
   }
 
   public async init(): Promise<void> {
     await this.startChatMemberSyncing();
-    await this.syncCustomCommands();
+    await this.commandHandler.init();
   }
 
   public destroy(): void {
@@ -60,8 +55,9 @@ export class ChannelThread {
     this.jobs.clear();
   }
 
-  public async handleMessage(self: boolean, message: Message): Promise<void> {
+  public async handleMessage(self: boolean, message: MessageWithUser): Promise<void> {
     await this.chantHandler.handleMessage(self, message);
+    await this.commandHandler.handleMessage(self, message);
 
     this.messages.push(message.content);
   }
@@ -94,25 +90,6 @@ export class ChannelThread {
   private stopChatMemberSyncing(): void {
     this.jobs.get(this.refreshChatMembersJobName)?.stop();
     this.jobs.delete(this.refreshChatMembersJobName);
-  }
-
-  public async syncCustomCommands(): Promise<void> {
-    const commands = await prisma.command.getByChannelId(this.channel.user.id);
-
-    this.customCommands.clear();
-    for (const command of commands) {
-      this.customCommands.set(command.command, {
-        lastUsed: 0,
-        command,
-      });
-    }
-  }
-
-  public getUsedCustomCommand(message: string): CustomCommandState | null {
-    const [commandName] = message.trim().split(' ');
-
-    if (!commandName) return null;
-    return this.customCommands.get(commandName) ?? null;
   }
 
   public async syncChannel(): Promise<void> {

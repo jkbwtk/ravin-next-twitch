@@ -105,11 +105,8 @@ export const getCustomCommandsStatusView = new ExpressStack()
       }
 
       const resp: GetCustomCommandsStatusResponse = {
-        data: Array.from(channelThread.customCommands.values()).map((state) => ({
-          lastUsed: state.lastUsed,
-          lastUsedBy: state.lastUsedBy,
-          command: state.command.serialize(),
-        })),
+        data: Array.from(channelThread.commandHandler.customCommands.values())
+          .map((state) => state.getState()),
       };
 
       res.json(resp);
