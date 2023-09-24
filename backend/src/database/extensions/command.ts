@@ -1,4 +1,5 @@
 import { Bot } from '#bot/Bot';
+import { ExtensionReturnType, ExtensionType } from '#database/extensions/utils';
 import { logger } from '#lib/logger';
 import { CustomCommand, DeleteCustomCommandRequest, PatchCustomCommandRequest, PostCustomCommandRequest, UserLevel } from '#shared/types/api/commands';
 import { Prisma } from '@prisma/client';
@@ -10,6 +11,9 @@ declare global {
   }
 }
 
+export type CommandWithUser = ExtensionReturnType<ExtensionType<
+  typeof commandExtension
+>['model']['command']['getById']>;
 
 export const commandExtension = Prisma.defineExtension((client) => {
   return client.$extends({
@@ -164,7 +168,3 @@ export const commandExtension = Prisma.defineExtension((client) => {
     },
   });
 });
-
-export type CommandWithUser = NonNullable<Awaited<ReturnType<ReturnType<ReturnType<
-  typeof commandExtension
-> ['$extends']['extArgs']['model']['command']['getById'] >>>>;

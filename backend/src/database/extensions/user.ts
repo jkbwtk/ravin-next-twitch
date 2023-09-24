@@ -2,7 +2,7 @@ import { ChantingSettings } from '#shared/types/api/channel';
 import { Prisma } from '@prisma/client';
 
 
-const userWithChannel = Prisma.validator<Prisma.UserArgs>()({
+const userWithChannel = Prisma.validator<Prisma.UserDefaultArgs>()({
   include: {
     channel: true,
   },

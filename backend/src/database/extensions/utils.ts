@@ -21,3 +21,9 @@ export const utilsExtension = Prisma.defineExtension((client) => {
     },
   });
 });
+
+type PrismaExtension = ReturnType<typeof Prisma['defineExtension']>;
+
+export type ExtensionType<T extends PrismaExtension> = ReturnType<T> ['$extends']['extArgs'];
+
+export type ExtensionReturnType<T extends () => (...args: never[]) => Promise<unknown>> = NonNullable<Awaited<ReturnType<ReturnType<T>>>>;

@@ -1,3 +1,4 @@
+import { ExtensionType } from '#database/extensions/utils';
 import { logger } from '#lib/logger';
 import { definedOrFail } from '#lib/utils';
 import { UserLevel } from '#shared/types/api/commands';
@@ -25,13 +26,9 @@ export type DatabaseEmote = {
   count: bigint;
 };
 
-const messageWithUser = Prisma.validator<Prisma.MessageArgs>()({
-  include: {
-    user: true,
-  },
-});
-
-export type MessageWithUser = Prisma.MessageGetPayload<typeof messageWithUser>;
+export type MessageWithUser = Awaited<ReturnType<ReturnType<ExtensionType<
+  typeof messageExtension
+>['model']['message']['createFromChatUserState']>>>;
 
 export const messageExtension = Prisma.defineExtension((client) => {
   return client.$extends({

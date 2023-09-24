@@ -1,17 +1,10 @@
+import { ExtensionReturnType, ExtensionType } from '#database/extensions/utils';
 import { Prisma } from '@prisma/client';
 
 
-const tokenWithUserAndChannel = Prisma.validator<Prisma.TokenArgs>()({
-  include: {
-    user: {
-      include: {
-        channel: true,
-      },
-    },
-  },
-});
-
-export type TokenWithUserAndChannel = Prisma.TokenGetPayload<typeof tokenWithUserAndChannel>;
+export type TokenWithUserAndChannel = ExtensionReturnType<ExtensionType<
+  typeof tokenExtension
+>['model']['token']['getByUserId']>;
 
 export const tokenExtension = Prisma.defineExtension((client) => {
   return client.$extends({
