@@ -5,9 +5,9 @@ import { Config } from '#lib/Config';
 import { isDevApi } from '#shared/constants';
 import Deferred from '#lib/Deferred';
 import { TwitchUserRepo } from '#lib/TwitchUserRepo';
-import { SocketServer } from '#server/SocketServer';
 import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
+import { Wirable } from '#lib/autowire';
 
 
 export interface BotOptions {
@@ -19,7 +19,7 @@ export class Bot {
   private static instance: Bot;
 
   private options: Required<BotOptions>;
-  private client!: Client;
+  @Wirable() private client!: Client;
 
   private channels: ExtendedMap<string, ChannelThread>;
 
@@ -233,7 +233,7 @@ export class Bot {
         }
       }
 
-      const channelThread = new ChannelThread(instance.client, channel, {});
+      const channelThread = new ChannelThread(instance, channel, {});
       await channelThread.init();
       instance.channels.set(channel.user.login, channelThread);
 
@@ -244,7 +244,7 @@ export class Bot {
 
       return true;
     } catch (err) {
-      logger.warn('Failed to join channel [%s]', id, { label: ['Bot', 'joinChannel'], err });
+      logger.error('Failed to join channel [%s]', id, { label: ['Bot', 'joinChannel'], err });
       return false;
     }
   }

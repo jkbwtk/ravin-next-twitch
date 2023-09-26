@@ -4,19 +4,19 @@ import { getChatters } from '#lib/twitch';
 import { ChannelWithUser } from '#database/extensions/channel';
 import { prisma } from '#database/database';
 import { ExtendedCron } from '#lib/ExtendedCron';
-import { Client } from 'tmi.js';
 import { ChantHandler } from '#bot/ChantHandler';
 import { mergeOptions, RequiredDefaults } from '#shared/utils';
 import { CacheFIFO } from '#lib/CacheArray';
 import { CommandHandler } from '#bot/CommandHandler';
 import { MessageWithUser } from '#database/extensions/message';
+import { AutoWirable, ClassInstance } from '#lib/autowire';
 
 
 export type ChannelThreadOptions = {
   messageCacheSize?: number;
 };
 
-export class ChannelThread {
+export class ChannelThread implements AutoWirable {
   private options: Required<ChannelThreadOptions>;
 
   public chatMembers: ExtendedSet<string> = new ExtendedSet();
@@ -32,7 +32,7 @@ export class ChannelThread {
     messageCacheSize: 100,
   };
 
-  constructor(public client: Client, public channel: ChannelWithUser, options: ChannelThreadOptions = {}) {
+  constructor(public __parent: ClassInstance, public channel: ChannelWithUser, options: ChannelThreadOptions = {}) {
     this.options = mergeOptions(options, ChannelThread.defaultOptions);
 
     this.messages = new CacheFIFO(this.options.messageCacheSize);

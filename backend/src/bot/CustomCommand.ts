@@ -2,8 +2,10 @@ import { ChannelThread } from '#bot/ChannelThread';
 import { prisma } from '#database/database';
 import { CommandWithUser } from '#database/extensions/command';
 import { MessageWithUser } from '#database/extensions/message';
+import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { SocketServer } from '#server/SocketServer';
 import { CustomCommand as CustomCommandApi } from '#shared/types/api/commands';
+import { Client } from 'tmi.js';
 
 
 export type CustomCommandState = {
@@ -12,11 +14,17 @@ export type CustomCommandState = {
   command: CustomCommandApi;
 };
 
-export class CustomCommand {
+export class CustomCommand implements AutoWirable {
+  private client: Client;
+  private channelThread: ChannelThread;
+
   private lastUsed = 0;
   private lastUsedBy?: string;
 
-  constructor(private command: CommandWithUser, private channelThread: ChannelThread) { }
+  constructor(public __parent: ClassInstance, private command: CommandWithUser) {
+    this.client = wire(this, Client);
+    this.channelThread = wire(this, ChannelThread);
+  }
 
   public async execute(self: boolean, message: MessageWithUser): Promise<void> {
     if (self) return;
@@ -26,7 +34,7 @@ export class CustomCommand {
       Date.now() - this.lastUsed >= this.command.cooldown * 1000 &&
       message.getUserLevel() >= this.command.userLevel
     ) {
-      await this.channelThread.client.say(message.channelName, this.command.response);
+      await this.client.say(message.channelName, this.command.response);
       await prisma.channelStats.incrementCommands(this.channelThread.channel.user.id);
       await prisma.command.incrementUsage(this.command.id);
 

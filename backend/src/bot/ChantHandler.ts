@@ -1,8 +1,10 @@
-import type { ChannelThread } from '#bot/ChannelThread';
+import { ChannelThread } from '#bot/ChannelThread';
 import { MessageWithUser } from '#database/extensions/message';
 import ExtendedSet from '#lib/ExtendedSet';
+import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { logger } from '#lib/logger';
 import { mergeOptions, RequiredDefaults } from '#shared/utils';
+import { Client } from 'tmi.js';
 
 
 export type ChantHandlerOptions = {
@@ -28,7 +30,10 @@ export type ChantHandlerOptions = {
   ignoredUsernames?: string[];
 };
 
-export class ChantHandler {
+export class ChantHandler implements AutoWirable {
+  private channelThread: ChannelThread;
+  private client: Client;
+
   private chantParticipants: ExtendedSet<string> = new ExtendedSet();
   private lastChantTimestamp = 0;
   private chantResponded = false;
@@ -42,8 +47,11 @@ export class ChantHandler {
     ignoredUsernames: [],
   };
 
-  constructor(private channelThread: ChannelThread, options: ChantHandlerOptions = {}) {
+  constructor(public __parent: ClassInstance, options: ChantHandlerOptions = {}) {
     this.options = mergeOptions(options, ChantHandler.defaultOptions);
+
+    this.channelThread = wire(this, ChannelThread);
+    this.client = wire(this, Client);
   }
 
   public async handleMessage(self: boolean, message: MessageWithUser): Promise<void> {
@@ -78,7 +86,7 @@ export class ChantHandler {
       this.chantResponded = true;
       this.lastChantTimestamp = timestamp;
 
-      await this.channelThread.client.say(
+      await this.client.say(
         message.channelName,
         message.content,
       );

@@ -1,14 +1,19 @@
-import type { ChannelThread } from '#bot/ChannelThread';
+import { ChannelThread } from '#bot/ChannelThread';
 import { CustomCommand } from '#bot/CustomCommand';
 import { prisma } from '#database/database';
 import { MessageWithUser } from '#database/extensions/message';
 import { ExtendedMap } from '#lib/ExtendedMap';
+import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 
 
-export class CommandHandler {
+export class CommandHandler implements AutoWirable {
+  private channelThread: ChannelThread;
+
   public customCommands: ExtendedMap<string, CustomCommand> = new ExtendedMap();
 
-  constructor(private channelThread: ChannelThread) { }
+  constructor(public __parent: ClassInstance) {
+    this.channelThread = wire(this, ChannelThread);
+  }
 
   public async init(): Promise<void> {
     await this.syncCustomCommands();
@@ -32,7 +37,7 @@ export class CommandHandler {
 
     this.customCommands.clear();
     for (const command of commands) {
-      this.customCommands.set(command.command, new CustomCommand(command, this.channelThread));
+      this.customCommands.set(command.command, new CustomCommand(this, command));
     }
   }
 }

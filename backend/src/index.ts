@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import registerAliases from 'module-alias';
 
 if (process.env.DEV !== 'true') {
