@@ -11,7 +11,7 @@ export type ExtendedCronOptions<T> = Exclude<CronOptions, 'context' | 'name'> & 
 export type ExtendedCronCallback<T> = (self: ExtendedCron<T>, context: T) => void;
 export type ExtendedCronEffectCallback = (self: ExtendedCron<void>) => void;
 
-export type ExtendedCronEffect = 'create' | 'run' | 'delete';
+export type ExtendedCronEffect = 'create' | 'run' | 'delete' | 'pause' | 'resume';
 
 export class ExtendedCron<T = undefined> extends Cron {
   public creationTimestamp: number;
@@ -21,6 +21,8 @@ export class ExtendedCron<T = undefined> extends Cron {
     create: new Set(),
     run: new Set(),
     delete: new Set(),
+    pause: new Set(),
+    resume: new Set(),
   };
 
   constructor(pattern: string | Date, options: ExtendedCronOptions<T>, callback: ExtendedCronCallback<T>) {
@@ -36,6 +38,18 @@ export class ExtendedCron<T = undefined> extends Cron {
     this.originalName = originalName;
 
     ExtendedCron.emitEffect('create', this);
+  }
+
+  public resume(): boolean {
+    const resp = super.resume();
+    ExtendedCron.emitEffect('resume', this);
+    return resp;
+  }
+
+  public pause(): boolean {
+    const resp = super.pause();
+    ExtendedCron.emitEffect('pause', this);
+    return resp;
   }
 
   public stop(): void {
