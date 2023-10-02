@@ -1,3 +1,4 @@
+import { logger } from '#lib/logger';
 import { ScheduledJob } from '#shared/types/api/admin';
 import Cron, { CronOptions } from 'croner';
 import { createHash } from 'crypto';
@@ -77,6 +78,10 @@ export class ExtendedCron<T = undefined> extends Cron {
   private static emitEffect(effect: ExtendedCronEffect, self: ExtendedCron<void>): void {
     const callbacks = ExtendedCron.effects[effect];
 
+    logger.debug('Emitting effect [%s]', effect, {
+      label: ['ExtendedCron', self.name],
+    });
+
     for (const callback of callbacks) {
       callback(self);
     }
@@ -84,10 +89,20 @@ export class ExtendedCron<T = undefined> extends Cron {
 
   public static registerEffect(effect: ExtendedCronEffect, callback: ExtendedCronEffectCallback): void {
     ExtendedCron.effects[effect].add(callback);
+
+    logger.debug('Registered effect [%s]', effect, {
+      label: 'ExtendedCron',
+    });
   }
 
   public static unregisterEffect(effect: ExtendedCronEffect, callback: ExtendedCronEffectCallback): boolean {
-    return ExtendedCron.effects[effect].delete(callback);
+    const resp = ExtendedCron.effects[effect].delete(callback);
+
+    logger.debug('Unregistered effect [%s]', effect, {
+      label: 'ExtendedCron',
+    });
+
+    return resp;
   }
 
   public static get scheduledJobs(): ExtendedCron[] {
