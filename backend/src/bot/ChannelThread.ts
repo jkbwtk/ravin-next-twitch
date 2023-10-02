@@ -10,6 +10,7 @@ import { CacheFIFO } from '#lib/CacheArray';
 import { CommandHandler } from '#bot/CommandHandler';
 import { MessageWithUser } from '#database/extensions/message';
 import { AutoWirable, ClassInstance } from '#lib/autowire';
+import { CommandTimerHandler } from '#bot/CommandTimerHandler';
 
 
 export type ChannelThreadOptions = {
@@ -23,6 +24,7 @@ export class ChannelThread implements AutoWirable {
 
   public chantHandler: ChantHandler;
   public commandHandler: CommandHandler;
+  public commandTimerHandler: CommandTimerHandler;
 
   public messages: CacheFIFO<string>;
   public readonly refreshChatMembersJobName: string;
@@ -39,6 +41,7 @@ export class ChannelThread implements AutoWirable {
 
     this.chantHandler = new ChantHandler(this);
     this.commandHandler = new CommandHandler(this);
+    this.commandTimerHandler = new CommandTimerHandler(this);
 
     this.refreshChatMembersJobName = `ChannelThread:${this.channel.user.login}:refreshChatMembers`;
   }
@@ -46,10 +49,13 @@ export class ChannelThread implements AutoWirable {
   public async init(): Promise<void> {
     await this.startChatMemberSyncing();
     await this.commandHandler.init();
+    await this.commandTimerHandler.init();
   }
 
   public destroy(): void {
     this.stopChatMemberSyncing();
+
+    this.commandTimerHandler.destroy();
 
     this.jobs.forEach((job) => job.stop());
     this.jobs.clear();
@@ -58,6 +64,7 @@ export class ChannelThread implements AutoWirable {
   public async handleMessage(self: boolean, message: MessageWithUser): Promise<void> {
     await this.chantHandler.handleMessage(self, message);
     await this.commandHandler.handleMessage(self, message);
+    await this.commandTimerHandler.processMessage(self, message);
 
     this.messages.push(message.content);
   }

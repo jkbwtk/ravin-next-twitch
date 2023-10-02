@@ -132,6 +132,22 @@ model SystemNotification {
   @@index([userId])
 }
 
+model CommandTimer {
+  id        Int      @id() @default(autoincrement())
+  name      String   @db.VarChar
+  alias     String   @db.VarChar
+  response  String   @db.VarChar
+  cron      String   @db.VarChar
+  enabled   Boolean  @default(false)
+  lines     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  userId    String   @db.VarChar
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
 model Token {
   id           Int      @id() @default(autoincrement())
   accessToken  String   @unique() @db.VarChar
@@ -160,6 +176,7 @@ model User {
   message             Message[]
   system_notification SystemNotification[]
   token               Token?
+  commandTimer        CommandTimer[]
 
   @@index([login])
 }
