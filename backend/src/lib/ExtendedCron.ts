@@ -1,5 +1,6 @@
 import { logger } from '#lib/logger';
 import { ScheduledJob } from '#shared/types/api/admin';
+import { quickSwitch } from '#shared/utils';
 import Cron, { CronOptions } from 'croner';
 import { createHash } from 'crypto';
 
@@ -17,6 +18,9 @@ export type ExtendedCronEffect = 'create' | 'run' | 'delete' | 'pause' | 'resume
 export class ExtendedCron<T = undefined> extends Cron {
   public creationTimestamp: number;
   public originalName: string;
+
+  public pausedReason?: string;
+  public resumedReason?: string;
 
   private static readonly effects: Record<ExtendedCronEffect, Set<ExtendedCronEffectCallback>> = {
     create: new Set(),
@@ -41,15 +45,21 @@ export class ExtendedCron<T = undefined> extends Cron {
     ExtendedCron.emitEffect('create', this);
   }
 
-  public resume(): boolean {
+  public resume(reason?: string): boolean {
     const resp = super.resume();
+
     ExtendedCron.emitEffect('resume', this);
+    this.resumedReason = reason;
+
     return resp;
   }
 
-  public pause(): boolean {
+  public pause(reason?: string): boolean {
     const resp = super.pause();
+
     ExtendedCron.emitEffect('pause', this);
+    this.pausedReason = reason;
+
     return resp;
   }
 
@@ -78,7 +88,18 @@ export class ExtendedCron<T = undefined> extends Cron {
   private static emitEffect(effect: ExtendedCronEffect, self: ExtendedCron<void>): void {
     const callbacks = ExtendedCron.effects[effect];
 
-    logger.debug('Emitting effect [%s]', effect, {
+    let message = 'Emitting effect [%s]';
+    let reason = quickSwitch(effect, {
+      pause: self.pausedReason,
+      resume: self.resumedReason,
+      default: undefined,
+    });
+
+    if (reason !== undefined) {
+      message += ', reason: [%s]';
+    }
+
+    logger.debug(message, effect, reason, {
       label: ['ExtendedCron', self.name],
     });
 
@@ -125,6 +146,7 @@ export class ExtendedCron<T = undefined> extends Cron {
       isStopped: this.isStopped(),
       isBusy: this.isBusy(),
       creationTimestamp: this.creationTimestamp,
+      pausedReason: this.pausedReason ?? null,
     };
 
     return job;

@@ -19,6 +19,8 @@ export type ScheduledJob = {
   isStopped: boolean,
   isBusy: boolean,
   creationTimestamp: number,
+  pausedReason: string | null,
+  resumedReason: string | null,
 };
 
 export type GetScheduledJobsResponse = {
