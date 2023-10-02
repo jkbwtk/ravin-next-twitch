@@ -19,15 +19,15 @@ export class SocketServer {
       SocketServer.instance = new SocketServer(httpServer);
       await SocketServer.instance.registerRoutes();
 
-      ExtendedCron.registerCreateEffect((self) => {
+      ExtendedCron.registerEffect('create', (self) => {
         SocketServer.emitToRoom('admin', 'NEW_CRON_JOB', self.serialize());
       });
 
-      ExtendedCron.registerRunEffect((self) => {
+      ExtendedCron.registerEffect('run', (self) => {
         SocketServer.emitToRoom('admin', 'UPD_CRON_JOB', self.serialize());
       });
 
-      ExtendedCron.registerDeleteEffect((self) => {
+      ExtendedCron.registerEffect('delete', (self) => {
         SocketServer.emitToRoom('admin', 'DEL_CRON_JOB', self.creationTimestamp);
       });
 

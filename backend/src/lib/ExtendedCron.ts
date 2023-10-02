@@ -9,14 +9,19 @@ export type ExtendedCronOptions<T> = Exclude<CronOptions, 'context' | 'name'> & 
 };
 
 export type ExtendedCronCallback<T> = (self: ExtendedCron<T>, context: T) => void;
+export type ExtendedCronEffectCallback = (self: ExtendedCron<void>) => void;
+
+export type ExtendedCronEffect = 'create' | 'run' | 'delete';
 
 export class ExtendedCron<T = undefined> extends Cron {
   public creationTimestamp: number;
   public originalName: string;
 
-  private static createEffects: ExtendedCronCallback<void>[] = [];
-  private static runEffects: ExtendedCronCallback<void>[] = [];
-  private static deleteEffects: ExtendedCronCallback<void>[] = [];
+  private static readonly effects: Record<ExtendedCronEffect, Set<ExtendedCronEffectCallback>> = {
+    create: new Set(),
+    run: new Set(),
+    delete: new Set(),
+  };
 
   constructor(pattern: string | Date, options: ExtendedCronOptions<T>, callback: ExtendedCronCallback<T>) {
     const creationTimestamp = performance.now();
@@ -30,7 +35,12 @@ export class ExtendedCron<T = undefined> extends Cron {
     this.creationTimestamp = creationTimestamp;
     this.originalName = originalName;
 
-    ExtendedCron.processCreateEffects(this);
+    ExtendedCron.emitEffect('create', this);
+  }
+
+  public stop(): void {
+    super.stop();
+    ExtendedCron.emitEffect('delete', this);
   }
 
   private static hash(creationTimestamp: number, name: string, pattern?: string): string {
@@ -46,59 +56,28 @@ export class ExtendedCron<T = undefined> extends Cron {
   private static callbackWrapper<T>(callback: ExtendedCronCallback<T>): ExtendedCronCallback<T> {
     return (self, ctx) => {
       callback(self, ctx);
-      ExtendedCron.processRunEffects(self);
+      ExtendedCron.emitEffect('run', self);
     };
   }
 
-  private static processEffects(self: ExtendedCron<void>, effects: ExtendedCronCallback<void>[]): void {
-    for (const effect of effects) {
-      effect(self, undefined);
+  private static emitEffect(effect: ExtendedCronEffect, self: ExtendedCron<void>): void {
+    const callbacks = ExtendedCron.effects[effect];
+
+    for (const callback of callbacks) {
+      callback(self);
     }
   }
 
-  private static processCreateEffects(self: ExtendedCron<void>) {
-    ExtendedCron.processEffects(self, ExtendedCron.createEffects);
+  public static registerEffect(effect: ExtendedCronEffect, callback: ExtendedCronEffectCallback): void {
+    ExtendedCron.effects[effect].add(callback);
   }
 
-  private static processRunEffects(self: ExtendedCron<void>) {
-    ExtendedCron.processEffects(self, ExtendedCron.runEffects);
-  }
-
-  private static processDeleteEffects(self: ExtendedCron<void>) {
-    ExtendedCron.processEffects(self, ExtendedCron.deleteEffects);
-  }
-
-  public static registerCreateEffect(effect: ExtendedCronCallback<void>): void {
-    ExtendedCron.createEffects.push(effect);
-  }
-
-  public static unregisterCreateEffect(effect: ExtendedCronCallback<void>): void {
-    ExtendedCron.createEffects = ExtendedCron.createEffects.filter((m) => m !== effect);
-  }
-
-  public static registerRunEffect(effect: ExtendedCronCallback<void>): void {
-    ExtendedCron.runEffects.push(effect);
-  }
-
-  public static unregisterRunEffect(effect: ExtendedCronCallback<void>): void {
-    ExtendedCron.runEffects = ExtendedCron.runEffects.filter((m) => m !== effect);
-  }
-
-  public static registerDeleteEffect(effect: ExtendedCronCallback<void>): void {
-    ExtendedCron.deleteEffects.push(effect);
-  }
-
-  public static unregisterDeleteEffect(effect: ExtendedCronCallback<void>): void {
-    ExtendedCron.deleteEffects = ExtendedCron.deleteEffects.filter((m) => m !== effect);
+  public static unregisterEffect(effect: ExtendedCronEffect, callback: ExtendedCronEffectCallback): boolean {
+    return ExtendedCron.effects[effect].delete(callback);
   }
 
   public static get scheduledJobs(): ExtendedCron[] {
     return Cron.scheduledJobs as ExtendedCron[];
-  }
-
-  public stop(): void {
-    super.stop();
-    ExtendedCron.processDeleteEffects(this);
   }
 
   public serialize(): ScheduledJob {
