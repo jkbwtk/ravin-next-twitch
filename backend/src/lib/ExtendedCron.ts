@@ -3,6 +3,7 @@ import { ScheduledJob } from '#shared/types/api/admin';
 import { quickSwitch } from '#shared/utils';
 import Cron, { CronOptions } from 'croner';
 import { createHash } from 'crypto';
+import { nextTick } from 'process';
 
 
 export type ExtendedCronOptions<T> = Exclude<CronOptions, 'context' | 'name'> & {
@@ -10,10 +11,10 @@ export type ExtendedCronOptions<T> = Exclude<CronOptions, 'context' | 'name'> & 
   context?: T
 };
 
-export type ExtendedCronCallback<T> = (self: ExtendedCron<T>, context: T) => void;
+export type ExtendedCronCallback<T> = (self: ExtendedCron<T>, context: T) => Promise<void> | void;
 export type ExtendedCronEffectCallback = (self: ExtendedCron<void>) => void;
 
-export type ExtendedCronEffect = 'create' | 'run' | 'delete' | 'pause' | 'resume';
+export type ExtendedCronEffect = 'create' | 'start' | 'finish' | 'delete' | 'pause' | 'resume';
 
 export class ExtendedCron<T = undefined> extends Cron {
   public creationTimestamp: number;
@@ -24,7 +25,8 @@ export class ExtendedCron<T = undefined> extends Cron {
 
   private static readonly effects: Record<ExtendedCronEffect, Set<ExtendedCronEffectCallback>> = {
     create: new Set(),
-    run: new Set(),
+    start: new Set(),
+    finish: new Set(),
     delete: new Set(),
     pause: new Set(),
     resume: new Set(),
@@ -79,9 +81,14 @@ export class ExtendedCron<T = undefined> extends Cron {
   }
 
   private static callbackWrapper<T>(callback: ExtendedCronCallback<T>): ExtendedCronCallback<T> {
-    return (self, ctx) => {
-      callback(self, ctx);
-      ExtendedCron.emitEffect('run', self);
+    return async (self, ctx) => {
+      ExtendedCron.emitEffect('start', self);
+
+      await callback(self, ctx);
+
+      nextTick(() => {
+        ExtendedCron.emitEffect('finish', self);
+      });
     };
   }
 
@@ -147,6 +154,7 @@ export class ExtendedCron<T = undefined> extends Cron {
       isBusy: this.isBusy(),
       creationTimestamp: this.creationTimestamp,
       pausedReason: this.pausedReason ?? null,
+      resumedReason: this.resumedReason ?? null,
     };
 
     return job;

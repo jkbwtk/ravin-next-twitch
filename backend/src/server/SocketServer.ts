@@ -23,7 +23,11 @@ export class SocketServer {
         SocketServer.emitToRoom('admin', 'NEW_CRON_JOB', self.serialize());
       });
 
-      ExtendedCron.registerEffect('run', (self) => {
+      ExtendedCron.registerEffect('start', (self) => {
+        SocketServer.emitToRoom('admin', 'UPD_CRON_JOB', self.serialize());
+      });
+
+      ExtendedCron.registerEffect('finish', (self) => {
         SocketServer.emitToRoom('admin', 'UPD_CRON_JOB', self.serialize());
       });
 

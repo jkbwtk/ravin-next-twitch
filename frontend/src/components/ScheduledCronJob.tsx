@@ -35,6 +35,9 @@ const ScheduledCronJob: Component<ScheduledCronJobProps> = (props) => {
 
   return <div class={style.job}>
     <Switch>
+      <Match when={props.isBusy}>
+        <MaterialSymbol symbol='hourglass_empty' size='big' color='yellow' />
+      </Match>
       <Match when={props.isRunning}>
         <MaterialSymbol symbol='play_arrow' size='big' color='green' />
       </Match>
