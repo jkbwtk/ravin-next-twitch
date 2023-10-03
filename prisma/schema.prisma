@@ -136,6 +136,7 @@ model CommandTimer {
   id        Int      @id() @default(autoincrement())
   name      String   @db.VarChar
   alias     String   @db.VarChar
+  cooldown  Int      @default(60)
   response  String   @db.VarChar
   cron      String   @db.VarChar
   enabled   Boolean  @default(false)
@@ -145,6 +146,8 @@ model CommandTimer {
   userId    String   @db.VarChar
   user      User     @relation(fields: [userId], references: [id])
 
+  @@unique([userId, name])
+  @@unique([userId, alias])
   @@index([userId])
 }
 

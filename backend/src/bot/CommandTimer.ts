@@ -2,13 +2,14 @@ import { ChannelThread } from '#bot/ChannelThread';
 import { MessageWithUser } from '#database/extensions/message';
 import { ExtendedCron } from '#lib/ExtendedCron';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
-import { sleep } from '#lib/utils';
+import { UserLevel } from '#shared/types/api/commands';
 import { CommandTimer as PrismaCommandTimer } from '@prisma/client';
 import { Client } from 'tmi.js';
 
 
 export class CommandTimer implements AutoWirable {
   private messageCounter = 0;
+  private lastUsed = 0;
 
   private job: ExtendedCron;
 
@@ -28,20 +29,36 @@ export class CommandTimer implements AutoWirable {
     }, this.processTimer);
   }
 
-  private processTimer = (self: ExtendedCron): void => {
+  private processTimer = async (self: ExtendedCron): Promise<void> => {
     if (this.messageCounter < this.timer.lines) {
       self.pause('Not enough messages');
       return;
     }
 
-    this.client.say(`#${this.channelThread.channel.user.login}`, this.timer.response);
-
+    await this.execute();
     this.messageCounter = 0;
   };
+
+  public async execute(): Promise<void> {
+    await this.client.say(`#${this.channelThread.channel.user.login}`, this.timer.response);
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public processMessage(self: boolean, message: MessageWithUser): void {
     if (self) return;
+
+    if (
+      message.content.toLowerCase() === this.timer.alias.toLowerCase() &&
+      (Date.now() - this.lastUsed >= this.timer.cooldown * 1000 ||
+      message.getUserLevel() >= UserLevel.Moderator)
+    ) {
+      this.execute();
+
+      this.lastUsed = Date.now();
+      this.messageCounter = 0;
+
+      return;
+    }
 
     this.messageCounter += 1;
 
