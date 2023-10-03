@@ -75,19 +75,17 @@ export class ChannelThread implements AutoWirable {
     this.messages.setMaxLength(this.options.messageCacheSize);
   }
 
-  private async syncChatMembers(): Promise<void> {
+  private syncChatMembers = async (): Promise<void> => {
     const chatters = await getChatters(this.channel.user.id, 1000);
     const mappedChatters = chatters.users.map((chatter) => chatter.user_id);
 
     this.chatMembers = new ExtendedSet(mappedChatters);
-  }
+  };
 
   private async startChatMemberSyncing(): Promise<void> {
-    const job = new ExtendedCron('0 */5 * * * *', {
+    const job = new ExtendedCron('? */5 * * * *', {
       name: this.refreshChatMembersJobName,
-    }, async () => {
-      await this.syncChatMembers();
-    });
+    }, this.syncChatMembers);
 
     await job.trigger();
 
