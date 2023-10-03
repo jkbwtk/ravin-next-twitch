@@ -304,4 +304,16 @@ export class Bot {
 
     await channelThread.syncChannel();
   }
+
+  public static async reloadChannelCommandTimers(channelId: string): Promise<void> {
+    const channel = await prisma.channel.getByUserIdOrFail(channelId);
+    const channelThread = Bot.getChannelThread(channel.user.login);
+
+    if (!channelThread) {
+      logger.warn('Channel thread for [%s] not found', channel.user.login, { label: ['Bot', 'reloadChannelCommandTimers'] });
+      return;
+    }
+
+    await channelThread.commandTimerHandler.syncCommandTimers();
+  }
 }

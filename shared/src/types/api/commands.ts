@@ -37,3 +37,41 @@ export type CustomCommandState = {
 export type GetCustomCommandsStatusResponse = {
   data: CustomCommandState[];
 };
+
+export type CommandTimer = {
+  id: number;
+  channelId: string;
+  name: string;
+  alias: string;
+  cooldown: number;
+  response: string;
+  cron: string;
+  enabled: boolean;
+  lines: number;
+};
+
+export type GetCommandTimersResponse = {
+  data: CommandTimer[];
+};
+
+export type PostCommandTimerRequest = Omit<CommandTimer, 'id' | 'channelId'>;
+
+export type PatchCommandTimerRequest = Partial<PostCommandTimerRequest> & Pick<CommandTimer, 'id'>;
+
+export type DeleteCommandTimerRequest = {
+  id: CommandTimer['id'];
+};
+
+export type CommandTimerState = {
+  lastUsed: number;
+  lastUsedBy?: string;
+  lastRun: number | null;
+  nextRun: number | null;
+  status: 'running' | 'paused';
+  pausedReason: string | null;
+  timer: CommandTimer;
+};
+
+export type GetCommandTimersStatusResponse = {
+  data: CommandTimerState[];
+};

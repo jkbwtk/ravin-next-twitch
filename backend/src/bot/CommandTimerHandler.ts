@@ -7,7 +7,7 @@ import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 
 
 export class CommandTimerHandler implements AutoWirable {
-  private commandTimers: ExtendedMap<string, CommandTimer> = new ExtendedMap();
+  public commandTimers: ExtendedMap<string, CommandTimer> = new ExtendedMap();
 
   private channelThread: ChannelThread;
 
@@ -30,7 +30,7 @@ export class CommandTimerHandler implements AutoWirable {
   }
 
   public async syncCommandTimers(): Promise<void> {
-    const timers = await prisma.commandTimer.getByUserId(this.channelThread.channel.user.id);
+    const timers = await prisma.commandTimer.getByChannelId(this.channelThread.channel.user.id);
 
     this.clearCommandTimers();
     for (const timer of timers) {

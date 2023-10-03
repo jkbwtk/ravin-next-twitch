@@ -1,4 +1,4 @@
-import { CustomCommand, CustomCommandState } from 'types/api/commands';
+import { CommandTimer, CommandTimerState, CustomCommand, CustomCommandState } from 'types/api/commands';
 import { Action } from './dashboard';
 import { SystemNotification } from './systemNotifications';
 import { Message } from './logs';
@@ -22,6 +22,12 @@ export type ServerToClientEvents = {
   NEW_CRON_JOB: (job: ScheduledJob) => void;
   UPD_CRON_JOB: (job: ScheduledJob) => void;
   DEL_CRON_JOB: (creationTimestamp: number) => void;
+
+  NEW_COMMAND_TIMER: (command: CommandTimer) => void;
+  UPD_COMMAND_TIMER: (command: CommandTimer) => void;
+  DEL_COMMAND_TIMER: (commandId: number) => void;
+
+  COMMAND_TIMER_EXECUTED: (status: CommandTimerState) => void;
 };
 
 export type ClientToServerEvents = {
