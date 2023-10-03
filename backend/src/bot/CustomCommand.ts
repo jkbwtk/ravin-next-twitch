@@ -4,15 +4,9 @@ import { CommandWithUser } from '#database/extensions/command';
 import { MessageWithUser } from '#database/extensions/message';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { SocketServer } from '#server/SocketServer';
-import { CustomCommand as CustomCommandApi } from '#shared/types/api/commands';
+import { CustomCommandState } from '#shared/types/api/commands';
 import { Client } from 'tmi.js';
 
-
-export type CustomCommandState = {
-  lastUsed: number;
-  lastUsedBy?: string;
-  command: CustomCommandApi;
-};
 
 export class CustomCommand implements AutoWirable {
   private client: Client;

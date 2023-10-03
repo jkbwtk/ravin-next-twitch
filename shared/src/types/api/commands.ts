@@ -28,12 +28,12 @@ export type DeleteCustomCommandRequest = {
   id: CustomCommand['id'];
 };
 
-export type CommandStatus = {
+export type CustomCommandState = {
   lastUsed: number;
   lastUsedBy?: string;
   command: CustomCommand;
 };
 
 export type GetCustomCommandsStatusResponse = {
-  data: CommandStatus[];
+  data: CustomCommandState[];
 };

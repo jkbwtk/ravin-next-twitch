@@ -1,4 +1,4 @@
-import { CommandStatus, CustomCommand } from 'types/api/commands';
+import { CustomCommand, CustomCommandState } from 'types/api/commands';
 import { Action } from './dashboard';
 import { SystemNotification } from './systemNotifications';
 import { Message } from './logs';
@@ -12,7 +12,7 @@ export type ServerToClientEvents = {
   UPD_CUSTOM_COMMAND: (command: CustomCommand) => void;
   DEL_CUSTOM_COMMAND: (commandId: number) => void;
 
-  COMMAND_EXECUTED: (status: CommandStatus) => void;
+  COMMAND_EXECUTED: (status: CustomCommandState) => void;
 
   NEW_SYSTEM_NOTIFICATION: (notification: SystemNotification) => void;
   RAD_SYSTEM_NOTIFICATION: (notificationIds: number[]) => void;
