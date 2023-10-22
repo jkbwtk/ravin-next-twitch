@@ -64,6 +64,22 @@ export class TemplateRunner {
     return context;
   }
 
+  private createMockContext(): Context {
+    const context = this.isolate.createContextSync();
+    const jail = context.global;
+
+    jail.setSync('global', jail.derefInto());
+    jail.setSync('template', this.template);
+
+    jail.setSync('setState', () => undefined);
+    jail.setSync('getState', () => null);
+
+    jail.setSync('counter', () => 0);
+    jail.setSync('time', () => '1970-01-01T00:00:00.000Z');
+
+    return context;
+  }
+
   private setCustomState = (value: unknown): boolean => {
     try {
       const stringified = JSON.stringify(value);
@@ -122,19 +138,29 @@ export class TemplateRunner {
       .format(format);
   };
 
-  public async run(params?: Record<string, unknown>): Promise<string> {
-    const t1 = performance.now();
-    const context = this.createContext(params);
-    logger.time('Creating context', t1);
-
-    return `${await this.script.run(context, { timeout: this.options.executionTimeout })}`;
-  }
-
   public getStatesObject(): Partial<Record<DefaultStates, unknown>> {
     return Object.fromEntries(this.states);
   }
 
   public setStatesObject(states: Partial<Record<DefaultStates, unknown>>): void {
     this.states = new Map(Object.entries(states) as [DefaultStates, unknown][]);
+  }
+
+  public async run(params?: Record<string, unknown>): Promise<string> {
+    const context = this.createContext(params);
+
+    const response = await this.script.run(context, { timeout: this.options.executionTimeout });
+    context.release();
+
+    return `${response}`;
+  }
+
+  public async dryRun(): Promise<string> {
+    const context = this.createMockContext();
+
+    const response = await this.script.run(context, { timeout: this.options.executionTimeout });
+    context.release();
+
+    return `${response}`;
   }
 }
