@@ -13,6 +13,7 @@ import { channelStatsExtension } from '#database/extensions/channelStats';
 import { mapOptionsToArray } from '#lib/utils';
 import { utilsExtension } from '#database/extensions/utils';
 import { commandTimerExtension } from '#database/extensions/commandTimer';
+import { templateExtension } from '#database/extensions/template';
 
 
 export const redisOptions: RedisOptions = {
@@ -46,7 +47,8 @@ const prismaExtended = prismaBase
   .$extends(messageExtension)
   .$extends(commandExtension)
   .$extends(channelStatsExtension)
-  .$extends(commandTimerExtension);
+  .$extends(commandTimerExtension)
+  .$extends(templateExtension);
 
 export type ExtendedPrismaClient = typeof prismaExtended;
 

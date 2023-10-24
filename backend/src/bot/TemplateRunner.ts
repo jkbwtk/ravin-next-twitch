@@ -4,6 +4,8 @@ import { Context, Isolate, Reference, Script } from 'isolated-vm';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import dayjs from 'dayjs';
+import { Template } from '#database/extensions/template';
+import { StateMap } from '#bot/StateMap';
 
 
 dayjs.extend(utc);
@@ -13,6 +15,8 @@ export type GlobalReference = Reference<Record<string | number | symbol, unknown
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type DefaultStates = 'customState' | 'counterState' | (string & {});
+
+export type StatesObject = Partial<Record<DefaultStates, unknown>>;
 
 export type TemplateRunnerOptions = {
   /**
@@ -36,12 +40,13 @@ export class TemplateRunner {
     executionTimeout: 1000,
   };
 
-  private states = new Map<DefaultStates, unknown>();
+  public states: StateMap;
 
-  constructor(private isolate: Isolate, private template: string, options: TemplateRunnerOptions = {}) {
+  constructor(private isolate: Isolate, private template: Template, options: TemplateRunnerOptions = {}) {
     this.options = mergeOptions(options, TemplateRunner.defaultOptions);
 
-    this.script = isolate.compileScriptSync(`\`${template}\``);
+    this.script = isolate.compileScriptSync(`\`${template.template}\``);
+    this.states = new StateMap(template);
   }
 
   private createContext(params: Record<string, unknown> = {}): Context {
@@ -49,7 +54,7 @@ export class TemplateRunner {
     const jail = context.global;
 
     jail.setSync('global', jail.derefInto());
-    jail.setSync('template', this.template);
+    jail.setSync('template', this.template.template);
 
     jail.setSync('setState', this.setCustomState);
     jail.setSync('getState', this.getCustomState);
@@ -69,7 +74,7 @@ export class TemplateRunner {
     const jail = context.global;
 
     jail.setSync('global', jail.derefInto());
-    jail.setSync('template', this.template);
+    jail.setSync('template', this.template.template);
 
     jail.setSync('setState', () => undefined);
     jail.setSync('getState', () => null);
@@ -84,18 +89,16 @@ export class TemplateRunner {
     try {
       const stringified = JSON.stringify(value);
       if (stringified.length > this.options.maxCustomStateLength) {
-        logger.warn('Custom state is too long, not setting', { label: ['TemplateRunner', 'setCustomState'] });
+        logger.warn('Custom state is too long, not setting', { label: ['TemplateRunner', this.template.id, 'setCustomState'] });
         return false;
       }
 
       const state = JSON.parse(stringified);
-
       this.states.set('customState', state);
 
-      logger.info('Set custom state to %o', state!);
       return true;
     } catch (err) {
-      logger.error('Setting custom state failed', { error: err });
+      logger.error('Setting custom state failed', { error: err, label: ['TemplateRunner', this.template.id, 'setCustomState'] });
       return false;
     }
   };
@@ -110,7 +113,7 @@ export class TemplateRunner {
 
       return parsed;
     } catch (err) {
-      logger.error('Getting custom state failed', { error: err, label: ['TemplateRunner', 'getCustomState'] });
+      logger.error('Getting custom state failed', { error: err, label: ['TemplateRunner', this.template.id, 'getCustomState'] });
     }
   };
 
@@ -118,7 +121,7 @@ export class TemplateRunner {
     let state = (this.states.get('counterState') ?? 0) as number;
 
     if (typeof state !== 'number') {
-      logger.warn('Counter state is not a number, resetting to 0', { label: ['TemplateRunner', 'counter'] });
+      logger.warn('Counter state is not a number, resetting to 0', { label: ['TemplateRunner', this.template.id, 'counter'] });
       state = 0;
     }
 
@@ -137,14 +140,6 @@ export class TemplateRunner {
     return date.tz(timezone)
       .format(format);
   };
-
-  public getStatesObject(): Partial<Record<DefaultStates, unknown>> {
-    return Object.fromEntries(this.states);
-  }
-
-  public setStatesObject(states: Partial<Record<DefaultStates, unknown>>): void {
-    this.states = new Map(Object.entries(states) as [DefaultStates, unknown][]);
-  }
 
   public async run(params?: Record<string, unknown>): Promise<string> {
     const context = this.createContext(params);

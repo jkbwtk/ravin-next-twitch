@@ -9,8 +9,9 @@ import { mergeOptions, RequiredDefaults } from '#shared/utils';
 import { CacheFIFO } from '#lib/CacheArray';
 import { CommandHandler } from '#bot/CommandHandler';
 import { MessageWithUser } from '#database/extensions/message';
-import { AutoWirable, ClassInstance } from '#lib/autowire';
+import { AutoWirable, ClassInstance, Wirable } from '#lib/autowire';
 import { CommandTimerHandler } from '#bot/CommandTimerHandler';
+import { Isolate } from 'isolated-vm';
 
 
 export type ChannelThreadOptions = {
@@ -25,6 +26,8 @@ export class ChannelThread implements AutoWirable {
   public chantHandler: ChantHandler;
   public commandHandler: CommandHandler;
   public commandTimerHandler: CommandTimerHandler;
+
+  @Wirable() private isolate: Isolate;
 
   public messages: CacheFIFO<string>;
   public readonly refreshChatMembersJobName: string;
@@ -43,6 +46,8 @@ export class ChannelThread implements AutoWirable {
     this.commandHandler = new CommandHandler(this);
     this.commandTimerHandler = new CommandTimerHandler(this);
 
+    this.isolate = new Isolate({ memoryLimit: 32 });
+
     this.refreshChatMembersJobName = `ChannelThread:${this.channel.user.login}:refreshChatMembers`;
   }
 
@@ -59,6 +64,8 @@ export class ChannelThread implements AutoWirable {
 
     this.jobs.forEach((job) => job.stop());
     this.jobs.clear();
+
+    this.isolate.dispose();
   }
 
   public async handleMessage(self: boolean, message: MessageWithUser): Promise<void> {

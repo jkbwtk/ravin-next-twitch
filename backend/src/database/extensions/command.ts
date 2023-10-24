@@ -11,7 +11,7 @@ declare global {
   }
 }
 
-export type CommandWithUser = ExtensionReturnType<ExtensionType<
+export type CommandWithUserAndTemplate = ExtensionReturnType<ExtensionType<
   typeof commandExtension
 >['model']['command']['getById']>;
 
@@ -24,7 +24,7 @@ export const commandExtension = Prisma.defineExtension((client) => {
             id: true,
             channelUserId: true,
             command: true,
-            response: true,
+            templateId: true,
             userLevel: true,
             cooldown: true,
             enabled: true,
@@ -35,7 +35,7 @@ export const commandExtension = Prisma.defineExtension((client) => {
                 id: command.id,
                 channelId: command.channelUserId,
                 command: command.command,
-                response: command.response,
+                response: command.templateId.toString(),
                 userLevel: command.userLevel,
                 cooldown: command.cooldown,
                 enabled: command.enabled,
@@ -55,6 +55,7 @@ export const commandExtension = Prisma.defineExtension((client) => {
             where: { id },
             include: {
               user: true,
+              template: true,
             },
           });
 
@@ -69,6 +70,7 @@ export const commandExtension = Prisma.defineExtension((client) => {
             where: { channelUserId: channelId },
             include: {
               user: true,
+              template: true,
             },
           });
 
@@ -100,6 +102,7 @@ export const commandExtension = Prisma.defineExtension((client) => {
             },
             include: {
               user: true,
+              template: true,
             },
           });
 
@@ -114,13 +117,14 @@ export const commandExtension = Prisma.defineExtension((client) => {
             data: {
               channelUserId: channelId,
               command: command.command,
-              response: command.response,
+              templateId: parseInt(command.response),
               userLevel: command.userLevel,
               cooldown: command.cooldown,
               enabled: command.enabled,
             },
             include: {
               user: true,
+              template: true,
             },
           });
 
@@ -137,13 +141,14 @@ export const commandExtension = Prisma.defineExtension((client) => {
             where: { id: command.id },
             data: {
               command: command.command,
-              response: command.response,
+              templateId: Math.random(),
               userLevel: command.userLevel,
               cooldown: command.cooldown,
               enabled: command.enabled,
             },
             include: {
               user: true,
+              template: true,
             },
           });
 
