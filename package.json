@@ -4,10 +4,11 @@
   "description": "Experimental twitch bot with dashboard",
   "main": "server/index.js",
   "scripts": {
-    "start": "cross-env NODE_ENV=production node . --no-node-snapshot",
-    "dev": "cross-env DEV=true TS_NODE_PROJECT=./backend/tsconfig.json tsnd -r tsconfig-paths/register ./backend/src/index.ts --no-node-snapshot",
-    "playground": "cross-env DEV=true TS_NODE_PROJECT=./backend/tsconfig.json tsnd -r tsconfig-paths/register ./backend/src/playground.ts --no-node-snapshot",
+    "start": "cross-env NODE_ENV=production node --no-node-snapshot .",
+    "dev": "cross-env DEV=true TS_NODE_PROJECT=./backend/tsconfig.json tsnd -r tsconfig-paths/register --no-node-snapshot ./backend/src/index.ts",
+    "playground": "cross-env DEV=true TS_NODE_PROJECT=./backend/tsconfig.json tsnd -r tsconfig-paths/register --no-node-snapshot ./backend/src/playground.ts",
     "build": "vite build && cd ./backend && tsc -b",
+    "watch": "cd backend && tsc -b --watch",
     "lint": "eslint --fix --ext .ts,.tsx ./frontend/src ./backend/src ./shared/src",
     "test": "vitest"
   },
