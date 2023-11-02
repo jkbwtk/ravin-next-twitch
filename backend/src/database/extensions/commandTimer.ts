@@ -1,4 +1,4 @@
-import { CommandTimer, DeleteCommandTimerRequest, PatchCommandTimerRequest, PostCommandTimerRequest } from '#shared/types/api/commands';
+import { CommandTimer, DeleteCommandTimerReqBody, PatchCommandTimerReqBody, PostCommandTimerReqBody } from '#shared/types/api/commands';
 import { ExtensionReturnType, ExtensionType } from '#database/extensions/utils';
 import { logger } from '#lib/logger';
 import { Prisma } from '@prisma/client';
@@ -74,7 +74,7 @@ export const commandTimerExtension = Prisma.defineExtension((client) => {
 
           return result;
         },
-        async createFromApi(channelId: string, commandTimer: PostCommandTimerRequest) {
+        async createFromApi(channelId: string, commandTimer: PostCommandTimerReqBody) {
           const t1 = performance.now();
 
           const result = await Prisma.getExtensionContext(this).create({
@@ -96,7 +96,7 @@ export const commandTimerExtension = Prisma.defineExtension((client) => {
 
           return result;
         },
-        async updateFromApi(commandTimer: PatchCommandTimerRequest) {
+        async updateFromApi(commandTimer: PatchCommandTimerReqBody) {
           const t1 = performance.now();
 
           const result = await Prisma.getExtensionContext(this).update({
@@ -118,7 +118,7 @@ export const commandTimerExtension = Prisma.defineExtension((client) => {
 
           return result;
         },
-        async deleteFromApi(commandTimer: DeleteCommandTimerRequest) {
+        async deleteFromApi(commandTimer: DeleteCommandTimerReqBody) {
           const t1 = performance.now();
 
           const result = await Prisma.getExtensionContext(this).delete({

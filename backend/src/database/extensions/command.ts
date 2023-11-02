@@ -1,7 +1,7 @@
 import { Bot } from '#bot/Bot';
 import { ExtensionReturnType, ExtensionType } from '#database/extensions/utils';
 import { logger } from '#lib/logger';
-import { CustomCommand, DeleteCustomCommandRequest, PatchCustomCommandRequest, PostCustomCommandRequest, UserLevel } from '#shared/types/api/commands';
+import { CustomCommand, DeleteCustomCommandReqBody, PatchCustomCommandReqBody, PostCustomCommandReqBody, UserLevel } from '#shared/types/api/commands';
 import { Prisma } from '@prisma/client';
 
 
@@ -35,7 +35,7 @@ export const commandExtension = Prisma.defineExtension((client) => {
                 id: command.id,
                 channelId: command.channelUserId,
                 command: command.command,
-                response: command.templateId.toString(),
+                templateId: command.templateId,
                 userLevel: command.userLevel,
                 cooldown: command.cooldown,
                 enabled: command.enabled,
@@ -110,14 +110,14 @@ export const commandExtension = Prisma.defineExtension((client) => {
 
           return result;
         },
-        async createFromApi(channelId: string, command: PostCustomCommandRequest) {
+        async createFromApi(channelId: string, command: PostCustomCommandReqBody) {
           const t1 = performance.now();
 
           const result = await Prisma.getExtensionContext(this).create({
             data: {
               channelUserId: channelId,
               command: command.command,
-              templateId: parseInt(command.response),
+              templateId: command.templateId,
               userLevel: command.userLevel,
               cooldown: command.cooldown,
               enabled: command.enabled,
@@ -134,14 +134,14 @@ export const commandExtension = Prisma.defineExtension((client) => {
 
           return result;
         },
-        async updateFromApi(command: PatchCustomCommandRequest) {
+        async updateFromApi(command: PatchCustomCommandReqBody) {
           const t1 = performance.now();
 
           const result = await Prisma.getExtensionContext(this).update({
             where: { id: command.id },
             data: {
               command: command.command,
-              templateId: Math.random(),
+              templateId: command.templateId,
               userLevel: command.userLevel,
               cooldown: command.cooldown,
               enabled: command.enabled,
@@ -158,7 +158,7 @@ export const commandExtension = Prisma.defineExtension((client) => {
 
           return result;
         },
-        async deleteFromApi(command: DeleteCustomCommandRequest) {
+        async deleteFromApi(command: DeleteCustomCommandReqBody) {
           const t1 = performance.now();
 
           const result = await Prisma.getExtensionContext(this).delete({

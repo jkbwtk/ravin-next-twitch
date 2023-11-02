@@ -2,7 +2,7 @@ import { Config } from '#lib/Config';
 import { display } from '#lib/display';
 import { ExpressStack } from '#server/ExpressStack';
 import { ServerError } from '#server/ServerError';
-import { GetOnboardingSchema, PostSubmitOnboardingSchema } from '#server/routers/onboarding/onboarding.schemas';
+import { GetOnboardingSchema, PostOnboardingSchema } from '#server/routers/onboarding/onboarding.schemas';
 import { validate } from '#server/stackMiddlewares';
 import { frontendPath } from '#shared/constants';
 import { json } from 'body-parser';
@@ -26,7 +26,7 @@ export const getOnboardingView = new ExpressStack<OnboardingContext>()
 
 export const postSubmitOnboardingView = new ExpressStack<OnboardingContext>()
   .useNative(json())
-  .use(validate(PostSubmitOnboardingSchema))
+  .use(validate(PostOnboardingSchema))
   .use(async (req, res, ctx) => {
     if (req.validated.body.key !== ctx.key) throw new ServerError(401, 'Invalid key');
 
