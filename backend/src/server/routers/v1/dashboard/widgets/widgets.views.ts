@@ -5,7 +5,7 @@ import { TwitchUserRepo } from '#lib/TwitchUserRepo';
 import { logger } from '#lib/logger';
 import { getModerators } from '#lib/twitch';
 import { ExpressStack } from '#server/ExpressStack';
-import { ServerError } from '#server/ServerError';
+import { HttpCodes, ServerError } from '#shared/ServerError';
 import { authenticated } from '#server/stackMiddlewares';
 import {
   ChatStatFrame,
@@ -50,7 +50,7 @@ export const getModeratorsView = new ExpressStack()
         error: err,
       });
 
-      throw new ServerError(500, 'Failed to get moderators');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to get moderators');
     }
   });
 
@@ -86,7 +86,7 @@ export const getTopStatsView = new ExpressStack()
         error: err,
       });
 
-      throw new ServerError(500, 'Failed to get top stats');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to get top stats');
     }
   });
 
@@ -107,7 +107,7 @@ export const getRecentActionsView = new ExpressStack()
         error: err,
       });
 
-      throw new ServerError(500, 'Failed to get recent actions');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to get recent actions');
     }
   });
 
@@ -184,6 +184,6 @@ export const getChatStatsView = new ExpressStack()
         error: err,
       });
 
-      throw new ServerError(500, 'Failed to get chat stats');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to get chat stats');
     }
   });

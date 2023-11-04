@@ -4,7 +4,7 @@ import { Config } from '#lib/Config';
 import { logger } from '#lib/logger';
 import { getModerators } from '#lib/twitch';
 import { ExpressStack } from '#server/ExpressStack';
-import { ServerError } from '#server/ServerError';
+import { HttpCodes, ServerError } from '#shared/ServerError';
 import { authenticated } from '#server/stackMiddlewares';
 import { GetBotConnectionStatusResponse } from '#shared/types/api/dashboard';
 
@@ -33,7 +33,7 @@ export const getConnectionStatusView = new ExpressStack()
         error: err,
       });
 
-      throw new ServerError(500, 'Failed to get connection status');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to get connection status');
     }
   });
 
@@ -60,6 +60,6 @@ export const postJoinChannelView = new ExpressStack()
         error: err,
       });
 
-      throw new ServerError(500, 'Failed to join channel');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to join channel');
     }
   });

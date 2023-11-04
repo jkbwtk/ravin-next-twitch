@@ -2,7 +2,7 @@ import { Bot } from '#bot/Bot';
 import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
-import { ServerError } from '#server/ServerError';
+import { HttpCodes, ServerError } from '#shared/ServerError';
 import { SocketServer } from '#server/SocketServer';
 import { DeleteCustomCommandSchema, PatchCustomCommandSchema, PostCustomCommandSchema } from '#server/routers/v1/commands/custom/custom.schemas';
 import { authenticated, validate } from '#server/stackMiddlewares';
@@ -27,7 +27,7 @@ export const getCustomCommandsView = new ExpressStack()
         label: ['APIv1', 'commands', 'getCustomCommandView'],
       });
 
-      throw new ServerError(500, 'Failed to get custom commands');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to get custom commands');
     }
   });
 
@@ -47,7 +47,7 @@ export const postCustomCommandsView = new ExpressStack()
         label: ['APIv1', 'commands', 'postCustomCommandView'],
       });
 
-      throw new ServerError(500, 'Failed to create custom command');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to create custom command');
     }
   });
 
@@ -67,7 +67,7 @@ export const patchCustomCommandsView = new ExpressStack()
         label: ['APIv1', 'commands', 'patchCustomCommandView'],
       });
 
-      throw new ServerError(500, 'Failed to update custom command');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to update custom command');
     }
   });
 
@@ -90,7 +90,7 @@ export const deleteCustomCommandsView = new ExpressStack()
         label: ['APIv1', 'commands', 'deleteCustomCommandView'],
       });
 
-      throw new ServerError(500, 'Failed to delete custom command');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to delete custom command');
     }
   });
 
@@ -116,6 +116,6 @@ export const getCustomCommandsStatusView = new ExpressStack()
         label: ['APIv1', 'commands', 'getCustomCommandStatusView'],
       });
 
-      throw new ServerError(500, 'Failed to get custom command status');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to get custom command status');
     }
   });

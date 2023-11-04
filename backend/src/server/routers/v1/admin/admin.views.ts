@@ -2,7 +2,7 @@ import { Config } from '#lib/Config';
 import { ExtendedCron } from '#lib/ExtendedCron';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
-import { ServerError } from '#server/ServerError';
+import { HttpCodes, ServerError } from '#shared/ServerError';
 import { PatchConfigSchema } from '#server/routers/v1/admin/admin.schemas';
 import { admin, authenticated, validate } from '#server/stackMiddlewares';
 import { GetScheduledJobsResponse } from '#shared/types/api/admin';
@@ -32,7 +32,7 @@ export const patchConfigView = new ExpressStack()
         error: err,
       });
 
-      throw new ServerError(500, 'Failed to update config');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to update config');
     }
   });
 
@@ -52,6 +52,6 @@ export const getScheduledJobsView = new ExpressStack()
         error: err,
       });
 
-      throw new ServerError(500, 'Failed to get scheduled jobs');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to get scheduled jobs');
     }
   });

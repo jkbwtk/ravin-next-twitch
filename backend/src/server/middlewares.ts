@@ -1,8 +1,10 @@
 import { logger } from '#lib/logger';
-import { ServerError } from '#server/ServerError';
+import { HttpCodes, ServerError } from '#shared/ServerError';
+import { ServerErrorResponse } from '#shared/types/api/serverError';
 import { ErrorRequestHandler, RequestHandler } from 'express';
 import onHeaders from 'on-headers';
 import onFinished from 'on-finished';
+import { ParamsDictionary } from 'express-serve-static-core';
 
 
 declare global {
@@ -48,11 +50,11 @@ export const requestLogger: RequestHandler = (req, res, next) => {
 
 export const invalidRoute: RequestHandler = (req, res) => {
   res.contentType('text/plain');
-  res.status(404).send('Invalid Route');
+  res.status(HttpCodes.NotFound).send('Invalid Route');
 };
 
 export const notImplemented: RequestHandler = (req, res) => {
-  res.sendStatus(501);
+  res.sendStatus(HttpCodes.NotImplemented);
 };
 
 export const accessControl: RequestHandler = (req, res, next) => {
@@ -64,14 +66,12 @@ export const accessControl: RequestHandler = (req, res, next) => {
 
 export const notConfigured: RequestHandler = (req, res) => {
   res.contentType('text/plain');
-  res.status(503).send('Server is not configured yet.');
+  res.status(HttpCodes.ServiceUnavailable).send('Server is not configured yet.');
 };
 
-export const catchErrors: ErrorRequestHandler = (err, req, res, next) => {
+export const catchErrors: ErrorRequestHandler<ParamsDictionary, ServerErrorResponse> = (err, req, res, next) => {
   if (err instanceof ServerError) {
-    return res.status(err.statusCode).json({
-      statusCode: err.statusCode,
-      type: err.type,
+    return res.status(err.code).json({
       message: err.message,
     });
   }
@@ -82,9 +82,7 @@ export const catchErrors: ErrorRequestHandler = (err, req, res, next) => {
 
   if (res.headersSent) return next(err);
 
-  res.status(500).json({
-    statusCode: 500,
-    type: 'Internal Server Error',
+  res.status(HttpCodes.InternalServerError).json({
     message: 'Internal Server Error',
   });
 };

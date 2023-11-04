@@ -1,14 +1,14 @@
 import { Request } from 'express';
 import { Middleware } from '#server/ExpressStack';
-import { ServerError } from '#server/ServerError';
+import { HttpCodes, ServerError } from '#shared/ServerError';
 import { AnyZodObject, z, ZodError, ZodObject } from 'zod';
 import { isDevMode } from '#shared/constants';
 
 export const authenticated: Middleware<never, object, object, {
   user: Exclude<Request['user'], undefined>;
 }> = (req, res) => {
-  if (req.isUnauthenticated()) throw new ServerError(401, 'Unauthorized');
-  if (req.user === undefined) throw new ServerError(401, 'Unauthorized');
+  if (req.isUnauthenticated()) throw new ServerError(HttpCodes.Unauthorized, 'Unauthorized');
+  if (req.user === undefined) throw new ServerError(HttpCodes.Unauthorized, 'Unauthorized');
 
   const authReq = req as typeof req & { user: Exclude<typeof req['user'], undefined> };
 
@@ -18,7 +18,7 @@ export const authenticated: Middleware<never, object, object, {
 export const admin: Middleware<void, {
   user: Exclude<Request['user'], undefined>;
 }> = (req) => {
-  if (req.user.admin === false) throw new ServerError(403, 'Forbidden');
+  if (req.user.admin === false) throw new ServerError(HttpCodes.Forbidden, 'Forbidden');
 };
 
 export type ValidatorSchema = ZodObject<{
@@ -43,23 +43,23 @@ export const validate = <T extends ValidatorSchema>(schema: T): Middleware<never
       const invalids = error.issues.map((issue) => issue.path.pop());
 
       throw new ServerError(
-        400,
+        HttpCodes.BadRequest,
         `Invalid or missing input${
           invalids.length > 1 ? 's' : ''
         } provided for: ${invalids.join(', ')}`,
       );
     } else {
-      throw new ServerError(400, 'Invalid input');
+      throw new ServerError(HttpCodes.BadRequest, 'Invalid input');
     }
   }
 };
 
 export const requireDevMode: Middleware<void> = () => {
-  if (!isDevMode) throw new ServerError(404, 'Not Found');
+  if (!isDevMode) throw new ServerError(HttpCodes.NotFound, 'Not Found');
 };
 
 export const waitUntilReady = (signal: () => boolean): Middleware<void> => () => {
-  if (!signal()) throw new ServerError(503, 'Service Temporarily Unavailable');
+  if (!signal()) throw new ServerError(HttpCodes.ServiceUnavailable, 'Service Temporarily Unavailable');
 };
 
 export const validateResponse =

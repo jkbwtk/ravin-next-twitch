@@ -1,7 +1,7 @@
 import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
-import { ServerError } from '#server/ServerError';
+import { HttpCodes, ServerError } from '#shared/ServerError';
 import { PostChantingSchema } from '#server/routers/v1/channel/settings/settings.schemas';
 import { authenticated, validate } from '#server/stackMiddlewares';
 import { GetChantingSettingsResponse } from '#shared/types/api/channel';
@@ -34,6 +34,6 @@ export const postChantingView = new ExpressStack()
         error: err,
       });
 
-      throw new ServerError(500, 'Failed to update chanting settings');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to update chanting settings');
     }
   });

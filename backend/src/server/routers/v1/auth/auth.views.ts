@@ -1,7 +1,7 @@
 import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
-import { ServerError } from '#server/ServerError';
+import { HttpCodes, ServerError } from '#shared/ServerError';
 import { SocketServer } from '#server/SocketServer';
 import { authScopes } from '#server/routers/v1/auth/authShared';
 import { passportReady } from '#server/routers/v1/auth/passportUtils';
@@ -31,7 +31,7 @@ export const getUserView = new ExpressStack()
         error: err,
       });
 
-      throw new ServerError(500, 'Failed to get user');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to get user');
     }
   });
 
@@ -47,7 +47,7 @@ export const postLogoutView = new ExpressStack()
           error: err,
         });
 
-        return reject(new ServerError(500, 'Failed to logout user'));
+        return reject(new ServerError(HttpCodes.InternalServerError, 'Failed to logout user'));
       }
 
       await prisma.systemNotification.createNotification(

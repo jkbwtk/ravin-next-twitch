@@ -1,7 +1,7 @@
 import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
-import { ServerError } from '#server/ServerError';
+import { HttpCodes, ServerError } from '#shared/ServerError';
 import { authenticated } from '#server/stackMiddlewares';
 import { GetMessagesResponse } from '#shared/types/api/logs';
 
@@ -23,6 +23,6 @@ export const getMessagesView = new ExpressStack()
         label: ['APIv1', 'logs', 'getMessagesView'],
       });
 
-      throw new ServerError(500, 'Failed to get messages');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to get messages');
     }
   });

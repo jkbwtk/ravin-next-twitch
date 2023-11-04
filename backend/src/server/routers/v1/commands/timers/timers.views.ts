@@ -2,7 +2,7 @@ import { Bot } from '#bot/Bot';
 import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
-import { ServerError } from '#server/ServerError';
+import { HttpCodes, ServerError } from '#shared/ServerError';
 import { SocketServer } from '#server/SocketServer';
 import { DeleteCommandTimerSchema, PatchCommandTimerSchema, PostCommandTimerSchema } from '#server/routers/v1/commands/timers/timers.schemas';
 import { authenticated, validate } from '#server/stackMiddlewares';
@@ -27,7 +27,7 @@ export const getCommandTimersView = new ExpressStack()
         label: ['APIv1', 'timers', 'getCommandTimersView'],
       });
 
-      throw new ServerError(500, 'Failed to get command timers');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to get command timers');
     }
   });
 
@@ -47,7 +47,7 @@ export const postCommandTimersView = new ExpressStack()
         label: ['APIv1', 'timers', 'postCommandTimersView'],
       });
 
-      throw new ServerError(500, 'Failed to create command timer');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to create command timer');
     }
   });
 
@@ -67,7 +67,7 @@ export const patchCommandTimersView = new ExpressStack()
         label: ['APIv1', 'timers', 'patchCommandTimersView'],
       });
 
-      throw new ServerError(500, 'Failed to update command timer');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to update command timer');
     }
   });
 
@@ -88,7 +88,7 @@ export const deleteCommandTimersView = new ExpressStack()
         label: ['APIv1', 'timers', 'deleteCommandTimersView'],
       });
 
-      throw new ServerError(500, 'Failed to delete command timer');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to delete command timer');
     }
   });
 
@@ -114,6 +114,6 @@ export const getCommandTimersStatusView = new ExpressStack()
         label: ['APIv1', 'commands', 'getCommandTimersStatusView'],
       });
 
-      throw new ServerError(500, 'Failed to get command timer status');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to get command timer status');
     }
   });

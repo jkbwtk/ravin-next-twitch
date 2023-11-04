@@ -2,7 +2,7 @@ import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { arrayFrom } from '#lib/utils';
 import { ExpressStack } from '#server/ExpressStack';
-import { ServerError } from '#server/ServerError';
+import { HttpCodes, ServerError } from '#shared/ServerError';
 import { SocketServer } from '#server/SocketServer';
 import { PostBroadcastNotificationSchema, PostReadNotificationsSchema } from '#server/routers/v1/systemNotifications/systemNotifications.schemas';
 import { admin, authenticated, validate } from '#server/stackMiddlewares';
@@ -27,7 +27,7 @@ export const getNotifications = new ExpressStack()
         error: err,
       });
 
-      throw new ServerError(500, 'Failed to get notifications');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to get notifications');
     }
   });
 
@@ -49,7 +49,7 @@ export const postMarkAsRead = new ExpressStack()
         error: err,
       });
 
-      throw new ServerError(500, 'Failed to mark notifications as read');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to mark notifications as read');
     }
   });
 
@@ -71,6 +71,6 @@ export const postBroadcastNotification = new ExpressStack()
         error: err,
       });
 
-      throw new ServerError(500, 'Failed to broadcast notification');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to broadcast notification');
     }
   });

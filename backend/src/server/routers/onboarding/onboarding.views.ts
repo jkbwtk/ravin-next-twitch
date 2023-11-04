@@ -1,7 +1,7 @@
 import { Config } from '#lib/Config';
 import { display } from '#lib/display';
 import { ExpressStack } from '#server/ExpressStack';
-import { ServerError } from '#server/ServerError';
+import { HttpCodes, ServerError } from '#shared/ServerError';
 import { GetOnboardingSchema, PostOnboardingSchema } from '#server/routers/onboarding/onboarding.schemas';
 import { validate } from '#server/stackMiddlewares';
 import { frontendPath } from '#shared/constants';
@@ -28,7 +28,7 @@ export const postSubmitOnboardingView = new ExpressStack<OnboardingContext>()
   .useNative(json())
   .use(validate(PostOnboardingSchema))
   .use(async (req, res, ctx) => {
-    if (req.validated.body.key !== ctx.key) throw new ServerError(401, 'Invalid key');
+    if (req.validated.body.key !== ctx.key) throw new ServerError(HttpCodes.Unauthorized, 'Invalid key');
 
     await Config.batchSet([
       ['adminUsername', req.validated.body.adminUsername],
