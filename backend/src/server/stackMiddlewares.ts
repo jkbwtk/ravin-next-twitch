@@ -61,3 +61,16 @@ export const requireDevMode: Middleware<void> = () => {
 export const waitUntilReady = (signal: () => boolean): Middleware<void> => () => {
   if (!signal()) throw new ServerError(503, 'Service Temporarily Unavailable');
 };
+
+export const validateResponse =
+  <T extends AnyZodObject>(schema: T): Middleware<never, object, object, object, { jsonValidated: (body: z.infer<T>) => void }> => async (req, res) => {
+    const temp = Object.assign(res, {
+      jsonValidated: (body: unknown) => {
+        const validated = schema.parse(body);
+
+        return res.json.call(res, validated);
+      },
+    });
+
+    return [req, temp];
+  };
