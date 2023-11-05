@@ -1,8 +1,10 @@
 import { Request } from 'express';
 import { Middleware } from '#server/ExpressStack';
-import { HttpCodes, ServerError } from '#shared/ServerError';
+import { ServerError } from '#shared/ServerError';
 import { AnyZodObject, z, ZodError, ZodObject } from 'zod';
 import { isDevMode } from '#shared/constants';
+import { HttpCodes } from '#shared/httpCodes';
+
 
 export const authenticated: Middleware<never, object, object, {
   user: Exclude<Request['user'], undefined>;

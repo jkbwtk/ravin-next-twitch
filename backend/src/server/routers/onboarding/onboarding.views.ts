@@ -1,13 +1,15 @@
 import { Config } from '#lib/Config';
 import { display } from '#lib/display';
 import { ExpressStack } from '#server/ExpressStack';
-import { HttpCodes, ServerError } from '#shared/ServerError';
+import { ServerError } from '#shared/ServerError';
 import { GetOnboardingSchema, PostOnboardingSchema } from '#server/routers/onboarding/onboarding.schemas';
 import { validate } from '#server/stackMiddlewares';
 import { frontendPath } from '#shared/constants';
 import { json } from 'body-parser';
 import { randomBytes } from 'crypto';
 import path from 'path';
+import { HttpCodes } from '#shared/httpCodes';
+
 
 export type OnboardingContext = {
   key: string;
@@ -52,5 +54,5 @@ export const postSubmitOnboardingView = new ExpressStack<OnboardingContext>()
 
     setTimeout(() => process.emit('SIGINT'), 15000);
 
-    res.sendStatus(200);
+    res.sendStatus(HttpCodes.Accepted);
   });

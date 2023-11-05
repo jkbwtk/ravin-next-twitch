@@ -1,9 +1,10 @@
 import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
-import { HttpCodes, ServerError } from '#shared/ServerError';
+import { ServerError } from '#shared/ServerError';
 import { authenticated } from '#server/stackMiddlewares';
 import { GetMessagesResponse } from '#shared/types/api/logs';
+import { HttpCodes } from '#shared/httpCodes';
 
 
 export const getMessagesView = new ExpressStack()

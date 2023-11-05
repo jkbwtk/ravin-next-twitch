@@ -1,20 +1,22 @@
 import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
-import { HttpCodes, ServerError } from '#shared/ServerError';
+import { ServerError } from '#shared/ServerError';
 import { SocketServer } from '#server/SocketServer';
 import { authScopes } from '#server/routers/v1/auth/authShared';
 import { passportReady } from '#server/routers/v1/auth/passportUtils';
-import { authenticated, waitUntilReady } from '#server/stackMiddlewares';
+import { authenticated, validateResponse, waitUntilReady } from '#server/stackMiddlewares';
 import { GetFrontendUser } from '#shared/types/api/auth';
 import passport from 'passport';
+import { HttpCodes } from '#shared/httpCodes';
 
 
 export const getUserView = new ExpressStack()
   .usePreflight(authenticated)
+  .use(validateResponse(GetFrontendUser))
   .use((req, res) => {
     try {
-      const resp: GetFrontendUser = {
+      res.jsonValidated({
         data: {
           id: req.user.id,
           login: req.user.login,
@@ -22,9 +24,7 @@ export const getUserView = new ExpressStack()
           profileImageUrl: req.user.profileImageUrl,
           admin: req.user.admin,
         },
-      };
-
-      res.json(resp);
+      });
     } catch (err) {
       logger.error('Failed to get user', {
         label: ['APIv1', 'auth', 'getUserView'],
@@ -57,7 +57,7 @@ export const postLogoutView = new ExpressStack()
       );
 
       SocketServer.disconnectUser(user.id);
-      res.sendStatus(200);
+      res.sendStatus(HttpCodes.OK);
       resolve();
     });
   }));

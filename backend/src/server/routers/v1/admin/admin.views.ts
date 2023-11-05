@@ -2,11 +2,12 @@ import { Config } from '#lib/Config';
 import { ExtendedCron } from '#lib/ExtendedCron';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
-import { HttpCodes, ServerError } from '#shared/ServerError';
+import { ServerError } from '#shared/ServerError';
 import { PatchConfigSchema } from '#server/routers/v1/admin/admin.schemas';
 import { admin, authenticated, validate } from '#server/stackMiddlewares';
 import { GetScheduledJobsResponse } from '#shared/types/api/admin';
 import { json } from 'body-parser';
+import { HttpCodes } from '#shared/httpCodes';
 
 
 export const patchConfigView = new ExpressStack()
@@ -25,7 +26,7 @@ export const patchConfigView = new ExpressStack()
     try {
       await Config.batchSet(changes);
 
-      res.sendStatus(200);
+      res.sendStatus(HttpCodes.OK);
     } catch (err) {
       logger.error('Failed to update config', {
         label: ['APIv1', 'admin', 'patchConfigView'],

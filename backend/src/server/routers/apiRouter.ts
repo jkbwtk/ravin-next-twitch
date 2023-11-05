@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { createV1Router } from '#routers/v1/v1Router';
 import { catchErrors } from '#server/middlewares';
-import { HttpCodes, ServerError } from '#shared/ServerError';
+import { ServerError } from '#shared/ServerError';
+import { HttpCodes } from '#shared/httpCodes';
 
 
 export const createApiRouter = async (): Promise<Router> => {

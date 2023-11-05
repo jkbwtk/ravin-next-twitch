@@ -2,25 +2,25 @@ import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { arrayFrom } from '#lib/utils';
 import { ExpressStack } from '#server/ExpressStack';
-import { HttpCodes, ServerError } from '#shared/ServerError';
+import { ServerError } from '#shared/ServerError';
 import { SocketServer } from '#server/SocketServer';
 import { PostBroadcastNotificationSchema, PostReadNotificationsSchema } from '#server/routers/v1/systemNotifications/systemNotifications.schemas';
-import { admin, authenticated, validate } from '#server/stackMiddlewares';
+import { admin, authenticated, validate, validateResponse } from '#server/stackMiddlewares';
 import { GetSystemNotificationsReadResponse } from '#shared/types/api/systemNotifications';
 import { json } from 'body-parser';
+import { HttpCodes } from '#shared/httpCodes';
 
 
 export const getNotifications = new ExpressStack()
   .use(authenticated)
+  .use(validateResponse(GetSystemNotificationsReadResponse))
   .use(async (req, res) => {
     try {
       const notifications = await prisma.systemNotification.getByUserId(req.user.id);
 
-      const resp: GetSystemNotificationsReadResponse = {
+      res.jsonValidated({
         data: notifications.map((notification) => notification.serialize()),
-      };
-
-      res.json(resp);
+      });
     } catch (err) {
       logger.error('Failed to get notifications', {
         label: ['APIv1', 'systemNotifications', 'getNotifications'],
@@ -42,7 +42,7 @@ export const postMarkAsRead = new ExpressStack()
       await prisma.systemNotification.markAsReadById(body.id);
       SocketServer.emitToUser(req.user.id, 'RAD_SYSTEM_NOTIFICATION', arrayFrom(body.id));
 
-      res.sendStatus(200);
+      res.sendStatus(HttpCodes.OK);
     } catch (err) {
       logger.error('Failed to mark notifications as read', {
         label: ['APIv1', 'systemNotifications', 'markAsRead'],
@@ -64,7 +64,7 @@ export const postBroadcastNotification = new ExpressStack()
       const body = req.validated.body;
       await prisma.systemNotification.broadcastNotification(body.title, body.content);
 
-      res.sendStatus(200);
+      res.sendStatus(HttpCodes.OK);
     } catch (err) {
       logger.error('Failed to broadcast notification', {
         label: ['APIv1', 'systemNotifications', 'postBroadcastNotification'],

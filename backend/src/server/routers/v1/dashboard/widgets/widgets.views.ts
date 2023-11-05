@@ -5,7 +5,7 @@ import { TwitchUserRepo } from '#lib/TwitchUserRepo';
 import { logger } from '#lib/logger';
 import { getModerators } from '#lib/twitch';
 import { ExpressStack } from '#server/ExpressStack';
-import { HttpCodes, ServerError } from '#shared/ServerError';
+import { ServerError } from '#shared/ServerError';
 import { authenticated } from '#server/stackMiddlewares';
 import {
   ChatStatFrame,
@@ -16,6 +16,7 @@ import {
 } from '#shared/types/api/dashboard';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
+import { HttpCodes } from '#shared/httpCodes';
 
 dayjs.extend(utc);
 

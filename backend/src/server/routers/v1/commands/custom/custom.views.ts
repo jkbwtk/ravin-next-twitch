@@ -2,25 +2,25 @@ import { Bot } from '#bot/Bot';
 import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
-import { HttpCodes, ServerError } from '#shared/ServerError';
+import { ServerError } from '#shared/ServerError';
 import { SocketServer } from '#server/SocketServer';
 import { DeleteCustomCommandSchema, PatchCustomCommandSchema, PostCustomCommandSchema } from '#server/routers/v1/commands/custom/custom.schemas';
-import { authenticated, validate } from '#server/stackMiddlewares';
+import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
 import { GetCustomCommandsResponse, GetCustomCommandsStatusResponse } from '#shared/types/api/commands';
 import { json } from 'body-parser';
+import { HttpCodes } from '#shared/httpCodes';
 
 
 export const getCustomCommandsView = new ExpressStack()
   .usePreflight(authenticated)
+  .use(validateResponse(GetCustomCommandsResponse))
   .use(async (req, res) => {
     try {
       const commands = await prisma.command.getByChannelId(req.user.id);
 
-      const resp: GetCustomCommandsResponse = {
+      res.jsonValidated({
         data: commands.map((c) => c.serialize()),
-      };
-
-      res.json(resp);
+      });
     } catch (err) {
       logger.warn('Failed to get custom commands', {
         error: err,
@@ -40,7 +40,7 @@ export const postCustomCommandsView = new ExpressStack()
       const command = await prisma.command.createFromApi(req.user.id, req.validated.body);
       SocketServer.emitToUser(req.user.id, 'NEW_CUSTOM_COMMAND', command.serialize());
 
-      res.sendStatus(200);
+      res.sendStatus(HttpCodes.Created);
     } catch (err) {
       logger.warn('Failed to create custom command', {
         error: err,
@@ -60,7 +60,7 @@ export const patchCustomCommandsView = new ExpressStack()
       const command = await prisma.command.updateFromApi(req.validated.body);
       SocketServer.emitToUser(req.user.id, 'UPD_CUSTOM_COMMAND', command.serialize());
 
-      res.sendStatus(200);
+      res.sendStatus(HttpCodes.OK);
     } catch (err) {
       logger.warn('Failed to update custom command', {
         error: err,
@@ -83,7 +83,7 @@ export const deleteCustomCommandsView = new ExpressStack()
       await Bot.reloadChannelCommands(req.user.id);
       SocketServer.emitToUser(req.user.id, 'DEL_CUSTOM_COMMAND', req.validated.body.id);
 
-      res.sendStatus(200);
+      res.sendStatus(HttpCodes.OK);
     } catch (err) {
       logger.warn('Failed to delete custom command', {
         error: err,
@@ -96,20 +96,18 @@ export const deleteCustomCommandsView = new ExpressStack()
 
 export const getCustomCommandsStatusView = new ExpressStack()
   .usePreflight(authenticated)
+  .use(validateResponse(GetCustomCommandsStatusResponse))
   .use(async (req, res) => {
     try {
       const channelThread = Bot.getChannelThread(req.user.login);
       if (channelThread === undefined) {
-        res.sendStatus(404);
-        return;
+        throw new ServerError(HttpCodes.InternalServerError, `Channel thread for user ${req.user.login} not found`);
       }
 
-      const resp: GetCustomCommandsStatusResponse = {
+      res.jsonValidated({
         data: Array.from(channelThread.commandHandler.customCommands.values())
           .map((state) => state.getState()),
-      };
-
-      res.json(resp);
+      });
     } catch (err) {
       logger.warn('Failed to get custom command status', {
         error: err,

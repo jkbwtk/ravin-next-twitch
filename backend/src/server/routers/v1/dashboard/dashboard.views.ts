@@ -4,13 +4,15 @@ import { Config } from '#lib/Config';
 import { logger } from '#lib/logger';
 import { getModerators } from '#lib/twitch';
 import { ExpressStack } from '#server/ExpressStack';
-import { HttpCodes, ServerError } from '#shared/ServerError';
-import { authenticated } from '#server/stackMiddlewares';
+import { ServerError } from '#shared/ServerError';
+import { authenticated, validateResponse } from '#server/stackMiddlewares';
 import { GetBotConnectionStatusResponse } from '#shared/types/api/dashboard';
+import { HttpCodes } from '#shared/httpCodes';
 
 
 export const getConnectionStatusView = new ExpressStack()
   .usePreflight(authenticated)
+  .use(validateResponse(GetBotConnectionStatusResponse))
   .use(async (req, res) => {
     try {
       const moderatorLogins = (await getModerators(req.user.id))
@@ -18,15 +20,13 @@ export const getConnectionStatusView = new ExpressStack()
 
       const botLogin = await Config.getOrFail('botLogin');
 
-      const resp: GetBotConnectionStatusResponse = {
+      res.jsonValidated({
         data: {
           channel: req.user.login,
           joined: req.user.channel.joined ?? false,
           admin: moderatorLogins.includes(botLogin) || botLogin === req.user.login,
         },
-      };
-
-      res.json(resp);
+      });
     } catch (err) {
       logger.error('Failed to get connection status', {
         label: ['APIv1', 'dashboard', 'getConnectionStatusView'],
@@ -48,12 +48,13 @@ export const postJoinChannelView = new ExpressStack()
       if (channel.joined) await Bot.joinChannel(channel.user.id);
       else await Bot.leaveChannel(channel.user.id);
 
+      // TODO: Create dedicated model method for this
       await prisma.channel.update({
         where: { id: channel.id },
         data: { joined: channel.joined },
       });
 
-      res.sendStatus(200);
+      res.sendStatus(HttpCodes.OK);
     } catch (err) {
       logger.error('Failed to join channel', {
         label: ['APIv1', 'dashboard', 'postJoinChannelView'],

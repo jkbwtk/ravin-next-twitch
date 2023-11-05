@@ -1,3 +1,6 @@
+import { z } from 'zod';
+
+
 export interface GetMockApp {
   cursor: string;
   total: number;
@@ -19,14 +22,19 @@ export interface AccessToken {
   token_type: string;
 }
 
-export interface FrontendUser {
-  id: string;
-  login: string;
-  displayName: string;
-  profileImageUrl: string;
-  admin: boolean;
-}
+export const FrontendUser = z.object({
+  id: z.string().min(1),
+  login: z.string().min(1),
+  displayName: z.string().min(1),
+  profileImageUrl: z.string().url(),
+  admin: z.boolean(),
+});
 
-export interface GetFrontendUser {
-  data: FrontendUser;
-}
+export type FrontendUser = z.infer<typeof FrontendUser>;
+
+
+export const GetFrontendUser = z.object({
+  data: FrontendUser,
+});
+
+export type GetFrontendUser = z.infer<typeof GetFrontendUser>;
