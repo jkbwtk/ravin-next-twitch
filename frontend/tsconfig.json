@@ -49,6 +49,9 @@
       "#providers/*": [
         "./providers/*"
       ],
+      "#lib/*": [
+        "./lib/*"
+      ],
     }
   },
 }

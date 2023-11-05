@@ -38,7 +38,11 @@ export class ServerError extends Error {
   }
 
   public getVerboseName(): VerboseHttpCodes {
-    return quickSwitch(this.code, {
+    return ServerError.getVerboseName(this.code);
+  }
+
+  public static getVerboseName(code: HttpCodes): VerboseHttpCodes {
+    return quickSwitch(code, {
       ...ServerError.verboseHttpCodes,
       default: ServerError.verboseHttpCodes[HttpCodes.UnknownError],
     });
