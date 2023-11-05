@@ -1,4 +1,6 @@
 @use 'app';
+@use 'animations' as *;
+@use 'symbolUtils';
 
 
 .container {
@@ -11,13 +13,43 @@
   grid-template-rows: min-content 1fr;
 }
 
-.title {
-  color: app.$textBrightColor;
-  font-size: app.$altFontSize;
+.title-bar {
+  display: flex;
+  justify-content: space-between;
 
-  font-weight: 500;
+  .title {
+    color: app.$textBrightColor;
+    font-size: app.$altFontSize;
 
-  user-select: none;
+    font-weight: 500;
+
+    user-select: none;
+  }
+
+  .refresh-button {
+    display: flex;
+    height: 100%;
+
+    align-items: center;
+
+    :global(.material-symbols-rounded) {
+      @include inlineAnimation(.5s, ease-in-out, 0s, infinite, normal, forwards) {
+        from {
+          rotate: 0deg;
+        }
+
+        to {
+          rotate: 360deg;
+        }
+      }
+
+      animation-play-state: paused;
+    }
+  }
+
+  .loading > :global(.material-symbols-rounded) {
+    animation-play-state: running;
+  }
 }
 
 .container-proper {

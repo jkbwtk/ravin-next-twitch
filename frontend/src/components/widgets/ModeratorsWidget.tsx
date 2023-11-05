@@ -22,7 +22,7 @@ const fetchModerators = async (): Promise<Moderator[]> => {
 };
 
 const ModeratorsWidget: Component = () => {
-  const [moderators] = createResource(fetchModerators, {
+  const [moderators, { refetch: refetchModerators }] = createResource(fetchModerators, {
     initialValue: [],
   });
 
@@ -30,7 +30,7 @@ const ModeratorsWidget: Component = () => {
   const offlineModerators = createMemo(() => moderators().filter((moderator) => !moderator.status));
 
   return (
-    <Widget class={style.container} title='Moderators'>
+    <Widget class={style.container} title='Moderators' refresh={refetchModerators} loading={moderators.state === 'refreshing'}>
       <Show when={!moderators.loading} fallback={<FetchFallback>Fetching Moderators</FetchFallback>}>
         <div class={style.segment}>
           <span class={style.segmentTitle}>Online {onlineModerators().length} / {moderators().length}</span>

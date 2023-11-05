@@ -16,7 +16,7 @@ const fetchTopStats = async (): Promise<TopStats> => {
 };
 
 const TopStatsWidget: Component = () => {
-  const [stats] = createResource(fetchTopStats, {
+  const [stats, { refetch: refetchStats }] = createResource(fetchTopStats, {
     initialValue: {
       chatter: {
         avatarUrl: '',
@@ -31,7 +31,7 @@ const TopStatsWidget: Component = () => {
   });
 
   return (
-    <Widget class={style.container} title='Top Stats'>
+    <Widget class={style.container} title='Top Stats' refresh={refetchStats} loading={stats.state === 'refreshing'}>
       <Show when={!stats.loading} fallback={<FetchFallback>Fetching Top Stats</FetchFallback>}>
 
         <div class={style.segment}>
