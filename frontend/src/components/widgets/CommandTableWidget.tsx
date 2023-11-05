@@ -1,10 +1,13 @@
-import { createResource, createSignal, For, onCleanup, onMount } from 'solid-js';
+import { createResource, createSignal, ErrorBoundary, For, onCleanup, onMount, Suspense } from 'solid-js';
 import { CustomCommand, GetCustomCommandsResponse } from '#types/api/commands';
 import { useSocket } from '#providers/SocketProvider';
+import { fetchJson } from '#lib/fetch';
 import Command from '#components/Command';
+import FetchFallback from '#components/FetchFallback';
+import ErrorFallback from '#components/ErrorFallback';
+import Widget from '#components/Widget';
 
 import style from '#styles/widgets/CommandTableWidget.module.scss';
-import Widget from '#components/Widget';
 
 
 export enum TableType {
@@ -18,8 +21,7 @@ export interface CustomCommandProps {
 }
 
 const fetchCommands = async () => {
-  const response = await fetch('/api/v1/commands/custom');
-  const { data } = await response.json() as GetCustomCommandsResponse;
+  const { data } = await fetchJson('/api/v1/commands/custom', { schema: GetCustomCommandsResponse });
 
   return data.sort((a, b) => {
     if (a.command > b.command) return 1;
@@ -31,7 +33,7 @@ const fetchCommands = async () => {
 const CommandTable: Component = () => {
   const [socket] = useSocket();
   const [tableType, setTableType] = createSignal<TableType>(TableType.Full);
-  const [commands, { mutate: setCommands }] = createResource(fetchCommands, {
+  const [commands, { mutate: setCommands, refetch: refetchCommands }] = createResource(fetchCommands, {
     initialValue: [],
   });
 
@@ -79,44 +81,51 @@ const CommandTable: Component = () => {
       title='Custom Commands'
       class={style.container}
       containerClass={style.outerContainer}
+      refresh={refetchCommands}
+      loading={commands.state === 'refreshing'}
     >
-      <table ref={tableRef} class={style.commandsContainer}>
-        <colgroup>
-          <col />
-          <col />
-          <col classList={{
-            [style.disabled]: tableType() > TableType.Full,
-          }} />
-          <col classList={{
-            [style.disabled]: tableType() > TableType.Compact,
-          }} />
-          <col />
-          <col />
-        </colgroup>
+      <ErrorBoundary fallback={
+        <ErrorFallback class={style.fallback} refresh={refetchCommands} loading={commands.state === 'refreshing'}>Failed to load commands</ErrorFallback>
+      }>
+        <Suspense fallback={<FetchFallback class={style.fallback}>Loading commands...</FetchFallback>}>
+          <table ref={tableRef} class={style.commandsContainer}>
+            <colgroup>
+              <col />
+              <col />
+              <col classList={{
+                [style.disabled]: tableType() > TableType.Full,
+              }} />
+              <col classList={{
+                [style.disabled]: tableType() > TableType.Compact,
+              }} />
+              <col />
+              <col />
+            </colgroup>
 
-        <thead>
-          <tr>
-            <th>Command</th>
-            <th>Response</th>
-            <th classList={{
-              [style.disabled]: tableType() > TableType.Full,
-            }}>User Level</th>
-            <th classList={{
-              [style.disabled]: tableType() > TableType.Compact,
-            }}>Cooldown</th>
-            <th>Enabled</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <For each={commands()}>
-            {(command) => (
-              <Command command={command} tableType={tableType()} />
-            )}
-          </For>
-        </tbody>
-      </table>
+            <thead>
+              <tr>
+                <th>Command</th>
+                <th>Response</th>
+                <th classList={{
+                  [style.disabled]: tableType() > TableType.Full,
+                }}>User Level</th>
+                <th classList={{
+                  [style.disabled]: tableType() > TableType.Compact,
+                }}>Cooldown</th>
+                <th>Enabled</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <For each={commands()}>
+                {(command) => (
+                  <Command command={command} tableType={tableType()} />
+                )}
+              </For>
+            </tbody>
+          </table>
+        </Suspense>
+      </ErrorBoundary>
     </Widget>
   );
 };

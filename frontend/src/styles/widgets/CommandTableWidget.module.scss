@@ -2,6 +2,7 @@
 
 .outer-container {
   width: 100% !important;
+  min-height: 100%;
 }
 
 .container {
@@ -11,6 +12,10 @@
   background-color: none !important;
 }
 
+.fallback {
+  height: 100%;
+  justify-content: center;
+}
 
 .commands-container {
   width: 100%;
