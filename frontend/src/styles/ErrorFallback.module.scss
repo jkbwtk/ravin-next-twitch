@@ -1,0 +1,20 @@
+@use 'app';
+@use 'animations';
+
+
+.error {
+  margin: auto;
+
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+
+  gap: 2rem;
+
+  @include animations.fadeIn(0.5s);
+
+  span {
+    font-size: app.$altIconSize;
+    text-align: center;
+  }
+}

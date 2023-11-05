@@ -16,7 +16,7 @@ const FetchFallback: ParentComponent<FetchFallbackProps> = (userProps) => {
   const props = mergeProps(defaultProps, userProps);
 
   return (
-    <div class={[style.loading, props.class].join(' ')} {...props}>
+    <div {...props} class={[style.loading, props.class].join(' ')}>
       <props.spinner />
       <span>{props.children}</span>
     </div>
