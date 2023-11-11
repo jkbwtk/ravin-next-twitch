@@ -14,7 +14,13 @@
   @include animations.fadeIn(0.5s);
 
   span {
-    font-size: app.$altIconSize;
+    font-size: app.$altFontSize;
     text-align: center;
   }
+}
+
+.horizontal {
+  flex-direction: row;
+
+  gap: 4rem;
 }
