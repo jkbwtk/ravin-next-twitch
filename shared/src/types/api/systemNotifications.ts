@@ -7,7 +7,7 @@ export const SystemNotification = z.object({
   title: z.string().min(1).max(64),
   content: z.string().min(1).max(1024),
   read: z.boolean(),
-  createdAt: z.date(),
+  createdAt: z.coerce.date(),
 });
 
 export type SystemNotification = z.infer<typeof SystemNotification>;

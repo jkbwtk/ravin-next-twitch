@@ -1,4 +1,4 @@
-import { batch, createEffect, createMemo, createResource, createSignal, Show } from 'solid-js';
+import { batch, createEffect, createMemo, createResource, createSignal, ErrorBoundary, InitializedResourceReturn, Show, Suspense } from 'solid-js';
 import { ChantingSettings, GetChantingSettingsResponse } from '#types/api/channel';
 import FetchFallback from '#components/FetchFallback';
 import InputLabeled from '#components/InputLabeled';
@@ -9,13 +9,14 @@ import { useNotification } from '#providers/NotificationProvider';
 import MaterialSymbol from '#components/MaterialSymbol';
 import { Transition } from 'solid-transition-group';
 import Widget from '#components/Widget';
+import { makeRequest } from '#lib/fetch';
 
 import style from '#styles/widgets/ChantingSettingsWidget.module.scss';
+import ErrorFallback from '#components/ErrorFallback';
 
 
 const fetchChantingSettings = async (): Promise<ChantingSettings> => {
-  const response = await fetch('/api/v1/channel/settings/chanting');
-  const { data } = await response.json() as GetChantingSettingsResponse;
+  const { data } = await makeRequest('/api/v1/channel/settings/chantingg', { schema: GetChantingSettingsResponse });
 
   return data;
 };
@@ -26,10 +27,11 @@ const defaultValues: ChantingSettings = {
   length: 3,
 };
 
-
-const ChantingSettingsWidget: Component = () => {
+const ChantingSettingsBase: Component<{ settings: InitializedResourceReturn<ChantingSettings> }> = (props) => {
+  const [settings, { mutate: mutateSettings }] = props.settings;
   const [, { addNotification }] = useNotification();
-  const [settings, { mutate: mutateSettings }] = createResource(fetchChantingSettings, { initialValue: defaultValues });
+
+  const [isDirty, setDirty] = createSignal(false);
 
   const [enabled, setEnabled] = createSignal(defaultValues.enabled);
   const [interval, setInterval] = createSignal(defaultValues.interval);
@@ -41,20 +43,11 @@ const ChantingSettingsWidget: Component = () => {
   let intervalRef = document.createElement('input');
   let enabledRef = document.createElement('input');
 
-  const hasChanged = createMemo<boolean | number>((prev) => {
-    const changed = !(
-      settings.latest.enabled === enabled() &&
-      settings.latest.interval === interval() &&
-      settings.latest.length === length()
-    );
-
-    // dumb hack to account for one additional render after settings are loaded
-    // prevents the warning from showing up on initial load
-    // logic for checking if settings have changed is above to make solid reactivity work with this hack
-    if (prev === undefined) return -1;
-    else if (prev === -1) return false;
-    else return changed;
-  });
+  const hasChanged = createMemo<boolean | number>(() => !(
+    settings.latest.enabled === enabled() &&
+    settings.latest.interval === interval() &&
+    settings.latest.length === length()
+  ) && isDirty());
 
   const handleFormSubmit = async (ev: SubmitEvent) => {
     ev.preventDefault();
@@ -107,96 +100,130 @@ const ChantingSettingsWidget: Component = () => {
   });
 
   return (
-    <Widget class={style.container} title='Chanting'>
-      <Show
-        when={settings.state === 'ready'}
-        fallback={<FetchFallback>Fetching Chat Stats</FetchFallback>}
-      >
-        <form class={style.settingsForm} onSubmit={handleFormSubmit}>
-          <InputCheckbox
-            id='enabled'
-            name='enabled'
-            label='Enabled'
-            ref={enabledRef}
-            onChange={(ev) => setEnabled(ev.target.checked)}
-            checked={settings().enabled}
-          />
+    <form class={style.settingsForm} onSubmit={handleFormSubmit}>
+      <InputCheckbox
+        id='enabled'
+        name='enabled'
+        label='Enabled'
+        ref={enabledRef}
+        onChange={(ev) => {
+          batch(() => {
+            setEnabled(ev.target.checked);
+            setDirty(true);
+          });
+        }}
+        checked={settings().enabled}
+      />
 
-          <InputLabeled label='Time between chants' for='interval'>
-            <InputRange
-              id='interval'
-              name='interval'
-              min={0}
-              max={300}
-              step={10}
-              label='Interval:'
-              unit='seconds'
-              ref={intervalRef}
-              onChange={(ev) => setInterval(ev.target.valueAsNumber)}
-              value={settings().interval}
-            />
-          </InputLabeled>
+      <InputLabeled label='Time between chants' for='interval'>
+        <InputRange
+          id='interval'
+          name='interval'
+          min={0}
+          max={300}
+          step={10}
+          label='Interval:'
+          unit='seconds'
+          ref={intervalRef}
+          onChange={(ev) => {
+            batch(() => {
+              setInterval(ev.target.valueAsNumber);
+              setDirty(true);
+            });
+          }}
+          value={settings().interval}
+        />
+      </InputLabeled>
 
-          <InputLabeled label='Minimum chant length' for='minLength'>
-            <InputRange
-              id='minLength'
-              name='minLength'
-              min={2}
-              max={64}
-              label='Minimum length:'
-              unit='messages'
-              ref={lengthRef}
-              onChange={(ev) => setLength(ev.target.valueAsNumber)}
-              value={settings().length}
-            />
-          </InputLabeled>
+      <InputLabeled label='Minimum chant length' for='minLength'>
+        <InputRange
+          id='minLength'
+          name='minLength'
+          min={2}
+          max={64}
+          label='Minimum length:'
+          unit='messages'
+          ref={lengthRef}
+          onChange={(ev) => {
+            batch(() => {
+              setLength(ev.target.valueAsNumber);
+              setDirty(true);
+            });
+          }}
+          value={settings().length}
+        />
+      </InputLabeled>
 
-          <div class={style.buttonsContainer}>
-            <Transition
-              enterActiveClass={style.warningShow}
-              exitActiveClass={style.warningHide}
-            >
-              <Show when={hasChanged()}>
-                <div class={style.warning}>
-                  <MaterialSymbol symbol='warning' color='yellow' />
-                  <span>Unsaved changes!</span>
-                </div>
-              </Show>
-            </Transition>
-            <Button
-              type='button'
-              disabled={!hasChanged()}
-              onClick={() => {
-                enabledRef.checked = settings().enabled;
-                lengthRef.value = settings().length.toString();
-                intervalRef.value = settings().interval.toString();
+      <div class={style.buttonsContainer}>
+        <Transition
+          enterActiveClass={style.warningShow}
+          exitActiveClass={style.warningHide}
+        >
+          <Show when={hasChanged()}>
+            <div class={style.warning}>
+              <MaterialSymbol symbol='warning' color='yellow' />
+              <span>Unsaved changes!</span>
+            </div>
+          </Show>
+        </Transition>
+        <Button
+          type='button'
+          disabled={!hasChanged()}
+          onClick={() => {
+            enabledRef.checked = settings().enabled;
+            lengthRef.value = settings().length.toString();
+            intervalRef.value = settings().interval.toString();
 
-                batch(() => {
-                  setEnabled(settings().enabled);
-                  setInterval(settings().interval);
-                  setLength(settings().length);
-                });
+            batch(() => {
+              setEnabled(settings().enabled);
+              setInterval(settings().interval);
+              setLength(settings().length);
+            });
 
-                lengthRef.dispatchEvent(new Event('change'));
-                intervalRef.dispatchEvent(new Event('change'));
-              }}
-            >
+            lengthRef.dispatchEvent(new Event('change'));
+            intervalRef.dispatchEvent(new Event('change'));
+          }}
+        >
               Reset
-            </Button>
+        </Button>
 
-            <Button
-              type='submit'
-              symbol='save'
-              color='primary'
-              size='medium'
-              disabled={!hasChanged()}
-              loading={saving()}
-            >
+        <Button
+          type='submit'
+          symbol='save'
+          color='primary'
+          size='medium'
+          disabled={!hasChanged()}
+          loading={saving()}
+        >
               Save
-            </Button>
-          </div>
-        </form>
-      </Show>
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+const ChantingSettingsWidget: Component = () => {
+  const resource = createResource(fetchChantingSettings, { initialValue: defaultValues });
+  const [settings, { refetch: refetchSettings }] = resource;
+
+
+  return (
+    <Widget class={style.container} title='Chanting'>
+      <ErrorBoundary fallback={
+        <ErrorFallback
+          class={style.fallback}
+          refresh={refetchSettings}
+          loading={settings.state === 'refreshing'}
+        >
+          Failed to load chanting settings
+        </ErrorFallback>
+      }>
+        <Suspense
+          fallback={<FetchFallback>Fetching Chanting Settings</FetchFallback>}
+        >
+          <ChantingSettingsBase settings={resource}/>
+        </Suspense>
+      </ErrorBoundary>
     </Widget>
   );
 };

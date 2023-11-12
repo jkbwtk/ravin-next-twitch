@@ -33,15 +33,16 @@ export const GetBotConnectionStatusResponse = z.object({
 export type GetBotConnectionStatusResponse = z.infer<typeof GetBotConnectionStatusResponse>;
 
 
+// TODO make top stats optional
 export const TopStats = z.object({
   chatter: z.object({
     avatarUrl: z.string().url(),
-    displayName: z.string().min(1),
+    displayName: z.string(),
   }),
-  command: z.string().min(1),
+  command: z.string(),
   emote: z.object({
-    url: z.string().url(),
-    name: z.string().min(1),
+    url: z.union([z.string().url(), z.string().max(0)]),
+    name: z.string(),
   }),
 });
 
@@ -101,29 +102,29 @@ export type ChatStatSources = z.infer<typeof ChatStatSources>;
 
 
 export const ChatStatFrame = z.object({
-  timestamp: z.number().int().positive(),
+  timestamp: z.number().int().nonnegative(),
   frameDuration: z.number().int().positive(),
-  messages: z.number().int().positive(),
-  timeouts: z.number().int().positive(),
-  bans: z.number().int().positive(),
-  deleted: z.number().int().positive(),
-  commands: z.number().int().positive(),
+  messages: z.number().int().nonnegative(),
+  timeouts: z.number().int().nonnegative(),
+  bans: z.number().int().nonnegative(),
+  deleted: z.number().int().nonnegative(),
+  commands: z.number().int().nonnegative(),
 }) satisfies z.Schema<{ [key in ChatStatSources]: number }>;
 
 export type ChatStatFrame = z.infer<typeof ChatStatFrame>;
 
 
 export const ChatStats = z.object({
-  dateStart: z.number().int().positive(),
-  dateEnd: z.number().int().positive(),
+  dateStart: z.number().int().nonnegative(),
+  dateEnd: z.number().int().nonnegative(),
 
   frames: z.array(ChatStatFrame),
 
-  messagesTotal: z.number().int().positive(),
-  timeoutsTotal: z.number().int().positive(),
-  bansTotal: z.number().int().positive(),
-  deletedTotal: z.number().int().positive(),
-  commandsTotal: z.number().int().positive(),
+  messagesTotal: z.number().int().nonnegative(),
+  timeoutsTotal: z.number().int().nonnegative(),
+  bansTotal: z.number().int().nonnegative(),
+  deletedTotal: z.number().int().nonnegative(),
+  commandsTotal: z.number().int().nonnegative(),
 }) satisfies z.Schema<{ [key in `${ChatStatSources}Total`]: number }>;
 
 export type ChatStats = z.infer<typeof ChatStats>;

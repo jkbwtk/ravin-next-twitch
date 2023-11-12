@@ -1,9 +1,11 @@
-import { createResource, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
+import { createResource, createSignal, ErrorBoundary, For, onCleanup, onMount, Suspense } from 'solid-js';
 import FetchFallback from '#components/FetchFallback';
 import Widget from '#components/Widget';
 import { GetScheduledJobsResponse, ScheduledJob } from '#shared/types/api/admin';
 import { useSocket } from '#providers/SocketProvider';
 import ScheduledCronJob from '#components/ScheduledCronJob';
+import { makeRequest } from '#lib/fetch';
+import ErrorFallback from '#components/ErrorFallback';
 
 import style from '#styles/widgets/ScheduledJobsWidget.module.scss';
 
@@ -15,15 +17,14 @@ const sortJobs = (a: ScheduledJob, b: ScheduledJob) => {
 };
 
 const fetchChantingSettings = async (): Promise<ScheduledJob[]> => {
-  const response = await fetch('/api/v1/admin/scheduled-jobs');
-  const { data } = await response.json() as GetScheduledJobsResponse;
+  const { data } = await makeRequest('/api/v1/admin/scheduled-jobs', { schema: GetScheduledJobsResponse });
 
   return data.sort(sortJobs);
 };
 
 const ScheduledJobsWidget: Component = () => {
   const [socket] = useSocket();
-  const [jobs, { mutate: mutateJobs }] = createResource(fetchChantingSettings, { initialValue: [] });
+  const [jobs, { mutate: mutateJobs, refetch: refetchJobs }] = createResource(fetchChantingSettings, { initialValue: [] });
   const [timer, setTimer] = createSignal(Date.now());
 
   const handleJobCreation = (job: ScheduledJob) => {
@@ -75,14 +76,17 @@ const ScheduledJobsWidget: Component = () => {
 
   return (
     <Widget class={style.container} containerClass={style.outerContainer} title='Scheduled Jobs'>
-      <Show
-        when={jobs.state === 'ready' || jobs.state === 'refreshing'}
-        fallback={<FetchFallback>Fetching Scheduled Jobs</FetchFallback>}
-      >
-        <For each={jobs()}>
-          {(job) => (<ScheduledCronJob {...job} timer={timer()} />)}
-        </For>
-      </Show>
+      <ErrorBoundary fallback={
+        <ErrorFallback class={style.fallback} refresh={refetchJobs} loading={jobs.state === 'refreshing'}>Failed to load scheduled jobs</ErrorFallback>
+      }>
+        <Suspense
+          fallback={<FetchFallback>Fetching Scheduled Jobs</FetchFallback>}
+        >
+          <For each={jobs()}>
+            {(job) => (<ScheduledCronJob {...job} timer={timer()} />)}
+          </For>
+        </Suspense>
+      </ErrorBoundary>
     </Widget>
   );
 };

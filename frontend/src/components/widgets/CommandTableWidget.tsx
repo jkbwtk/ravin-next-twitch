@@ -1,7 +1,7 @@
 import { createResource, createSignal, ErrorBoundary, For, onCleanup, onMount, Suspense } from 'solid-js';
 import { CustomCommand, GetCustomCommandsResponse } from '#types/api/commands';
 import { useSocket } from '#providers/SocketProvider';
-import { fetchJson } from '#lib/fetch';
+import { makeRequest } from '#lib/fetch';
 import Command from '#components/Command';
 import FetchFallback from '#components/FetchFallback';
 import ErrorFallback from '#components/ErrorFallback';
@@ -21,7 +21,7 @@ export interface CustomCommandProps {
 }
 
 const fetchCommands = async () => {
-  const { data } = await fetchJson('/api/v1/commands/custom', { schema: GetCustomCommandsResponse });
+  const { data } = await makeRequest('/api/v1/commands/custom', { schema: GetCustomCommandsResponse });
 
   return data.sort((a, b) => {
     if (a.command > b.command) return 1;
@@ -87,7 +87,7 @@ const CommandTable: Component = () => {
       <ErrorBoundary fallback={
         <ErrorFallback class={style.fallback} refresh={refetchCommands} loading={commands.state === 'refreshing'}>Failed to load commands</ErrorFallback>
       }>
-        <Suspense fallback={<FetchFallback class={style.fallback}>Loading commands...</FetchFallback>}>
+        <Suspense fallback={<FetchFallback class={style.fallback}>Fetching Commands</FetchFallback>}>
           <table ref={tableRef} class={style.commandsContainer}>
             <colgroup>
               <col />

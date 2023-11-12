@@ -45,7 +45,7 @@ export type DeleteCustomCommandReqBody = z.infer<typeof DeleteCustomCommandReqBo
 
 
 export const CustomCommandState = z.object({
-  lastUsed: z.number().int().positive(),
+  lastUsed: z.number().int().nonnegative(),
   lastUsedBy: z.string().optional(),
   command: CustomCommand,
 });

@@ -3,11 +3,11 @@ import InputLabeled from '#components/InputLabeled';
 import Button from '#components/Button';
 import { useNotification } from '#providers/NotificationProvider';
 import Widget from '#components/Widget';
-
-import style from '#styles/widgets/BroadcastSystemNotificationWidget.module.scss';
-import { PostSystemNotificationBroadcastRequest } from '#shared/types/api/systemNotifications';
+import { PostSystemNotificationBroadcastReqBody } from '#shared/types/api/systemNotifications';
 import InputBase from '#components/InputBase';
 import TextArea from '#components/TextArea';
+
+import style from '#styles/widgets/BroadcastSystemNotificationWidget.module.scss';
 
 
 const BroadcastSystemNotificationWidget: Component = () => {
@@ -24,7 +24,7 @@ const BroadcastSystemNotificationWidget: Component = () => {
     const title = ev.target.elements.namedItem('title') as HTMLInputElement;
     const content = ev.target.elements.namedItem('content') as HTMLInputElement;
 
-    const notification: PostSystemNotificationBroadcastRequest = {
+    const notification: PostSystemNotificationBroadcastReqBody = {
       title: title.value,
       content: content.value,
     };

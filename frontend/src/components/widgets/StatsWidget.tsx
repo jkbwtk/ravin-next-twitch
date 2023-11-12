@@ -1,4 +1,4 @@
-import { createEffect, createMemo, createResource, createSignal, onCleanup, onMount, Show } from 'solid-js';
+import { createEffect, createMemo, createResource, createSignal, ErrorBoundary, onCleanup, onMount, ResourceReturn, Show, Suspense } from 'solid-js';
 import Chart from 'chart.js/auto';
 import Widget from '#components/Widget';
 import { ChatStats, ChatStatSources, GetChatStatsResponse } from '#types/api/dashboard';
@@ -6,13 +6,14 @@ import DotSpinner from '#components/DotSpinner';
 import FetchFallback from '#components/FetchFallback';
 import { timeframe } from '#shared/timeUtils';
 import { truncateNumber } from '#shared/numberUtils';
+import { makeRequest } from '#lib/fetch';
+import ErrorFallback from '#components/ErrorFallback';
 
 import style from '#styles/widgets/StatsWidget.module.scss';
 
 
 const fetchChatStats = async (): Promise<ChatStats> => {
-  const response = await fetch('/api/v1/dashboard/widgets/chat-stats');
-  const { data } = await response.json() as GetChatStatsResponse;
+  const { data } = await makeRequest('/api/v1/dashboard/widgets/chat-stats', { schema: GetChatStatsResponse });
 
   return data;
 };
@@ -96,8 +97,8 @@ const createChart = (canvas: HTMLCanvasElement) => new Chart(
   },
 );
 
-const StatsWidget: Component<StatsWidgetProps> = (props) => {
-  const [stats, { refetch: refetchStats }] = createResource(fetchChatStats);
+const StatsBase: Component<StatsWidgetProps & { stats: ResourceReturn<ChatStats> }> = (props) => {
+  const [stats, { refetch: refetchStats }] = props.stats;
   const [widgetVisible, setWidgetVisible] = createSignal(false);
   const [selectedStat, setSelectedStat] = createSignal<ChatStatSources>('messages');
 
@@ -178,74 +179,84 @@ const StatsWidget: Component<StatsWidgetProps> = (props) => {
   });
 
   return (
-    <Widget class={style.container} containerClass={style.outerContainer} title='Stats'>
-      <Show
-        when={stats.state === 'ready' || stats.state === 'refreshing'}
-        fallback={<FetchFallback>Fetching Chat Stats</FetchFallback>}
-      >
-        <div class={style.statsContainer}>
-          <span class={style.timeframe}>{timeframe(stats()?.dateStart ?? 0, stats()?.dateEnd ?? 0)}</span>
+    <>
+      <div class={style.statsContainer}>
+        <span class={style.timeframe}>{timeframe(stats()?.dateStart ?? 0, stats()?.dateEnd ?? 0)}</span>
 
-          <div class={style.stats}>
-            <span class={style.name}>Messages</span>
-            <button
-              classList={{
-                [style.value]: true,
-                [style.primary]: selectedStat() === 'messages',
-              }}
-              onClick={() => setSelectedStat('messages')}
-            >{truncateNumber(stats()?.messagesTotal)}</button>
+        <div class={style.stats}>
+          <span class={style.name}>Messages</span>
+          <button
+            classList={{
+              [style.value]: true,
+              [style.primary]: selectedStat() === 'messages',
+            }}
+            onClick={() => setSelectedStat('messages')}
+          >{truncateNumber(stats()?.messagesTotal)}</button>
 
-            <span class={style.name}>Timeouts</span>
-            <button
-              classList={{
-                [style.value]: true,
-                [style.primary]: selectedStat() === 'timeouts',
-              }}
-              onClick={() => setSelectedStat('timeouts')}
-            >{truncateNumber(stats()?.timeoutsTotal)}</button>
+          <span class={style.name}>Timeouts</span>
+          <button
+            classList={{
+              [style.value]: true,
+              [style.primary]: selectedStat() === 'timeouts',
+            }}
+            onClick={() => setSelectedStat('timeouts')}
+          >{truncateNumber(stats()?.timeoutsTotal)}</button>
 
-            <span class={style.name}>Bans</span>
-            <button
-              classList={{
-                [style.value]: true,
-                [style.primary]: selectedStat() === 'bans',
-              }}
-              onClick={() => setSelectedStat('bans')}
-            >{truncateNumber(stats()?.bansTotal)}</button>
+          <span class={style.name}>Bans</span>
+          <button
+            classList={{
+              [style.value]: true,
+              [style.primary]: selectedStat() === 'bans',
+            }}
+            onClick={() => setSelectedStat('bans')}
+          >{truncateNumber(stats()?.bansTotal)}</button>
 
-            <span class={style.name}>Deleted</span>
-            <button
-              classList={{
-                [style.value]: true,
-                [style.primary]: selectedStat() === 'deleted',
-              }}
-              onClick={() => setSelectedStat('deleted')}
-            >{truncateNumber(stats()?.deletedTotal)}</button>
+          <span class={style.name}>Deleted</span>
+          <button
+            classList={{
+              [style.value]: true,
+              [style.primary]: selectedStat() === 'deleted',
+            }}
+            onClick={() => setSelectedStat('deleted')}
+          >{truncateNumber(stats()?.deletedTotal)}</button>
 
-            <span class={style.name}>Commands</span>
-            <button
-              classList={{
-                [style.value]: true,
-                [style.primary]: selectedStat() === 'commands',
-              }}
-              onClick={() => setSelectedStat('commands')}
-            >{truncateNumber(stats()?.commandsTotal)}</button>
+          <span class={style.name}>Commands</span>
+          <button
+            classList={{
+              [style.value]: true,
+              [style.primary]: selectedStat() === 'commands',
+            }}
+            onClick={() => setSelectedStat('commands')}
+          >{truncateNumber(stats()?.commandsTotal)}</button>
+        </div>
+      </div><div class={style.chartContainer}>
+        <Show when={!widgetVisible()}>
+          <div class={style.chartResizeInfo}>
+            <DotSpinner />
+            <span>Resizing chart</span>
           </div>
-        </div>
+        </Show>
+        <canvas class={style.chart} ref={canvasRef} style={{
+          display: widgetVisible() ? 'initial' : 'none',
+        }} />
+      </div>
+    </>
+  );
+};
 
-        <div class={style.chartContainer}>
-          <Show when={!widgetVisible()}>
-            <div class={style.chartResizeInfo}>
-              <DotSpinner />
-              <span>Resizing chart</span>
-            </div>
-          </Show>
-          <canvas class={style.chart} ref={canvasRef} style={{
-            display: widgetVisible() ? 'initial' : 'none',
-          }} />
-        </div>
-      </Show>
+const StatsWidget: Component<StatsWidgetProps> = (props) => {
+  const resource = createResource(fetchChatStats);
+  const [stats, { refetch: refetchStats }] = resource;
+
+  return (
+    <Widget class={style.container} containerClass={style.outerContainer} title='Stats'>
+      <ErrorBoundary fallback={
+        <ErrorFallback class={style.fallback} refresh={refetchStats} loading={stats.state === 'refreshing'}>Failed to load chat stats</ErrorFallback>
+      }>
+        <Suspense fallback={<FetchFallback>Fetching Chat Stats</FetchFallback>}>
+          <StatsBase {...props} stats={resource} />
+        </Suspense>
+      </ErrorBoundary>
     </Widget>
   );
 };

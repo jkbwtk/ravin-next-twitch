@@ -4,6 +4,8 @@ import { createStore } from 'solid-js/store';
 import { FrontendUser, GetFrontendUser } from '#types/api/auth';
 import { GetSystemNotificationsResponse, SystemNotification } from '#shared/types/api/systemNotifications';
 import DotSpinner from '#components/DotSpinner';
+import { makeRequest } from '#lib/fetch';
+import { isDev } from 'solid-js/web';
 
 import style from '#styles/SessionProvider.module.scss';
 
@@ -57,12 +59,8 @@ export const SessionProvider: ParentComponent = (props) => {
   const [loaded, setLoaded] = createSignal(false);
 
   const fetchUser = async (): Promise<FrontendUser | null> => {
-    const response = await fetch('/api/v1/auth/user', {
-      cache: 'no-store',
-    });
-
-    if (response.ok) {
-      const { data } = await response.json() as GetFrontendUser;
+    try {
+      const { data } = await makeRequest('/api/v1/auth/user', { schema: GetFrontendUser, cache: 'no-store' });
 
       batch(() => {
         setState('loggedIn', true);
@@ -70,13 +68,15 @@ export const SessionProvider: ParentComponent = (props) => {
       });
 
       return data;
-    }
+    } catch (err) {
+      if (isDev) console.error(err);
 
-    batch(() => {
-      setState('loggedIn', false);
-      setState('user', undefined);
-    });
-    return null;
+      batch(() => {
+        setState('loggedIn', false);
+        setState('user', undefined);
+      });
+      return null;
+    }
   };
 
   const invalidate = () => {
@@ -104,23 +104,19 @@ export const SessionProvider: ParentComponent = (props) => {
   };
 
   const fetchSystemNotifications = async (): Promise<SystemNotification[]> => {
-    const response = await fetch('/api/v1/notifications', {
-      method: 'GET',
-      cache: 'no-store',
-    });
-
-    if (response.ok) {
-      const { data } = await response.json() as GetSystemNotificationsResponse;
-      const mapped = data.map((notification) => ({ ...notification, createdAt: new Date(notification.createdAt) }));
-      const mappedUnread = mapped.filter((notification) => !notification.read);
+    try {
+      const { data } = await makeRequest('/api/v1/notifications', { schema: GetSystemNotificationsResponse, cache: 'no-store' });
+      const unread = data.filter((notification) => !notification.read);
 
       batch(() => {
-        setState('notifications', mapped);
-        setState('unreadNotifications', mappedUnread);
+        setState('notifications', data);
+        setState('unreadNotifications', unread);
       });
 
-      return mapped;
-    } else {
+      return data;
+    } catch (err) {
+      if (isDev) console.error(err);
+
       addNotification({
         type: 'error',
         title: 'Notification Error',

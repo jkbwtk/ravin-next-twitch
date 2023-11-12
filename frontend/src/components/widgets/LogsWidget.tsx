@@ -1,9 +1,12 @@
-import { createResource, For, onCleanup, onMount } from 'solid-js';
+import { createResource, ErrorBoundary, For, onCleanup, onMount, Suspense } from 'solid-js';
 import { useSocket } from '#providers/SocketProvider';
 import Widget from '#components/Widget';
 import { GetMessagesResponse, Message as MessagePublic } from '#shared/types/api/logs';
+import { makeRequest } from '#lib/fetch';
 
 import style from '#styles/widgets/LogsWidget.module.scss';
+import ErrorFallback from '#components/ErrorFallback';
+import FetchFallback from '#components/FetchFallback';
 
 
 export type MessageProps = {
@@ -11,15 +14,14 @@ export type MessageProps = {
 };
 
 const fetchMessages = async () => {
-  const response = await fetch('/api/v1/logs/messages');
-  const { data } = await response.json() as GetMessagesResponse;
+  const { data } = await makeRequest('/api/v1/logs/messages', { schema: GetMessagesResponse });
 
   return data;
 };
 
 const LogsWidget: Component = () => {
   const [socket] = useSocket();
-  const [messages, { mutate: setMessages }] = createResource(fetchMessages, {
+  const [messages, { mutate: setMessages, refetch: refetchMessages }] = createResource(fetchMessages, {
     initialValue: [],
   });
 
@@ -42,34 +44,42 @@ const LogsWidget: Component = () => {
       title='Chat Logs'
       class={style.container}
       containerClass={style.outerContainer}
+      refresh={refetchMessages}
+      loading={messages.state === 'refreshing'}
     >
-      <table ref={tableRef} class={style.commandsContainer}>
-        <colgroup>
-          <col />
-          <col />
-          <col />
-        </colgroup>
+      <ErrorBoundary fallback={
+        <ErrorFallback class={style.fallback} refresh={refetchMessages} loading={messages.state === 'refreshing'}>Failed to load logs</ErrorFallback>
+      }>
+        <Suspense fallback={<FetchFallback class={style.fallback}>Fetching Logs</FetchFallback>}>
+          <table ref={tableRef} class={style.commandsContainer}>
+            <colgroup>
+              <col />
+              <col />
+              <col />
+            </colgroup>
 
-        <thead>
-          <tr>
-            <th>User</th>
-            <th>Message</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <For each={messages()}>
-            {(message) => (
+            <thead>
               <tr>
-                <td>{message.displayName}</td>
-                <td>{message.content}</td>
-                <td>{new Date(message.timestamp).toDateString()}</td>
+                <th>User</th>
+                <th>Message</th>
+                <th>Date</th>
               </tr>
-            )}
-          </For>
-        </tbody>
-      </table>
+            </thead>
+
+            <tbody>
+              <For each={messages()}>
+                {(message) => (
+                  <tr>
+                    <td>{message.displayName}</td>
+                    <td>{message.content}</td>
+                    <td>{new Date(message.timestamp).toDateString()}</td>
+                  </tr>
+                )}
+              </For>
+            </tbody>
+          </table>
+        </Suspense>
+      </ErrorBoundary>
     </Widget>
   );
 };

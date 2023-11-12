@@ -1,18 +1,18 @@
 import DashboardInfoBar from '#components/DashboardInfoBar';
 import { CustomCommandEditorProvider } from '#providers/CustomCommandEditorProvider';
 import { batch, createResource, For, onCleanup, onMount } from 'solid-js';
-import { CustomCommand, CommandStatus as CustomCommandStatus, GetCustomCommandsStatusResponse } from '#shared/types/api/commands';
+import { CustomCommand, CustomCommandState, GetCustomCommandsStatusResponse } from '#shared/types/api/commands';
 import { useSocket } from '#providers/SocketProvider';
 import CommandStatusTile from '#components/CommandStatusTile';
 
 import style from '#styles/dashboard/CommandStatus.module.scss';
+import { makeRequest } from '#lib/fetch';
 
 
 const fetchStatuses = async () => {
-  const response = await fetch('/api/v1/commands/custom/status');
-  const data = await response.json() as GetCustomCommandsStatusResponse;
+  const { data } = await makeRequest('/api/v1/commands/custom/status', { schema: GetCustomCommandsStatusResponse });
 
-  return data.data.sort((a, b) => {
+  return data.sort((a, b) => {
     if (a.command.id > b.command.id) return 1;
     if (a.command.id < b.command.id) return -1;
     return 0;
@@ -60,7 +60,7 @@ const CommandStatus: Component = () => {
     });
   };
 
-  const executeCommand = (status: CustomCommandStatus) => {
+  const executeCommand = (status: CustomCommandState) => {
     setStatuses((s) => s.map((c) => c.command.id !== status.command.id ? c : {
       command: c.command,
       lastUsed: status.lastUsed,
