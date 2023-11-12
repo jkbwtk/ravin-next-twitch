@@ -16,7 +16,7 @@ import ErrorFallback from '#components/ErrorFallback';
 
 
 const fetchChantingSettings = async (): Promise<ChantingSettings> => {
-  const { data } = await makeRequest('/api/v1/channel/settings/chantingg', { schema: GetChantingSettingsResponse });
+  const { data } = await makeRequest('/api/v1/channel/settings/chanting', { schema: GetChantingSettingsResponse });
 
   return data;
 };
