@@ -33,7 +33,7 @@ export const requestLogger: RequestHandler = (req, res, next) => {
 
     logger.http({
       method: req.method,
-      remoteAddress: req.ip,
+      remoteAddress: req.ip!,
       url: req.originalUrl ?? req.url,
       httpVersion: req.httpVersion,
       referer: req.headers.referer ?? null,

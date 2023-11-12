@@ -109,11 +109,11 @@ export const getCustomCommandsStatusView = new ExpressStack()
           .map((state) => state.getState()),
       });
     } catch (err) {
-      logger.warn('Failed to get custom command status', {
+      logger.warn('Failed to get custom commands status', {
         error: err,
-        label: ['APIv1', 'commands', 'getCustomCommandStatusView'],
+        label: ['APIv1', 'commands', 'getCustomCommandsStatusView'],
       });
 
-      throw new ServerError(HttpCodes.InternalServerError, 'Failed to get custom command status');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to get custom commands status');
     }
   });

@@ -26,7 +26,7 @@ const Command: Component<CommandProps> = (props) => {
   return (
     <tr>
       <td>{props.command.command}</td>
-      <td>{props.command.response}</td>
+      <td>{props.command.templateId}</td>
       <td classList={{
         [style.disabled]: props.tableType > TableType.Full,
       }}>{translateUserLevel(props.command.userLevel)}</td>
