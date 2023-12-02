@@ -4,6 +4,8 @@ import { translateUserLevel, useCustomCommandEditor } from '#providers/CustomCom
 import { Match, Switch } from 'solid-js';
 import { CustomCommand } from '#shared/types/api/commands';
 import { TableType } from '#components/widgets/CommandTableWidget';
+import TableRow from '@suid/material/TableRow/TableRow';
+import TableCell from '@suid/material/TableCell/TableCell';
 
 import style from '#styles/widgets/CommandTableWidget.module.scss';
 
@@ -14,7 +16,7 @@ export type CommandProps = {
 };
 
 const Command: Component<CommandProps> = (props) => {
-  const [, { open, updateCommand, deleteCommand }] = useCustomCommandEditor();
+  const [editor, { open, updateCommand, deleteCommand }] = useCustomCommandEditor();
 
   const toggleEnabled = () => {
     updateCommand({
@@ -24,16 +26,16 @@ const Command: Component<CommandProps> = (props) => {
   };
 
   return (
-    <tr>
-      <td>{props.command.command}</td>
-      <td>{props.command.templateId}</td>
-      <td classList={{
+    <TableRow>
+      <TableCell align='left'>{props.command.command}</TableCell>
+      <TableCell align='left'>{editor.templates.find((t) => t.id === props.command.templateId)?.name}</TableCell>
+      <TableCell classList={{
         [style.disabled]: props.tableType > TableType.Full,
-      }}>{translateUserLevel(props.command.userLevel)}</td>
-      <td classList={{
+      }}>{translateUserLevel(props.command.userLevel)}</TableCell>
+      <TableCell align='right' classList={{
         [style.disabled]: props.tableType > TableType.Compact,
-      }}>{props.command.cooldown}s</td>
-      <td>
+      }}>{props.command.cooldown}s</TableCell>
+      <TableCell align='center'>
         <div>
           <TemplateButton onClick={toggleEnabled}>
             <Switch>
@@ -46,9 +48,9 @@ const Command: Component<CommandProps> = (props) => {
             </Switch>
           </TemplateButton>
         </div>
-      </td>
-      <td>
-        <div>
+      </TableCell>
+      <TableCell align='center'>
+        <div class={style.actionsContainer}>
           <TemplateButton onClick={() => open(props.command)}>
             <MaterialSymbol symbol='edit' color='yellow' size='alt' interactive class={style.commandButton} />
           </TemplateButton>
@@ -57,8 +59,8 @@ const Command: Component<CommandProps> = (props) => {
             <MaterialSymbol symbol='delete' color='red' size='alt' interactive class={style.commandButton} />
           </TemplateButton>
         </div>
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 };
 

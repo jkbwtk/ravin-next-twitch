@@ -1,6 +1,6 @@
-import { createContext, Show, useContext } from 'solid-js';
+import { createContext, createEffect, createResource, createSignal, For, onCleanup, onMount, Show, useContext } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { CustomCommand, DeleteCustomCommandRequest, PatchCustomCommandRequest, PostCustomCommandRequest, UserLevel } from '#shared/types/api/commands';
+import { CustomCommand, DeleteCustomCommandReqBody, PatchCustomCommandReqBody, PostCustomCommandReqBody, UserLevel } from '#shared/types/api/commands';
 import { Portal } from 'solid-js/web';
 import { Transition } from 'solid-transition-group';
 import TemplateButton from '#components/TemplateButton';
@@ -9,9 +9,14 @@ import { useNotification } from '#providers/NotificationProvider';
 import InputRange from '#components/InputRange';
 import InputBase from '#components/InputBase';
 import InputLabeled from '#components/InputLabeled';
-import TextArea from '#components/TextArea';
-import Select from '#components/Select';
 import Button from '#components/Button';
+import FormControl from '@suid/material/FormControl/FormControl';
+import Select from '@suid/material/Select/Select';
+import MenuItem from '@suid/material/MenuItem/MenuItem';
+import { SelectChangeEvent } from '@suid/material/Select';
+import { GetTemplatesResponse, Template } from '#shared/types/api/templates';
+import { makeRequest } from '#lib/fetch';
+import { useSocket } from '#providers/SocketProvider';
 
 import style from '#styles/CustomCommandsEditorProvider.module.scss';
 
@@ -21,6 +26,7 @@ export const translateUserLevel = (userLevel: UserLevel): keyof typeof UserLevel
 export type CustomCommandEditorContextState = {
   open: boolean;
   command: Partial<CustomCommand>;
+  templates: Template[];
 };
 
 export type CustomCommandEditorContextValue = [
@@ -29,7 +35,7 @@ export type CustomCommandEditorContextValue = [
     open: (command?: Partial<CustomCommand>) => void;
     close: () => void;
 
-    updateCommand: (command: PatchCustomCommandRequest) => void;
+    updateCommand: (command: PatchCustomCommandReqBody) => void;
     deleteCommand: (command: CustomCommand) => void;
   }
 ];
@@ -37,6 +43,7 @@ export type CustomCommandEditorContextValue = [
 export const defaultState: CustomCommandEditorContextState = {
   open: false,
   command: {},
+  templates: [],
 };
 
 const CustomCommandEditorContext = createContext<CustomCommandEditorContextValue>([
@@ -58,9 +65,49 @@ const CustomCommandEditorContext = createContext<CustomCommandEditorContextValue
   },
 ]);
 
+const fetchTemplates = async () => {
+  const { data } = await makeRequest('/api/v1/templates', { schema: GetTemplatesResponse });
+
+  return data.sort((a, b) => {
+    if (a.name > b.name) return 1;
+    if (a.name < b.name) return -1;
+    return 0;
+  });
+};
+
 export const CustomCommandEditorProvider: ParentComponent = (props) => {
+  const [socket] = useSocket();
   const [state, setState] = createStore({ ...defaultState });
   const [, { addNotification }] = useNotification();
+
+  const [templates, { mutate: setTemplates }] = createResource(fetchTemplates, {
+    initialValue: [],
+  });
+
+  const [template, setTemplate] = createSignal(state.command.templateId ?? 0);
+  const [userLevel, setUserLevel] = createSignal(state.command.userLevel ?? UserLevel['Everyone']);
+
+  createEffect(() => {
+    setState({
+      templates: templates(),
+    });
+  });
+
+  const createTemplate = (template: Template) => {
+    setTemplates((templates) => [...templates, template].sort((a, b) => {
+      if (a.name > b.name) return 1;
+      if (a.name < b.name) return -1;
+      return 0;
+    }));
+  };
+
+  const updateTemplate = (template: Template) => {
+    setTemplates((templates) => templates.map((t) => t.id === template.id ? template : t));
+  };
+
+  const removeTemplate = (templateId: number) => {
+    setTemplates((templates) => templates.filter((template) => template.id !== templateId));
+  };
 
   const open = (command?: Partial<CustomCommand>) => {
     setState({
@@ -70,10 +117,13 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
   };
 
   const close = () => {
-    setState(defaultState);
+    setState({
+      open: false,
+      command: {},
+    });
   };
 
-  const createCommand = async (command: PostCustomCommandRequest) => {
+  const createCommand = async (command: PostCustomCommandReqBody) => {
     const response = await fetch(`/api/v1/commands/custom`, {
       method: 'POST',
       headers: {
@@ -92,7 +142,7 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
     }
   };
 
-  const updateCommand = async (command: PatchCustomCommandRequest) => {
+  const updateCommand = async (command: PatchCustomCommandReqBody) => {
     const response = await fetch(`/api/v1/commands/custom`, {
       method: 'PATCH',
       headers: {
@@ -112,7 +162,7 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
   };
 
   const deleteCommand = async (command: CustomCommand) => {
-    const body: DeleteCustomCommandRequest = {
+    const body: DeleteCustomCommandReqBody = {
       id: command.id,
     };
 
@@ -141,30 +191,36 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
     }
   };
 
+  const handleTemplateChange = (ev: SelectChangeEvent) => {
+    setTemplate(ev.target.value as unknown as number);
+  };
+
+  const handleUserStatusChange = (ev: SelectChangeEvent) => {
+    setUserLevel(ev.target.value as unknown as UserLevel);
+  };
+
   const handleForm = async (ev: SubmitEvent) => {
     ev.preventDefault();
 
     if (!(ev.target instanceof HTMLFormElement)) return;
 
     const command = ev.target.elements.namedItem('command') as HTMLInputElement;
-    const response = ev.target.elements.namedItem('response') as HTMLTextAreaElement;
     const cooldown = ev.target.elements.namedItem('cooldown') as HTMLInputElement;
-    const userLevel = ev.target.elements.namedItem('userLevel') as HTMLInputElement;
 
     if (state.command.id) {
       await updateCommand({
         id: state.command.id,
         command: command.value,
-        response: response.value,
+        templateId: template(),
         cooldown: parseInt(cooldown.value),
-        userLevel: parseInt(userLevel.value),
+        userLevel: userLevel(),
       });
     } else {
       await createCommand({
         command: command.value,
-        response: response.value,
+        templateId: template()!,
         cooldown: parseInt(cooldown.value),
-        userLevel: parseInt(userLevel.value),
+        userLevel: userLevel(),
         enabled: true,
       });
     }
@@ -172,6 +228,17 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
     close();
   };
 
+  onMount(() => {
+    socket.client.on('NEW_TEMPLATE', createTemplate);
+    socket.client.on('UPD_TEMPLATE', updateTemplate);
+    socket.client.on('DEL_TEMPLATE', removeTemplate);
+  });
+
+  onCleanup(() => {
+    socket.client.off('NEW_TEMPLATE', createTemplate);
+    socket.client.off('UPD_TEMPLATE', updateTemplate);
+    socket.client.off('DEL_TEMPLATE', removeTemplate);
+  });
 
   return (
     <CustomCommandEditorContext.Provider
@@ -231,21 +298,27 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
                   </div>
 
                   <div class={style.group}>
-                    <InputLabeled label='Response' for='response'>
-                      <TextArea
-                        id='response'
-                        name='response'
-                        minLength={1}
-                        maxLength={256}
-                        placeholder='This is a command response.'
-                        required
-                        class={style.textarea}
-                        value={state.command.response ?? ''}
-                      />
-                    </InputLabeled>
+                    <FormControl>
+                      <InputLabeled label='Template' for='template'>
+                        <Select
+                          labelId='template-label'
+                          id='template'
+                          name='template'
+                          value={template()}
+                          onChange={handleTemplateChange}
+                          required
+                        >
+                          <For each={templates()}>
+                            {(template) => (
+                              <MenuItem value={template.id}>{template.name}</MenuItem>
+                            )}
+                          </For>
+                        </Select>
+                      </InputLabeled>
+                    </FormControl>
 
                     <div class={style.description}>
-                      This is your command response. It can be up to 256 characters long.
+                      This is your command template. You can add and edit templates in the Templates section.
                     </div>
                   </div>
 
@@ -270,44 +343,24 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
                   </div>
 
                   <div class={style.group}>
-                    <InputLabeled label='User level' for='userLevel'>
-                      <Select id='userLevel' name='userLevel' class={style.select}>
-                        <option
-                          selected={(state.command.userLevel ?? UserLevel['Everyone']) === UserLevel['Everyone']}
-                          value={UserLevel['Everyone']}
+                    <FormControl>
+                      <InputLabeled label='User level' for='user-level'>
+                        <Select
+                          labelId='user-level-label'
+                          id='user-level'
+                          name='user-level'
+                          value={userLevel()}
+                          onChange={handleUserStatusChange}
+                          required
                         >
-                        Everyone
-                        </option>
-
-                        <option
-                          selected={state.command.userLevel === UserLevel['Subscriber']}
-                          value={UserLevel['Subscriber']}
-                        >
-                        Subscriber
-                        </option>
-
-                        <option
-                          selected={state.command.userLevel === UserLevel['VIP']}
-                          value={UserLevel['VIP']}
-                        >
-                        VIP
-                        </option>
-
-                        <option
-                          selected={state.command.userLevel === UserLevel['Moderator']}
-                          value={UserLevel['Moderator']}
-                        >
-                        Moderator
-                        </option>
-
-                        <option
-                          selected={state.command.userLevel === UserLevel['Owner']}
-                          value={UserLevel['Owner']}
-                        >
-                        Owner
-                        </option>
-                      </Select>
-                    </InputLabeled>
+                          <MenuItem value={UserLevel['Everyone']}>Everyone</MenuItem>
+                          <MenuItem value={UserLevel['Subscriber']}>Subscriber</MenuItem>
+                          <MenuItem value={UserLevel['VIP']}>VIP</MenuItem>
+                          <MenuItem value={UserLevel['Moderator']}>Moderator</MenuItem>
+                          <MenuItem value={UserLevel['Owner']}>Owner</MenuItem>
+                        </Select>
+                      </InputLabeled>
+                    </FormControl>
 
                     <div class={style.description}>
                       Minimum user level required to use this command.

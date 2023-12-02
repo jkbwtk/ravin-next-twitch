@@ -1,4 +1,4 @@
-import { createResource, createSignal, ErrorBoundary, For, onCleanup, onMount, Suspense } from 'solid-js';
+import { createEffect, createResource, createSignal, ErrorBoundary, For, onCleanup, onMount, Suspense } from 'solid-js';
 import { CustomCommand, GetCustomCommandsResponse } from '#types/api/commands';
 import { useSocket } from '#providers/SocketProvider';
 import { makeRequest } from '#lib/fetch';
@@ -6,6 +6,13 @@ import Command from '#components/Command';
 import FetchFallback from '#components/FetchFallback';
 import ErrorFallback from '#components/ErrorFallback';
 import Widget from '#components/Widget';
+import TableContainer from '@suid/material/TableContainer/TableContainer';
+import Table from '@suid/material/Table/Table';
+import TableHead from '@suid/material/TableHead/TableHead';
+import Paper from '@suid/material/Paper/Paper';
+import TableRow from '@suid/material/TableRow/TableRow';
+import TableCell from '@suid/material/TableCell/TableCell';
+import TableBody from '@suid/material/TableBody/TableBody';
 
 import style from '#styles/widgets/CommandTableWidget.module.scss';
 
@@ -76,6 +83,10 @@ const CommandTable: Component = () => {
     window.removeEventListener('resize', handleResize);
   });
 
+  createEffect(() => {
+    commands.state === 'ready' && handleResize();
+  });
+
   return (
     <Widget
       title='Custom Commands'
@@ -88,42 +99,31 @@ const CommandTable: Component = () => {
         <ErrorFallback class={style.fallback} refresh={refetchCommands} loading={commands.state === 'refreshing'}>Failed to load commands</ErrorFallback>
       }>
         <Suspense fallback={<FetchFallback class={style.fallback}>Fetching Commands</FetchFallback>}>
-          <table ref={tableRef} class={style.commandsContainer}>
-            <colgroup>
-              <col />
-              <col />
-              <col classList={{
-                [style.disabled]: tableType() > TableType.Full,
-              }} />
-              <col classList={{
-                [style.disabled]: tableType() > TableType.Compact,
-              }} />
-              <col />
-              <col />
-            </colgroup>
-
-            <thead>
-              <tr>
-                <th>Command</th>
-                <th>Response</th>
-                <th classList={{
-                  [style.disabled]: tableType() > TableType.Full,
-                }}>User Level</th>
-                <th classList={{
-                  [style.disabled]: tableType() > TableType.Compact,
-                }}>Cooldown</th>
-                <th>Enabled</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <For each={commands()}>
-                {(command) => (
-                  <Command command={command} tableType={tableType()} />
-                )}
-              </For>
-            </tbody>
-          </table>
+          <TableContainer class={style.commandsContainer} component={Paper}>
+            <Table ref={tableRef} stickyHeader>
+              <TableHead >
+                <TableRow>
+                  <TableCell align='center'>Command</TableCell>
+                  <TableCell align='center'>Template</TableCell>
+                  <TableCell align='center' classList={{
+                    [style.disabled]: tableType() > TableType.Full,
+                  }}>User Level</TableCell>
+                  <TableCell align='center' classList={{
+                    [style.disabled]: tableType() > TableType.Compact,
+                  }}>Cooldown</TableCell>
+                  <TableCell align='center'>Enabled</TableCell>
+                  <TableCell align='center'>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <For each={commands()}>
+                  {(command) => (
+                    <Command command={command} tableType={tableType()} />
+                  )}
+                </For>
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Suspense>
       </ErrorBoundary>
     </Widget>
