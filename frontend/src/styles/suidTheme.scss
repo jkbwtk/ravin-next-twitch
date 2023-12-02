@@ -1,0 +1,108 @@
+@use 'sass:color';
+@use 'app' as *;
+
+
+.MuiInputBase-root {
+  background-color: $widgetColor;
+
+  .MuiInputBase-input {
+    padding: 0.8rem 1.4rem;
+    color: $textBrightColor;
+
+    font-size: $altFontSize;
+    line-height: normal !important;
+    letter-spacing: normal !important;
+
+    font-weight: 500;
+
+    display: flex;
+    align-items: center;
+  }
+}
+
+.MuiPaper-root {
+  background-color: color.adjust($widgetColor, $alpha: -0.25) !important;
+  background-image: initial !important;
+
+  backdrop-filter: blur(1rem);
+}
+
+.MuiMenuItem-root.Mui-selected {
+  color: $textBrightColor;
+}
+
+.MuiMenuItem-root {
+  &:hover {
+    color: $textBrightColor;
+  }
+}
+
+.MuiOutlinedInput-notchedOutline {
+  border-color: $borderColor !important;
+}
+
+.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: $textColor !important;
+  border-width: 0.1rem !important;
+}
+
+.MuiTableHead-root {
+  @mixin styledHeader() {
+    background-color: $borderColor !important;
+
+    &:not(:last-of-type) {
+      border-right: 0.2rem dashed $widgetColor !important;
+    }
+
+    &:first-of-type {
+      border-top-left-radius: $borderRadius;
+      border-bottom-left-radius: $borderRadius;
+    }
+
+    &:last-of-type {
+      border-top-right-radius: $borderRadius;
+      border-bottom-right-radius: $borderRadius;
+    }
+  }
+
+  .MuiTableCell-head {
+    color: $textBrightColor !important;
+    font-weight: 500 !important;
+
+    font-size: $smallFontSize;
+    line-height: normal !important;
+    letter-spacing: normal !important;
+
+    @include styledHeader();
+  }
+
+  .MuiTableCell-stickyHeader {
+    @include styledHeader();
+  }
+}
+
+.MuiTableRow-root {
+  &:not(:last-of-type) .MuiTableCell-body {
+    border-bottom: 0.1rem solid $borderColor !important;
+  }
+
+  &:last-of-type .MuiTableCell-body {
+    border-bottom: 0 !important;
+  }
+
+  .MuiTableCell-body {
+    font-size: $smallFontSize;
+    line-height: normal !important;
+    letter-spacing: normal !important;
+
+    &:not(:last-of-type) {
+      border-right: 0.1rem dashed $borderColor !important;
+    }
+
+
+    padding: 0.8rem 1.6rem !important;
+
+    box-sizing: border-box;
+    height: 5.1rem !important;
+  }
+}

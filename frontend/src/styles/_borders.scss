@@ -1,0 +1,31 @@
+@use 'app';
+
+
+$borderWidth: 0.1rem;
+
+@mixin border {
+  border-color: app.$borderColor;
+
+  border-top-width: 0;
+  border-bottom-width: 0;
+  border-left-width: 0;
+  border-right-width: 0;
+
+  border-style: solid;
+}
+
+@mixin bottom {
+  border-bottom-width: $borderWidth;
+}
+
+@mixin top {
+  border-top-width: $borderWidth;
+}
+
+@mixin left {
+  border-left-width: $borderWidth;
+}
+
+@mixin right {
+  border-right-width: $borderWidth;
+}

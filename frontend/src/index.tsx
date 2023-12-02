@@ -1,12 +1,15 @@
-import type { Component as SolidComponent, ParentComponent as SolidParentComponent } from 'solid-js';
+import { type Component as SolidComponent, type ParentComponent as SolidParentComponent } from 'solid-js';
 import { Router } from '@solidjs/router';
 import { render } from 'solid-js/web';
 import App from './App';
 import { NotificationProvider } from '#providers/NotificationProvider';
 import { SessionProvider } from '#providers/SessionProvider';
+import ThemeProvider from '@suid/material/styles/ThemeProvider';
+import { SocketProvider } from '#providers/SocketProvider';
+import theme from './suidTheme';
+import { StyledEngineProvider } from '@suid/material';
 
 import '#styles/index.scss';
-import { SocketProvider } from '#providers/SocketProvider';
 
 
 // declared it here and not in global.d.ts because typescript was complaining about empty interfaces
@@ -23,15 +26,19 @@ const root = document.getElementById('root');
 
 if (root instanceof HTMLElement) {
   render(() =>
-    <NotificationProvider>
-      <SessionProvider>
-        <SocketProvider>
-          <Router>
-            <App />
-          </Router>
-        </SocketProvider>
-      </SessionProvider>
-    </NotificationProvider>
+    <StyledEngineProvider cleanupStyles={false}>
+      <ThemeProvider theme={theme}>
+        <NotificationProvider>
+          <SessionProvider>
+            <SocketProvider>
+              <Router>
+                <App />
+              </Router>
+            </SocketProvider>
+          </SessionProvider>
+        </NotificationProvider>
+      </ThemeProvider>
+    </StyledEngineProvider>
   , root);
 
   const updateAppHeight = () => {

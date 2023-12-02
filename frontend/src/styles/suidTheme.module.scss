@@ -1,0 +1,49 @@
+@use 'sass:color';
+@use 'app' as *;
+
+
+:export {
+  backgroundColor: $backgroundColor;
+  borderColor: $borderColor;
+  widgetColor: $widgetColor;
+
+  gray: $gray;
+  grayBright: $grayBright;
+
+  red: $red;
+  redBright: $redBright;
+
+  green: $green;
+  greenBright: $greenBright;
+
+  blue: $blue;
+  blueBright: $blueBright;
+
+  yellow: $yellow;
+  yellowBright: $yellowBright;
+
+  textColor: $textColor;
+  textBrightColor: $textBrightColor;
+
+  primaryColor: $primaryColor;
+  primaryBrightColor: $primaryBrightColor;
+
+  fontFamily: $fontFamily;
+  monoFontFamily: $monoFontFamily;
+
+  baseFontSize: $baseFontSize;
+  defaultFontSize: $defaultFontSize;
+  altFontSize: $altFontSize;
+  bigFontSize: $bigFontSize;
+  smallFontSize: $smallFontSize;
+  tinyFontSize: $tinyFontSize;
+
+  defaultIconSize: $defaultIconSize;
+  altIconSize: $altIconSize;
+  bigIconSize: $bigIconSize;
+  smallestIconSize: $smallestIconSize;
+  smallerIconSize: $smallerIconSize;
+  smallIconSize: $smallIconSize;
+
+  borderRadius: $borderRadius;
+}

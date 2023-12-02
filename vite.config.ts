@@ -8,10 +8,11 @@ import {
   serverPort,
 } from './shared/src/constants';
 import { cwd } from 'process';
+import suidPlugin from '@suid/vite-plugin';
 
 
 export default defineConfig({
-  plugins: [solidPlugin(), alias()],
+  plugins: [solidPlugin(), alias(), suidPlugin()],
 
   root: frontendDevelopmentPath,
 

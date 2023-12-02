@@ -1,31 +1,23 @@
 @use 'app';
+@use 'borders';
 
-
-$borderWidth: 0.1rem;
 
 .border {
-  border-color: app.$borderColor;
-
-  border-top-width: 0;
-  border-bottom-width: 0;
-  border-left-width: 0;
-  border-right-width: 0;
-
-  border-style: solid;
+  @include borders.border;
 }
 
 .bottom {
-  border-bottom-width: $borderWidth;
+  @include borders.bottom;
 }
 
 .top {
-  border-top-width: $borderWidth;
+  @include borders.top;
 }
 
 .left {
-  border-left-width: $borderWidth;
+  @include borders.left;
 }
 
 .right {
-  border-right-width: $borderWidth;
+  @include borders.right;
 }
