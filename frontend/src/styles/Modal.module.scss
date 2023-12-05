@@ -1,0 +1,108 @@
+@use 'app' as *;
+@use 'animations' as *;
+@use 'sass:color';
+
+
+$transitionDuration: 0.2s;
+$transitionTimingFunction: ease-in-out;
+$transitionStyle: $transitionDuration $transitionTimingFunction;
+
+.container {
+  position: fixed;
+  left: 0;
+  top: 0;
+
+  width: 100%;
+  height: 100%;
+
+  z-index: 10;
+
+  background-color: color.adjust($backgroundColor, $alpha: -0.5);
+  backdrop-filter: blur(0.5rem);
+
+  .modal {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: min-content 1fr;
+
+    position: absolute;
+    contain: content;
+
+    left: calc(50% + var(--modal-offset-x));
+    top: calc(50% + var(--modal-offset-y));
+    transform: translate(-50%, -50%);
+
+    width: 50rem;
+
+    max-width: calc(100% - 6rem);
+    max-height: calc(100% - 6rem);
+
+    background-color: color.adjust($widgetColor, $alpha: -0.25);
+
+    border: 0.2rem solid $borderColor;
+    border-radius: $borderRadius;
+
+    .title-bar {
+      display: grid;
+      grid-template-columns: 1fr min-content;
+
+      align-items: center;
+
+      padding: 1rem;
+      box-sizing: border-box;
+
+      color: $textColor;
+      font-weight: 500;
+      font-size: $altFontSize;
+
+      user-select: none;
+      cursor: grab;
+
+      background-color: $borderColor;
+    }
+  }
+}
+
+.dragged {
+  cursor: grabbing !important;
+}
+
+.modal-open {
+  animation: modalContainerOpenAnimation 0.2s ease-in-out;
+
+  .modal {
+    animation: modalOpenAnimation 0.2s ease-in-out;
+  }
+}
+
+.modal-close {
+  animation: modalContainerOpenAnimation 0.2s ease-in-out reverse;
+
+  .modal {
+    animation: modalOpenAnimation 0.2s ease-in-out reverse;
+  }
+}
+
+@keyframes modalContainerOpenAnimation {
+  from {
+    background-color: transparent;
+    backdrop-filter: blur(0);
+  }
+
+  to {
+    background-color: color.adjust($backgroundColor, $alpha: -0.5);
+    backdrop-filter: blur(0.5rem);
+  }
+}
+
+@keyframes modalOpenAnimation {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 2rem));
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
