@@ -77,3 +77,7 @@ type OptionalKeys<T> = {
 }[keyof T];
 
 export type RequiredDefaults<T extends Record<string, unknown>> = Required<Pick<T, OptionalKeys<T>>>;
+
+export const clamp = (value: number, min: number, max: number): number => {
+  return Math.min(Math.max(value, min), max);
+};
