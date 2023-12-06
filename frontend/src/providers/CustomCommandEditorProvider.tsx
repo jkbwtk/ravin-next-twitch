@@ -1,10 +1,6 @@
 import { createContext, createEffect, createResource, createSignal, For, onCleanup, onMount, Show, useContext } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { CustomCommand, DeleteCustomCommandReqBody, PatchCustomCommandReqBody, PostCustomCommandReqBody, UserLevel } from '#shared/types/api/commands';
-import { Portal } from 'solid-js/web';
-import { Transition } from 'solid-transition-group';
-import TemplateButton from '#components/TemplateButton';
-import MaterialSymbol from '#components/MaterialSymbol';
 import { useNotification } from '#providers/NotificationProvider';
 import InputRange from '#components/InputRange';
 import InputBase from '#components/InputBase';
@@ -17,6 +13,7 @@ import { SelectChangeEvent } from '@suid/material/Select';
 import { GetTemplatesResponse, Template } from '#shared/types/api/templates';
 import { makeRequest } from '#lib/fetch';
 import { useSocket } from '#providers/SocketProvider';
+import Modal from '#components/Modal';
 
 import style from '#styles/CustomCommandsEditorProvider.module.scss';
 
@@ -254,130 +251,106 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
     >
       {props.children}
 
-      <Portal>
-        <Transition
-          enterActiveClass={style.modalOpen}
-          exitActiveClass={style.modalClose}
-        >
-          <Show when={state.open}>
-            <div
-              class={style.container}
-              onClick={(ev) => {
-                if (ev.target === ev.currentTarget) close();
-              }}
-            >
-              <div class={style.modal}>
-                <div class={style.titleBar}>
-                  <span class={style.title}>Add command</span>
+      <Modal open={state.open} title='Add command' onClose={() => close()}>
+        <form class={style.form} onSubmit={handleForm}>
+          <div class={style.group}>
+            <InputLabeled label='Command' for='command'>
+              <InputBase
+                id='command'
+                name='command'
+                autocomplete='off'
+                required
+                minLength={1}
+                maxLength={32}
+                pattern='^[^\s]+$'
+                placeholder='!command'
+                value={state.command.command ?? ''}
+                title='Command name cannot contain spaces.'
+              />
+            </InputLabeled>
 
-                  <TemplateButton onclick={() => close()}>
-                    <MaterialSymbol symbol='close' color='gray' highlightColor='primary' interactive />
-                  </TemplateButton>
-                </div>
-
-                <form class={style.form} onSubmit={handleForm}>
-                  <div class={style.group}>
-                    <InputLabeled label='Command' for='command'>
-                      <InputBase
-                        id='command'
-                        name='command'
-                        autocomplete='off'
-                        required
-                        minLength={1}
-                        maxLength={32}
-                        pattern='^[^\s]+$'
-                        placeholder='!command'
-                        value={state.command.command ?? ''}
-                        title='Command name cannot contain spaces.'
-                      />
-                    </InputLabeled>
-
-                    <div class={style.description}>
+            <div class={style.description}>
                       Name of the command. It cannot contain spaces and must be between 1 and 32 characters long.
-                    </div>
-                  </div>
+            </div>
+          </div>
 
-                  <div class={style.group}>
-                    <FormControl>
-                      <InputLabeled label='Template' for='template'>
-                        <Select
-                          labelId='template-label'
-                          id='template'
-                          name='template'
-                          value={template()}
-                          onChange={handleTemplateChange}
-                          required
-                        >
-                          <For each={templates()}>
-                            {(template) => (
-                              <MenuItem value={template.id}>{template.name}</MenuItem>
-                            )}
-                          </For>
-                        </Select>
-                      </InputLabeled>
-                    </FormControl>
+          <div class={style.group}>
+            <FormControl>
+              <InputLabeled label='Template' for='template'>
+                <Select
+                  labelId='template-label'
+                  id='template'
+                  name='template'
+                  value={template()}
+                  onChange={handleTemplateChange}
+                  required
+                >
+                  <For each={templates()}>
+                    {(template) => (
+                      <MenuItem value={template.id}>{template.name}</MenuItem>
+                    )}
+                  </For>
+                </Select>
+              </InputLabeled>
+            </FormControl>
 
-                    <div class={style.description}>
+            <div class={style.description}>
                       This is your command template. You can add and edit templates in the Templates section.
-                    </div>
-                  </div>
+            </div>
+          </div>
 
-                  <div class={style.group}>
-                    <InputLabeled label='Cooldown' for='cooldown'>
-                      <InputRange
-                        id='cooldown'
-                        name='cooldown'
-                        type='range'
-                        min='0'
-                        max='1440'
-                        step='5'
-                        label='Cooldown between uses:'
-                        unit='seconds'
-                        value={state.command.cooldown ?? '0'}
-                      />
-                    </InputLabeled>
+          <div class={style.group}>
+            <InputLabeled label='Cooldown' for='cooldown'>
+              <InputRange
+                id='cooldown'
+                name='cooldown'
+                type='range'
+                min='0'
+                max='1440'
+                step='5'
+                label='Cooldown between uses:'
+                unit='seconds'
+                value={state.command.cooldown ?? '0'}
+              />
+            </InputLabeled>
 
-                    <div class={style.description}>
+            <div class={style.description}>
                       Minimum time between uses of this command. Set to 0 to disable.
-                    </div>
-                  </div>
+            </div>
+          </div>
 
-                  <div class={style.group}>
-                    <FormControl>
-                      <InputLabeled label='User level' for='user-level'>
-                        <Select
-                          labelId='user-level-label'
-                          id='user-level'
-                          name='user-level'
-                          value={userLevel()}
-                          onChange={handleUserStatusChange}
-                          required
-                        >
-                          <MenuItem value={UserLevel['Everyone']}>Everyone</MenuItem>
-                          <MenuItem value={UserLevel['Subscriber']}>Subscriber</MenuItem>
-                          <MenuItem value={UserLevel['VIP']}>VIP</MenuItem>
-                          <MenuItem value={UserLevel['Moderator']}>Moderator</MenuItem>
-                          <MenuItem value={UserLevel['Owner']}>Owner</MenuItem>
-                        </Select>
-                      </InputLabeled>
-                    </FormControl>
+          <div class={style.group}>
+            <FormControl>
+              <InputLabeled label='User level' for='user-level'>
+                <Select
+                  labelId='user-level-label'
+                  id='user-level'
+                  name='user-level'
+                  value={userLevel()}
+                  onChange={handleUserStatusChange}
+                  required
+                >
+                  <MenuItem value={UserLevel['Everyone']}>Everyone</MenuItem>
+                  <MenuItem value={UserLevel['Subscriber']}>Subscriber</MenuItem>
+                  <MenuItem value={UserLevel['VIP']}>VIP</MenuItem>
+                  <MenuItem value={UserLevel['Moderator']}>Moderator</MenuItem>
+                  <MenuItem value={UserLevel['Owner']}>Owner</MenuItem>
+                </Select>
+              </InputLabeled>
+            </FormControl>
 
-                    <div class={style.description}>
+            <div class={style.description}>
                       Minimum user level required to use this command.
                       Permissions are hierarchical, so a VIP can use a command that requires a Subscriber, but not the other way around.
-                    </div>
-                  </div>
-
-                  <div class={style.buttons}>
-                    <Button type='submit' color='primary' symbol='save'>Save</Button>
-                    <Button type='button' color='gray' onclick={() => close()}>Cancel</Button>
-                  </div>
-                </form>
-              </div>
             </div>
-          </Show>
-        </Transition>
-      </Portal>
+          </div>
+
+          <div class={style.buttons}>
+            <Button type='submit' color='primary' symbol='save'>Save</Button>
+            <Button type='button' color='gray' onclick={() => close()}>Cancel</Button>
+          </div>
+        </form>
+      </Modal>
     </CustomCommandEditorContext.Provider>);
 };
 
