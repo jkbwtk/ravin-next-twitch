@@ -1,15 +1,15 @@
-import { JSX } from 'solid-js';
+import { AnchorProps, Link } from '@solidjs/router';
 
 import style from '#styles/AnchorText.module.scss';
 
 
-const AnchorText: ParentComponent<JSX.AnchorHTMLAttributes<HTMLAnchorElement>> = (props) => {
+const AnchorText: ParentComponent<AnchorProps> = (props) => {
   const customClass = [style.anchor, props.class].join(' ');
 
   return (
-    <a {...props} class={customClass} >
+    <Link {...props} class={customClass} >
       {props.children ?? props.href}
-    </a>
+    </Link>
   );
 };
 

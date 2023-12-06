@@ -14,6 +14,7 @@ import { GetTemplatesResponse, Template } from '#shared/types/api/templates';
 import { makeRequest } from '#lib/fetch';
 import { useSocket } from '#providers/SocketProvider';
 import Modal from '#components/Modal';
+import AnchorText from '#components/AnchorText';
 
 import style from '#styles/CustomCommandsEditorProvider.module.scss';
 
@@ -295,7 +296,8 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
             </FormControl>
 
             <div class={style.description}>
-                      This is your command template. You can add and edit templates in the Templates section.
+              This is your command template.
+              You can add and edit templates in the <AnchorText href='/dashboard/templates'>Templates</AnchorText> section.
             </div>
           </div>
 

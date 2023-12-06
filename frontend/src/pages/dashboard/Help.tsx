@@ -36,9 +36,9 @@ const Help: Component = () => {
           </p>
 
           <p class={style.description}>
-            So here is a link to the guide on how to set up a Twitch bot:
-            <AnchorText href='https://dev.twitch.tv/docs/irc/authenticate-bot' />.
-            And here are some more words to end this "paragraph".
+            So here is a link to the guide on how to set up a Twitch bot: <AnchorText
+              href='https://dev.twitch.tv/docs/irc/authenticate-bot'
+            />. And here are some more words to end this "paragraph".
           </p>
 
           <p>
