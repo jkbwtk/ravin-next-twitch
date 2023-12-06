@@ -70,3 +70,8 @@ button {
 
   cursor: pointer;
 }
+
+code {
+  font-family: app.$monoFontFamily;
+  color: app.$codeColor;
+}
