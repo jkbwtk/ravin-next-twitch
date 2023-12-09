@@ -7,7 +7,6 @@ import dayjs from 'dayjs';
 import { Template } from '#database/extensions/template';
 import { StateMap } from '#bot/StateMap';
 
-
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -40,27 +39,27 @@ export class TemplateRunner {
     executionTimeout: 1000,
   };
 
-  public states: StateMap;
-
   constructor(private isolate: Isolate, private template: Template, options: TemplateRunnerOptions = {}) {
     this.options = mergeOptions(options, TemplateRunner.defaultOptions);
 
     this.script = isolate.compileScriptSync(`\`${template.template}\``);
-    this.states = new StateMap(template);
   }
 
-  private createContext(params: Record<string, unknown> = {}): Context {
+  private async createContext(params: Record<string, unknown> = {}): Promise<Context> {
     const context = this.isolate.createContextSync();
     const jail = context.global;
+
+    const states = new StateMap(this.template);
+    await states.load();
 
     jail.setSync('global', jail.derefInto());
     jail.setSync('template', this.template.template);
 
-    jail.setSync('setState', this.setCustomState);
-    jail.setSync('getState', this.getCustomState);
+    jail.setSync('setState', this.setCustomStateFactory(states));
+    jail.setSync('getState', this.getCustomStateFactory(states));
 
-    jail.setSync('counter', this.counter);
-    jail.setSync('time', this.time);
+    jail.setSync('counter', this.counterFactory(states));
+    jail.setSync('time', this.timeFactory(states));
 
     for (const [key, value] of Object.entries(params)) {
       jail.setSync(key, value);
@@ -85,64 +84,72 @@ export class TemplateRunner {
     return context;
   }
 
-  private setCustomState = (value: unknown): boolean => {
-    try {
-      const stringified = JSON.stringify(value);
-      if (stringified.length > this.options.maxCustomStateLength) {
-        logger.warn('Custom state is too long, not setting', { label: ['TemplateRunner', this.template.id, 'setCustomState'] });
+  private setCustomStateFactory(states: StateMap) {
+    return (value: unknown): boolean => {
+      try {
+        const stringified = JSON.stringify(value);
+        if (stringified.length > this.options.maxCustomStateLength) {
+          logger.warn('Custom state is too long, not setting', { label: ['TemplateRunner', this.template.id, 'setCustomState'] });
+          return false;
+        }
+
+        const state = JSON.parse(stringified);
+        states.set('customState', state);
+
+        return true;
+      } catch (err) {
+        logger.error('Setting custom state failed', { error: err, label: ['TemplateRunner', this.template.id, 'setCustomState'] });
         return false;
       }
+    };
+  }
 
-      const state = JSON.parse(stringified);
-      this.states.set('customState', state);
+  private getCustomStateFactory(states: StateMap) {
+    return (): unknown => {
+      try {
+        let state = states.get('customState');
+        if (state === undefined) state = null;
 
-      return true;
-    } catch (err) {
-      logger.error('Setting custom state failed', { error: err, label: ['TemplateRunner', this.template.id, 'setCustomState'] });
-      return false;
-    }
-  };
+        const stringified = JSON.stringify(state);
+        const parsed = JSON.parse(stringified);
 
-  private getCustomState = (): unknown => {
-    try {
-      let state = this.states.get('customState');
-      if (state === undefined) state = null;
+        return parsed;
+      } catch (err) {
+        logger.error('Getting custom state failed', { error: err, label: ['TemplateRunner', this.template.id, 'getCustomState'] });
+      }
+    };
+  }
 
-      const stringified = JSON.stringify(state);
-      const parsed = JSON.parse(stringified);
+  private counterFactory(states: StateMap) {
+    return (): number => {
+      let state = (states.get('counterState') ?? 0) as number;
 
-      return parsed;
-    } catch (err) {
-      logger.error('Getting custom state failed', { error: err, label: ['TemplateRunner', this.template.id, 'getCustomState'] });
-    }
-  };
+      if (typeof state !== 'number') {
+        logger.warn('Counter state is not a number, resetting to 0', { label: ['TemplateRunner', this.template.id, 'counter'] });
+        state = 0;
+      }
 
-  private counter = (): number => {
-    let state = (this.states.get('counterState') ?? 0) as number;
+      state += 1;
 
-    if (typeof state !== 'number') {
-      logger.warn('Counter state is not a number, resetting to 0', { label: ['TemplateRunner', this.template.id, 'counter'] });
-      state = 0;
-    }
+      states.set('counterState', state);
+      return state;
+    };
+  }
 
-    state += 1;
+  private timeFactory(states: StateMap) {
+    return (timezone: string, format?: string): string => {
+      const date = dayjs();
 
-    this.states.set('counterState', state);
-    return state;
-  };
+      if (timezone === undefined || typeof timezone !== 'string') throw new Error('Invalid timezone type');
+      if (format !== undefined && typeof format !== 'string') throw new Error('Invalid format type');
 
-  private time = (timezone: string, format?: string): string => {
-    const date = dayjs();
-
-    if (timezone === undefined || typeof timezone !== 'string') throw new Error('Invalid timezone type');
-    if (format !== undefined && typeof format !== 'string') throw new Error('Invalid format type');
-
-    return date.tz(timezone)
-      .format(format);
-  };
+      return date.tz(timezone)
+        .format(format);
+    };
+  }
 
   public async run(params?: Record<string, unknown>): Promise<string> {
-    const context = this.createContext(params);
+    const context = await this.createContext(params);
 
     const response = await this.script.run(context, { timeout: this.options.executionTimeout });
     context.release();

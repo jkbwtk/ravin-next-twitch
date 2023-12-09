@@ -3,6 +3,7 @@ import { TemplateRunner } from '#bot/TemplateRunner';
 import { prisma } from '#database/database';
 import { CommandWithUserAndTemplate } from '#database/extensions/command';
 import { MessageWithUser } from '#database/extensions/message';
+import { Template } from '#database/extensions/template';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { SocketServer } from '#server/SocketServer';
 import { CustomCommandState } from '#shared/types/api/commands';
@@ -24,7 +25,7 @@ export class CustomCommand implements AutoWirable {
     this.channelThread = wire(this, ChannelThread);
 
     const isolate = wire(this, Isolate);
-    this.templateRunner = new TemplateRunner(isolate, this.command.template);
+    this.templateRunner = new TemplateRunner(isolate, this.command.template as Template);
   }
 
   public async execute(self: boolean, message: MessageWithUser): Promise<void> {
