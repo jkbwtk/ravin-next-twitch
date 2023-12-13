@@ -1,6 +1,7 @@
 import { ExtendedMap } from '#lib/ExtendedMap';
 import { Config as ConfigEntity } from '@prisma/client';
 import { prisma } from '#database/database';
+import { logger } from '#lib/logger';
 
 
 export class Config {
@@ -41,20 +42,24 @@ export class Config {
   }
 
   public static async get(key: string, shadowed = true): Promise<string | undefined> {
-    const instance = await Config.getInstance();
+    try {
+      const instance = await Config.getInstance();
 
-    if (shadowed) {
-      const shadowedValue = instance.shadow.get(key);
-      if (shadowedValue !== undefined) return shadowedValue;
-    }
+      if (shadowed) {
+        const shadowedValue = instance.shadow.get(key);
+        if (shadowedValue !== undefined) return shadowedValue;
+      }
 
-    const value = instance.config.get(key);
-    if (value !== undefined) return value;
+      const value = instance.config.get(key);
+      if (value !== undefined) return value;
 
-    const query = await instance.repository.findFirst({ where: { key } });
-    if (query) {
-      instance.config.set(query.key, query.value);
-      return query.value;
+      const query = await instance.repository.findFirst({ where: { key } });
+      if (query) {
+        instance.config.set(query.key, query.value);
+        return query.value;
+      }
+    } catch (err) {
+      logger.warn('Failed to get config key', { error: err, label: ['Config', 'get'] });
     }
   }
 

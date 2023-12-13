@@ -63,7 +63,11 @@ export class Server {
   private static async generateSessionSecret() {
     const secret = randomAlphanumeric(12);
 
-    await Config.set('sessionSecret', secret);
+    try {
+      await Config.set('sessionSecret', secret);
+    } catch (err) {
+      logger.warn('Failed to set session secret', { error: err, label: ['Server', 'generateSessionSecret'] });
+    }
 
     return secret;
   }
