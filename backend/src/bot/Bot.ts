@@ -8,6 +8,7 @@ import { TwitchUserRepo } from '#lib/TwitchUserRepo';
 import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { Wirable } from '#lib/autowire';
+import { SocketServer } from '#server/SocketServer';
 
 
 export interface BotOptions {
@@ -115,6 +116,7 @@ export class Bot {
       }
 
       await prisma.channelStats.incrementMessages(instance.channelUserId);
+      SocketServer.emitToUser(instance.channelUserId, 'NEW_MESSAGE', instance.serialize());
 
       await thread.handleMessage(self, instance);
     } catch (err) {

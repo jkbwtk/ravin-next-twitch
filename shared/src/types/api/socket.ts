@@ -3,6 +3,7 @@ import { Action } from './dashboard';
 import { SystemNotification } from './systemNotifications';
 import { Message } from './logs';
 import { ScheduledJob } from 'types/api/admin';
+import { Template } from 'types/api/templates';
 
 
 export type ServerToClientEvents = {
@@ -28,6 +29,10 @@ export type ServerToClientEvents = {
   DEL_COMMAND_TIMER: (commandId: number) => void;
 
   COMMAND_TIMER_EXECUTED: (status: CommandTimerState) => void;
+
+  NEW_TEMPLATE: (template: Template) => void;
+  UPD_TEMPLATE: (template: Template) => void;
+  DEL_TEMPLATE: (templateId: number) => void;
 };
 
 export type ClientToServerEvents = {

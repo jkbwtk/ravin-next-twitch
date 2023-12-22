@@ -8,6 +8,7 @@ import { createChannelRouter } from '#server/routers/v1/channel/channel.router';
 import { createCommandsRouter } from '#server/routers/v1/commands/commands.router';
 import { createDashboardRouter } from '#server/routers/v1/dashboard/dashboard.router';
 import { createAuthRouter } from '#server/routers/v1/auth/auth.router';
+import { createTemplatesRouter } from '#server/routers/v1/templates/templates.router';
 
 
 export const createV1Router = async (): Promise<Router> => {
@@ -30,6 +31,8 @@ export const createV1Router = async (): Promise<Router> => {
   v1Router.use('/logs', createLogsRouter());
 
   v1Router.use('/admin', createAdminRouter());
+
+  v1Router.use('/templates', createTemplatesRouter());
 
   return v1Router;
 };
