@@ -148,13 +148,19 @@ export class TemplateRunner {
     };
   }
 
-  public async run(params?: Record<string, unknown>): Promise<string> {
-    const context = await this.createContext(params);
+  public async run(params?: Record<string, unknown>): Promise<string | null> {
+    try {
+      const context = await this.createContext(params);
 
-    const response = await this.script.run(context, { timeout: this.options.executionTimeout });
-    context.release();
+      const response = await this.script.run(context, { timeout: this.options.executionTimeout });
+      context.release();
 
-    return `${response}`;
+      return `${response}`;
+    } catch (err) {
+      logger.error('Template execution failed', { error: err, label: ['TemplateRunner', this.template.id, 'run'] });
+
+      return null;
+    }
   }
 
   public async dryRun(): Promise<string> {

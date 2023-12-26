@@ -5,6 +5,7 @@ import { CommandWithUserAndTemplate } from '#database/extensions/command';
 import { MessageWithUser } from '#database/extensions/message';
 import { Template } from '#database/extensions/template';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
+import { logger } from '#lib/logger';
 import { SocketServer } from '#server/SocketServer';
 import { CustomCommandState } from '#shared/types/api/commands';
 import { Isolate } from 'isolated-vm';
@@ -42,6 +43,14 @@ export class CustomCommand implements AutoWirable {
         user: message.displayName,
         username: message.username,
       });
+
+      if (response === null) {
+        logger.warn('Failed to execute template for command %s in #%s', this.command.command, this.command.user.login, {
+          label: ['CustomCommand', 'execute'],
+        });
+
+        return;
+      }
 
       await this.client.say(message.channelName, response);
       await prisma.channelStats.incrementCommands(this.channelThread.channel.user.id);
