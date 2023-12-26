@@ -9,6 +9,7 @@ import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { Wirable } from '#lib/autowire';
 import { SocketServer } from '#server/SocketServer';
+import { ExtendedCron } from '#lib/ExtendedCron';
 
 
 export interface BotOptions {
@@ -24,6 +25,10 @@ export class Bot {
 
   private channels: ExtendedMap<string, ChannelThread>;
 
+  private readonly rejoinChannelsJobName = 'Bot:rejoinChannels';
+
+  private jobs: ExtendedMap<string, ExtendedCron> = new ExtendedMap();
+
   private static defaultOptions: Required<BotOptions> = {
     joinInterval: 1000,
     debug: true,
@@ -34,6 +39,8 @@ export class Bot {
     this.registerEventHandlers();
 
     await this.client.connect();
+
+    this.createJobs();
   }
 
   public static async getInstance(options?: Partial<BotOptions>): Promise<Bot> {
@@ -101,6 +108,29 @@ export class Bot {
     instance.client.addListener('connected', wrapper);
     await deferred.promise;
     instance.client.removeListener('connected', wrapper);
+  };
+
+  private createJobs(): void {
+    this.jobs.set(
+      this.rejoinChannelsJobName,
+      new ExtendedCron('?/1 * * * *', {
+        name: this.rejoinChannelsJobName,
+      }, this.rejoinChannels),
+    );
+  }
+
+  private rejoinChannels = async () => {
+    const channels = await prisma.channel.findMany({
+      include: {
+        user: true,
+      },
+    });
+
+    for (const channel of channels) {
+      if (channel.joined && !this.client.getChannels().includes(`#${channel.user.login}`)) {
+        await Bot.joinChannel(channel.userId);
+      }
+    }
   };
 
   private handleMessage = async (channel: string, userstate: ChatUserstate, message: string, self: boolean) => {
@@ -246,7 +276,7 @@ export class Bot {
 
       return true;
     } catch (err) {
-      logger.error('Failed to join channel [%s]', id, { label: ['Bot', 'joinChannel'], err });
+      logger.error('Failed to join channel [%s]', id, { label: ['Bot', 'joinChannel'], error: err });
       return false;
     }
   }
@@ -317,5 +347,16 @@ export class Bot {
     }
 
     await channelThread.commandTimerHandler.syncCommandTimers();
+  }
+
+  public async destroy(): Promise<void> {
+    this.jobs.forEach((job) => job.stop());
+    this.jobs.clear();
+
+    this.channels.forEach((channel) => channel.destroy());
+    this.channels.clear();
+
+    await this.client.disconnect();
+    this.client.removeAllListeners();
   }
 }
