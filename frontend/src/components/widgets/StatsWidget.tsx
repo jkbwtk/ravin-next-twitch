@@ -74,12 +74,12 @@ const createChart = (canvas: HTMLCanvasElement) => new Chart(
           titleAlign: 'center',
           titleFont: {
             family: 'Quicksand',
-            weight: '700',
+            weight: 700,
             size: 12,
           },
           bodyFont: {
             family: 'Quicksand',
-            weight: '500',
+            weight: 500,
             size: 16,
           },
         },

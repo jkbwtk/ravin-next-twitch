@@ -49,7 +49,7 @@ const Homepage: Component = () => {
             <AnimatedImage class={style.avatar} src={session.user?.profileImageUrl} />
           </Match>
           <Match when={!session.loggedIn}>
-            <AnchorButton class={style.button} color='gray' size='medium' href='/api/v1/auth/twitch'>Login with twitch</AnchorButton>
+            <AnchorButton customClass={style.button} color='gray' size='medium' href='/api/v1/auth/twitch'>Login with twitch</AnchorButton>
           </Match>
         </Switch>
       </div>

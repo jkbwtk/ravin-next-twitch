@@ -1,12 +1,12 @@
 import MaterialSymbol from '#components/MaterialSymbol';
 import { timeFromNowAlt } from '#shared/timeUtils';
-import { CommandStatus } from '#shared/types/api/commands';
+import { CustomCommandState } from '#shared/types/api/commands';
 import { createEffect, createSignal, Match, onCleanup, onMount, Switch } from 'solid-js';
 
 import style from '#styles/CommandStatusTile.module.scss';
 
 
-const CommandStatusTile: Component<CommandStatus> = (props) => {
+const CommandStatusTile: Component<CustomCommandState> = (props) => {
   const getTime = () => props.lastUsed !== 0 ? timeFromNowAlt(props.lastUsed) : 'never';
   const [time, setTime] = createSignal(getTime());
   let intervalHandle: number | undefined = undefined;
