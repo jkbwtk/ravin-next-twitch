@@ -4,7 +4,6 @@ import { cwd } from 'process';
 
 
 export const defaultServerPort = 3000;
-export const defaultCallbackUrl = 'http://localhost:3000/api/v1/auth/callback';
 
 export const frontendDevelopmentPath = path.join(cwd(), 'frontend');
 export const frontendProductionPath = path.join(cwd(), 'web');
@@ -21,8 +20,10 @@ export const serverPort = (() => {
   return isNaN(port) ? defaultServerPort : port;
 })();
 
+
 export const publicPath = isDevMode ? developmentPublicPath : productionPublicPath;
 export const frontendPath = isDevMode ? frontendDevelopmentPath : frontendProductionPath;
+export const defaultCallbackUrl = `http://localhost:${serverPort}/api/v1/auth/callback`;
 
 export const callbackUrl = process.env.CALLBACK_URL ?? defaultCallbackUrl;
 
