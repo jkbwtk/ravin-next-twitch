@@ -115,7 +115,7 @@ const instance = new Logger({
         'error',
         'warn',
         'info',
-        'http',
+        // 'http',
         'verbose',
         'debug',
         'time',
