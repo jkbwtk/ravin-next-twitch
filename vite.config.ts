@@ -19,6 +19,10 @@ export default defineConfig({
   server: {
     port: serverPort,
     host: '0.0.0.0',
+
+    hmr: {
+      port: 55555,
+    },
   },
 
   build: {
