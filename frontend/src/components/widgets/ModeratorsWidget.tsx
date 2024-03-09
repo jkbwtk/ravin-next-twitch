@@ -2,9 +2,9 @@ import { createMemo, createResource, ErrorBoundary, For, InitializedResourceRetu
 import Widget from '#components/Widget';
 import AnimatedImage from '#components/AnimatedImage';
 import { GetModeratorsResponse, Moderator } from '#types/api/dashboard';
-import FetchFallback from '#components/FetchFallback';
 import { makeRequest } from '#lib/fetch';
 import ErrorFallback from '#components/ErrorFallback';
+import { Skeleton, Stack } from '@suid/material';
 
 import style from '#styles/widgets/ModeratorsWidget.module.scss';
 
@@ -50,6 +50,30 @@ const ModeratorsBase: Component<{ moderators: InitializedResourceReturn<Moderato
   );
 };
 
+const ModeratorsSkeleton: Component = () => (
+  <>
+    <Stack class={style.segment}>
+      <Skeleton variant='text' animation='wave' />
+      <div class={style.user}>
+        <Skeleton variant='circular' animation='wave' width={30} height={30} />
+        <Skeleton variant='text' animation='wave' style={{ 'flex-grow': 1 }} />
+      </div>
+    </Stack>
+
+    <Stack class={style.segment}>
+      <Skeleton variant='text' animation='wave' />
+      <div class={style.user}>
+        <Skeleton variant='circular' animation='wave' width={30} height={30} />
+        <Skeleton variant='text' animation='wave' style={{ 'flex-grow': 1 }} />
+      </div>
+      <div class={style.user}>
+        <Skeleton variant='circular' animation='wave' width={30} height={30} />
+        <Skeleton variant='text' animation='wave' style={{ 'flex-grow': 1 }} />
+      </div>
+    </Stack>
+  </>
+);
+
 const ModeratorsWidget: Component = () => {
   const resource = createResource(fetchModerators, {
     initialValue: [],
@@ -57,15 +81,23 @@ const ModeratorsWidget: Component = () => {
   const [moderators, { refetch: refetchModerators }] = resource;
 
   return (
-    <Widget class={style.container} title='Moderators' refresh={refetchModerators} loading={moderators.state === 'refreshing'}>
-      <ErrorBoundary fallback={
-        <ErrorFallback class={style.fallback} refresh={refetchModerators} loading={moderators.state === 'refreshing'}>Failed to load moderators</ErrorFallback>
-      }>
-        <Suspense fallback={<FetchFallback>Fetching Moderators</FetchFallback>}>
-          <ModeratorsBase moderators={resource}/>
-        </Suspense>
-      </ErrorBoundary>
-    </Widget>
+    <>
+      <Widget class={style.container} title='Moderators' refresh={refetchModerators} loading={moderators.state === 'refreshing'}>
+        <ErrorBoundary fallback={
+          <ErrorFallback
+            class={style.fallback}
+            refresh={refetchModerators}
+            loading={moderators.state === 'refreshing'}
+          >
+            Failed to load moderators
+          </ErrorFallback>
+        }>
+          <Suspense fallback={<ModeratorsSkeleton/>}>
+            <ModeratorsBase moderators={resource}/>
+          </Suspense>
+        </ErrorBoundary>
+      </Widget>
+    </>
   );
 };
 
