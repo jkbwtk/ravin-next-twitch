@@ -3,9 +3,9 @@ import Widget from '#components/Widget';
 import AnimatedImage from '#components/AnimatedImage';
 import { GetTopStatsResponse, TopStats } from '#types/api/dashboard';
 import MaterialSymbol from '#components/MaterialSymbol';
-import FetchFallback from '#components/FetchFallback';
 import { makeRequest } from '#lib/fetch';
 import ErrorFallback from '#components/ErrorFallback';
+import { Skeleton, Stack } from '@suid/material';
 
 import style from '#styles/widgets/TopStatsWidget.module.scss';
 
@@ -36,7 +36,33 @@ const TopStatsWidget: Component = () => {
       <ErrorBoundary fallback={
         <ErrorFallback class={style.fallback} refresh={refetchStats} loading={stats.state === 'refreshing'}>Failed to load top stats</ErrorFallback>
       }>
-        <Suspense fallback={<FetchFallback>Fetching Top Stats</FetchFallback>}>
+        <Suspense fallback={
+          <>
+            <Stack class={style.segment}>
+              <Skeleton variant='text' animation='wave' />
+              <div class={style.entry}>
+                <Skeleton variant='circular' animation='wave' width={40} height={40} />
+                <Skeleton variant='text' animation='wave' style={{ 'flex-grow': 1 }} />
+              </div>
+            </Stack>
+
+            <Stack class={style.segment}>
+              <Skeleton variant='text' animation='wave' />
+              <div class={style.entry}>
+                <Skeleton variant='circular' animation='wave' width={40} height={40} />
+                <Skeleton variant='text' animation='wave' style={{ 'flex-grow': 1 }} />
+              </div>
+            </Stack>
+
+            <Stack class={style.segment}>
+              <Skeleton variant='text' animation='wave' />
+              <div class={style.entry}>
+                <Skeleton variant='circular' animation='wave' width={40} height={40} />
+                <Skeleton variant='text' animation='wave' style={{ 'flex-grow': 1 }} />
+              </div>
+            </Stack>
+          </>
+        }>
           <div class={style.segment}>
             <span class={style.segmentTitle}>Top chatter</span>
 
