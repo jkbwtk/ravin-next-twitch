@@ -11,11 +11,11 @@ export const quickSwitch = <T, K extends QuickSwitchKeyTypes = string>(value: Qu
   return cases.default;
 };
 
-type NonNull = string | number | boolean | symbol | object | bigint;
+type Defined = string | number | boolean | symbol | object | bigint | null;
 
-export const mergeOptions = <T extends Record<string, NonNull>>(options: T, defaults: RequiredDefaults<T> | Required<T>): Required<T> => {
+export const mergeOptions = <T extends Record<string, Defined>>(options: T, defaults: RequiredDefaults<T> | Required<T>): Required<T> => {
   const definedOptions = Object.entries(options)
-    .filter(([, value]) => value !== undefined) as [keyof T, NonNull][];
+    .filter(([, value]) => value !== undefined) as [keyof T, Defined][];
 
   return Object.assign({}, defaults, Object.fromEntries(definedOptions)) as Required<T>;
 };
