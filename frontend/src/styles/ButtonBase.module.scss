@@ -7,7 +7,6 @@
   user-select: none;
   text-decoration: none;
   font-weight: 500;
-  border-radius: app.$borderRadius;
   cursor: pointer;
   transition: all 0.1s ease-in-out;
   box-sizing: border-box;
@@ -24,6 +23,10 @@
     translate: 0 0.2rem;
   }
 
+  &:not(.plain) {
+    border-radius: app.$borderRadius;
+  }
+
   .text {
     display: flex;
     align-items: center;
@@ -32,7 +35,9 @@
 }
 
 @mixin border($color) {
-  border: 0.2rem solid $color;
+  &:not(.plain) {
+    border: 0.2rem solid $color;
+  }
 }
 
 @mixin color($textColor, $accentColor, $activeColor, $invertedColor) {
@@ -42,14 +47,23 @@
 
   &:hover:not(.disabled):not(.loading),
   &:active:not(.disabled):not(.loading) {
-    background-color: $activeColor;
-    color: $invertedColor;
-    box-shadow: 0 0.0 1rem $activeColor;
-
-    @include border($activeColor);
-
-    :global(.material-symbols-rounded) {
+    &:not(.plain) {
+      background-color: $activeColor;
       color: $invertedColor;
+      box-shadow: 0 0.0 1rem $activeColor;
+
+      @include border($activeColor);
+
+
+      :global(.material-symbols-rounded) {
+        color: $invertedColor;
+      }
+    }
+
+    &.plain {
+      :global(.material-symbols-rounded) {
+        color: $activeColor;
+      }
     }
   }
 
@@ -65,8 +79,10 @@
 }
 
 @mixin size($paddingX, $paddingY, $fontSize, $iconSize) {
-  padding: $paddingY $paddingX;
-  font-size: $fontSize;
+  &:not(.plain) {
+    padding: $paddingY $paddingX;
+    font-size: $fontSize;
+  }
 
   :global(.material-symbols-rounded) {
     @include symbolUtils.symbolSize($iconSize);

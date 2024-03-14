@@ -18,6 +18,7 @@ export interface ButtonProps extends ButtonBaseProps {
   draggable?: boolean;
   disabled?: boolean;
   loading?: boolean;
+  plain?: boolean;
 }
 
 export const defaultProps: Required<ButtonProps> = {
@@ -28,6 +29,7 @@ export const defaultProps: Required<ButtonProps> = {
   draggable: false,
   disabled: false,
   loading: false,
+  plain: false,
 };
 
 const Button: Component<ButtonProps & JSX.ButtonHTMLAttributes<HTMLButtonElement>> = (userProps) => {
@@ -45,6 +47,7 @@ const Button: Component<ButtonProps & JSX.ButtonHTMLAttributes<HTMLButtonElement
         [style.disabled]: props.disabled,
         [style.loading]: props.loading,
         [props.customClass]: true,
+        [style.plain]: props.plain,
       }}
       {...props}
     >

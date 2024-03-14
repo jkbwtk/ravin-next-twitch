@@ -8,7 +8,7 @@ export type SymbolColorType = 'gray' | 'red' | 'green' | 'blue' | 'yellow' | 'pr
 export type SymbolHighlightColorType = SymbolColorType | 'none';
 export type SymbolSizeType = 'smallest' | 'smaller' | 'small' | 'alt' | 'medium' | 'big';
 
-interface MaterialSymbolProps {
+export interface MaterialSymbolProps {
   symbol: string;
   color?: SymbolColorType;
   size?: SymbolSizeType;
