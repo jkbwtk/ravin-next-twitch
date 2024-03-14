@@ -1,0 +1,46 @@
+@use 'app' as *;
+
+
+.paginator {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+
+  margin: 0.8rem 0;
+
+  gap: 1.6rem;
+
+  .limit-picker {
+    display: flex;
+    align-items: center;
+
+    width: max-content;
+    gap: 0.8rem;
+
+    font-size: $smallFontSize;
+
+    .select {
+      width: 8rem;
+    }
+  }
+
+  .controls {
+    display: flex;
+    align-items: center;
+
+    gap: 0.8rem;
+
+    .page-info {
+      font-size: $smallFontSize;
+
+      font-family: $monoFontFamily;
+    }
+
+    .page-button {
+      width: 4rem;
+      height: 4rem;
+    }
+  }
+}
