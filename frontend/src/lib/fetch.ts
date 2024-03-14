@@ -6,10 +6,20 @@ import { getVerboseName } from '#shared/httpCodes';
 
 export type RequestOptions<T extends ZodTypeAny> = RequestInit & {
   schema?: T;
+  params?: URLSearchParams;
 };
 
 export const makeRequest = async <T extends ZodTypeAny>(url: string | URL, options: RequestOptions<T>): Promise<z.infer<T>> => {
-  const res = await fetch(url, options);
+  const localUrl = new URL(url.toString(), window.location.origin);
+
+  // Merge search params from url and options
+  if (options.params instanceof URLSearchParams) {
+    for (const [key, value] of options.params) {
+      localUrl.searchParams.set(key, value);
+    }
+  }
+
+  const res = await fetch(localUrl, options);
 
   if (res.headers.get('Content-Type')?.includes('application/json') === false) {
     throw new Error('Expected JSON response');
