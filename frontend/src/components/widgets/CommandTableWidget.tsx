@@ -1,5 +1,5 @@
 import { createEffect, createResource, createSignal, ErrorBoundary, For, onCleanup, onMount, Suspense } from 'solid-js';
-import { CustomCommand, GetCustomCommandsResponse } from '#types/api/commands';
+import { CustomCommand, GetCustomCommandsPaginatedResponse } from '#types/api/commands';
 import { useSocket } from '#providers/SocketProvider';
 import { makeRequest } from '#lib/fetch';
 import Command from '#components/Command';
@@ -13,6 +13,8 @@ import Paper from '@suid/material/Paper/Paper';
 import TableRow from '@suid/material/TableRow/TableRow';
 import TableCell from '@suid/material/TableCell/TableCell';
 import TableBody from '@suid/material/TableBody/TableBody';
+import { createPagination, getSearchParams, Pagination } from '#lib/pagination';
+import Paginator from '#components/Paginator';
 
 import style from '#styles/widgets/CommandTableWidget.module.scss';
 
@@ -27,35 +29,50 @@ export interface CustomCommandProps {
   command: CustomCommand;
 }
 
-const fetchCommands = async () => {
-  const { data } = await makeRequest('/api/v1/commands/custom', { schema: GetCustomCommandsResponse });
+const fetchCommands = async (pagination: Pagination) => {
+  console.log(pagination);
 
-  return data.sort((a, b) => {
+  const response = await makeRequest('/api/v1/commands/custom', {
+    schema: GetCustomCommandsPaginatedResponse,
+    params: getSearchParams(pagination),
+  });
+
+  response.data.sort((a, b) => {
     if (a.command > b.command) return 1;
     if (a.command < b.command) return -1;
     return 0;
   });
+
+  return response;
 };
 
 const CommandTable: Component = () => {
   const [socket] = useSocket();
   const [tableType, setTableType] = createSignal<TableType>(TableType.Full);
-  const [commands, { mutate: setCommands, refetch: refetchCommands }] = createResource(fetchCommands, {
-    initialValue: [],
+  const [page, setPage] = createSignal(0);
+  const [limit, setLimit] = createSignal(5);
+  const [commands, { mutate: setCommands, refetch: refetchCommands }] = createResource(createPagination(limit, page), fetchCommands, {
+    initialValue: {
+      data: [],
+      total: 0,
+      limit: 0,
+      offset: 0,
+    },
+    name: 'commands',
   });
 
   let tableRef = document.createElement('table');
 
   const createCommand = (command: CustomCommand) => {
-    setCommands((commands) => [...commands, command]);
+    setCommands((commands) => ({ ...commands, data: [...commands.data, command] }));
   };
 
   const updateCommand = (command: CustomCommand) => {
-    setCommands((commands) => commands.map((c) => c.id === command.id ? command : c));
+    setCommands((commands) => ({ ...commands, data: commands.data.map((c) => c.id === command.id ? command : c) }));
   };
 
   const removeCommand = (commandId: number) => {
-    setCommands((commands) => commands.filter((command) => command.id !== commandId));
+    setCommands((commands) => ({ ...commands, data: commands.data.filter((command) => command.id !== commandId) }));
   };
 
   const handleResize = () => {
@@ -95,6 +112,8 @@ const CommandTable: Component = () => {
       refresh={refetchCommands}
       loading={commands.state === 'refreshing'}
     >
+      <Paginator page={[page, setPage]} limit={[limit, setLimit]} total={() => commands().total} />
+
       <ErrorBoundary fallback={
         <ErrorFallback class={style.fallback} refresh={refetchCommands} loading={commands.state === 'refreshing'}>Failed to load commands</ErrorFallback>
       }>
@@ -116,7 +135,7 @@ const CommandTable: Component = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                <For each={commands()}>
+                <For each={commands().data}>
                   {(command) => (
                     <Command command={command} tableType={tableType()} />
                   )}

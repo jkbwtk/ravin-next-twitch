@@ -1,3 +1,4 @@
+import { PaginatedResponse } from '../pagination';
 import { z } from 'zod';
 
 
@@ -27,6 +28,11 @@ export const GetCustomCommandsResponse = z.object({
 });
 
 export type GetCustomCommandsResponse = z.infer<typeof GetCustomCommandsResponse>;
+
+
+export const GetCustomCommandsPaginatedResponse = PaginatedResponse(GetCustomCommandsResponse);
+
+export type GetCustomCommandsPaginatedResponse = z.infer<typeof GetCustomCommandsPaginatedResponse>;
 
 
 export const PostCustomCommandReqBody = CustomCommand.omit({ id: true, channelId: true });
