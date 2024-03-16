@@ -40,7 +40,7 @@ const Paginator: Component<PaginatorProps> = (props) => {
 
       <div class={style.controls}>
         <span class={style.pageInfo}>
-          {props.page[0]() * props.limit[0]() + 1} - {props.limit[0]() + props.page[0]() * props.limit[0]()} of {props.total()}
+          {props.page[0]() * props.limit[0]() + 1} - {Math.min(props.limit[0]() + props.page[0]() * props.limit[0](), props.total())} of {props.total()}
         </span>
 
         <Button
