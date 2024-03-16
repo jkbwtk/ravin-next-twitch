@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import { Middleware } from '#server/ExpressStack';
 import { ServerError } from '#shared/ServerError';
-import { AnyZodObject, z, ZodError, ZodObject } from 'zod';
+import { AnyZodObject, z, ZodError, ZodObject, ZodTypeAny } from 'zod';
 import { isDevMode } from '#shared/constants';
 import { HttpCodes } from '#shared/httpCodes';
 
@@ -65,7 +65,7 @@ export const waitUntilReady = (signal: () => boolean): Middleware<void> => () =>
 };
 
 export const validateResponse =
-  <T extends AnyZodObject>(schema: T): Middleware<never, object, object, object, { jsonValidated: (body: z.infer<T>) => void }> => async (req, res) => {
+  <T extends ZodTypeAny>(schema: T): Middleware<never, object, object, object, { jsonValidated: (body: z.infer<T>) => void }> => async (req, res) => {
     const temp = Object.assign(res, {
       jsonValidated: (body: unknown) => {
         const validated = schema.parse(body);
