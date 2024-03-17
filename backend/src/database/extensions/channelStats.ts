@@ -43,9 +43,7 @@ export const channelStatsExtension = Prisma.defineExtension((client) => {
     model: {
       channelStats: {
         async getFrames(userId: string, limit = 60) {
-          const t1 = performance.now();
-
-          const result = await Prisma.getExtensionContext(this).findMany({
+          return Prisma.getExtensionContext(this).findMany({
             where: { userId },
             orderBy: {
               frameId: 'desc',
@@ -55,15 +53,9 @@ export const channelStatsExtension = Prisma.defineExtension((client) => {
               user: true,
             },
           });
-
-          logger.time('Getting channelStats frames', t1);
-
-          return result;
         },
         async getFrame(userId: string, frameId: number) {
-          const t1 = performance.now();
-
-          const result = await Prisma.getExtensionContext(this).findFirst({
+          return Prisma.getExtensionContext(this).findFirst({
             where: {
               userId, frameId,
             },
@@ -71,15 +63,9 @@ export const channelStatsExtension = Prisma.defineExtension((client) => {
               user: true,
             },
           });
-
-          logger.time('Getting channelStats frame', t1);
-
-          return result;
         },
         async getLatestFrame(userId: string) {
-          const t1 = performance.now();
-
-          const result = await Prisma.getExtensionContext(this).findFirst({
+          return Prisma.getExtensionContext(this).findFirst({
             where: { userId },
             orderBy: {
               frameId: 'desc',
@@ -88,18 +74,12 @@ export const channelStatsExtension = Prisma.defineExtension((client) => {
               user: true,
             },
           });
-
-          logger.time('Getting channelStats latest frame', t1);
-
-          return result;
         },
         async getFramesBetween(userId: string, start: Date | number, end: Date | number = new Date()) {
           const startFrameId = typeof start === 'number' ? start : Prisma.getExtensionContext(this).frameIdFromDate(start);
           const endFrameId = typeof end === 'number' ? end : Prisma.getExtensionContext(this).frameIdFromDate(end);
 
-          const t1 = performance.now();
-
-          const result = await Prisma.getExtensionContext(this).findMany({
+          return Prisma.getExtensionContext(this).findMany({
             where: {
               userId,
               frameId: {
@@ -114,15 +94,9 @@ export const channelStatsExtension = Prisma.defineExtension((client) => {
               user: true,
             },
           });
-
-          logger.time('Getting channelStats between dates', t1);
-
-          return result;
         },
         async incrementMessages(userId: string) {
           const frameId = Prisma.getExtensionContext(this).frameIdFromDate();
-
-          const t1 = performance.now();
 
           await Prisma.getExtensionContext(this).upsert({
             update: {
@@ -137,13 +111,9 @@ export const channelStatsExtension = Prisma.defineExtension((client) => {
               messages: 1,
             },
           });
-
-          logger.time('Incrementing messages in channelStats', t1);
         },
         async incrementTimeouts(userId: string) {
           const frameId = Prisma.getExtensionContext(this).frameIdFromDate();
-
-          const t1 = performance.now();
 
           await Prisma.getExtensionContext(this).upsert({
             update: {
@@ -158,13 +128,9 @@ export const channelStatsExtension = Prisma.defineExtension((client) => {
               timeouts: 1,
             },
           });
-
-          logger.time('Incrementing timeouts in channelStats', t1);
         },
         async incrementBans(userId: string) {
           const frameId = Prisma.getExtensionContext(this).frameIdFromDate();
-
-          const t1 = performance.now();
 
           await Prisma.getExtensionContext(this).upsert({
             update: {
@@ -179,13 +145,9 @@ export const channelStatsExtension = Prisma.defineExtension((client) => {
               bans: 1,
             },
           });
-
-          logger.time('Incrementing bans in channelStats', t1);
         },
         async incrementDeleted(userId: string) {
           const frameId = Prisma.getExtensionContext(this).frameIdFromDate();
-
-          const t1 = performance.now();
 
           await Prisma.getExtensionContext(this).upsert({
             update: {
@@ -200,13 +162,9 @@ export const channelStatsExtension = Prisma.defineExtension((client) => {
               deleted: 1,
             },
           });
-
-          logger.time('Incrementing deleted in channelStats', t1);
         },
         async incrementCommands(userId: string) {
           const frameId = Prisma.getExtensionContext(this).frameIdFromDate();
-
-          const t1 = performance.now();
 
           await Prisma.getExtensionContext(this).upsert({
             update: {
@@ -221,8 +179,6 @@ export const channelStatsExtension = Prisma.defineExtension((client) => {
               commands: 1,
             },
           });
-
-          logger.time('Incrementing commands in channelStats', t1);
         },
       },
     },

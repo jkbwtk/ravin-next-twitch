@@ -47,36 +47,22 @@ export const commandTimerExtension = Prisma.defineExtension((client) => {
     model: {
       commandTimer: {
         async getById(id: number) {
-          const t1 = performance.now();
-
-          const result = await Prisma.getExtensionContext(this).findFirst({
+          return Prisma.getExtensionContext(this).findFirst({
             where: { id },
             include: {
               user: true,
             },
           });
-
-          logger.time('Getting command timer by id', t1);
-
-          return result;
         },
         async getByChannelId(channelId: string) {
-          const t1 = performance.now();
-
-          const result = await Prisma.getExtensionContext(this).findMany({
+          return Prisma.getExtensionContext(this).findMany({
             where: { channelUserId: channelId },
             include: {
               user: true,
             },
           });
-
-          logger.time('Getting command timers by channel id', t1);
-
-          return result;
         },
         async createFromApi(channelId: string, commandTimer: PostCommandTimerReqBody) {
-          const t1 = performance.now();
-
           const result = await Prisma.getExtensionContext(this).create({
             data: {
               channelUserId: channelId,
@@ -90,15 +76,11 @@ export const commandTimerExtension = Prisma.defineExtension((client) => {
             },
           });
 
-          logger.time('Creating command timer from api', t1);
-
           await Bot.reloadChannelCommandTimers(result.channelUserId);
 
           return result;
         },
         async updateFromApi(commandTimer: PatchCommandTimerReqBody) {
-          const t1 = performance.now();
-
           const result = await Prisma.getExtensionContext(this).update({
             where: { id: commandTimer.id },
             data: {
@@ -112,22 +94,14 @@ export const commandTimerExtension = Prisma.defineExtension((client) => {
             },
           });
 
-          logger.time('Updating command timer from api', t1);
-
           await Bot.reloadChannelCommandTimers(result.channelUserId);
 
           return result;
         },
         async deleteFromApi(commandTimer: DeleteCommandTimerReqBody) {
-          const t1 = performance.now();
-
-          const result = await Prisma.getExtensionContext(this).delete({
+          return Prisma.getExtensionContext(this).delete({
             where: { id: commandTimer.id },
           });
-
-          logger.time('Deleting command timer from api', t1);
-
-          return result;
         },
       },
     },

@@ -4,6 +4,7 @@ import { FileOutput } from '#lib/logger/outputs/FileOutput';
 import { ARGS, LEVEL, MESSAGE, TransformableEntry } from '#lib/logger/types';
 import chalk from 'chalk';
 import { duration } from 'dayjs';
+import { string } from 'zod';
 
 
 export type HTTPLogEntry = {
@@ -18,6 +19,12 @@ export type HTTPLogEntry = {
   contentLength: number;
   responseTime: number;
   totalTime: number;
+};
+
+export type QueryTimerData = {
+  model?: string;
+  operation: string;
+  args: unknown;
 };
 
 const colorStrings = (color: typeof chalk.white, entry: TransformableEntry) => {
@@ -101,6 +108,10 @@ const instance = new Logger({
       level: 6,
       color: 'gray',
     },
+    queryTime: {
+      level: 7,
+      color: 'gray',
+    },
   },
   format: Logger.createFormatAssembler()
     .chain(colorStrings.bind(null, chalk.cyan))
@@ -119,8 +130,13 @@ const instance = new Logger({
         'verbose',
         'debug',
         'time',
+        'queryTime',
       ],
     }),
+    // new ConsoleOutput({
+    //   format: fileJsonFormat,
+    //   level: Infinity,
+    // }),
     // new FileOutput({
     //   format: fileJsonFormat,
     //   level: Infinity,
@@ -181,6 +197,19 @@ const instance = new Logger({
   callback({
     level,
     message,
+    [LEVEL]: level,
+    [MESSAGE]: message,
+    [ARGS]: [finish - start],
+  });
+}).registerLevelFunction('queryTime', (callback, level, data: QueryTimerData, start: number, finish: number = performance.now()) => {
+  if (level !== 'queryTime') return;
+
+  const message = chalk.gray`Query ${data.model ?? '[MODEL]'}.${chalk.bold(data.operation)} took %o ${chalk.gray`ms`}`;
+
+  callback({
+    level,
+    message,
+    data: Object.assign({}, data),
     [LEVEL]: level,
     [MESSAGE]: message,
     [ARGS]: [finish - start],

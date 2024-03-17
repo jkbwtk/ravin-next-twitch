@@ -139,9 +139,7 @@ export const messageExtension = Prisma.defineExtension((client) => {
           });
         },
         async getByChannelId(channelId: string, limit = 1000) {
-          const t1 = performance.now();
-
-          const result = await Prisma.getExtensionContext(this).findMany({
+          return Prisma.getExtensionContext(this).findMany({
             where: {
               channelUserId: channelId,
             },
@@ -153,15 +151,9 @@ export const messageExtension = Prisma.defineExtension((client) => {
               user: true,
             },
           });
-
-          logger.time('Getting messages by channel id', t1);
-
-          return result;
         },
         async getTopChatter(channelId: string): Promise<string | null> {
           try {
-            const t1 = performance.now();
-
             const result = await client.$queryRaw<(Pick<Message, 'userId'> & { count: bigint })[]>`
             SELECT "userId", COUNT(*) AS "count"
             FROM "Message"
@@ -170,8 +162,6 @@ export const messageExtension = Prisma.defineExtension((client) => {
             ORDER BY "count" DESC
             LIMIT 1
             `;
-
-            logger.time('Getting top chatter', t1);
 
             return result[0]?.userId ?? null;
           } catch (err) {
@@ -185,8 +175,6 @@ export const messageExtension = Prisma.defineExtension((client) => {
         },
         async getTopEmote(channelId: string): Promise<DatabaseEmote | null> {
           try {
-            const t1 = performance.now();
-
             const result = await client.$queryRaw<DatabaseEmote[]>`
             SELECT "id", "name", SUM("count") AS "count"
             FROM (SELECT "emote".key AS "id", "name", "count"::INTEGER
@@ -200,8 +188,6 @@ export const messageExtension = Prisma.defineExtension((client) => {
             ORDER BY "count" DESC
             LIMIT 1;
             `;
-
-            logger.time('Getting top emote', t1);
 
             return result[0] ?? null;
           } catch (err) {

@@ -1,5 +1,5 @@
+import { logger } from '#lib/logger';
 import { Prisma } from '@prisma/client';
-
 
 export const utilsExtension = Prisma.defineExtension((client) => {
   return client.$extends({
@@ -17,6 +17,14 @@ export const utilsExtension = Prisma.defineExtension((client) => {
           args.update.updatedAt = new Date();
           return query(args);
         },
+      },
+
+      async $allOperations({ operation, model, args, query }) {
+        const start = performance.now();
+        const result = await query(args);
+
+        logger.queryTime({ model, operation, args }, start);
+        return result;
       },
     },
   });

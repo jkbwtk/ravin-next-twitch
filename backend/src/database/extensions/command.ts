@@ -1,6 +1,7 @@
 import { Bot } from '#bot/Bot';
 import { ExtensionReturnType, ExtensionType } from '#database/extensions/utils';
 import { logger } from '#lib/logger';
+import { LimitOffsetPaginationState } from '#server/middlewares/pagination';
 import { CustomCommand, DeleteCustomCommandReqBody, PatchCustomCommandReqBody, PostCustomCommandReqBody, UserLevel } from '#shared/types/api/commands';
 import { Prisma } from '@prisma/client';
 
@@ -49,38 +50,31 @@ export const commandExtension = Prisma.defineExtension((client) => {
     model: {
       command: {
         async getById(id: number) {
-          const t1 = performance.now();
-
-          const result = await Prisma.getExtensionContext(this).findFirst({
+          return Prisma.getExtensionContext(this).findFirst({
             where: { id },
             include: {
               user: true,
               template: true,
             },
           });
-
-          logger.time('Getting command by id', t1);
-
-          return result;
         },
-        async getByChannelId(channelId: string) {
-          const t1 = performance.now();
-
-          const result = await Prisma.getExtensionContext(this).findMany({
+        async getByChannelId(channelId: string, pagination: LimitOffsetPaginationState = null) {
+          return Prisma.getExtensionContext(this).findMany({
             where: { channelUserId: channelId },
             include: {
               user: true,
               template: true,
             },
+
+            ...pagination,
           });
-
-          logger.time('Getting commands by channel id', t1);
-
-          return result;
+        },
+        async countByChannelId(channelId: string) {
+          return Prisma.getExtensionContext(this).count({
+            where: { channelUserId: channelId },
+          });
         },
         async incrementUsage(id: number) {
-          const t1 = performance.now();
-
           await Prisma.getExtensionContext(this).update({
             where: { id },
             data: {
@@ -89,13 +83,9 @@ export const commandExtension = Prisma.defineExtension((client) => {
               },
             },
           });
-
-          logger.time('Incrementing command usage', t1);
         },
         async getTopCommand(channelId: string) {
-          const t1 = performance.now();
-
-          const result = await Prisma.getExtensionContext(this).findFirst({
+          return Prisma.getExtensionContext(this).findFirst({
             where: { channelUserId: channelId },
             orderBy: {
               usage: 'desc',
@@ -105,14 +95,8 @@ export const commandExtension = Prisma.defineExtension((client) => {
               template: true,
             },
           });
-
-          logger.time('Getting top command', t1);
-
-          return result;
         },
         async createFromApi(channelId: string, command: PostCustomCommandReqBody) {
-          const t1 = performance.now();
-
           const result = await Prisma.getExtensionContext(this).create({
             data: {
               channelUserId: channelId,
@@ -128,15 +112,11 @@ export const commandExtension = Prisma.defineExtension((client) => {
             },
           });
 
-          logger.time('Creating command from api', t1);
-
           await Bot.reloadChannelCommands(result.channelUserId);
 
           return result;
         },
         async updateFromApi(command: PatchCustomCommandReqBody) {
-          const t1 = performance.now();
-
           const result = await Prisma.getExtensionContext(this).update({
             where: { id: command.id },
             data: {
@@ -152,22 +132,14 @@ export const commandExtension = Prisma.defineExtension((client) => {
             },
           });
 
-          logger.time('Updating command from api', t1);
-
           await Bot.reloadChannelCommands(result.channelUserId);
 
           return result;
         },
         async deleteFromApi(command: DeleteCustomCommandReqBody) {
-          const t1 = performance.now();
-
-          const result = await Prisma.getExtensionContext(this).delete({
+          return Prisma.getExtensionContext(this).delete({
             where: { id: command.id },
           });
-
-          logger.time('Deleting command from api', t1);
-
-          return result;
         },
       },
     },
