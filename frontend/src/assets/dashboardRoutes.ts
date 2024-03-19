@@ -41,6 +41,12 @@ const sidebarElements: SidebarRoute[] = [
     ],
   },
   {
+    name: 'Templates',
+    symbol: 'description',
+    href: '/dashboard/templates',
+    component: lazy(() => import('#pages/dashboard/Templates')),
+  },
+  {
     symbol: 'psychology',
     name: 'Ai',
     href: '/dashboard/ai',
