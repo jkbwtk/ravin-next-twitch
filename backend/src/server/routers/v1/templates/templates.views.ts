@@ -9,7 +9,7 @@ import { json } from 'body-parser';
 import { HttpCodes } from '#shared/httpCodes';
 import { GetTemplatesResponse, TestTemplateResponse } from '#shared/types/api/templates';
 import { DeleteTemplateSchema, PatchTemplateSchema, PostTemplateSchema, TestTemplateSchema } from '#server/routers/v1/templates/templates.schemas';
-import { TemplateTester } from '#bot/TemplateTester';
+import { TemplateTester } from '#bot/templates/TemplateTester';
 
 
 export const getTemplatesView = new ExpressStack()

@@ -1,5 +1,5 @@
 import { ChannelThread } from '#bot/ChannelThread';
-import { TemplateRunner } from '#bot/TemplateRunner';
+import { TemplateRunner } from '#bot/templates/TemplateRunner';
 import { prisma } from '#database/database';
 import { CommandWithUserAndTemplate } from '#database/extensions/command';
 import { MessageWithUser } from '#database/extensions/message';

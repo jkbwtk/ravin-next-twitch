@@ -5,7 +5,7 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import dayjs from 'dayjs';
 import { Template } from '#database/extensions/template';
-import { StateMap } from '#bot/StateMap';
+import { StateMap } from '#bot/templates/StateMap';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);

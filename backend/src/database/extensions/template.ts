@@ -1,5 +1,5 @@
 import { Bot } from '#bot/Bot';
-import { StatesObject } from '#bot/TemplateRunner';
+import { StatesObject } from '#bot//templates/TemplateRunner';
 import { ExtensionReturnType, ExtensionType } from '#database/extensions/utils';
 import { logger } from '#lib/logger';
 import { DeleteTemplateReqBody, PatchTemplateReqBody, PostTemplateReqBody } from '#shared/types/api/templates';

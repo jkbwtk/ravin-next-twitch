@@ -1,4 +1,4 @@
-import { DefaultStates, StatesObject } from '#bot/TemplateRunner';
+import { DefaultStates, StatesObject } from '#bot/templates/TemplateRunner';
 import { prisma } from '#database/database';
 import { Template } from '@prisma/client';
 
