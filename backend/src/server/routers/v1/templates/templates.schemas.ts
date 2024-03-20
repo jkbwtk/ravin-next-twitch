@@ -8,6 +8,11 @@ export const PostTemplateSchema = z.object({
 
 export type PostTemplateRequestSchema = z.infer<typeof PostTemplateSchema>;
 
+export const TestTemplateSchema = z.object({
+  body: PostTemplateReqBody,
+});
+
+export type TestTemplateRequestSchema = z.infer<typeof TestTemplateSchema>;
 
 export const PatchTemplateSchema = z.object({
   body: PatchTemplateReqBody,

@@ -7,8 +7,8 @@ import { SocketServer } from '#server/SocketServer';
 import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
 import { json } from 'body-parser';
 import { HttpCodes } from '#shared/httpCodes';
-import { GetTemplatesResponse } from '#shared/types/api/templates';
-import { DeleteTemplateSchema, PatchTemplateSchema, PostTemplateSchema } from '#server/routers/v1/templates/templates.schemas';
+import { GetTemplatesResponse, TestTemplateResponse } from '#shared/types/api/templates';
+import { DeleteTemplateSchema, PatchTemplateSchema, PostTemplateSchema, TestTemplateSchema } from '#server/routers/v1/templates/templates.schemas';
 import { TemplateTester } from '#bot/TemplateTester';
 
 
@@ -49,6 +49,29 @@ export const postTemplatesView = new ExpressStack()
       });
 
       throw new ServerError(HttpCodes.InternalServerError, 'Failed to create template');
+    }
+  });
+
+
+export const testTemplateView = new ExpressStack()
+  .usePreflight(authenticated)
+  .useNative(json())
+  .use(validate(TestTemplateSchema))
+  .use(validateResponse(TestTemplateResponse))
+  .use(async (req, res) => {
+    try {
+      const issues = await TemplateTester.test(req.validated.body.template);
+
+      res.jsonValidated({
+        data: Object.fromEntries(issues),
+      });
+    } catch (err) {
+      logger.warn('Failed to test template', {
+        error: err,
+        label: ['APIv1', 'templates', 'testTemplateView'],
+      });
+
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to test template');
     }
   });
 

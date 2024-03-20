@@ -23,6 +23,18 @@ export const PostTemplateReqBody = Template.omit({ id: true, userId: true });
 export type PostTemplateReqBody = z.infer<typeof PostTemplateReqBody>;
 
 
+export const TemplateIssue = z.object({
+  SyntaxError: z.string().optional(),
+  ReferenceError: z.string().optional(),
+});
+
+export const TestTemplateResponse = z.object({
+  data: z.record(TemplateIssue),
+});
+
+export type TestTemplateResponse = z.infer<typeof TestTemplateResponse>;
+
+
 export const PatchTemplateReqBody = Template.pick({ id: true }).merge(PostTemplateReqBody.partial());
 
 export type PatchTemplateReqBody = z.infer<typeof PatchTemplateReqBody>;
