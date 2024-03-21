@@ -1,5 +1,9 @@
 import { z } from 'zod';
 
+export const TemplateEnvironments = z.enum(['empty', 'command']);
+
+export type TemplateEnvironments = z.infer<typeof TemplateEnvironments>;
+
 
 export const Template = z.object({
   id: z.number().int().positive(),

@@ -1,3 +1,5 @@
+import { EnvironmentProvider, testEnvironments } from '#bot/templates/templateEnvironments';
+import { TemplateEnvironments } from '#shared/types/api/templates';
 import { Context, Isolate, Script } from 'isolated-vm';
 
 
@@ -6,20 +8,6 @@ export type TemplateIssues = {
   ReferenceError?: string;
 };
 
-export type ContextProvider = (context: Context) => void;
-
-export type SupportedEnvironments = keyof typeof TemplateTester['environments'];
-
-const emptyContextProvider: ContextProvider = () => void 0;
-
-const commandContextProvider: ContextProvider = (context) => {
-  const jail = context.global;
-
-  jail.setSync('channel', '[CHANNEL]');
-  jail.setSync('args', 'arg1 arg2');
-  jail.setSync('user', '[USER]');
-  jail.setSync('username', '[USERNAME]');
-};
 
 export class TemplateTester {
   private script: Script;
@@ -44,7 +32,7 @@ export class TemplateTester {
     return context;
   }
 
-  public async dryRun(contextProvider?: ContextProvider): Promise<string> {
+  public async dryRun(contextProvider?: EnvironmentProvider): Promise<string> {
     const context = this.createMockContext();
 
     if (contextProvider) {
@@ -57,24 +45,19 @@ export class TemplateTester {
     return `${response}`;
   }
 
-  public static environments = {
-    empty: emptyContextProvider,
-    customCommand: commandContextProvider,
-  } satisfies Record<string, ContextProvider>;
-
   private static sanitizeErrorMessage(message: string): string {
     return message.replace('<isolated-vm>', 'template');
   }
 
-  public static async test(code: string): Promise<Map<SupportedEnvironments, TemplateIssues>> {
+  public static async test(code: string): Promise<Map<TemplateEnvironments, TemplateIssues>> {
     const isolate = new Isolate({ memoryLimit: 8 });
-    const issues: Map<SupportedEnvironments, TemplateIssues> = new Map();
+    const issues: Map<TemplateEnvironments, TemplateIssues> = new Map();
 
-    for (const [name, contextProvider] of Object.entries(TemplateTester.environments) as [SupportedEnvironments, ContextProvider][]) {
+    for (const [name, environmentProvider] of Object.entries(testEnvironments) as [TemplateEnvironments, EnvironmentProvider][]) {
       try {
         const runner = new TemplateTester(isolate, code);
 
-        await runner.dryRun(contextProvider);
+        await runner.dryRun(environmentProvider);
       } catch (err) {
         if (err instanceof SyntaxError) {
           issues.set(name, { SyntaxError: this.sanitizeErrorMessage(err.message) });
