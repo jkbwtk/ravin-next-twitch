@@ -166,15 +166,17 @@ model Token {
 }
 
 model Template {
-  id        Int      @id() @default(autoincrement())
-  name      String   @db.VarChar
-  template  String   @db.VarChar
+  id           Int      @id() @default(autoincrement())
+  name         String   @db.VarChar
+  template     String   @db.VarChar
   /// [TemplateStatesPrisma]
-  states    Json     @default("{}")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-  userId    String   @db.VarChar
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  states       Json     @default("{}")
+  /// [TemplateEnvironmentsPrisma]
+  environments Json     @default("[]")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
+  userId       String   @db.VarChar
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   command Command[]
 

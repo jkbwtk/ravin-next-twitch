@@ -63,7 +63,7 @@ export const testTemplateView = new ExpressStack()
       const issues = await TemplateTester.test(req.validated.body.template);
 
       res.jsonValidated({
-        data: Object.fromEntries(issues),
+        data: Object.fromEntries(issues) as TestTemplateResponse['data'],
       });
     } catch (err) {
       logger.warn('Failed to test template', {
@@ -90,7 +90,6 @@ export const patchTemplatesView = new ExpressStack()
 
       res.sendStatus(HttpCodes.OK);
     } catch (err) {
-      console.log(err);
       logger.warn('Failed to update templates', {
         error: err,
         label: ['APIv1', 'templates', 'patchTemplatesView'],

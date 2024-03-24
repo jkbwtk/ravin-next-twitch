@@ -49,15 +49,16 @@ export class TemplateTester {
     return message.replace('<isolated-vm>', 'template');
   }
 
-  public static async test(code: string): Promise<Map<TemplateEnvironments, TemplateIssues>> {
+  public static async test(code: string): Promise<Map<TemplateEnvironments, TemplateIssues | null>> {
     const isolate = new Isolate({ memoryLimit: 8 });
-    const issues: Map<TemplateEnvironments, TemplateIssues> = new Map();
+    const issues: Map<TemplateEnvironments, TemplateIssues | null> = new Map();
 
     for (const [name, environmentProvider] of Object.entries(testEnvironments) as [TemplateEnvironments, EnvironmentProvider][]) {
       try {
         const runner = new TemplateTester(isolate, code);
 
         await runner.dryRun(environmentProvider);
+        issues.set(name, null);
       } catch (err) {
         if (err instanceof SyntaxError) {
           issues.set(name, { SyntaxError: this.sanitizeErrorMessage(err.message) });
@@ -72,5 +73,13 @@ export class TemplateTester {
 
     isolate.dispose();
     return issues;
+  }
+
+  public static async getSupportedEnvironments(code: string): Promise<TemplateEnvironments[]> {
+    const issues = await this.test(code);
+
+    return Array.from(issues.entries())
+      .filter(([, value]) => value === null)
+      .map(([key]) => key);
   }
 }

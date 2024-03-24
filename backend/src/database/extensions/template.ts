@@ -1,14 +1,17 @@
 import { Bot } from '#bot/Bot';
 import { StatesObject } from '#bot//templates/TemplateRunner';
 import { ExtensionReturnType, ExtensionType } from '#database/extensions/utils';
-import { logger } from '#lib/logger';
 import { DeleteTemplateReqBody, PatchTemplateReqBody, PostTemplateReqBody } from '#shared/types/api/templates';
+import { Template as TemplateApi } from '#shared/types/api/templates';
 import { Prisma } from '@prisma/client';
+import { TemplateTester } from '#bot/templates/TemplateTester';
 
 
 declare global {
   namespace PrismaJson {
     type TemplateStatesPrisma = StatesObject;
+
+    type TemplateEnvironmentsPrisma = TemplateApi['environments'];
   }
 }
 
@@ -26,14 +29,16 @@ export const templateExtension = Prisma.defineExtension((client) => {
             name: true,
             template: true,
             userId: true,
+            environments: true,
           },
           compute(template) {
-            return () => {
+            return (): TemplateApi => {
               return {
                 id: template.id,
                 name: template.name,
                 template: template.template,
                 userId: template.userId,
+                environments: template.environments,
               };
             };
           },
@@ -61,12 +66,13 @@ export const templateExtension = Prisma.defineExtension((client) => {
             },
           });
         },
-        async createFromApi(channelId: string, command: PostTemplateReqBody) {
+        async createFromApi(channelId: string, template: PostTemplateReqBody) {
           const result = await Prisma.getExtensionContext(this).create({
             data: {
-              name: command.name,
-              template: command.template,
+              name: template.name,
+              template: template.template,
               userId: channelId,
+              environments: await TemplateTester.getSupportedEnvironments(template.template),
             },
           });
 
@@ -80,6 +86,9 @@ export const templateExtension = Prisma.defineExtension((client) => {
             data: {
               name: template.name,
               template: template.template,
+              environments: template.template ?
+                await TemplateTester.getSupportedEnvironments(template.template) :
+                undefined,
             },
           });
 

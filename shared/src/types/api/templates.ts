@@ -10,6 +10,8 @@ export const Template = z.object({
   name: z.string().min(3),
   template: z.string().min(1),
   userId: z.string().min(1),
+  environments: z.array(TemplateEnvironments)
+    .refine((v) => Array.from(new Set(v))),
 });
 
 export type Template = z.infer<typeof Template>;
@@ -33,7 +35,7 @@ export const TemplateIssue = z.object({
 });
 
 export const TestTemplateResponse = z.object({
-  data: z.record(TemplateIssue),
+  data: z.record(TemplateIssue).nullable(),
 });
 
 export type TestTemplateResponse = z.infer<typeof TestTemplateResponse>;
