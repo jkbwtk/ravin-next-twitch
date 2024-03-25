@@ -7,15 +7,21 @@ if (process.env.DEV !== 'true') {
 
 import { Server } from '#server/Server';
 import { logger } from '#lib/logger';
+import { runJobs } from '#jobs/job';
 
 
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
   logger.info('Shutting down gracefully...', { label: 'Process' });
+
+  await runJobs('shutdown');
+
   process.exit(0);
 });
 
 const main = async () => {
   try {
+    runJobs('startup');
+
     const server = new Server();
     await server.start();
   } catch (err) {

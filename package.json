@@ -26,7 +26,8 @@
     "#database": "server/database",
     "#bot": "server/bot",
     "#server": "server/server",
-    "#routers": "server/server/routers"
+    "#routers": "server/server/routers",
+    "#jobs": "server/jobs"
   },
   "dependencies": {
     "@colors/colors": "^1.6.0",
