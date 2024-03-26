@@ -9,7 +9,7 @@ import style from '#styles/widgets/CommandTableWidget.module.scss';
 
 export type TemplateProps = {
   template: TemplateType;
-  openEditor: (template: Partial<TemplateType>) => void;
+  openEditor: (template: TemplateType | null) => void;
   deleteTemplate: (template: TemplateType) => void;
 };
 
