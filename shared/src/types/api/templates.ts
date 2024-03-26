@@ -24,9 +24,14 @@ export const GetTemplatesResponse = z.object({
 export type GetTemplatesResponse = z.infer<typeof GetTemplatesResponse>;
 
 
-export const PostTemplateReqBody = Template.omit({ id: true, userId: true });
+export const PostTemplateReqBody = Template.omit({ id: true, userId: true, environments: true });
 
 export type PostTemplateReqBody = z.infer<typeof PostTemplateReqBody>;
+
+
+export const TestTemplateReqBody = Template.pick({ template: true });
+
+export type TestTemplateReqBody = z.infer<typeof TestTemplateReqBody>;
 
 
 export const TemplateIssue = z.object({
@@ -35,7 +40,7 @@ export const TemplateIssue = z.object({
 });
 
 export const TestTemplateResponse = z.object({
-  data: z.record(TemplateIssue).nullable(),
+  data: z.record(TemplateIssue.nullable()),
 });
 
 export type TestTemplateResponse = z.infer<typeof TestTemplateResponse>;
