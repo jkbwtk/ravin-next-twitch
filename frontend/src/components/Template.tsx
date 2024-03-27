@@ -3,6 +3,7 @@ import TemplateButton from '#components/TemplateButton';
 import TableRow from '@suid/material/TableRow/TableRow';
 import TableCell from '@suid/material/TableCell/TableCell';
 import { Template as TemplateType } from '#shared/types/api/templates';
+import HighlightedCode from '#components/HighlightedCode';
 
 import style from '#styles/widgets/CommandTableWidget.module.scss';
 
@@ -13,11 +14,14 @@ export type TemplateProps = {
   deleteTemplate: (template: TemplateType) => void;
 };
 
+
 const Template: Component<TemplateProps> = (props) => {
   return (
     <TableRow>
       <TableCell align='left'>{props.template.name}</TableCell>
-      <TableCell align='left'><code>{props.template.template}</code></TableCell>
+      <TableCell align='left'>
+        <HighlightedCode code={props.template.template} language='javascript' wrap='`' />
+      </TableCell>
       <TableCell align='center'>
         <div class={style.actionsContainer}>
           <TemplateButton>

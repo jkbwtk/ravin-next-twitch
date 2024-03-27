@@ -8,9 +8,11 @@ import ThemeProvider from '@suid/material/styles/ThemeProvider';
 import { SocketProvider } from '#providers/SocketProvider';
 import theme from './suidTheme';
 import { StyledEngineProvider } from '@suid/material';
+import hljs from 'highlight.js/lib/core';
+import javascript from 'highlight.js/lib/languages/javascript';
 
 import '#styles/index.scss';
-
+import 'highlight.js/styles/nord.css';
 
 // declared it here and not in global.d.ts because typescript was complaining about empty interfaces
 // and import.meta.env.DEV was not recognized
@@ -21,6 +23,8 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/ban-types
   type ParentComponent<P = {}> = SolidParentComponent<P>;
 }
+
+hljs.registerLanguage('javascript', javascript);
 
 const root = document.getElementById('root');
 
