@@ -13,11 +13,13 @@ export type ModalProps = {
   onClose?: () => void;
 
   title?: string;
+  modalClass?: string;
 };
 
 export const defaultProps: RequiredDefaults<ModalProps> = {
   onClose: () => void 0,
   title: '',
+  modalClass: '',
 };
 
 const Modal: ParentComponent<ModalProps> = (userProps) => {
@@ -119,7 +121,13 @@ const Modal: ParentComponent<ModalProps> = (userProps) => {
               if (ev.target === ev.currentTarget && !isDragging()) props.onClose();
             }}
           >
-            <div ref={modalRef} class={style.modal}>
+            <div
+              ref={modalRef}
+              class={style.modal}
+              classList={{
+                [props.modalClass]: props.modalClass.length > 0,
+              }}
+            >
               <div
                 class={style.titleBar}
                 onMouseDown={onDragStart}
