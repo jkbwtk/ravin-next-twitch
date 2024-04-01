@@ -48,7 +48,11 @@ rules:
   no-useless-return: error
   arrow-spacing: error
   no-warning-comments: ["error", { "terms": ["!"], "location": "start" }]
-  "@typescript-eslint/ban-types": ["error", { "types": { "object": false } }]
+  "@typescript-eslint/ban-types":
+    [
+      "error",
+      { "types": { "{}": false, "object": false }, "extendDefaults": true },
+    ]
   "@typescript-eslint/type-annotation-spacing": ["error", { "after": true }]
   semi: "off"
   "@typescript-eslint/semi": "error"
