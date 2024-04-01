@@ -68,8 +68,7 @@ const Homepage: Component = () => {
           <Switch>
             <Match when={session.loggedIn}>
               <span class={style.message}>
-              Welcome back
-                <AnchorText
+              Welcome back <AnchorText
                   href={`https://twitch.tv/${session.user?.login}`}
                   target='_blank'
                   rel='noopener noreferrer'
