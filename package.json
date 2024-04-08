@@ -34,7 +34,7 @@
     "@faker-js/faker": "^8.4.1",
     "@prisma/client": "^5.11.0",
     "@rollup/plugin-alias": "^5.1.0",
-    "@solidjs/router": "^0.8.4",
+    "@solidjs/router": "^0.13.1",
     "@suid/icons-material": "^0.7.0",
     "@suid/material": "^0.16.0",
     "@suid/vite-plugin": "^0.2.0",

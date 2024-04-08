@@ -4,9 +4,9 @@ import { batch, createResource, For, onCleanup, onMount } from 'solid-js';
 import { CustomCommand, CustomCommandState, GetCustomCommandsStatusResponse } from '#shared/types/api/commands';
 import { useSocket } from '#providers/SocketProvider';
 import CommandStatusTile from '#components/CommandStatusTile';
+import { makeRequest } from '#lib/fetch';
 
 import style from '#styles/dashboard/CommandStatus.module.scss';
-import { makeRequest } from '#lib/fetch';
 
 
 const fetchStatuses = async () => {
@@ -19,7 +19,7 @@ const fetchStatuses = async () => {
   });
 };
 
-const CommandStatus: Component = () => {
+const CommandStatus: RouteComponent = (props) => {
   const [socket] = useSocket();
   const [statuses, { mutate: setStatuses }] = createResource(fetchStatuses, {
     initialValue: [],
@@ -85,7 +85,7 @@ const CommandStatus: Component = () => {
   return (
     <CustomCommandEditorProvider>
       <div class={style.container}>
-        <DashboardInfoBar / >
+        <DashboardInfoBar metadata={props.data?.metadata} />
         <div class={style.commands}>
           <For each={statuses()}>
             {CommandStatusTile}

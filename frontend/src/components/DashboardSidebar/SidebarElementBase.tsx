@@ -1,19 +1,15 @@
 import MaterialSymbol from '#components/MaterialSymbol';
+import { ExtendedRouteDefinition } from '#routers/utils';
 
 
-export interface SidebarRoute {
-  symbol: string;
-  name: string;
-  href: string;
-  auxRoutes?: SidebarRoute[];
-  component?: Component;
-  adminOnly?: boolean;
-}
+export type SidebarElementProps = ExtendedRouteDefinition & {
+  absolutePath?: string;
+};
 
-const SidebarElementBase: Component<SidebarRoute> = (props) => {
+const SidebarElementBase: Component<SidebarElementProps> = (props) => {
   return (<>
-    <MaterialSymbol symbol={props.symbol} />
-    <span>{props.name}</span>
+    <MaterialSymbol symbol={props.metadata?.symbol ?? 'question_mark'} />
+    <span>{props.metadata?.name ?? props.path ?? '[EMPTY_ROUTE]'}</span>
   </>);
 };
 

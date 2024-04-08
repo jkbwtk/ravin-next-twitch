@@ -1,6 +1,6 @@
-import SidebarElementBase, { SidebarRoute } from '#components/DashboardSidebar/SidebarElementBase';
+import SidebarElementBase, { SidebarElementProps } from '#components/DashboardSidebar/SidebarElementBase';
 import SidebarElementSwitch from '#components/DashboardSidebar/SidebarElementSwitch';
-import { hasAuxRoutes } from '#components/DashboardSidebar/SidebarUtils';
+import { hasAuxRoutes, joinPaths } from '#routers/utils';
 import MaterialSymbol from '#components/MaterialSymbol';
 import { useBeforeLeave, useLocation } from '@solidjs/router';
 import { createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid-js';
@@ -8,15 +8,15 @@ import { createEffect, createSignal, For, onCleanup, onMount, Show } from 'solid
 import style from '#styles/DashboardSidebar.module.scss';
 
 
-const SidebarElementNested: Component<SidebarRoute> = (props) => {
+const SidebarElementNested: Component<SidebarElementProps> = (props) => {
   const pathname = useLocation().pathname;
-  const [open, setOpen] = createSignal(pathname.startsWith(props.href));
+  const [open, setOpen] = createSignal(pathname.startsWith(joinPaths(props.absolutePath, props.path)));
 
   let outerContainer = document.createElement('div');
   let innerContainer = document.createElement('nav');
 
   useBeforeLeave((ev) => {
-    if (!ev.to.toString().startsWith(props.href)) setOpen(false);
+    if (!ev.to.toString().startsWith(joinPaths(props.absolutePath, props.path))) setOpen(false);
   });
 
   createEffect<boolean>((runOnce) => {
@@ -97,8 +97,8 @@ const SidebarElementNested: Component<SidebarRoute> = (props) => {
           class={style.outerSubContainer}
         >
           <nav ref={innerContainer} class={style.subContainer}>
-            <For each={props.auxRoutes}>
-              {(element) => (<SidebarElementSwitch {...element} />)}
+            <For each={props.children}>
+              {(element) => (<SidebarElementSwitch {...element} absolutePath={joinPaths(props.absolutePath, props.path)} />)}
             </For>
           </nav>
         </div>

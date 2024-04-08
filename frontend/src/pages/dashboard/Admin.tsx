@@ -6,10 +6,10 @@ import ScheduledJobsWidget from '#components/widgets/ScheduledJobsWidget';
 import style from '#styles/dashboard/Admin.module.scss';
 
 
-const Logs: Component = () => {
+const Logs: RouteComponent = (props) => {
   return (
     <div class={style.container}>
-      <DashboardInfoBar />
+      <DashboardInfoBar metadata={props.data?.metadata} />
       <div class={style.widgets}>
         <AdminConfigWidget />
         <BroadcastSystemNotificationWidget />

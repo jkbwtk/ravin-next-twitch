@@ -8,12 +8,12 @@ import ChannelStatus from '#components/ChannelStatus';
 import style from '#styles/dashboard/Dashboard.module.scss';
 
 
-const Dashboard: Component = () => {
+const Dashboard: RouteComponent = (props) => {
   let containerRef = document.createElement('div');
 
   return (
     <div class={style.container}>
-      <DashboardInfoBar>
+      <DashboardInfoBar metadata={props.data?.metadata} >
         <ChannelStatus />
       </DashboardInfoBar>
       <div ref={containerRef} class={style.widgets}>

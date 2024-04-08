@@ -6,21 +6,21 @@ import CommandTableWidget from '#components/widgets/CommandTableWidget';
 import style from '#styles/dashboard/CustomCommands.module.scss';
 
 
-const InfoBar: Component = () => {
+const InfoBar: RouteComponent = (props) => {
   const [, { open }] = useCustomCommandEditor();
 
   return (
-    <DashboardInfoBar>
+    <DashboardInfoBar metadata={props.data?.metadata}>
       <Button color='primary' size='big' onClick={() => open()}>Add Command</Button>
     </DashboardInfoBar>
   );
 };
 
-const CustomCommands: Component = () => {
+const CustomCommands: RouteComponent = (props) => {
   return (
     <CustomCommandEditorProvider>
       <div class={style.container}>
-        <InfoBar />
+        <InfoBar {...props} />
         <div class={style.widgets}>
           <CommandTableWidget />
         </div>

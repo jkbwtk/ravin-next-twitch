@@ -1,11 +1,11 @@
-import { SidebarRoute } from '#components/DashboardSidebar/SidebarElementBase';
+import { SidebarElementProps } from '#components/DashboardSidebar/SidebarElementBase';
 import SidebarElementNested from '#components/DashboardSidebar/SidebarElementNested';
 import SidebarElementSimple from '#components/DashboardSidebar/SidebarElementSimple';
-import { hasAuxRoutes } from '#components/DashboardSidebar/SidebarUtils';
+import { hasAuxRoutes } from '#routers/utils';
 import { Match, Switch } from 'solid-js';
 
 
-const SidebarElementSwitch: Component<SidebarRoute> = (props) => {
+const SidebarElementSwitch: Component<SidebarElementProps> = (props) => {
   return (
     <Switch>
       <Match when={hasAuxRoutes(props)}>

@@ -18,8 +18,8 @@ dependencies:
     specifier: ^5.1.0
     version: 5.1.0
   '@solidjs/router':
-    specifier: ^0.8.4
-    version: 0.8.4(solid-js@1.8.16)
+    specifier: ^0.13.1
+    version: 0.13.1(solid-js@1.8.16)
   '@suid/icons-material':
     specifier: ^0.7.0
     version: 0.7.0(solid-js@1.8.16)
@@ -991,10 +991,10 @@ packages:
       solid-js: 1.8.16
     dev: false
 
-  /@solidjs/router@0.8.4(solid-js@1.8.16):
-    resolution: {integrity: sha512-Gi/WVoVseGMKS1DBdT3pNAMgOzEOp6Q3dpgNd2mW9GUEnVocPmtyBjDvXwN6m7tjSGsqqfqJFXk7bm1hxabSRw==}
+  /@solidjs/router@0.13.1(solid-js@1.8.16):
+    resolution: {integrity: sha512-Rz5Lf0ssWMuN+Wm2GFO0vwZoO/KSwYFSuCUzWrRAvje5M0ZYZrMk5FZxuzdJT+zg8KuqWJQlRALks5E0r+FjAA==}
     peerDependencies:
-      solid-js: ^1.5.3
+      solid-js: ^1.8.6
     dependencies:
       solid-js: 1.8.16
     dev: false

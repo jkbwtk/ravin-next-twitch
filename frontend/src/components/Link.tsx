@@ -1,5 +1,5 @@
 import { mergeProps } from 'solid-js';
-import { Link as RouterLink, LinkProps as RouterLinkProps } from '@solidjs/router';
+import { A, AnchorProps as RouterLinkProps } from '@solidjs/router';
 import { ButtonProps, defaultProps } from '#components/Button';
 import ButtonBase, { getColorClass, getSizeClass } from '#components/ButtonBase';
 
@@ -22,7 +22,7 @@ const Link: Component<LinkProps & RouterLinkProps> = (userProps) => {
   const sizeClass = getSizeClass(props.size);
 
   return (
-    <RouterLink
+    <A
       classList={{
         [style.button]: true,
         [colorClass]: true,
@@ -32,7 +32,7 @@ const Link: Component<LinkProps & RouterLinkProps> = (userProps) => {
       {...props}
     >
       <ButtonBase {...props} />
-    </RouterLink>
+    </A>
   );
 };
 

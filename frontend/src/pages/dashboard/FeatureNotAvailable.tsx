@@ -4,10 +4,10 @@ import MaterialSymbol from '#components/MaterialSymbol';
 import style from '#styles/dashboard/FeatureNotAvailable.module.scss';
 
 
-const FeatureNotAvailable: Component = () => {
+const FeatureNotAvailable: RouteComponent = (props) => {
   return (
     <div class={style.container}>
-      <DashboardInfoBar />
+      <DashboardInfoBar metadata={props.data?.metadata} />
       <div class={style.info}>
         <MaterialSymbol symbol='warning' color='primary' class={style.icon} />
         <span class={style.header}>Feature not available</span>

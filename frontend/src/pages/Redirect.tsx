@@ -1,11 +1,17 @@
 import { useNavigate } from '@solidjs/router';
 
-const Redirect: Component<string> = (props) => {
+export type RedirectProps = {
+  to: string;
+};
+
+const Redirect: RouteComponent<{}, RedirectProps> = (props) => {
   const navigate = useNavigate();
 
-  navigate(props);
+  if (props.data?.to) {
+    navigate(props.data.to);
+  }
 
-  return <span>Navigating to {props}</span>;
+  return <span>Navigating to {props.data?.to}</span>;
 };
 
 export default Redirect;

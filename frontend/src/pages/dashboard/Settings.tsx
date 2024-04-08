@@ -4,12 +4,12 @@ import ChantingSettingsWidget from '#components/widgets/ChantingSettingsWidget';
 import style from '#styles/dashboard/Settings.module.scss';
 
 
-const Settings: Component = () => {
+const Settings: RouteComponent = (props) => {
   let containerRef = document.createElement('div');
 
   return (
     <div class={style.container}>
-      <DashboardInfoBar />
+      <DashboardInfoBar metadata={props.data?.metadata} />
       <div ref={containerRef} class={style.widgets}>
         <ChantingSettingsWidget />
       </div>

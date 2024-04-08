@@ -9,11 +9,10 @@ import TemplateEditor from '#components/TemplateEditor';
 import style from '#styles/dashboard/Templates.module.scss';
 
 
-const Templates: Component = () => {
+const Templates: RouteComponent = (props) => {
   const [editorOpen, setEditorOpen] = createSignal(false);
   const [template, setTemplate] = createSignal<Template | null>(null);
   const [, { addNotification }] = useNotification();
-
 
   const deleteTemplate = async (template: Template) => {
     const body: DeleteTemplateReqBody = {
@@ -62,7 +61,7 @@ const Templates: Component = () => {
 
   return (
     <div class={style.container}>
-      <DashboardInfoBar>
+      <DashboardInfoBar metadata={props.data?.metadata}>
         <Button color='primary' size='big' onClick={() => openEditor()} >Add Template</Button>
       </DashboardInfoBar>
       <div class={style.widgets}>

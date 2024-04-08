@@ -44,6 +44,7 @@ export default defineConfig({
       { find: '#assets', replacement: resolve(frontendDevelopmentPath, 'src/assets') },
       { find: '#lib', replacement: resolve(frontendDevelopmentPath, 'src/lib') },
       { find: '#providers', replacement: resolve(frontendDevelopmentPath, 'src/providers') },
+      { find: '#routers', replacement: resolve(frontendDevelopmentPath, 'src/routers') },
     ],
   },
 

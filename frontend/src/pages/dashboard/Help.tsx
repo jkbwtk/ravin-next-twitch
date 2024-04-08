@@ -8,10 +8,10 @@ import registeringApplicationWebm from '#assets/registeringApplication.webm';
 import unrelatedImage from '#assets/unrelatedImage.png';
 
 
-const Help: Component = () => {
+const Help: RouteComponent = (props) => {
   return (
     <div class={style.container}>
-      <DashboardInfoBar />
+      <DashboardInfoBar metadata={props.data?.metadata} />
 
       <div class={style.helpContainer}>
         <div class={style.entry}>

@@ -1,16 +1,21 @@
 import { For } from 'solid-js';
 import MaterialSymbol from '#components/MaterialSymbol';
-import { Link, useRouteData } from '@solidjs/router';
-import { SidebarRoute } from '#components/DashboardSidebar/SidebarElementBase';
+import { A, useLocation } from '@solidjs/router';
+import { RouteMetadata } from '#routers/utils';
 
 import style from '#styles/DashboardInfoBar.module.scss';
 import borders from '#styles/borders.module.scss';
 
 
+export type DashboardInfoBarProps = {
+  metadata?: RouteMetadata;
+};
+
 const capitalize = (str: string) => str[0].toUpperCase() + str.slice(1);
 
-const DashboardInfoBar: ParentComponent = (props) => {
-  const data = useRouteData<SidebarRoute>();
+const DashboardInfoBar: ParentComponent<DashboardInfoBarProps> = (props) => {
+  const location = useLocation();
+
   let pathAccumulator = [''];
 
   return (
@@ -21,20 +26,20 @@ const DashboardInfoBar: ParentComponent = (props) => {
     }}>
       <div class={style.container}>
         <div class={style.locationInfo}>
-          <div class={style.title}>{data.name}</div>
+          <div class={style.title}>{props.metadata?.name}</div>
           <div class={style.path}>
-            <Link href='/' class={style.pathElement}>
+            <A href='/' class={style.pathElement}>
               <MaterialSymbol symbol='home' color='gray' interactive size='small' highlightColor='primary' />
-            </Link>
+            </A>
 
-            <For each={data.href.split('/').slice(1)}>
+            <For each={location.pathname.split('/').slice(1)}>
               {(part) => {
                 pathAccumulator.push(part);
 
                 return (
                   <>
                     <MaterialSymbol symbol='arrow_forward_ios' color='primary' size='smallest' />
-                    <Link href={pathAccumulator.join('/')} class={style.pathElement}>{capitalize(part)}</Link>
+                    <A href={pathAccumulator.join('/')} class={style.pathElement}>{capitalize(part)}</A>
                   </>
                 );
               }}

@@ -1,21 +1,21 @@
-import SidebarElementBase, { SidebarRoute } from '#components/DashboardSidebar/SidebarElementBase';
-import { hasAuxRoutes } from '#components/DashboardSidebar/SidebarUtils';
-import { Link } from '@solidjs/router';
+import SidebarElementBase, { SidebarElementProps } from '#components/DashboardSidebar/SidebarElementBase';
+import { hasAuxRoutes, joinPaths } from '#routers/utils';
+import { A } from '@solidjs/router';
 
 import style from '#styles/DashboardSidebar.module.scss';
 
 
-const SidebarElementSimple: Component<SidebarRoute> = (props) => {
+const SidebarElementSimple: Component<SidebarElementProps> = (props) => {
   return (
-    <Link
-      href={props.href}
+    <A
+      href={joinPaths(props.absolutePath, props.path)}
       class={style.element}
       activeClass={style.active}
       end={!hasAuxRoutes(props)}
       draggable={false}
     >
       <SidebarElementBase {...props} />
-    </Link>
+    </A>
   );
 };
 
