@@ -1,4 +1,17 @@
 @use 'app' as *;
+@use 'animations' as *;
+
+
+.modal {
+  width: max-content !important;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: minmax(36rem, 46rem) minmax(12rem, 26rem);
+
+  overflow: auto;
+}
 
 .editor {
   display: grid;
@@ -7,8 +20,7 @@
 
   gap: 2rem;
   padding: 2rem;
-
-  width: 100%;
+  padding-right: 1rem;
 
   box-sizing: border-box;
 
@@ -50,8 +62,53 @@
     width: 100%;
 
     display: flex;
-    flex-direction: row-reverse;
+    flex-direction: row;
+    justify-content: flex-end;
 
     gap: 1rem;
+  }
+}
+
+.status {
+  display: flex;
+  flex-direction: column;
+
+  margin: 2rem;
+  margin-left: 1rem;
+
+  box-sizing: border-box;
+
+  gap: 0.8rem;
+
+  .pill {
+    border-radius: 100rem;
+    padding: 0.4rem 1rem;
+
+    width: fit-content;
+
+    font-size: $smallFontSize;
+    color: $grayBright;
+
+    display: flex;
+    align-items: center;
+
+    gap: 0.4rem;
+
+    border: 0.2rem solid;
+    border-color: $green;
+
+    transition: border-color 0.5s;
+  }
+
+  .issue {
+    font-size: $smallFontSize;
+
+    padding-top: 0.8rem;
+  }
+
+  .invalid {
+    .pill {
+      border-color: $red;
+    }
   }
 }

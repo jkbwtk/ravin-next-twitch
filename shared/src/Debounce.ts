@@ -27,6 +27,8 @@ export class Debounce<T = void> {
 
     this.timeout = setTimeout(() => {
       this.options.callback(value);
+
+      this.timeout = null;
     }, this.options.timeout);
   };
 }

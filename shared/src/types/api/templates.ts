@@ -29,7 +29,9 @@ export const PostTemplateReqBody = Template.omit({ id: true, userId: true, envir
 export type PostTemplateReqBody = z.infer<typeof PostTemplateReqBody>;
 
 
-export const TestTemplateReqBody = Template.pick({ template: true });
+export const TestTemplateReqBody = z.object({
+  template: z.string(),
+});
 
 export type TestTemplateReqBody = z.infer<typeof TestTemplateReqBody>;
 
