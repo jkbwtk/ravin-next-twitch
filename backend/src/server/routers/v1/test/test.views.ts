@@ -19,10 +19,10 @@ const lazySignal = basicSignal(false);
 sleep(20000).then(() => {
   lazySignal.set(true);
 
-  logger.debug({
-    message: 'LazyView signal is set to true',
-    label: ['DEV', 'lazySignal'],
-  });
+  // logger.debug({
+  //   message: 'LazyView signal is set to true',
+  //   label: ['DEV', 'lazySignal'],
+  // });
 });
 
 export const getLazyView = new ExpressStack()
