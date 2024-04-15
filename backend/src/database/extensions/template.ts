@@ -80,7 +80,7 @@ export const templateExtension = Prisma.defineExtension((client) => {
               name: template.name,
               template: template.template,
               userId: channelId,
-              environments: await TemplateTester.getSupportedEnvironments(template.template),
+              environments: (await TemplateTester.test(template.template)).getSupportedEnvironments(),
             },
           });
 
@@ -95,7 +95,7 @@ export const templateExtension = Prisma.defineExtension((client) => {
               name: template.name,
               template: template.template,
               environments: template.template ?
-                await TemplateTester.getSupportedEnvironments(template.template) :
+                (await TemplateTester.test(template.template)).getSupportedEnvironments() :
                 undefined,
             },
           });

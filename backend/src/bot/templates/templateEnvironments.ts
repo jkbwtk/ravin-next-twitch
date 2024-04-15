@@ -5,7 +5,7 @@ import { Context } from 'isolated-vm';
 export type EnvironmentProvider = (context: Context) => void;
 
 export const testEnvironments: Record<TemplateEnvironments, EnvironmentProvider> = {
-  empty: () => void 0,
+  generic: () => void 0,
 
   command: (context) => {
     const jail = context.global;

@@ -137,7 +137,7 @@ const TemplateEditorBase: Component<TemplateEditorProps> = (props) => {
   };
 
   const environmentNameMap: Record<string, string> = {
-    empty: 'Generic',
+    generic: 'Generic',
     command: 'Command',
   } satisfies Record<TemplateEnvironments, string>;
 
@@ -239,7 +239,7 @@ const TemplateEditorBase: Component<TemplateEditorProps> = (props) => {
                   </div>
 
                   <Show when={env().status !== null}>
-                    <div class={style.issue}>{env().status?.SyntaxError ?? env().status?.ReferenceError}</div>
+                    <div class={style.issue}>{env().status?.message}</div>
                   </Show>
                 </div>
               )}

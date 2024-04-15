@@ -1,7 +1,7 @@
 import { PaginatedResponse } from '../pagination';
 import { z } from 'zod';
 
-export const TemplateEnvironments = z.enum(['empty', 'command']);
+export const TemplateEnvironments = z.enum(['generic', 'command']);
 
 export type TemplateEnvironments = z.infer<typeof TemplateEnvironments>;
 
@@ -43,9 +43,11 @@ export type TestTemplateReqBody = z.infer<typeof TestTemplateReqBody>;
 
 
 export const TemplateIssue = z.object({
-  SyntaxError: z.string().optional(),
-  ReferenceError: z.string().optional(),
+  type: z.enum(['SyntaxError', 'ReferenceError']),
+  message: z.string(),
 });
+
+export type TemplateIssue = z.infer<typeof TemplateIssue>;
 
 export const TestTemplateResponse = z.object({
   data: z.record(TemplateIssue.nullable()),

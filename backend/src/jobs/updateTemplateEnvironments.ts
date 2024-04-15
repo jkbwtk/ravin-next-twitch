@@ -17,7 +17,7 @@ const updateTemplateEnvironments: Job = {
 
     for (const template of templates) {
       try {
-        const supportedEnvironments = await TemplateTester.getSupportedEnvironments(template.template);
+        const supportedEnvironments = (await TemplateTester.test(template.template)).getSupportedEnvironments();
         await prisma.template.update({
           data: {
             environments: supportedEnvironments,
