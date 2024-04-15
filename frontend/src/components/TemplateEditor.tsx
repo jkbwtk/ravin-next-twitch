@@ -70,7 +70,7 @@ const TemplateEditorBase: Component<TemplateEditorProps> = (props) => {
   });
 
 
-  const createTemplate = async (template: PostTemplateReqBody) => {
+  const createTemplate = async (template: PostTemplateReqBody): Promise<boolean> => {
     const response = await fetch(`/api/v1/templates`, {
       method: 'POST',
       headers: {
@@ -79,17 +79,21 @@ const TemplateEditorBase: Component<TemplateEditorProps> = (props) => {
       body: JSON.stringify(template),
     });
 
+    console.log(response);
+
     if (!response.ok) {
       addNotification({
         type: 'error',
         title: 'Command not created',
-        message: `An error occurred while creating command.`,
+        message: `An error occurred while creating command. ${(await response.json()).message}`,
         duration: 10000,
       });
     }
+
+    return response.ok;
   };
 
-  const updateTemplate = async (template: PatchTemplateReqBody) => {
+  const updateTemplate = async (template: PatchTemplateReqBody): Promise<boolean> => {
     const response = await fetch(`/api/v1/templates`, {
       method: 'PATCH',
       headers: {
@@ -98,14 +102,18 @@ const TemplateEditorBase: Component<TemplateEditorProps> = (props) => {
       body: JSON.stringify(template),
     });
 
+    console.log(response);
+
     if (!response.ok) {
       addNotification({
         type: 'error',
         title: 'Template not updated',
-        message: `An error occurred while updating template.`,
+        message: `An error occurred while updating template. ${(await response.json()).message}`,
         duration: 10000,
       });
     }
+
+    return response.ok;
   };
 
   const handleForm = async (ev: SubmitEvent) => {
@@ -116,20 +124,24 @@ const TemplateEditorBase: Component<TemplateEditorProps> = (props) => {
     const name = ev.target.elements.namedItem('name') as HTMLInputElement;
     const templateField = ev.target.elements.namedItem('template') as HTMLInputElement;
 
+    let ok = true;
+
     if (props.template) {
-      await updateTemplate({
+      ok = await updateTemplate({
         id: props.template.id,
         name: name.value,
         template: templateField.value,
       });
     } else {
-      await createTemplate({
+      ok = await createTemplate({
         name: name.value,
         template: templateField.value,
       });
     }
 
-    props.onClose();
+    if (ok) {
+      props.onClose();
+    }
   };
 
   const handleInput = (ev: InputEvent) => {
