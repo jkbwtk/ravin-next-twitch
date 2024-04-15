@@ -1,4 +1,4 @@
-import { createResource, ErrorBoundary, For, onCleanup, onMount, Suspense } from 'solid-js';
+import { createResource, createSignal, ErrorBoundary, For, onCleanup, onMount, Suspense } from 'solid-js';
 import { useSocket } from '#providers/SocketProvider';
 import { makeRequest } from '#lib/fetch';
 import FetchFallback from '#components/FetchFallback';
@@ -11,8 +11,10 @@ import Paper from '@suid/material/Paper/Paper';
 import TableRow from '@suid/material/TableRow/TableRow';
 import TableCell from '@suid/material/TableCell/TableCell';
 import TableBody from '@suid/material/TableBody/TableBody';
-import { GetTemplatesResponse, Template as TemplateType } from '#shared/types/api/templates';
+import { GetTemplatesPaginatedResponse, Template as TemplateType } from '#shared/types/api/templates';
 import Template from '#components/Template';
+import { createPagination, getSearchParams, Pagination } from '#lib/pagination';
+import Paginator from '#components/Paginator';
 
 import style from '#styles/widgets/CommandTableWidget.module.scss';
 
@@ -22,34 +24,48 @@ export interface TemplateTableProps {
   deleteTemplate: (template: TemplateType) => void;
 }
 
-const fetchTemplates = async () => {
-  const { data } = await makeRequest('/api/v1/templates', { schema: GetTemplatesResponse });
+const fetchTemplates = async (pagination: Pagination) => {
+  const response = await makeRequest('/api/v1/templates', {
+    schema: GetTemplatesPaginatedResponse,
+    params: getSearchParams(pagination),
+  });
 
-  return data.sort((a, b) => {
+
+  response.data.sort((a, b) => {
     if (a.id < b.id) return -1;
     if (a.id > b.id) return 1;
     return 0;
   });
+
+  return response;
 };
 
 const TemplateTableWidget: Component<TemplateTableProps> = (props) => {
   const [socket] = useSocket();
-  const [templates, { mutate: setTemplates, refetch: refetchTemplates }] = createResource(fetchTemplates, {
-    initialValue: [],
+  const [page, setPage] = createSignal(0);
+  const [limit, setLimit] = createSignal(5);
+  const [templates, { mutate: setTemplates, refetch: refetchTemplates }] = createResource(createPagination(limit, page), fetchTemplates, {
+    initialValue: {
+      data: [],
+      total: 0,
+      limit: 0,
+      offset: 0,
+    },
+    name: 'templates',
   });
 
   let tableRef = document.createElement('table');
 
-  const createTemplate = (command: TemplateType) => {
-    setTemplates((commands) => [...commands, command]);
+  const createTemplate = (template: TemplateType) => {
+    setTemplates((templates) => ({ ...templates, data: [...templates.data, template] }));
   };
 
-  const updateTemplate = (command: TemplateType) => {
-    setTemplates((commands) => commands.map((c) => c.id === command.id ? command : c));
+  const updateTemplate = (template: TemplateType) => {
+    setTemplates((templates) => ({ ...templates, data: templates.data.map((c) => c.id === template.id ? template : c) }));
   };
 
-  const removeTemplate = (commandId: number) => {
-    setTemplates((commands) => commands.filter((command) => command.id !== commandId));
+  const removeTemplate = (templateId: number) => {
+    setTemplates((templates) => ({ ...templates, data: templates.data.filter((template) => template.id !== templateId) }));
   };
 
   onMount(() => {
@@ -76,6 +92,8 @@ const TemplateTableWidget: Component<TemplateTableProps> = (props) => {
       <ErrorBoundary fallback={
         <ErrorFallback class={style.fallback} refresh={refetchTemplates} loading={templates.state === 'refreshing'}>Failed to load templates</ErrorFallback>
       }>
+        <Paginator page={[page, setPage]} limit={[limit, setLimit]} total={() => templates().total} />
+
         <Suspense fallback={<FetchFallback class={style.fallback}>Fetching Templates</FetchFallback>}>
           <TableContainer class={style.commandsContainer} component={Paper}>
             <Table ref={tableRef} stickyHeader>
@@ -87,7 +105,7 @@ const TemplateTableWidget: Component<TemplateTableProps> = (props) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                <For each={templates()}>
+                <For each={templates().data}>
                   {(template) => (
                     <Template template={template} openEditor={props.openEditor} deleteTemplate={props.deleteTemplate} />
                   )}

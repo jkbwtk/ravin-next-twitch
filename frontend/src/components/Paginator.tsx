@@ -1,9 +1,8 @@
 import Select from '@suid/material/Select/Select';
 import style from '#styles/Paginator.module.scss';
 import { MenuItem } from '@suid/material';
-import { Accessor, Setter, Signal } from 'solid-js';
+import { Accessor, Signal } from 'solid-js';
 import { SelectChangeEvent } from '@suid/material/Select/SelectInputProps';
-import MaterialSymbol from '#components/MaterialSymbol';
 import Button from '#components/Button';
 
 

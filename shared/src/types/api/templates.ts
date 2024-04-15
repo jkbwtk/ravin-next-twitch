@@ -1,3 +1,4 @@
+import { PaginatedResponse } from '../pagination';
 import { z } from 'zod';
 
 export const TemplateEnvironments = z.enum(['empty', 'command']);
@@ -22,6 +23,11 @@ export const GetTemplatesResponse = z.object({
 });
 
 export type GetTemplatesResponse = z.infer<typeof GetTemplatesResponse>;
+
+
+export const GetTemplatesPaginatedResponse = PaginatedResponse(GetTemplatesResponse);
+
+export type GetTemplatesPaginatedResponse = z.infer<typeof GetTemplatesPaginatedResponse>;
 
 
 export const PostTemplateReqBody = Template.omit({ id: true, userId: true, environments: true });

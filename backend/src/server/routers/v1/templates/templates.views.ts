@@ -7,21 +7,35 @@ import { SocketServer } from '#server/SocketServer';
 import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
 import { json } from 'body-parser';
 import { HttpCodes } from '#shared/httpCodes';
-import { GetTemplatesResponse, TestTemplateResponse } from '#shared/types/api/templates';
+import { GetTemplatesPaginatedResponse, GetTemplatesResponse, TestTemplateResponse } from '#shared/types/api/templates';
 import { DeleteTemplateSchema, PatchTemplateSchema, PostTemplateSchema, TestTemplateSchema } from '#server/routers/v1/templates/templates.schemas';
 import { TemplateTester } from '#bot/templates/TemplateTester';
+import { limitOffsetPagination } from '#server/middlewares/pagination';
 
 
 export const getTemplatesView = new ExpressStack()
   .usePreflight(authenticated)
-  .use(validateResponse(GetTemplatesResponse))
+  .use(validateResponse(GetTemplatesPaginatedResponse.or(GetTemplatesResponse)))
+  .use(limitOffsetPagination())
   .use(async (req, res) => {
     try {
-      const templates = await prisma.template.getByChannelId(req.user.id);
+      if (req.pagination) {
+        const templates = await prisma.template.getByChannelId(req.user.id, req.pagination);
 
-      res.jsonValidated({
-        data: templates.map((c) => c.serialize()),
-      });
+        res.jsonValidated({
+          data: templates.map((c) => c.serialize()),
+
+          total: await prisma.template.countByChannelId(req.user.id),
+          limit: req.pagination.take,
+          offset: req.pagination.skip,
+        });
+      } else {
+        const templates = await prisma.template.getByChannelId(req.user.id);
+
+        res.jsonValidated({
+          data: templates.map((c) => c.serialize()),
+        });
+      }
     } catch (err) {
       logger.warn('Failed to get templates', {
         error: err,

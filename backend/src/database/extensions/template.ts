@@ -5,6 +5,7 @@ import { DeleteTemplateReqBody, PatchTemplateReqBody, PostTemplateReqBody } from
 import { Template as TemplateApi } from '#shared/types/api/templates';
 import { Prisma } from '@prisma/client';
 import { TemplateTester } from '#bot/templates/TemplateTester';
+import { LimitOffsetPaginationState } from '#server/middlewares/pagination';
 
 
 declare global {
@@ -53,8 +54,15 @@ export const templateExtension = Prisma.defineExtension((client) => {
             where: { id },
           });
         },
-        async getByChannelId(channelId: string) {
+        async getByChannelId(channelId: string, pagination: LimitOffsetPaginationState = null) {
           return Prisma.getExtensionContext(this).findMany({
+            where: { userId: channelId },
+
+            ...pagination,
+          });
+        },
+        async countByChannelId(channelId: string) {
+          return Prisma.getExtensionContext(this).count({
             where: { userId: channelId },
           });
         },
