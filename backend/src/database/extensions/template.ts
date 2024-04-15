@@ -4,8 +4,8 @@ import { ExtensionReturnType, ExtensionType } from '#database/extensions/utils';
 import { DeleteTemplateReqBody, PatchTemplateReqBody, PostTemplateReqBody } from '#shared/types/api/templates';
 import { Template as TemplateApi } from '#shared/types/api/templates';
 import { Prisma } from '@prisma/client';
-import { TemplateTester } from '#bot/templates/TemplateTester';
 import { LimitOffsetPaginationState } from '#server/middlewares/pagination';
+import { TemplateIssues } from '#bot/templates/TemplateIssues';
 
 
 declare global {
@@ -74,13 +74,13 @@ export const templateExtension = Prisma.defineExtension((client) => {
             },
           });
         },
-        async createFromApi(channelId: string, template: PostTemplateReqBody) {
+        async createFromApi(channelId: string, template: PostTemplateReqBody, templateIssues: TemplateIssues | null) {
           const result = await Prisma.getExtensionContext(this).create({
             data: {
               name: template.name,
               template: template.template,
               userId: channelId,
-              environments: (await TemplateTester.test(template.template)).getSupportedEnvironments(),
+              environments: templateIssues ? templateIssues.getSupportedEnvironments() : undefined,
             },
           });
 
@@ -88,15 +88,13 @@ export const templateExtension = Prisma.defineExtension((client) => {
 
           return result;
         },
-        async updateFromApi(template: PatchTemplateReqBody) {
+        async updateFromApi(template: PatchTemplateReqBody, templateIssues: TemplateIssues | null) {
           const result = await Prisma.getExtensionContext(this).update({
             where: { id: template.id },
             data: {
               name: template.name,
               template: template.template,
-              environments: template.template ?
-                (await TemplateTester.test(template.template)).getSupportedEnvironments() :
-                undefined,
+              environments: templateIssues ? templateIssues.getSupportedEnvironments() : undefined,
             },
           });
 

@@ -11,6 +11,7 @@ import { GetTemplatesPaginatedResponse, GetTemplatesResponse, TestTemplateRespon
 import { DeleteTemplateSchema, PatchTemplateSchema, PostTemplateSchema, TestTemplateSchema } from '#server/routers/v1/templates/templates.schemas';
 import { TemplateTester } from '#bot/templates/TemplateTester';
 import { limitOffsetPagination } from '#server/middlewares/pagination';
+import { templateTesterMiddleware } from '#server/routers/v1/templates/templates.middlewares';
 
 
 export const getTemplatesView = new ExpressStack()
@@ -50,9 +51,10 @@ export const postTemplatesView = new ExpressStack()
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PostTemplateSchema))
+  .use(templateTesterMiddleware)
   .use(async (req, res) => {
     try {
-      const template = await prisma.template.createFromApi(req.user.id, req.validated.body);
+      const template = await prisma.template.createFromApi(req.user.id, req.validated.body, req.templateIssues);
       SocketServer.emitToUser(req.user.id, 'NEW_TEMPLATE', template.serialize());
 
       res.sendStatus(HttpCodes.Created);
@@ -77,7 +79,7 @@ export const testTemplateView = new ExpressStack()
       const issues = await TemplateTester.test(req.validated.body.template);
 
       res.jsonValidated({
-        data: Object.fromEntries(issues) as TestTemplateResponse['data'],
+        data: issues.serialize(),
       });
     } catch (err) {
       logger.warn('Failed to test template', {
@@ -93,13 +95,10 @@ export const patchTemplatesView = new ExpressStack()
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PatchTemplateSchema))
+  .use(templateTesterMiddleware)
   .use(async (req, res) => {
     try {
-      if (req.validated.body.template !== undefined) {
-        const issues = await TemplateTester.test(req.validated.body.template);
-        console.log(issues);
-      }
-      const command = await prisma.template.updateFromApi(req.validated.body);
+      const command = await prisma.template.updateFromApi(req.validated.body, req.templateIssues);
       SocketServer.emitToUser(req.user.id, 'UPD_TEMPLATE', command.serialize());
 
       res.sendStatus(HttpCodes.OK);
