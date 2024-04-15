@@ -18,8 +18,6 @@ export const getCustomCommandsView = new ExpressStack()
   .use(limitOffsetPagination())
   .use(async (req, res) => {
     try {
-      console.log(req.pagination);
-
       if (req.pagination) {
         const commands = await prisma.command.getByChannelId(req.user.id, req.pagination);
 

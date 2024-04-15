@@ -112,11 +112,11 @@ const CommandTable: Component = () => {
       refresh={refetchCommands}
       loading={commands.state === 'refreshing'}
     >
-      <Paginator page={[page, setPage]} limit={[limit, setLimit]} total={() => commands().total} />
-
       <ErrorBoundary fallback={
         <ErrorFallback class={style.fallback} refresh={refetchCommands} loading={commands.state === 'refreshing'}>Failed to load commands</ErrorFallback>
       }>
+        <Paginator page={[page, setPage]} limit={[limit, setLimit]} total={() => commands().total} />
+
         <Suspense fallback={<FetchFallback class={style.fallback}>Fetching Commands</FetchFallback>}>
           <TableContainer class={style.commandsContainer} component={Paper}>
             <Table ref={tableRef} stickyHeader>
