@@ -102,7 +102,7 @@ const TemplateTableWidget: Component<TemplateTableProps> = (props) => {
                   <TableCell align='center'>Name</TableCell>
                   <TableCell align='center'>Template</TableCell>
                   <TableCell align='center'>Environments</TableCell>
-                  <TableCell align='center'>Actions</TableCell>
+                  <TableCell align='center' class={style.minWidthColumn}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>

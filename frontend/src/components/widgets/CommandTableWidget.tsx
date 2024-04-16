@@ -127,11 +127,11 @@ const CommandTable: Component = () => {
                   <TableCell align='center' classList={{
                     [style.disabled]: tableType() > TableType.Full,
                   }}>User Level</TableCell>
-                  <TableCell align='center' classList={{
+                  <TableCell align='center' class={style.minWidthColumn} classList={{
                     [style.disabled]: tableType() > TableType.Compact,
                   }}>Cooldown</TableCell>
-                  <TableCell align='center'>Enabled</TableCell>
-                  <TableCell align='center'>Actions</TableCell>
+                  <TableCell align='center' class={style.minWidthColumn}>Enabled</TableCell>
+                  <TableCell align='center' class={style.minWidthColumn}>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
