@@ -6,7 +6,7 @@ import Modal from '#components/Modal';
 import TextArea from '#components/TextArea';
 import { makeRequest } from '#lib/fetch';
 import { useNotification } from '#providers/NotificationProvider';
-import { PatchTemplateReqBody, PostTemplateReqBody, Template, TemplateEnvironments, TestTemplateResponse } from '#shared/types/api/templates';
+import { environmentNameMap, PatchTemplateReqBody, PostTemplateReqBody, Template, TestTemplateResponse } from '#shared/types/api/templates';
 import { createResource, createSignal, ErrorBoundary, Index, Show } from 'solid-js';
 import { Debounce } from '#shared/Debounce';
 import Stack from '@suid/material/Stack/Stack';
@@ -148,11 +148,6 @@ const TemplateEditorBase: Component<TemplateEditorProps> = (props) => {
   const handleInput = (ev: InputEvent) => {
     if (ev.target instanceof HTMLTextAreaElement) statusDebouncer.debounce(ev.target.value);
   };
-
-  const environmentNameMap: Record<string, string> = {
-    generic: 'Generic',
-    command: 'Command',
-  } satisfies Record<TemplateEnvironments, string>;
 
   const mappedStatus = () => Object.entries(templateStatus()?.data ?? {}).map(([env, status]) => ({
     name: environmentNameMap[env] ?? env,
