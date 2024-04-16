@@ -81,23 +81,7 @@
   gap: 0.8rem;
 
   .pill {
-    border-radius: 100rem;
-    padding: 0.4rem 1rem;
-
-    width: fit-content;
-
-    font-size: $smallFontSize;
-    color: $grayBright;
-
-    display: flex;
-    align-items: center;
-
-    gap: 0.4rem;
-
-    border: 0.2rem solid;
     border-color: $green;
-
-    transition: border-color 0.5s;
   }
 
   .issue {

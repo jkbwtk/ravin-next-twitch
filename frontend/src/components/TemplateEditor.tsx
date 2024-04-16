@@ -13,6 +13,7 @@ import Stack from '@suid/material/Stack/Stack';
 import Skeleton from '@suid/material/Skeleton/Skeleton';
 import ErrorFallback from '#components/ErrorFallback';
 import MaterialSymbol from '#components/MaterialSymbol';
+import Pill from '#components/Pill';
 
 import style from '#styles/TemplateEditor.module.scss';
 
@@ -237,18 +238,15 @@ const TemplateEditorBase: Component<TemplateEditorProps> = (props) => {
                     [style.invalid]: env().status !== null,
                   }}
                 >
-                  <div class={style.pill}>
-                    <Show
-                      when={env().status === null}
-                      fallback={
+                  <Pill
+                    content={env().name}
+                    class={style.pill}
+                    icon={
+                      env().status === null ?
+                        <MaterialSymbol symbol='check' size='small' color='green' /> :
                         <MaterialSymbol symbol='close' size='small' color='red' />
-                      }
-                    >
-                      <MaterialSymbol symbol='check' size='small' color='green' />
-                    </Show>
-
-                    {env().name}
-                  </div>
+                    }
+                  />
 
                   <Show when={env().status !== null}>
                     <div class={style.issue}>{env().status?.message}</div>
