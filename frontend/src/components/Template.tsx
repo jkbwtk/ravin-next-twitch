@@ -2,8 +2,10 @@ import MaterialSymbol from '#components/MaterialSymbol';
 import TemplateButton from '#components/TemplateButton';
 import TableRow from '@suid/material/TableRow/TableRow';
 import TableCell from '@suid/material/TableCell/TableCell';
-import { Template as TemplateType } from '#shared/types/api/templates';
+import { environmentAbbreviationMap, Template as TemplateType } from '#shared/types/api/templates';
 import HighlightedCode from '#components/HighlightedCode';
+import { For } from 'solid-js';
+import Pill from '#components/Pill';
 
 import style from '#styles/widgets/CommandTableWidget.module.scss';
 
@@ -23,11 +25,14 @@ const Template: Component<TemplateProps> = (props) => {
         <HighlightedCode code={props.template.template} language='javascript' wrap='`' />
       </TableCell>
       <TableCell align='center'>
+        <div class={style.pillContainer}>
+          <For each={[...props.template.environments, ...props.template.environments]}>
+            {(env) => <Pill class={style.pill} content={environmentAbbreviationMap[env] ?? env.slice(0, 3)} />}
+          </For>
+        </div>
+      </TableCell>
+      <TableCell align='center'>
         <div class={style.actionsContainer}>
-          <TemplateButton>
-            <MaterialSymbol symbol='settings_backup_restore' color='green' size='alt' interactive class={style.commandButton} />
-          </TemplateButton>
-
           <TemplateButton onClick={() => props.openEditor(props.template)}>
             <MaterialSymbol symbol='edit' color='yellow' size='alt' interactive class={style.commandButton} />
           </TemplateButton>

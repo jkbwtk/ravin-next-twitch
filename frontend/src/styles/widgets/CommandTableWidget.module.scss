@@ -33,3 +33,15 @@
 .disabled {
   display: none !important;
 }
+
+.pill-container {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  flex-wrap: wrap;
+
+  .pill {
+    border-color: $gray;
+  }
+}
