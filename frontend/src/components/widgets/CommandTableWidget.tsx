@@ -16,7 +16,7 @@ import TableBody from '@suid/material/TableBody/TableBody';
 import { createPagination, getSearchParams, Pagination } from '#lib/pagination';
 import Paginator from '#components/Paginator';
 
-import style from '#styles/widgets/CommandTableWidget.module.scss';
+import style from '#styles/widgets/TableWidget.module.scss';
 
 
 export enum TableType {

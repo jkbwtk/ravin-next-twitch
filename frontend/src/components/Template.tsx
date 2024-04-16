@@ -7,7 +7,7 @@ import HighlightedCode from '#components/HighlightedCode';
 import { For } from 'solid-js';
 import Pill from '#components/Pill';
 
-import style from '#styles/widgets/CommandTableWidget.module.scss';
+import style from '#styles/widgets/TableWidget.module.scss';
 
 
 export type TemplateProps = {

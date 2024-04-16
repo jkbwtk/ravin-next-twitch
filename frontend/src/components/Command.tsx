@@ -7,7 +7,7 @@ import { TableType } from '#components/widgets/CommandTableWidget';
 import TableRow from '@suid/material/TableRow/TableRow';
 import TableCell from '@suid/material/TableCell/TableCell';
 
-import style from '#styles/widgets/CommandTableWidget.module.scss';
+import style from '#styles/widgets/TableWidget.module.scss';
 
 
 export type CommandProps = {
