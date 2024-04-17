@@ -1,0 +1,22 @@
+@use 'app' as *;
+
+.container {
+  display: flex;
+  flex-direction: column;
+
+  gap: 2rem;
+
+  box-sizing: border-box;
+  padding: 2rem;
+
+  .message {
+    font-size: $altFontSize;
+  }
+
+  .button-container {
+    display: flex;
+    justify-content: flex-end;
+
+    gap: 1rem;
+  }
+}
