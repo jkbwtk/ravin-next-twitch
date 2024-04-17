@@ -1,6 +1,6 @@
 import { prisma } from '#database/database';
 import { TokenWithUserAndChannel } from '#database/extensions/token';
-import Deferred from '#lib/Deferred';
+import Deferred from '#shared/Deferred';
 import { ExtendedCron } from '#lib/ExtendedCron';
 import { ExtendedMap } from '#lib/ExtendedMap';
 import { logger } from '#lib/logger';

@@ -3,7 +3,7 @@ import { ChannelThread } from './ChannelThread';
 import { ExtendedMap } from '../lib/ExtendedMap';
 import { Config } from '#lib/Config';
 import { isDevApi } from '#shared/constants';
-import Deferred from '#lib/Deferred';
+import Deferred from '#shared/Deferred';
 import { TwitchUserRepo } from '#lib/TwitchUserRepo';
 import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
