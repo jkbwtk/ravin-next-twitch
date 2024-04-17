@@ -29,6 +29,8 @@ const Modal: ParentComponent<ModalProps> = (userProps) => {
   let containerRef = document.createElement('div');
   let modalRef = document.createElement('div');
 
+  let lastMouseDownTarget: EventTarget | null = null;
+
   let offsetX = 0;
   let offsetY = 0;
 
@@ -90,6 +92,14 @@ const Modal: ParentComponent<ModalProps> = (userProps) => {
     setModalPosition();
   };
 
+  const handleBackdropMouseDown = (ev: MouseEvent) => {
+    lastMouseDownTarget = ev.target;
+  };
+
+  const handleBackdropMouseUp = (ev: MouseEvent) => {
+    if (ev.target === ev.currentTarget && lastMouseDownTarget === ev.target) props.onClose();
+  };
+
   onMount(() => {
     window.addEventListener('resize', handleResize);
   });
@@ -117,9 +127,8 @@ const Modal: ParentComponent<ModalProps> = (userProps) => {
           <div
             ref={containerRef}
             class={style.container}
-            onClick={(ev) => {
-              if (ev.target === ev.currentTarget && !isDragging()) props.onClose();
-            }}
+            onMouseDown={handleBackdropMouseDown}
+            onMouseUp={handleBackdropMouseUp}
           >
             <div
               ref={modalRef}
