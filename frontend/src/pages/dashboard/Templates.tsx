@@ -18,7 +18,7 @@ const Templates: RouteComponent = (props) => {
 
   const deleteTemplate = async (template: Template) => {
     openConfirmationBox({
-      title: 'Delete Template',
+      title: `Delete ${template.name}`,
       message: 'Are you sure you want to delete this template?',
       confirmText: 'Delete',
     }).then(async (signal) => {

@@ -1,4 +1,4 @@
-import { createContext, createEffect, createResource, createSignal, For, onCleanup, onMount, Show, useContext } from 'solid-js';
+import { createContext, createEffect, createResource, createSignal, For, onCleanup, onMount, useContext } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { CustomCommand, DeleteCustomCommandReqBody, PatchCustomCommandReqBody, PostCustomCommandReqBody, UserLevel } from '#shared/types/api/commands';
 import { useNotification } from '#providers/NotificationProvider';
@@ -15,6 +15,7 @@ import { makeRequest } from '#lib/fetch';
 import { useSocket } from '#providers/SocketProvider';
 import Modal from '#components/Modal';
 import AnchorText from '#components/AnchorText';
+import { useConfirmationBox } from '#providers/ConfirmationBoxProvider';
 
 import style from '#styles/CustomCommandsEditorProvider.module.scss';
 
@@ -34,7 +35,7 @@ export type CustomCommandEditorContextValue = [
     close: () => void;
 
     updateCommand: (command: PatchCustomCommandReqBody) => void;
-    deleteCommand: (command: CustomCommand) => void;
+    deleteCommand: (command: CustomCommand, requireConfirmation?: boolean) => void;
   }
 ];
 
@@ -77,6 +78,7 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
   const [socket] = useSocket();
   const [state, setState] = createStore({ ...defaultState });
   const [, { addNotification }] = useNotification();
+  const { open: openConfirmationBox } = useConfirmationBox();
 
   const [templates, { mutate: setTemplates }] = createResource(fetchTemplates, {
     initialValue: [],
@@ -159,35 +161,50 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
     }
   };
 
-  const deleteCommand = async (command: CustomCommand) => {
-    const body: DeleteCustomCommandReqBody = {
-      id: command.id,
-    };
+  const deleteCommand = async (command: CustomCommand, requireConfirmation = false) => new Promise<void>((resolve) => {
+    const promise = requireConfirmation ? openConfirmationBox({
+      title: `Delete ${command.command}`,
+      message: 'Are you sure you want to delete this command?',
+      confirmText: 'Delete',
+    }) : Promise.resolve(true);
 
-    const response = await fetch(`/api/v1/commands/custom`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
+    promise.then(async (confirmed) => {
+      if (!confirmed) {
+        resolve();
+        return;
+      }
+
+      const body: DeleteCustomCommandReqBody = {
+        id: command.id,
+      };
+
+      const response = await fetch(`/api/v1/commands/custom`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (response.ok) {
+        addNotification({
+          type: 'success',
+          title: 'Command deleted',
+          message: `The command ${command.command} was successfully deleted.`,
+          duration: 5000,
+        });
+      } else {
+        addNotification({
+          type: 'error',
+          title: 'Command not deleted',
+          message: `An error occurred while deleting the command ${command.command}.`,
+          duration: 10000,
+        });
+      }
+
+      resolve();
     });
-
-    if (response.ok) {
-      addNotification({
-        type: 'success',
-        title: 'Command deleted',
-        message: `The command ${command.command} was successfully deleted.`,
-        duration: 5000,
-      });
-    } else {
-      addNotification({
-        type: 'error',
-        title: 'Command not deleted',
-        message: `An error occurred while deleting the command ${command.command}.`,
-        duration: 10000,
-      });
-    }
-  };
+  });
 
   const handleTemplateChange = (ev: SelectChangeEvent) => {
     setTemplate(ev.target.value as unknown as number);

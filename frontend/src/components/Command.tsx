@@ -55,7 +55,7 @@ const Command: Component<CommandProps> = (props) => {
             <MaterialSymbol symbol='edit' color='yellow' size='alt' interactive class={style.commandButton} />
           </TemplateButton>
 
-          <TemplateButton onClick={() => deleteCommand(props.command) }>
+          <TemplateButton onClick={() => deleteCommand(props.command, true) }>
             <MaterialSymbol symbol='delete' color='red' size='alt' interactive class={style.commandButton} />
           </TemplateButton>
         </div>
