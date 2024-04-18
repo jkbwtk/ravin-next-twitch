@@ -34,7 +34,7 @@ const SocketContext = createContext<SocketContextValue>([
 
 export const SocketProvider: ParentComponent = (props) => {
   const [state, setState] = createStore(defaultState);
-  const [session, { pushNotification, setNotificationsAsRead }] = useSession();
+  const [, { pushNotification, setNotificationsAsRead, isAuthenticated }] = useSession();
   const [loaded, setLoaded] = createSignal(false);
 
   const emit: SocketContextState['client']['emit'] = (event, ...args) => {
@@ -70,7 +70,7 @@ export const SocketProvider: ParentComponent = (props) => {
   };
 
   onMount(async () => {
-    if (session.loggedIn) {
+    if (isAuthenticated()) {
       setState('client', state.manager.socket('/'));
       registerSocketEvents();
       registerEventHandlers();
@@ -80,7 +80,7 @@ export const SocketProvider: ParentComponent = (props) => {
   });
 
   onCleanup(() => {
-    if (session.loggedIn) {
+    if (isAuthenticated()) {
       state.client.disconnect();
     }
   });

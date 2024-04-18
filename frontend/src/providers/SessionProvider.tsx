@@ -1,18 +1,19 @@
 import { useNotification } from '#providers/NotificationProvider';
 import { batch, createContext, createSignal, onMount, ParentComponent, Show, useContext } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { FrontendUser, GetFrontendUser } from '#types/api/auth';
+import { FrontendUser, GetSession, Session } from '#types/api/auth';
 import { GetSystemNotificationsResponse, SystemNotification } from '#shared/types/api/systemNotifications';
 import DotSpinner from '#components/DotSpinner';
 import { makeRequest } from '#lib/fetch';
 import { isDev } from 'solid-js/web';
+import { Config } from '#shared/types/api/auth';
 
 import style from '#styles/SessionProvider.module.scss';
 
 
 export type SessionContextState = {
-  loggedIn: boolean;
-  user?: FrontendUser;
+  user: FrontendUser | null;
+  config: Config;
   notifications: SystemNotification[];
   unreadNotifications: SystemNotification[];
 };
@@ -20,9 +21,11 @@ export type SessionContextState = {
 export type SessionContextValue = [
   state: SessionContextState,
   actions: {
-    fetchUser: () => Promise<FrontendUser | null>
+    fetchSession: () => Promise<Session>
     invalidate: () => void;
     logout: () => void;
+
+    isAuthenticated: () => boolean;
 
     fetchSystemNotifications: () => Promise<SystemNotification[] | null>
     markNotificationAsRead: (notification: SystemNotification) => Promise<void>;
@@ -33,7 +36,8 @@ export type SessionContextValue = [
 ];
 
 const defaultState: SessionContextState = {
-  loggedIn: false,
+  user: null,
+  config: { defaultPaginationLimit: 0, paginationLimitOptions: [] },
   notifications: [],
   unreadNotifications: [],
 };
@@ -41,30 +45,52 @@ const defaultState: SessionContextState = {
 const SessionContext = createContext<SessionContextValue>([
   defaultState,
   {
-    fetchUser: () => Promise.resolve(null),
-    invalidate: () => null,
-    logout: () => null,
+    fetchSession: () => {
+      throw Error('SessionContext: fetchSession() called before provider');
+    },
+    invalidate: () => {
+      throw Error('SessionContext: invalidate() called before provider');
+    },
+    logout: () => {
+      throw Error('SessionContext: logout() called before provider');
+    },
 
-    fetchSystemNotifications: () => Promise.resolve(null),
-    markNotificationAsRead: () => Promise.resolve(),
-    markAllNotificationsAsRead: () => Promise.resolve(),
-    pushNotification: () => null,
-    setNotificationsAsRead: () => null,
+    isAuthenticated: () => {
+      throw Error('SessionContext: isLogged() called before provider');
+    },
+
+    fetchSystemNotifications: () => {
+      throw Error('SessionContext: fetchSystemNotifications() called before provider');
+    },
+    markNotificationAsRead: () => {
+      throw Error('SessionContext: markNotificationAsRead() called before provider');
+    },
+    markAllNotificationsAsRead: () => {
+      throw Error('SessionContext: markAllNotificationsAsRead() called before provider');
+    },
+    pushNotification: () => {
+      throw Error('SessionContext: pushNotification() called before provider');
+    },
+    setNotificationsAsRead: () => {
+      throw Error('SessionContext: setNotificationsAsRead() called before provider');
+    },
   },
 ]);
 
 export const SessionProvider: ParentComponent = (props) => {
-  const [state, setState] = createStore(defaultState);
+  const [state, setState] = createStore(structuredClone(defaultState));
   const [, { addNotification }] = useNotification();
   const [loaded, setLoaded] = createSignal(false);
 
-  const fetchUser = async (): Promise<FrontendUser | null> => {
+  const isAuthenticated = () => state.user !== null;
+
+  const fetchSession = async (): Promise<Session> => {
     try {
-      const { data } = await makeRequest('/api/v1/auth/user', { schema: GetFrontendUser, cache: 'no-store' });
+      const { data } = await makeRequest('/api/v1/auth/session', { schema: GetSession, cache: 'no-store' });
 
       batch(() => {
-        setState('loggedIn', true);
-        setState('user', data);
+        setState('user', data.user);
+        setState('config', data.config);
       });
 
       return data;
@@ -72,18 +98,28 @@ export const SessionProvider: ParentComponent = (props) => {
       if (isDev) console.error(err);
 
       batch(() => {
-        setState('loggedIn', false);
-        setState('user', undefined);
+        setState('user', null);
+        setState('config', structuredClone(defaultState.config));
       });
-      return null;
+
+      addNotification({
+        type: 'error',
+        title: 'Session Error',
+        message: 'Failed to fetch session data',
+        duration: 5000,
+      });
+
+      return { user: null, config: structuredClone(defaultState.config) };
     }
   };
 
   const invalidate = () => {
-    batch(() => {
-      setState('loggedIn', false);
-      setState('user', undefined);
-    });
+    // batch(() => {
+    //   setState('user', null);
+    //   setState('config', structuredClone(defaultState.config));
+    //   setState('notifications', []);
+    //   setState('unreadNotifications', []);
+    // });
 
     location.pathname = '/';
   };
@@ -199,9 +235,9 @@ export const SessionProvider: ParentComponent = (props) => {
   };
 
   onMount(async () => {
-    await fetchUser();
+    await fetchSession();
 
-    if (state.loggedIn) {
+    if (isAuthenticated()) {
       await fetchSystemNotifications();
     }
 
@@ -211,8 +247,9 @@ export const SessionProvider: ParentComponent = (props) => {
   return (
     <SessionContext.Provider value={[state, {
       invalidate,
-      fetchUser,
+      fetchSession: fetchSession,
       logout,
+      isAuthenticated: isAuthenticated,
       fetchSystemNotifications,
       markNotificationAsRead,
       markAllNotificationsAsRead,

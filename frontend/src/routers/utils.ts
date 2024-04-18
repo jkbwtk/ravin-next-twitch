@@ -58,12 +58,12 @@ export const recursiveRouteFilter = <T extends ExtendedRouteDefinition<string, a
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const checkPermissions = <T extends ExtendedRouteDefinition<string, any>>(routes: T[]): T[] => {
-  const [session] = useSession();
+  const [session, { isAuthenticated }] = useSession();
 
   return recursiveRouteFilter(routes, (route) => {
     if (route.permissions === undefined) return true;
 
-    if (route.permissions.loggedIn !== undefined && route.permissions.loggedIn !== session.loggedIn) return false;
+    if (route.permissions.loggedIn !== undefined && route.permissions.loggedIn !== isAuthenticated()) return false;
     if (route.permissions.adminOnly && !session.user?.admin) return false;
 
     return true;

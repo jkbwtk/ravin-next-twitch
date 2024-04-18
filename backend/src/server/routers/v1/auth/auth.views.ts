@@ -6,32 +6,42 @@ import { SocketServer } from '#server/SocketServer';
 import { authScopes } from '#server/routers/v1/auth/authShared';
 import { passportReady } from '#server/routers/v1/auth/passportUtils';
 import { authenticated, validateResponse, waitUntilReady } from '#server/stackMiddlewares';
-import { GetFrontendUser } from '#shared/types/api/auth';
+import { GetSession } from '#shared/types/api/auth';
 import passport from 'passport';
 import { HttpCodes } from '#shared/httpCodes';
+import { Config } from '#lib/Config';
 
 
-export const getUserView = new ExpressStack()
-  .usePreflight(authenticated)
-  .use(validateResponse(GetFrontendUser))
-  .use((req, res) => {
+export const getSessionView = new ExpressStack()
+  .use(validateResponse(GetSession))
+  .use(async (req, res) => {
     try {
+      const user = req.user ?? null;
+
       res.jsonValidated({
         data: {
-          id: req.user.id,
-          login: req.user.login,
-          displayName: req.user.displayName,
-          profileImageUrl: req.user.profileImageUrl,
-          admin: req.user.admin,
+          user: user ? {
+            id: user.id,
+            login: user.login,
+            displayName: user.displayName,
+            profileImageUrl: user.profileImageUrl,
+            admin: user.admin,
+          } : null,
+          config: {
+            // @ts-expect-error Converted to number by Zod
+            defaultPaginationLimit: await Config.getOrFail('defaultPaginationLimit'),
+            // @ts-expect-error Converted to array of numbers by Zod
+            paginationLimitOptions: await Config.getOrFail('paginationLimitOptions'),
+          },
         },
       });
     } catch (err) {
-      logger.error('Failed to get user', {
-        label: ['APIv1', 'auth', 'getUserView'],
+      logger.error('Failed to get session data', {
+        label: ['APIv1', 'auth', 'getSessionView'],
         error: err,
       });
 
-      throw new ServerError(HttpCodes.InternalServerError, 'Failed to get user');
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to get session data');
     }
   });
 

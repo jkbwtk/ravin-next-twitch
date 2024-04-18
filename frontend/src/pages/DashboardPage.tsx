@@ -13,8 +13,8 @@ import borders from '#styles/borders.module.scss';
 
 
 const DashboardPage: RouteComponent = (props) => {
-  const [session, { logout, invalidate }] = useSession();
-  if (!session.loggedIn) invalidate();
+  const [session, { logout, invalidate, isAuthenticated }] = useSession();
+  if (!isAuthenticated()) invalidate();
 
   return (
     <div class={style.container}>
@@ -36,7 +36,7 @@ const DashboardPage: RouteComponent = (props) => {
           <SystemNotificationsIcon />
 
           <Show
-            when={session.loggedIn}
+            when={isAuthenticated()}
             fallback={<MaterialSymbol symbol='account_circle' size='big' color='gray' interactive={true} highlightColor={'gray'} />}
           >
             <AnimatedImage

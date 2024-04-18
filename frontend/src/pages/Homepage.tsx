@@ -4,6 +4,8 @@ import AnimatedImage from '#components/AnimatedImage';
 import AnchorText from '#components/AnchorText';
 import { createSignal, Match, onCleanup, onMount, Show, Switch } from 'solid-js';
 import Link from '#components/Link';
+import { Transition } from 'solid-transition-group';
+import MaterialSymbol from '#components/MaterialSymbol';
 
 import style from '#styles/Homepage.module.scss';
 import ravinLogo from '#assets/ravinLogo.svg';
@@ -14,12 +16,10 @@ import dashboard from '#assets/dashboard.png';
 import commandsDashboard from '#assets/commandsDashboard.png';
 import customCommands from '#assets/customCommands.png';
 import settings from '#assets/settings.png';
-import { Transition } from 'solid-transition-group';
-import MaterialSymbol from '#components/MaterialSymbol';
 
 
 const Homepage: Component = () => {
-  const [session, { logout }] = useSession();
+  const [session, { logout, isAuthenticated }] = useSession();
   const [counter, setCounter] = createSignal(0);
 
   let intervalHandle: undefined | number = undefined;
@@ -44,11 +44,11 @@ const Homepage: Component = () => {
         <img class={style.logo} src={ravinLogo} alt='Ravin NeXT' draggable={false} />
 
         <Switch>
-          <Match when={session.loggedIn}>
+          <Match when={isAuthenticated()}>
             <SystemNotificationsIcon />
             <AnimatedImage class={style.avatar} src={session.user?.profileImageUrl} />
           </Match>
-          <Match when={!session.loggedIn}>
+          <Match when={!isAuthenticated()}>
             <AnchorButton customClass={style.button} color='gray' size='medium' href='/api/v1/auth/twitch'>Login with twitch</AnchorButton>
           </Match>
         </Switch>
@@ -66,7 +66,7 @@ const Homepage: Component = () => {
 
         <div class={style.interactive}>
           <Switch>
-            <Match when={session.loggedIn}>
+            <Match when={isAuthenticated()}>
               <span class={style.message}>
               Welcome back <AnchorText
                   href={`https://twitch.tv/${session.user?.login}`}
@@ -83,7 +83,7 @@ const Homepage: Component = () => {
                 <Link customClass={style.button} href='/dashboard' size='big' symbol='dashboard'>Dashboard</Link>
               </div>
             </Match>
-            <Match when={!session.loggedIn}>
+            <Match when={!isAuthenticated()}>
               <span class={style.info}>Click on the button below to login with twitch</span>
               <AnchorButton customClass={style.button} color='primary' size='big' href='/api/v1/auth/twitch'>Login with twitch</AnchorButton>
             </Match>

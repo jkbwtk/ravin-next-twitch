@@ -1,4 +1,4 @@
-import { getTwitchCallback, getTwitchStrategy, getUserView, postLogoutView } from '#server/routers/v1/auth/auth.views';
+import { getSessionView, getTwitchCallback, getTwitchStrategy, postLogoutView } from '#server/routers/v1/auth/auth.views';
 import { setupPassport } from '#server/routers/v1/auth/passportUtils';
 import { Router } from 'express';
 
@@ -8,7 +8,7 @@ export const createAuthRouter = (): Router => {
 
   setupPassport();
 
-  authRouter.get('/user', ...getUserView.unwrap());
+  authRouter.get('/session', ...getSessionView.unwrap());
 
   authRouter.post('/logout', ...postLogoutView.unwrap());
 

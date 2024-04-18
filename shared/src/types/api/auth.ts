@@ -32,9 +32,26 @@ export const FrontendUser = z.object({
 
 export type FrontendUser = z.infer<typeof FrontendUser>;
 
-
-export const GetFrontendUser = z.object({
-  data: FrontendUser,
+export const Config = z.object({
+  defaultPaginationLimit: z.coerce.number(),
+  paginationLimitOptions: z.preprocess((v) => {
+    if (Array.isArray(v)) return v;
+    return JSON.parse(String(v));
+  }, z.array(z.number().int().min(1))),
 });
 
-export type GetFrontendUser = z.infer<typeof GetFrontendUser>;
+export type Config = z.infer<typeof Config>;
+
+export const Session = z.object({
+  user: FrontendUser.nullable(),
+  config: Config,
+});
+
+export type Session = z.infer<typeof Session>;
+
+
+export const GetSession = z.object({
+  data: Session,
+});
+
+export type GetSession = z.infer<typeof GetSession>;
