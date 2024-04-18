@@ -9,6 +9,7 @@ import { GetScheduledJobsResponse } from '#shared/types/api/admin';
 import { json } from 'body-parser';
 import { HttpCodes } from '#shared/httpCodes';
 import { GetConfig } from '#shared/types/api/auth';
+import { SocketServer } from '#server/SocketServer';
 
 
 export const patchConfigView = new ExpressStack()
@@ -103,6 +104,7 @@ export const postPublicConfigView = new ExpressStack()
       await Config.batchSet(changes);
 
       res.sendStatus(HttpCodes.OK);
+      SocketServer.emitToAll('UPD_SESSION');
     } catch (err) {
       logger.error('Failed to update public config', {
         label: ['APIv1', 'admin', 'postPublicConfigView'],

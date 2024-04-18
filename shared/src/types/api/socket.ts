@@ -33,6 +33,8 @@ export type ServerToClientEvents = {
   NEW_TEMPLATE: (template: Template) => void;
   UPD_TEMPLATE: (template: Template) => void;
   DEL_TEMPLATE: (templateId: number) => void;
+
+  UPD_SESSION: () => void;
 };
 
 export type ClientToServerEvents = {

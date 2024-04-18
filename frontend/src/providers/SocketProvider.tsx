@@ -34,7 +34,7 @@ const SocketContext = createContext<SocketContextValue>([
 
 export const SocketProvider: ParentComponent = (props) => {
   const [state, setState] = createStore(defaultState);
-  const [, { pushNotification, setNotificationsAsRead, isAuthenticated }] = useSession();
+  const [, { pushNotification, setNotificationsAsRead, isAuthenticated, fetchSession }] = useSession();
   const [loaded, setLoaded] = createSignal(false);
 
   const emit: SocketContextState['client']['emit'] = (event, ...args) => {
@@ -67,6 +67,12 @@ export const SocketProvider: ParentComponent = (props) => {
     });
 
     state.client.on('RAD_SYSTEM_NOTIFICATION', setNotificationsAsRead);
+
+    state.client.on('UPD_SESSION', async () => {
+      console.log('UPDATE SESSION');
+
+      await fetchSession();
+    });
   };
 
   onMount(async () => {
