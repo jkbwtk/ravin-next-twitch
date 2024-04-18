@@ -55,3 +55,14 @@ export const GetSession = z.object({
 });
 
 export type GetSession = z.infer<typeof GetSession>;
+
+export const GetConfig = z.object({
+  data: Config,
+});
+
+export type GetConfig = z.infer<typeof GetConfig>;
+
+
+export const PostConfigReqBody = Config;
+
+export type PostConfigReqBody = z.infer<typeof PostConfigReqBody>;

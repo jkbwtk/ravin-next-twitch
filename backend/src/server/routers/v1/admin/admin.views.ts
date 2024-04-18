@@ -3,11 +3,12 @@ import { ExtendedCron } from '#lib/ExtendedCron';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
 import { ServerError } from '#shared/ServerError';
-import { PatchConfigSchema } from '#server/routers/v1/admin/admin.schemas';
-import { admin, authenticated, validate } from '#server/stackMiddlewares';
+import { PatchConfigSchema, PostPublicConfigSchema } from '#server/routers/v1/admin/admin.schemas';
+import { admin, authenticated, validate, validateResponse } from '#server/stackMiddlewares';
 import { GetScheduledJobsResponse } from '#shared/types/api/admin';
 import { json } from 'body-parser';
 import { HttpCodes } from '#shared/httpCodes';
+import { GetConfig } from '#shared/types/api/auth';
 
 
 export const patchConfigView = new ExpressStack()
@@ -54,5 +55,60 @@ export const getScheduledJobsView = new ExpressStack()
       });
 
       throw new ServerError(HttpCodes.InternalServerError, 'Failed to get scheduled jobs');
+    }
+  });
+
+export const getPublicConfigView = new ExpressStack()
+  .usePreflight(authenticated)
+  .usePreflight(admin)
+  .use(validateResponse(GetConfig))
+  .use(async (req, res) => {
+    try {
+      res.jsonValidated({
+        data: {
+          // @ts-expect-error Converted to number by Zod
+          defaultPaginationLimit: await Config.getOrFail('defaultPaginationLimit'),
+          // @ts-expect-error Converted to array of numbers by Zod
+          paginationLimitOptions: await Config.getOrFail('paginationLimitOptions'),
+        },
+      });
+    } catch (err) {
+      logger.error('Failed to get public config', {
+        label: ['APIv1', 'admin', 'getPublicConfigView'],
+        error: err,
+      });
+
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to get public config');
+    }
+  });
+
+
+export const postPublicConfigView = new ExpressStack()
+  .usePreflight(authenticated)
+  .usePreflight(admin)
+  .useNative(json())
+  .use(validate(PostPublicConfigSchema))
+  .use(async (req, res) => {
+    const changes: [string, string][] = [];
+    const changedKeys = Object.keys(req.validated.body);
+
+    await Config.shadowBulkRestore(changedKeys);
+
+    for (const [key, value] of Object.entries(req.validated.body)) {
+      if (value === undefined) continue;
+      changes.push([key, JSON.stringify(value)]);
+    }
+
+    try {
+      await Config.batchSet(changes);
+
+      res.sendStatus(HttpCodes.OK);
+    } catch (err) {
+      logger.error('Failed to update public config', {
+        label: ['APIv1', 'admin', 'postPublicConfigView'],
+        error: err,
+      });
+
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to update public config');
     }
   });

@@ -1,5 +1,6 @@
 import DashboardInfoBar from '#components/DashboardInfoBar';
 import AdminConfigWidget from '#components/widgets/AdminConfigWidget';
+import AdminPublicConfigWidget from '#components/widgets/AdminPublicConfigWidget';
 import BroadcastSystemNotificationWidget from '#components/widgets/BroadcastSystemNotificationWidget';
 import ScheduledJobsWidget from '#components/widgets/ScheduledJobsWidget';
 
@@ -11,8 +12,9 @@ const Logs: RouteComponent = (props) => {
     <div class={style.container}>
       <DashboardInfoBar metadata={props.data?.metadata} />
       <div class={style.widgets}>
-        <AdminConfigWidget />
+        <AdminPublicConfigWidget />
         <BroadcastSystemNotificationWidget />
+        <AdminConfigWidget />
         <ScheduledJobsWidget />
       </div>
     </div>
