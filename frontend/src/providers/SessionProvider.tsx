@@ -7,6 +7,7 @@ import DotSpinner from '#components/DotSpinner';
 import { makeRequest } from '#lib/fetch';
 import { isDev } from 'solid-js/web';
 import { Config } from '#shared/types/api/auth';
+import { defaultConfigValues } from '#shared/config';
 
 import style from '#styles/SessionProvider.module.scss';
 
@@ -37,7 +38,7 @@ export type SessionContextValue = [
 
 const defaultState: SessionContextState = {
   user: null,
-  config: { defaultPaginationLimit: 0, paginationLimitOptions: [] },
+  config: structuredClone(defaultConfigValues),
   notifications: [],
   unreadNotifications: [],
 };

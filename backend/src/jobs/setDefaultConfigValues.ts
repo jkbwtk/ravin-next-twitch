@@ -1,12 +1,8 @@
 import { Job } from '#jobs/job';
 import { Config } from '#lib/Config';
 import { logger } from '#lib/logger';
+import { defaultConfigValues } from '#shared/config';
 
-
-const defaultConfigValues: Record<string, string | number | object> = {
-  defaultPaginationLimit: 10,
-  paginationLimitOptions: [5, 10, 25, 50, 100],
-};
 
 const setDefaultConfigValues: Job = {
   name: 'Set Default Config Values',
