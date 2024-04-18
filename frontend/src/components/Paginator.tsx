@@ -1,9 +1,11 @@
 import Select from '@suid/material/Select/Select';
-import style from '#styles/Paginator.module.scss';
 import { MenuItem } from '@suid/material';
-import { Accessor, Signal } from 'solid-js';
+import { Accessor, For, Signal } from 'solid-js';
 import { SelectChangeEvent } from '@suid/material/Select/SelectInputProps';
 import Button from '#components/Button';
+import { useSession } from '#providers/SessionProvider';
+
+import style from '#styles/Paginator.module.scss';
 
 
 export type PaginatorProps = {
@@ -13,6 +15,7 @@ export type PaginatorProps = {
 };
 
 const Paginator: Component<PaginatorProps> = (props) => {
+  const [session] = useSession();
   const handleLimitChange = (event: SelectChangeEvent) => {
     props.limit[1](parseInt(event.target.value));
     props.page[1](0);
@@ -29,11 +32,9 @@ const Paginator: Component<PaginatorProps> = (props) => {
           value={props.limit[0]()}
           onChange={handleLimitChange}
         >
-          <MenuItem value={5}>5</MenuItem>
-          <MenuItem value={10}>10</MenuItem>
-          <MenuItem value={25}>25</MenuItem>
-          <MenuItem value={50}>50</MenuItem>
-          <MenuItem value={100}>100</MenuItem>
+          <For each={session.config.paginationLimitOptions}>
+            {(value) => <MenuItem value={value}>{value}</MenuItem>}
+          </For>
         </Select>
       </div>
 

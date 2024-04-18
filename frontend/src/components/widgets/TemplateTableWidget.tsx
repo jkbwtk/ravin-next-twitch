@@ -15,6 +15,7 @@ import { GetTemplatesPaginatedResponse, Template as TemplateType } from '#shared
 import Template from '#components/Template';
 import { createPagination, getSearchParams, Pagination } from '#lib/pagination';
 import Paginator from '#components/Paginator';
+import { useSession } from '#providers/SessionProvider';
 
 import style from '#styles/widgets/TableWidget.module.scss';
 
@@ -42,8 +43,10 @@ const fetchTemplates = async (pagination: Pagination) => {
 
 const TemplateTableWidget: Component<TemplateTableProps> = (props) => {
   const [socket] = useSocket();
+  const [session] = useSession();
+
   const [page, setPage] = createSignal(0);
-  const [limit, setLimit] = createSignal(5);
+  const [limit, setLimit] = createSignal(session.config.defaultPaginationLimit);
   const [templates, { mutate: setTemplates, refetch: refetchTemplates }] = createResource(createPagination(limit, page), fetchTemplates, {
     initialValue: {
       data: [],

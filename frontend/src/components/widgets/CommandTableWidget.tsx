@@ -15,6 +15,7 @@ import TableCell from '@suid/material/TableCell/TableCell';
 import TableBody from '@suid/material/TableBody/TableBody';
 import { createPagination, getSearchParams, Pagination } from '#lib/pagination';
 import Paginator from '#components/Paginator';
+import { useSession } from '#providers/SessionProvider';
 
 import style from '#styles/widgets/TableWidget.module.scss';
 
@@ -48,9 +49,10 @@ const fetchCommands = async (pagination: Pagination) => {
 
 const CommandTable: Component = () => {
   const [socket] = useSocket();
+  const [session] = useSession();
   const [tableType, setTableType] = createSignal<TableType>(TableType.Full);
   const [page, setPage] = createSignal(0);
-  const [limit, setLimit] = createSignal(5);
+  const [limit, setLimit] = createSignal(session.config.defaultPaginationLimit);
   const [commands, { mutate: setCommands, refetch: refetchCommands }] = createResource(createPagination(limit, page), fetchCommands, {
     initialValue: {
       data: [],
