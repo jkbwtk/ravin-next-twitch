@@ -1,3 +1,4 @@
+import { Template } from './templates';
 import { PaginatedResponse } from '../pagination';
 import { z } from 'zod';
 
@@ -14,7 +15,7 @@ export const CustomCommand = z.object({
   id: z.number().int().positive(),
   channelId: z.string().min(1),
   command: z.string().min(1).max(64),
-  templateId: z.number().int().positive(),
+  template: Template,
   userLevel: z.nativeEnum(UserLevel),
   cooldown: z.number().int().min(0).max(86400).multipleOf(5),
   enabled: z.boolean(),
@@ -22,6 +23,12 @@ export const CustomCommand = z.object({
 
 export type CustomCommand = z.infer<typeof CustomCommand>;
 
+
+export const CustomCommandTemplateIdMixin = z.object({
+  templateId: z.number().int().positive(),
+});
+
+export type CustomCommandTemplateIdMixin = z.infer<typeof CustomCommandTemplateIdMixin>;
 
 export const GetCustomCommandsResponse = z.object({
   data: z.array(CustomCommand),
@@ -35,7 +42,7 @@ export const GetCustomCommandsPaginatedResponse = PaginatedResponse(GetCustomCom
 export type GetCustomCommandsPaginatedResponse = z.infer<typeof GetCustomCommandsPaginatedResponse>;
 
 
-export const PostCustomCommandReqBody = CustomCommand.omit({ id: true, channelId: true });
+export const PostCustomCommandReqBody = CustomCommand.omit({ id: true, channelId: true, template: true }).merge(CustomCommandTemplateIdMixin);
 
 export type PostCustomCommandReqBody = z.infer<typeof PostCustomCommandReqBody>;
 

@@ -1,14 +1,12 @@
 import { makeRequest } from '#lib/fetch';
 import { useSocket } from '#providers/SocketProvider';
 import { DeleteTemplateReqBody, GetTemplatesResponse, PatchTemplateReqBody, PostTemplateReqBody, Template } from '#shared/types/api/templates';
-import { createContext, createEffect, createResource, InitializedResource, onCleanup, onMount, useContext } from 'solid-js';
+import { createContext, createResource, InitializedResource, onCleanup, onMount, useContext } from 'solid-js';
 
 
 export type TemplatesContextValue = [
   templates: InitializedResource<Template[]>,
   actions: {
-    getById: (id: number) => Template | null;
-
     refetchTemplates: () => void;
 
     addTemplate: (template: PostTemplateReqBody) => Promise<Response>;
@@ -20,10 +18,6 @@ export type TemplatesContextValue = [
 const TemplatesContext = createContext<TemplatesContextValue>([
   null as unknown as InitializedResource<Template[]>,
   {
-    getById: () => {
-      throw Error('TemplatesContext: getById() called before provider');
-    },
-
     refetchTemplates: () => {
       throw Error('TemplatesContext: fetchTemplates() called before provider');
     },
@@ -64,20 +58,6 @@ export const TemplatesProvider: ParentComponent = (props) => {
     name: 'templates',
   });
 
-  const mappedTemplates: Map<number, Template> = new Map();
-
-  createEffect(() => {
-    mappedTemplates.clear();
-
-    for (const template of templates()) {
-      mappedTemplates.set(template.id, template);
-    }
-  });
-
-
-  const getById = (id: number): Template | null => {
-    return mappedTemplates.get(id) ?? null;
-  };
 
   const addTemplate = async (template: PostTemplateReqBody): Promise<Response> => {
     const response = await fetch(`/api/v1/templates`, {
@@ -148,7 +128,6 @@ export const TemplatesProvider: ParentComponent = (props) => {
     <TemplatesContext.Provider value={[
       templates,
       {
-        getById,
         refetchTemplates,
         addTemplate,
         updateTemplate,

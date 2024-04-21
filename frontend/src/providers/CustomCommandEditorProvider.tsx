@@ -68,7 +68,7 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
 
   const [templates] = useTemplates();
 
-  const [template, setTemplate] = createSignal(state.command.templateId ?? 0);
+  const [template, setTemplate] = createSignal(state.command.template?.id ?? 0);
   const [userLevel, setUserLevel] = createSignal(state.command.userLevel ?? UserLevel['Everyone']);
 
 
