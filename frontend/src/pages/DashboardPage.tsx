@@ -7,6 +7,7 @@ import { useSession } from '#providers/SessionProvider';
 import AnimatedImage from '#components/AnimatedImage';
 import SystemNotificationsIcon from '#components/SystemNotificationsIcon';
 import { dashboardRoutes } from '#routers/routes/dashboardRoutes';
+import { TemplatesProvider } from '#providers/TemplatesProvider';
 
 import style from '#styles/DashboardPage.module.scss';
 import borders from '#styles/borders.module.scss';
@@ -56,7 +57,9 @@ const DashboardPage: RouteComponent = (props) => {
         <DashboardSidebar elements={dashboardRoutes()} />
       </div>
 
-      {props.children}
+      <TemplatesProvider>
+        {props.children}
+      </TemplatesProvider>
     </div>
   );
 };

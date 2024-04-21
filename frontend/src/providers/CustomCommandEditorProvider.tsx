@@ -1,4 +1,4 @@
-import { createContext, createEffect, createResource, createSignal, For, onCleanup, onMount, useContext } from 'solid-js';
+import { createContext, createSignal, For, useContext } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { CustomCommand, DeleteCustomCommandReqBody, PatchCustomCommandReqBody, PostCustomCommandReqBody, UserLevel } from '#shared/types/api/commands';
 import { useNotification } from '#providers/NotificationProvider';
@@ -10,12 +10,10 @@ import FormControl from '@suid/material/FormControl/FormControl';
 import Select from '@suid/material/Select/Select';
 import MenuItem from '@suid/material/MenuItem/MenuItem';
 import { SelectChangeEvent } from '@suid/material/Select';
-import { GetTemplatesResponse, Template } from '#shared/types/api/templates';
-import { makeRequest } from '#lib/fetch';
-import { useSocket } from '#providers/SocketProvider';
 import Modal from '#components/Modal';
 import AnchorText from '#components/AnchorText';
 import { useConfirmationBox } from '#providers/ConfirmationBoxProvider';
+import { useTemplates } from '#providers/TemplatesProvider';
 
 import style from '#styles/CustomCommandsEditorProvider.module.scss';
 
@@ -25,7 +23,6 @@ export const translateUserLevel = (userLevel: UserLevel): keyof typeof UserLevel
 export type CustomCommandEditorContextState = {
   open: boolean;
   command: Partial<CustomCommand>;
-  templates: Template[];
 };
 
 export type CustomCommandEditorContextValue = [
@@ -42,7 +39,6 @@ export type CustomCommandEditorContextValue = [
 export const defaultState: CustomCommandEditorContextState = {
   open: false,
   command: {},
-  templates: [],
 };
 
 const CustomCommandEditorContext = createContext<CustomCommandEditorContextValue>([
@@ -64,50 +60,17 @@ const CustomCommandEditorContext = createContext<CustomCommandEditorContextValue
   },
 ]);
 
-const fetchTemplates = async () => {
-  const { data } = await makeRequest('/api/v1/templates', { schema: GetTemplatesResponse });
-
-  return data.sort((a, b) => {
-    if (a.name > b.name) return 1;
-    if (a.name < b.name) return -1;
-    return 0;
-  });
-};
 
 export const CustomCommandEditorProvider: ParentComponent = (props) => {
-  const [socket] = useSocket();
   const [state, setState] = createStore({ ...defaultState });
   const [, { addNotification }] = useNotification();
   const { open: openConfirmationBox } = useConfirmationBox();
 
-  const [templates, { mutate: setTemplates }] = createResource(fetchTemplates, {
-    initialValue: [],
-  });
+  const [templates] = useTemplates();
 
   const [template, setTemplate] = createSignal(state.command.templateId ?? 0);
   const [userLevel, setUserLevel] = createSignal(state.command.userLevel ?? UserLevel['Everyone']);
 
-  createEffect(() => {
-    setState({
-      templates: templates(),
-    });
-  });
-
-  const createTemplate = (template: Template) => {
-    setTemplates((templates) => [...templates, template].sort((a, b) => {
-      if (a.name > b.name) return 1;
-      if (a.name < b.name) return -1;
-      return 0;
-    }));
-  };
-
-  const updateTemplate = (template: Template) => {
-    setTemplates((templates) => templates.map((t) => t.id === template.id ? template : t));
-  };
-
-  const removeTemplate = (templateId: number) => {
-    setTemplates((templates) => templates.filter((template) => template.id !== templateId));
-  };
 
   const open = (command?: Partial<CustomCommand>) => {
     setState({
@@ -243,17 +206,6 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
     close();
   };
 
-  onMount(() => {
-    socket.client.on('NEW_TEMPLATE', createTemplate);
-    socket.client.on('UPD_TEMPLATE', updateTemplate);
-    socket.client.on('DEL_TEMPLATE', removeTemplate);
-  });
-
-  onCleanup(() => {
-    socket.client.off('NEW_TEMPLATE', createTemplate);
-    socket.client.off('UPD_TEMPLATE', updateTemplate);
-    socket.client.off('DEL_TEMPLATE', removeTemplate);
-  });
 
   return (
     <CustomCommandEditorContext.Provider

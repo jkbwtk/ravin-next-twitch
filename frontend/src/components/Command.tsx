@@ -6,6 +6,7 @@ import { CustomCommand } from '#shared/types/api/commands';
 import { TableType } from '#components/widgets/CommandTableWidget';
 import TableRow from '@suid/material/TableRow/TableRow';
 import TableCell from '@suid/material/TableCell/TableCell';
+import { useTemplates } from '#providers/TemplatesProvider';
 
 import style from '#styles/widgets/TableWidget.module.scss';
 
@@ -16,7 +17,8 @@ export type CommandProps = {
 };
 
 const Command: Component<CommandProps> = (props) => {
-  const [editor, { open, updateCommand, deleteCommand }] = useCustomCommandEditor();
+  const [, { open, updateCommand, deleteCommand }] = useCustomCommandEditor();
+  const [, { getById }] = useTemplates();
 
   const toggleEnabled = () => {
     updateCommand({
@@ -28,7 +30,7 @@ const Command: Component<CommandProps> = (props) => {
   return (
     <TableRow>
       <TableCell align='left'>{props.command.command}</TableCell>
-      <TableCell align='left'>{editor.templates.find((t) => t.id === props.command.templateId)?.name}</TableCell>
+      <TableCell align='left'>{getById(props.command.templateId)?.name}</TableCell>
       <TableCell classList={{
         [style.disabled]: props.tableType > TableType.Full,
       }}>{translateUserLevel(props.command.userLevel)}</TableCell>

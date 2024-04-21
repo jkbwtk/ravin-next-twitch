@@ -14,6 +14,7 @@ import Skeleton from '@suid/material/Skeleton/Skeleton';
 import ErrorFallback from '#components/ErrorFallback';
 import MaterialSymbol from '#components/MaterialSymbol';
 import Pill from '#components/Pill';
+import { useTemplates } from '#providers/TemplatesProvider';
 
 import style from '#styles/TemplateEditor.module.scss';
 
@@ -59,6 +60,7 @@ const TemplateStatusSkeleton: Component = () => (
 
 const TemplateEditorBase: Component<TemplateEditorProps> = (props) => {
   const [, { addNotification }] = useNotification();
+  const [, { addTemplate, updateTemplate: updateProviderTemplate }] = useTemplates();
 
   const [code, setCode] = createSignal(props.template?.template ?? '');
   const [templateStatus, { refetch: refetchTemplateStatus }] = createResource(code, testTemplate);
@@ -72,15 +74,7 @@ const TemplateEditorBase: Component<TemplateEditorProps> = (props) => {
 
 
   const createTemplate = async (template: PostTemplateReqBody): Promise<boolean> => {
-    const response = await fetch(`/api/v1/templates`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(template),
-    });
-
-    console.log(response);
+    const response = await addTemplate(template);
 
     if (!response.ok) {
       addNotification({
@@ -95,15 +89,7 @@ const TemplateEditorBase: Component<TemplateEditorProps> = (props) => {
   };
 
   const updateTemplate = async (template: PatchTemplateReqBody): Promise<boolean> => {
-    const response = await fetch(`/api/v1/templates`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(template),
-    });
-
-    console.log(response);
+    const response = await updateProviderTemplate(template);
 
     if (!response.ok) {
       addNotification({
@@ -150,7 +136,7 @@ const TemplateEditorBase: Component<TemplateEditorProps> = (props) => {
   };
 
   const mappedStatus = () => Object.entries(templateStatus()?.data ?? {}).map(([env, status]) => ({
-    name: environmentNameMap[env] ?? env,
+    name: (environmentNameMap as Record<string, string>)[env] ?? env,
     status,
   }));
 
