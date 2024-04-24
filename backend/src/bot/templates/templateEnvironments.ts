@@ -15,4 +15,10 @@ export const testEnvironments: Record<TemplateEnvironments, EnvironmentProvider>
     jail.setSync('user', '[USER]');
     jail.setSync('username', '[USERNAME]');
   },
+
+  timer: (context) => {
+    const jail = context.global;
+
+    jail.setSync('channel', '[CHANNEL]');
+  },
 };

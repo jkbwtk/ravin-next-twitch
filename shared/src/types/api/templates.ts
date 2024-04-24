@@ -1,7 +1,7 @@
 import { PaginatedResponse } from '../pagination';
 import { z } from 'zod';
 
-export const TemplateEnvironments = z.enum(['generic', 'command']);
+export const TemplateEnvironments = z.enum(['generic', 'command', 'timer']);
 
 export type TemplateEnvironments = z.infer<typeof TemplateEnvironments>;
 
@@ -9,11 +9,13 @@ export type TemplateEnvironments = z.infer<typeof TemplateEnvironments>;
 export const environmentNameMap: Record<TemplateEnvironments, string> = {
   generic: 'Generic',
   command: 'Command',
+  timer: 'Command Timer',
 };
 
 export const environmentAbbreviationMap: Record<TemplateEnvironments, string> = {
   generic: 'Gen',
   command: 'Cmd',
+  timer: 'Tim',
 };
 
 
