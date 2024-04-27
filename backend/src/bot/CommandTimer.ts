@@ -1,10 +1,14 @@
 import { ChannelThread } from '#bot/ChannelThread';
+import { TemplateRunner } from '#bot/templates/TemplateRunner';
 import { CommandTimerWithUser } from '#database/extensions/commandTimer';
 import { MessageWithUser } from '#database/extensions/message';
+import { Template } from '#database/extensions/template';
 import { ExtendedCron } from '#lib/ExtendedCron';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
+import { logger } from '#lib/logger';
 import { SocketServer } from '#server/SocketServer';
 import { CommandTimerState, UserLevel } from '#shared/types/api/commands';
+import { Isolate } from 'isolated-vm';
 import { Client } from 'tmi.js';
 
 
@@ -18,11 +22,16 @@ export class CommandTimer implements AutoWirable {
   private client: Client;
   private channelThread: ChannelThread;
 
+  private templateRunner: TemplateRunner;
+
   constructor(public __parent: ClassInstance, private timer: CommandTimerWithUser) {
     this.client = wire(this, Client);
     this.channelThread = wire(this, ChannelThread);
 
     this.job = this.createJob();
+
+    const isolate = wire(this, Isolate);
+    this.templateRunner = new TemplateRunner(isolate, this.timer.template as Template);
   }
 
   private createJob(): ExtendedCron {
@@ -42,7 +51,19 @@ export class CommandTimer implements AutoWirable {
   };
 
   public async execute(): Promise<void> {
-    await this.client.say(`#${this.channelThread.channel.user.login}`, this.timer.response);
+    const response = await this.templateRunner.run({
+      channel: this.channelThread.channel.user.displayName,
+    });
+
+    if (response === null) {
+      logger.warn('Failed to execute template for command timer %s in #%s', this.timer.name, this.timer.user.login, {
+        label: ['CustomCommand', 'execute'],
+      });
+
+      return;
+    }
+
+    await this.client.say(`#${this.channelThread.channel.user.login}`, response);
     SocketServer.emitToUser(this.channelThread.channel.user.id, 'COMMAND_TIMER_EXECUTED', this.getState());
   }
 
