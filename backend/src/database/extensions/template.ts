@@ -85,6 +85,7 @@ export const templateExtension = Prisma.defineExtension((client) => {
           });
 
           await Bot.reloadChannelCommands(result.userId);
+          await Bot.reloadChannelCommandTimers(result.userId);
 
           return result;
         },
@@ -99,13 +100,19 @@ export const templateExtension = Prisma.defineExtension((client) => {
           });
 
           await Bot.reloadChannelCommands(result.userId);
+          await Bot.reloadChannelCommandTimers(result.userId);
 
           return result;
         },
         async deleteFromApi(template: DeleteTemplateReqBody) {
-          return Prisma.getExtensionContext(this).delete({
+          const result = await Prisma.getExtensionContext(this).delete({
             where: { id: template.id },
           });
+
+          await Bot.reloadChannelCommands(result.userId);
+          await Bot.reloadChannelCommandTimers(result.userId);
+
+          return result;
         },
       },
     },
