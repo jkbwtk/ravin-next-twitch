@@ -11,6 +11,13 @@ export enum UserLevel {
   Owner = 4,
 }
 
+
+export const TemplateIdMixin = z.object({
+  templateId: z.number().int().positive(),
+});
+export type TemplateIdMixin = z.infer<typeof TemplateIdMixin>;
+
+
 export const CustomCommand = z.object({
   id: z.number().int().positive(),
   channelId: z.string().min(1),
@@ -24,12 +31,6 @@ export const CustomCommand = z.object({
 export type CustomCommand = z.infer<typeof CustomCommand>;
 
 
-export const CustomCommandTemplateIdMixin = z.object({
-  templateId: z.number().int().positive(),
-});
-
-export type CustomCommandTemplateIdMixin = z.infer<typeof CustomCommandTemplateIdMixin>;
-
 export const GetCustomCommandsResponse = z.object({
   data: z.array(CustomCommand),
 });
@@ -42,7 +43,7 @@ export const GetCustomCommandsPaginatedResponse = PaginatedResponse(GetCustomCom
 export type GetCustomCommandsPaginatedResponse = z.infer<typeof GetCustomCommandsPaginatedResponse>;
 
 
-export const PostCustomCommandReqBody = CustomCommand.omit({ id: true, channelId: true, template: true }).merge(CustomCommandTemplateIdMixin);
+export const PostCustomCommandReqBody = CustomCommand.omit({ id: true, channelId: true, template: true }).merge(TemplateIdMixin);
 
 export type PostCustomCommandReqBody = z.infer<typeof PostCustomCommandReqBody>;
 
@@ -79,14 +80,13 @@ export const CommandTimer = z.object({
   name: z.string().min(1).max(64),
   alias: z.string().min(1).max(64),
   cooldown: z.number().int().min(0).max(86400).multipleOf(5),
-  response: z.string().min(1).max(512),
+  template: Template,
   cron: z.string().min(1).max(64),
   enabled: z.boolean(),
   lines: z.number().int().min(0).max(1024),
 });
 
 export type CommandTimer = z.infer<typeof CommandTimer>;
-
 
 export const GetCommandTimersResponse = z.object({
   data: z.array(CommandTimer),
@@ -95,7 +95,7 @@ export const GetCommandTimersResponse = z.object({
 export type GetCommandTimersResponse = z.infer<typeof GetCommandTimersResponse>;
 
 
-export const PostCommandTimerReqBody = CommandTimer.omit({ id: true, channelId: true });
+export const PostCommandTimerReqBody = CommandTimer.omit({ id: true, channelId: true, template: true }).merge(TemplateIdMixin);
 
 export type PostCommandTimerReqBody = z.infer<typeof PostCommandTimerReqBody>;
 

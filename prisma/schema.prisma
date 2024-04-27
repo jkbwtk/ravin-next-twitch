@@ -139,7 +139,6 @@ model CommandTimer {
   name          String   @db.VarChar
   alias         String   @db.VarChar
   cooldown      Int      @default(60)
-  response      String   @db.VarChar
   cron          String   @db.VarChar
   enabled       Boolean  @default(false)
   lines         Int      @default(0)
@@ -147,6 +146,9 @@ model CommandTimer {
   updatedAt     DateTime @default(now())
   channelUserId String   @db.VarChar
   user          User     @relation(fields: [channelUserId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  templateId Int
+  template   Template @relation(fields: [templateId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@unique([channelUserId, name])
   @@unique([channelUserId, alias])
@@ -178,7 +180,8 @@ model Template {
   userId       String   @db.VarChar
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
-  command Command[]
+  command      Command[]
+  commandTimer CommandTimer[]
 
   @@unique([userId, name])
   @@index([userId, name])

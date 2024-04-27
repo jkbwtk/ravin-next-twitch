@@ -1,8 +1,8 @@
 import { CommandTimer, DeleteCommandTimerReqBody, PatchCommandTimerReqBody, PostCommandTimerReqBody } from '#shared/types/api/commands';
 import { ExtensionReturnType, ExtensionType } from '#database/extensions/utils';
-import { logger } from '#lib/logger';
 import { Prisma } from '@prisma/client';
 import { Bot } from '#bot/Bot';
+import { Template } from '#shared/types/api/templates';
 
 
 export type CommandTimerWithUser = ExtensionReturnType<ExtensionType<
@@ -20,20 +20,29 @@ export const commandTimerExtension = Prisma.defineExtension((client) => {
             name: true,
             alias: true,
             cooldown: true,
-            response: true,
+            templateId: true,
             cron: true,
             enabled: true,
             lines: true,
           },
           compute(command) {
             return (): CommandTimer => {
+              const template = 'template' in command ? command.template : null;
+              const validatedTemplate = Template.parse(template);
+
               return {
                 id: command.id,
                 channelId: command.channelUserId,
                 name: command.name,
                 alias: command.alias,
                 cooldown: command.cooldown,
-                response: command.response,
+                template: {
+                  id: command.templateId,
+                  name: validatedTemplate.name,
+                  template: validatedTemplate.template,
+                  userId: validatedTemplate.userId,
+                  environments: validatedTemplate.environments,
+                },
                 cron: command.cron,
                 enabled: command.enabled,
                 lines: command.lines,
@@ -51,6 +60,7 @@ export const commandTimerExtension = Prisma.defineExtension((client) => {
             where: { id },
             include: {
               user: true,
+              template: true,
             },
           });
         },
@@ -59,6 +69,7 @@ export const commandTimerExtension = Prisma.defineExtension((client) => {
             where: { channelUserId: channelId },
             include: {
               user: true,
+              template: true,
             },
           });
         },
@@ -69,10 +80,15 @@ export const commandTimerExtension = Prisma.defineExtension((client) => {
               name: commandTimer.name,
               alias: commandTimer.alias,
               cooldown: commandTimer.cooldown,
-              response: commandTimer.response,
+              templateId: commandTimer.templateId,
               cron: commandTimer.cron,
               enabled: commandTimer.enabled,
               lines: commandTimer.lines,
+            },
+
+            include: {
+              user: true,
+              template: true,
             },
           });
 
@@ -87,10 +103,15 @@ export const commandTimerExtension = Prisma.defineExtension((client) => {
               name: commandTimer.name,
               alias: commandTimer.alias,
               cooldown: commandTimer.cooldown,
-              response: commandTimer.response,
+              templateId: commandTimer.templateId,
               cron: commandTimer.cron,
               enabled: commandTimer.enabled,
               lines: commandTimer.lines,
+            },
+
+            include: {
+              user: true,
+              template: true,
             },
           });
 
