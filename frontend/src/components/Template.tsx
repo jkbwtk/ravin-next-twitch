@@ -26,7 +26,7 @@ const Template: Component<TemplateProps> = (props) => {
       </TableCell>
       <TableCell align='center'>
         <div class={style.pillContainer}>
-          <For each={[...props.template.environments, ...props.template.environments]}>
+          <For each={props.template.environments}>
             {(env) => <Pill class={style.pill} content={environmentAbbreviationMap[env] ?? env.slice(0, 3)} />}
           </For>
         </div>
