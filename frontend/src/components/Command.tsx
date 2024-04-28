@@ -29,12 +29,13 @@ const Command: Component<CommandProps> = (props) => {
     <TableRow>
       <TableCell align='left'>{props.command.command}</TableCell>
       <TableCell align='left'>{props.command.template.name}</TableCell>
-      <TableCell classList={{
-        [style.disabled]: props.tableType > TableType.Full,
-      }}>{translateUserLevel(props.command.userLevel)}</TableCell>
-      <TableCell align='right' classList={{
-        [style.disabled]: props.tableType > TableType.Compact,
-      }}>{props.command.cooldown}s</TableCell>
+      {/* Use class instead classList due to broken reactivity */}
+      <TableCell class={props.tableType > TableType.Full ? style.disabled : ''}>
+        {translateUserLevel(props.command.userLevel)}
+      </TableCell>
+      <TableCell align='right' class={props.tableType > TableType.Compact ? style.disabled : ''}>
+        {props.command.cooldown}s
+      </TableCell>
       <TableCell align='center'>
         <div>
           <TemplateButton onClick={toggleEnabled}>

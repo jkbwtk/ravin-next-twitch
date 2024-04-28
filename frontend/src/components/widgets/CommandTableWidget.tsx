@@ -26,13 +26,7 @@ export enum TableType {
   Mobile
 }
 
-export interface CustomCommandProps {
-  command: CustomCommand;
-}
-
 const fetchCommands = async (pagination: Pagination) => {
-  console.log(pagination);
-
   const response = await makeRequest('/api/v1/commands/custom', {
     schema: GetCustomCommandsPaginatedResponse,
     params: getSearchParams(pagination),
@@ -102,6 +96,7 @@ const CommandTable: Component = () => {
     window.removeEventListener('resize', handleResize);
   });
 
+  // Handle resize when table data is loaded
   createEffect(() => {
     commands.state === 'ready' && handleResize();
   });
