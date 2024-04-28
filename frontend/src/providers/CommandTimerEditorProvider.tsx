@@ -137,16 +137,12 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
   };
 
   const deleteTimer = async (timer: DeleteCommandTimerReqBody): Promise<boolean> => {
-    const body: DeleteCustomCommandReqBody = {
-      id: timer.id,
-    };
-
     const response = await fetch(`/api/v1/commands/timers`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(timer),
     });
 
     if (!response.ok) {
@@ -162,30 +158,28 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
   };
 
   const removeTimer = async (timer: CommandTimer): Promise<boolean> => {
-    openConfirmationBox({
+    const confirmed = await openConfirmationBox({
       title: `Delete ${timer.name}`,
       message: 'Are you sure you want to delete this timer?',
       confirmText: 'Delete',
-    }).then(async (confirmed) => {
-      if (!confirmed) return;
-
-      const ok = await deleteTimer({
-        id: timer.id,
-      });
-
-      if (ok) {
-        addNotification({
-          type: 'success',
-          title: 'Timer deleted',
-          message: `Timer ${timer.name} was successfully deleted.`,
-          duration: 5000,
-        });
-      }
-
-      return ok;
     });
 
-    return false;
+    if (!confirmed) return false;
+
+    const ok = await deleteTimer({
+      id: timer.id,
+    });
+
+    if (ok) {
+      addNotification({
+        type: 'success',
+        title: 'Timer deleted',
+        message: `Timer ${timer.name} was successfully deleted.`,
+        duration: 5000,
+      });
+    }
+
+    return ok;
   };
 
   const handleTemplateChange = (ev: SelectChangeEvent) => {
