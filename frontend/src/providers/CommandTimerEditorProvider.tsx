@@ -76,29 +76,21 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
   const [templateId, setTemplateId] = createSignal(-1);
 
 
-  const open = (command?: Partial<CustomCommand>) => {
+  const open = (timer?: Partial<CustomCommand>) => {
     batch(() => {
-      if (command?.template) {
-        setTemplateId(command.template.id);
-      } else {
-        setTemplateId(-1);
-      }
-
       setState({
         open: true,
-        timer: command ?? {},
+        timer: timer ?? {},
       });
+
+      setTemplateId(timer?.template?.id ?? -1);
     });
   };
 
   const close = () => {
     batch(() => {
+      setState(structuredClone(defaultState));
       setTemplateId(-1);
-
-      setState({
-        open: false,
-        timer: {},
-      });
     });
   };
 
