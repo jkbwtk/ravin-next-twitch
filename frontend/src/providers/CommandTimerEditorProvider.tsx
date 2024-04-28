@@ -212,7 +212,7 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
     const lines = ev.target.elements.namedItem('lines') as HTMLInputElement;
 
 
-    if (state.timer.id) {
+    const ok = state.timer.id ?
       await updateTimer({
         id: state.timer.id,
         name: name.value,
@@ -221,8 +221,7 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
         cron: cron.value,
         lines: parseInt(lines.value),
         templateId: templateId(),
-      });
-    } else {
+      }) :
       await createTimer({
         name: name.value,
         alias: alias.value,
@@ -233,9 +232,24 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
         templateId: templateId(),
         enabled: true,
       });
-    }
 
-    close();
+    if (ok) {
+      const metadata = state.timer.id ? {
+        title: 'Timer updated',
+        message: `Timer ${name.value} was successfully updated.`,
+      } : {
+        title: 'Timer created',
+        message: `Timer ${name.value} was successfully created.`,
+      };
+
+      addNotification({
+        type: 'success',
+        ...metadata,
+        duration: 5000,
+      });
+
+      close();
+    }
   };
 
 

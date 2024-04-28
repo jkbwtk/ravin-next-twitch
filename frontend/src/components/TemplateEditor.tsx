@@ -127,6 +127,20 @@ const TemplateEditorBase: Component<TemplateEditorProps> = (props) => {
     }
 
     if (ok) {
+      const metadata = props.template ? {
+        title: 'Template updated',
+        message: 'Template was successfully updated.',
+      } : {
+        title: 'Template created',
+        message: 'Template was successfully created.',
+      };
+
+      addNotification({
+        type: 'success',
+        ...metadata,
+        duration: 5000,
+      });
+
       props.onClose();
     }
   };
