@@ -33,8 +33,8 @@ const fetchCommands = async (pagination: Pagination) => {
   });
 
   response.data.sort((a, b) => {
-    if (a.command > b.command) return 1;
-    if (a.command < b.command) return -1;
+    if (a.id > b.id) return 1;
+    if (a.id < b.id) return -1;
     return 0;
   });
 
