@@ -27,27 +27,19 @@ export const routes: ExtendedRouteDefinition[] = [
         },
       },
       {
+        path: 'timers',
+        component: lazy(() => import('#pages/dashboard/CommandTimers')),
+        metadata: {
+          symbol: 'chronic',
+          name: 'Timers',
+        },
+      },
+      {
         path: 'status',
         component: lazy(() => import('#pages/dashboard/CommandStatus')),
         metadata: {
           symbol: 'monitor_heart',
           name: 'Status',
-        },
-      },
-      {
-        path: 'ai',
-        children: [
-          {
-            path: 'add',
-            metadata: {
-              symbol: 'add',
-              name: 'Add',
-            },
-          },
-        ],
-        metadata: {
-          symbol: 'psychology',
-          name: 'Ai',
         },
       },
     ],
@@ -58,6 +50,14 @@ export const routes: ExtendedRouteDefinition[] = [
     metadata: {
       name: 'Templates',
       symbol: 'description',
+    },
+  },
+  {
+    path: 'filters',
+    component: lazy(() => import('#pages/dashboard/Filters')),
+    metadata: {
+      symbol: 'filter_list',
+      name: 'Filters',
     },
   },
   {

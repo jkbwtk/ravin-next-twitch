@@ -1,11 +1,17 @@
-import { createResource, createSignal, For, onCleanup, onMount } from 'solid-js';
-import { CommandTimer as CommandTimerType, CustomCommand, GetCommandTimersResponse } from '#types/api/commands';
+import { createEffect, createResource, createSignal, ErrorBoundary, For, onCleanup, onMount, Suspense } from 'solid-js';
+import { CommandTimer as CommandTimerType, GetCommandTimersPaginatedResponse } from '#types/api/commands';
 import { useSocket } from '#providers/SocketProvider';
 import Widget from '#components/Widget';
 import CommandTimer from '#components/CommandTimer';
 import { makeRequest } from '#lib/fetch';
+import { createPagination, getSearchParams, Pagination } from '#lib/pagination';
+import { useSession } from '#providers/SessionProvider';
+import ErrorFallback from '#components/ErrorFallback';
+import Paginator from '#components/Paginator';
+import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@suid/material';
+import FetchFallback from '#components/FetchFallback';
 
-import style from '#styles/widgets/CommandTimersTableWidget.module.scss';
+import style from '#styles/widgets/TableWidget.module.scss';
 
 
 export enum TableType {
@@ -14,39 +20,49 @@ export enum TableType {
   Mobile
 }
 
-export interface CustomCommandProps {
-  command: CustomCommand;
-}
+const fetchTimers = async (pagination: Pagination) => {
+  const response = await makeRequest('/api/v1/commands/timers', {
+    schema: GetCommandTimersPaginatedResponse,
+    params: getSearchParams(pagination),
+  });
 
-const fetchCommands = async () => {
-  const { data } = await makeRequest('/api/v1/commands/timers', { schema: GetCommandTimersResponse });
-
-  return data.sort((a, b) => {
-    if (a.name > b.name) return 1;
-    if (a.name < b.name) return -1;
+  response.data.sort((a, b) => {
+    if (a.id > b.id) return 1;
+    if (a.id < b.id) return -1;
     return 0;
   });
+
+  return response;
 };
 
 const CommandTimersTable: Component = () => {
   const [socket] = useSocket();
+  const [session] = useSession();
   const [tableType, setTableType] = createSignal<TableType>(TableType.Full);
-  const [commands, { mutate: setCommands }] = createResource(fetchCommands, {
-    initialValue: [],
+  const [page, setPage] = createSignal(0);
+  const [limit, setLimit] = createSignal(session.config.defaultPaginationLimit);
+  const [timers, { mutate: setTimers, refetch: refetchTimers }] = createResource(createPagination(limit, page), fetchTimers, {
+    initialValue: {
+      data: [],
+      total: 0,
+      limit: 0,
+      offset: 0,
+    },
+    name: 'timers',
   });
 
   let tableRef = document.createElement('table');
 
-  const createCommand = (command: CommandTimerType) => {
-    setCommands((timer) => [...timer, command]);
+  const createCommand = (timer: CommandTimerType) => {
+    setTimers((timers) => ({ ...timers, data: [...timers.data, timer] }));
   };
 
-  const updateCommand = (command: CommandTimerType) => {
-    setCommands((timer) => timer.map((c) => c.id === command.id ? command : c));
+  const updateCommand = (timer: CommandTimerType) => {
+    setTimers((timers) => ({ ...timers, data: timers.data.map((c) => c.id === timer.id ? timer : c) }));
   };
 
-  const removeCommand = (commandId: number) => {
-    setCommands((timer) => timer.filter((command) => command.id !== commandId));
+  const removeCommand = (timerId: number) => {
+    setTimers((timers) => ({ ...timers, data: timers.data.filter((timer) => timer.id !== timerId) }));
   };
 
   const handleResize = () => {
@@ -74,36 +90,53 @@ const CommandTimersTable: Component = () => {
     window.removeEventListener('resize', handleResize);
   });
 
+  // Handle resize when table data is loaded
+  createEffect(() => {
+    timers.state === 'ready' && handleResize();
+  });
+
   return (
     <Widget
       title='Command Timers'
       class={style.container}
       containerClass={style.outerContainer}
+      refresh={refetchTimers}
+      loading={timers.state === 'refreshing'}
     >
-      <table ref={tableRef} class={style.commandsContainer}>
-        <colgroup>
-          <col />
-          <col />
-          <col />
-        </colgroup>
+      <ErrorBoundary fallback={
+        <ErrorFallback class={style.fallback} refresh={refetchTimers} loading={timers.state === 'refreshing'}>Failed to load commands</ErrorFallback>
+      }>
+        <Paginator page={[page, setPage]} limit={[limit, setLimit]} total={() => timers().total} />
 
-        <thead>
-          <tr>
-            <th>Frequency</th>
-            <th>Response</th>
-            <th>Enabled</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <For each={commands()}>
-            {(command) => (
-              <CommandTimer command={command} tableType={tableType()} />
-            )}
-          </For>
-        </tbody>
-      </table>
+        <Suspense fallback={<FetchFallback class={style.fallback}>Fetching Commands</FetchFallback>}>
+          <TableContainer ref={tableRef} class={style.commandsContainer} component={Paper}>
+            <Table stickyHeader>
+              <TableHead >
+                <TableRow>
+                  <TableCell align='center'>Name</TableCell>
+                  <TableCell align='center' classList={{
+                    [style.disabled]: tableType() > TableType.Full,
+                  }}>Alias</TableCell>
+                  <TableCell align='center'>Template</TableCell>
+                  <TableCell align='center'>Cron</TableCell>
+                  <TableCell align='center' classList={{
+                    [style.disabled]: tableType() > TableType.Compact,
+                  }}>Lines</TableCell>
+                  <TableCell align='center' class={style.minWidthColumn}>Enabled</TableCell>
+                  <TableCell align='center' class={style.minWidthColumn}>Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                <For each={timers().data}>
+                  {(timer) => (
+                    <CommandTimer timer={timer} tableType={tableType()} />
+                  )}
+                </For>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Suspense>
+      </ErrorBoundary>
     </Widget>
   );
 };

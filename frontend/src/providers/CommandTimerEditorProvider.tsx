@@ -42,7 +42,7 @@ export type CommandTimerEditorContextValue = [
 ];
 
 export const defaultState: CommandTimerEditorContextState = {
-  open: true,
+  open: false,
   timer: {},
 };
 
@@ -83,12 +83,12 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
       } else {
         setTemplateId(-1);
       }
-      
+
       setState({
         open: true,
         timer: command ?? {},
       });
-    })
+    });
   };
 
   const close = () => {
@@ -99,7 +99,7 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
         open: false,
         timer: {},
       });
-    })
+    });
   };
 
   const createTimer = async (command: PostCommandTimerReqBody): Promise<boolean> => {
@@ -145,28 +145,28 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
   };
 
   const deleteTimer = async (timer: DeleteCommandTimerReqBody): Promise<boolean> => {
-      const body: DeleteCustomCommandReqBody = {
-        id: timer.id,
-      };
+    const body: DeleteCustomCommandReqBody = {
+      id: timer.id,
+    };
 
-      const response = await fetch(`/api/v1/commands/timers`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
+    const response = await fetch(`/api/v1/commands/timers`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      addNotification({
+        type: 'error',
+        title: 'Timer not deleted',
+        message: `An error occurred while deleting timer. ${(await response.json()).message}`,
+        duration: 10000,
       });
+    }
 
-      if (!response.ok) {
-        addNotification({
-          type: 'error',
-          title: 'Timer not deleted',
-          message: `An error occurred while deleting timer. ${(await response.json()).message}`,
-          duration: 10000,
-        });
-      }
-
-      return response.ok;
+    return response.ok;
   };
 
   const removeTimer = async (timer: CommandTimer): Promise<boolean> => {
@@ -194,7 +194,7 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
     });
 
     return false;
-  }
+  };
 
   const handleTemplateChange = (ev: SelectChangeEvent) => {
     setTemplateId(ev.target.value as unknown as number);
@@ -220,7 +220,7 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
         // cooldown: parseInt(cooldown.value),
         cron: cron.value,
         lines: parseInt(lines.value),
-        templateId: templateId()
+        templateId: templateId(),
       });
     } else {
       await createTimer({
@@ -247,7 +247,7 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
           open,
           close,
           updateTimer,
-          removeTimer
+          removeTimer,
         },
       ]}
     >
