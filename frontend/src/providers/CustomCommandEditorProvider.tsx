@@ -1,4 +1,4 @@
-import { createContext, createSignal, For, useContext } from 'solid-js';
+import { batch, createContext, createSignal, For, useContext } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { CustomCommand, DeleteCustomCommandReqBody, PatchCustomCommandReqBody, PostCustomCommandReqBody, UserLevel } from '#shared/types/api/commands';
 import { useNotification } from '#providers/NotificationProvider';
@@ -62,27 +62,31 @@ const CustomCommandEditorContext = createContext<CustomCommandEditorContextValue
 
 
 export const CustomCommandEditorProvider: ParentComponent = (props) => {
-  const [state, setState] = createStore({ ...defaultState });
+  const [state, setState] = createStore(structuredClone(defaultState));
   const [, { addNotification }] = useNotification();
   const { open: openConfirmationBox } = useConfirmationBox();
 
   const [templates] = useTemplates();
 
-  const [template, setTemplate] = createSignal(state.command.template?.id ?? 0);
+  const [template, setTemplate] = createSignal(-1);
   const [userLevel, setUserLevel] = createSignal(state.command.userLevel ?? UserLevel['Everyone']);
 
 
   const open = (command?: Partial<CustomCommand>) => {
-    setState({
-      open: true,
-      command: command ?? {},
+    batch(() => {
+      setState({
+        open: true,
+        command: command ?? {},
+      });
+
+      setTemplate(command?.template?.id ?? -1);
     });
   };
 
   const close = () => {
-    setState({
-      open: false,
-      command: {},
+    batch(() => {
+      setState(structuredClone(defaultState));
+      setTemplate(-1);
     });
   };
 
