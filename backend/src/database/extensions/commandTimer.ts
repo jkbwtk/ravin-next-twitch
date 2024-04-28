@@ -3,6 +3,7 @@ import { ExtensionReturnType, ExtensionType } from '#database/extensions/utils';
 import { Prisma } from '@prisma/client';
 import { Bot } from '#bot/Bot';
 import { Template } from '#shared/types/api/templates';
+import { LimitOffsetPaginationState } from '#server/middlewares/pagination';
 
 
 export type CommandTimerWithUser = ExtensionReturnType<ExtensionType<
@@ -64,13 +65,20 @@ export const commandTimerExtension = Prisma.defineExtension((client) => {
             },
           });
         },
-        async getByChannelId(channelId: string) {
+        async getByChannelId(channelId: string, pagination: LimitOffsetPaginationState = null) {
           return Prisma.getExtensionContext(this).findMany({
             where: { channelUserId: channelId },
             include: {
               user: true,
               template: true,
             },
+
+            ...pagination,
+          });
+        },
+        async countByChannelId(channelId: string) {
+          return Prisma.getExtensionContext(this).count({
+            where: { channelUserId: channelId },
           });
         },
         async createFromApi(channelId: string, commandTimer: PostCommandTimerReqBody) {

@@ -95,6 +95,11 @@ export const GetCommandTimersResponse = z.object({
 export type GetCommandTimersResponse = z.infer<typeof GetCommandTimersResponse>;
 
 
+export const GetCommandTimersPaginatedResponse = PaginatedResponse(GetCommandTimersResponse);
+
+export type GetCommandTimersPaginatedResponse = z.infer<typeof GetCommandTimersPaginatedResponse>;
+
+
 export const PostCommandTimerReqBody = CommandTimer.omit({ id: true, channelId: true, template: true }).merge(TemplateIdMixin);
 
 export type PostCommandTimerReqBody = z.infer<typeof PostCommandTimerReqBody>;
