@@ -16,7 +16,7 @@ export type CommandProps = {
 };
 
 const Command: Component<CommandProps> = (props) => {
-  const [, { open, updateCommand, deleteCommand }] = useCustomCommandEditor();
+  const [, { open, updateCommand, removeCommand }] = useCustomCommandEditor();
 
   const toggleEnabled = () => {
     updateCommand({
@@ -56,7 +56,7 @@ const Command: Component<CommandProps> = (props) => {
             <MaterialSymbol symbol='edit' color='yellow' size='alt' interactive class={style.commandButton} />
           </TemplateButton>
 
-          <TemplateButton onClick={() => deleteCommand(props.command, true) }>
+          <TemplateButton onClick={() => removeCommand(props.command) }>
             <MaterialSymbol symbol='delete' color='red' size='alt' interactive class={style.commandButton} />
           </TemplateButton>
         </div>

@@ -32,7 +32,7 @@ export type CustomCommandEditorContextValue = [
     close: () => void;
 
     updateCommand: (command: PatchCustomCommandReqBody) => void;
-    deleteCommand: (command: CustomCommand, requireConfirmation?: boolean) => void;
+    removeCommand: (command: CustomCommand) => void;
   }
 ];
 
@@ -51,11 +51,11 @@ const CustomCommandEditorContext = createContext<CustomCommandEditorContextValue
       throw new Error('CustomCommandEditorContext: close() called before provider');
     },
 
-    updateCommand: () => {
+    updateCommand: (): Promise<boolean> => {
       throw new Error('CustomCommandEditorContext: updateCommand() called before provider');
     },
-    deleteCommand: () => {
-      throw new Error('CustomCommandEditorContext: deleteCommand() called before provider');
+    removeCommand: (): Promise<boolean> => {
+      throw new Error('CustomCommandEditorContext: removeCommand() called before provider');
     },
   },
 ]);
@@ -90,7 +90,7 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
     });
   };
 
-  const createCommand = async (command: PostCustomCommandReqBody) => {
+  const createCommand = async (command: PostCustomCommandReqBody): Promise<boolean> => {
     const response = await fetch(`/api/v1/commands/custom`, {
       method: 'POST',
       headers: {
@@ -103,13 +103,15 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
       addNotification({
         type: 'error',
         title: 'Command not created',
-        message: `An error occurred while creating command.`,
+        message: `An error occurred while creating command. ${(await response.json()).message}`,
         duration: 10000,
       });
     }
+
+    return response.ok;
   };
 
-  const updateCommand = async (command: PatchCustomCommandReqBody) => {
+  const updateCommand = async (command: PatchCustomCommandReqBody): Promise<boolean> => {
     const response = await fetch(`/api/v1/commands/custom`, {
       method: 'PATCH',
       headers: {
@@ -122,56 +124,57 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
       addNotification({
         type: 'error',
         title: 'Command not updated',
-        message: `An error occurred while updating command.`,
+        message: `An error occurred while updating command. ${(await response.json()).message}`,
         duration: 10000,
       });
     }
+
+    return response.ok;
   };
 
-  const deleteCommand = async (command: CustomCommand, requireConfirmation = false) => new Promise<void>((resolve) => {
-    const promise = requireConfirmation ? openConfirmationBox({
+  const deleteCommand = async (command: DeleteCustomCommandReqBody): Promise<boolean> => {
+    const response = await fetch(`/api/v1/commands/custom`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(command),
+    });
+
+    if (!response.ok) {
+      addNotification({
+        type: 'error',
+        title: 'Command not deleted',
+        message: `An error occurred while deleting command. ${(await response.json()).message}`,
+        duration: 10000,
+      });
+    }
+
+    return response.ok;
+  };
+
+  const removeCommand = async (command: CustomCommand): Promise<boolean> => {
+    const confirmed = await openConfirmationBox({
       title: `Delete ${command.command}`,
       message: 'Are you sure you want to delete this command?',
       confirmText: 'Delete',
-    }) : Promise.resolve(true);
-
-    promise.then(async (confirmed) => {
-      if (!confirmed) {
-        resolve();
-        return;
-      }
-
-      const body: DeleteCustomCommandReqBody = {
-        id: command.id,
-      };
-
-      const response = await fetch(`/api/v1/commands/custom`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
-
-      if (response.ok) {
-        addNotification({
-          type: 'success',
-          title: 'Command deleted',
-          message: `The command ${command.command} was successfully deleted.`,
-          duration: 5000,
-        });
-      } else {
-        addNotification({
-          type: 'error',
-          title: 'Command not deleted',
-          message: `An error occurred while deleting the command ${command.command}.`,
-          duration: 10000,
-        });
-      }
-
-      resolve();
     });
-  });
+
+    if (!confirmed) return false;
+
+    const ok = await deleteCommand({ id: command.id });
+
+    if (ok) {
+      addNotification({
+        type: 'success',
+        title: 'Command deleted',
+        message: `The command ${command.command} was successfully deleted.`,
+        duration: 5000,
+      });
+    }
+
+    return ok;
+  };
 
   const handleTemplateChange = (ev: SelectChangeEvent) => {
     setTemplate(ev.target.value as unknown as number);
@@ -219,7 +222,7 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
           open,
           close,
           updateCommand,
-          deleteCommand,
+          removeCommand,
         },
       ]}
     >
