@@ -8,11 +8,6 @@ import chalk from 'chalk';
 import path from 'path';
 import { Config } from '#lib/Config';
 import { createOnboardingRouter } from '#server/routers/onboarding/onboarding.router';
-import { redis } from '#database/database';
-import session from 'express-session';
-import passport from 'passport';
-import { randomAlphanumeric } from '#lib/utils';
-import RedisStore from 'connect-redis';
 import { TokenManager } from '#server/TokenManager';
 import { Bot } from '#bot/Bot';
 import http, { Server as HTTPServer } from 'http';
@@ -60,56 +55,11 @@ export class Server {
     this.app.use(this.vite.middlewares);
   }
 
-  private static async generateSessionSecret() {
-    const secret = randomAlphanumeric(12);
-
-    try {
-      await Config.set('sessionSecret', secret);
-    } catch (err) {
-      logger.warn('Failed to set session secret', { error: err, label: ['Server', 'generateSessionSecret'] });
-    }
-
-    return secret;
-  }
-
-  public static async generateSessionMiddleware(): Promise<RequestHandler> {
-    const secret = await Config.get('sessionSecret') ?? await Server.generateSessionSecret();
-
-    return session({
-      secret,
-      resave: false,
-      saveUninitialized: false,
-      name: 'ravin-auth',
-      rolling: true,
-      cookie: {
-        signed: true,
-        httpOnly: true,
-        // maxAge: 30 * 60 * 1000,
-        sameSite: 'strict',
-      },
-      store: new RedisStore({
-        client: redis,
-        prefix: 'session_store:',
-      }),
-    });
-  }
-
-  private async setupSession() {
-    const sessionMiddleware = await Server.generateSessionMiddleware();
-
-    this.app.use(sessionMiddleware);
-
-    this.app.use(passport.initialize());
-    this.app.use(passport.session());
-  }
-
   private async registerRoutes() {
     this.app.use(accessControl);
 
     this.app.use(requestLogger);
     this.app.use(compression(Server.compressionOptions));
-
-    await this.setupSession();
 
     if (await this.isConfigured()) {
       this.app.use('/api', await createApiRouter());

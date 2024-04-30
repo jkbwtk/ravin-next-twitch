@@ -1,12 +1,12 @@
 import { Server } from 'socket.io';
 import { Server as HTTPServer } from 'http';
-import { Server as AppServer } from '#server/Server';
-import passport from 'passport';
 import { Request } from 'express';
 import { ClientToServerEvents, ServerToClientEvents, SocketRoom } from '#types/api/socket';
 import { logger } from '#lib/logger';
 import { mapOptionsToArray } from '#lib/utils';
 import { ExtendedCron } from '#lib/ExtendedCron';
+import passport from 'passport';
+import { getSessionMiddleware } from '#server/sessionMiddleware';
 
 
 export class SocketServer {
@@ -62,12 +62,9 @@ export class SocketServer {
   }
 
   private async registerRoutes() {
-    const sessionMiddleware = await AppServer.generateSessionMiddleware();
-
-    this.io.engine.use(sessionMiddleware);
+    this.io.engine.use(await getSessionMiddleware());
     this.io.engine.use(passport.initialize());
     this.io.engine.use(passport.session());
-
 
     this.io.use((socket, next) => {
       const req = socket.request as Request;
