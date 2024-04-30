@@ -6,7 +6,7 @@ import { cwd } from 'process';
 export const defaultServerPort = 3000;
 
 export const frontendDevelopmentPath = path.join(cwd(), 'frontend');
-export const frontendProductionPath = path.join(cwd(), 'web');
+export const frontendProductionPath = path.join(cwd(), 'build', 'frontend');
 
 export const developmentPublicPath = path.join(frontendDevelopmentPath, 'public');
 export const productionPublicPath = path.join(frontendProductionPath, '');
