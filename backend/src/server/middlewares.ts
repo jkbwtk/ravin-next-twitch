@@ -72,9 +72,15 @@ export const notConfigured: RequestHandler = (req, res) => {
 
 export const catchErrors: ErrorRequestHandler<ParamsDictionary, ServerErrorResponse> = (err, req, res, next) => {
   if (err instanceof ServerError) {
-    return res.status(err.code).json({
+    const resp: ServerErrorResponse = {
       message: err.message,
-    });
+    };
+
+    if (err.details) {
+      resp.details = err.details;
+    }
+
+    return res.status(err.code).json(resp);
   }
 
   logger.error('Request processing failed', {
