@@ -4,6 +4,7 @@ import { useNotification } from '#providers/NotificationProvider';
 import Widget from '#components/Widget';
 import Input from '#components/Input';
 import { PatchConfigReqBody } from '#types/api/admin';
+import { useErrorHandlers } from '#providers/ErrorHandlersProvider';
 
 import style from '#styles/widgets/AdminConfigWidget.module.scss';
 
@@ -11,6 +12,7 @@ import style from '#styles/widgets/AdminConfigWidget.module.scss';
 const AdminConfigWidget: Component = () => {
   const [, { addNotification }] = useNotification();
   const [saving, setSaving] = createSignal(false);
+  const { popupApiError } = useErrorHandlers();
 
 
   const handleSubmit = async (ev: SubmitEvent) => {
@@ -49,10 +51,9 @@ const AdminConfigWidget: Component = () => {
         message: 'Settings have been saved successfully!',
       });
     } else {
-      addNotification({
-        type: 'error',
+      await popupApiError(resp, {
         title: 'Settings Not Saved',
-        message: 'There was an error saving the settings.',
+        action: 'saving settings',
       });
     }
 

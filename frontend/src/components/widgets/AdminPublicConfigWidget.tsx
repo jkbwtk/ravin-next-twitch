@@ -7,6 +7,7 @@ import { makeRequest } from '#lib/fetch';
 import InputBase from '#components/InputBase';
 import InputLabeled from '#components/InputLabeled';
 import { useSession } from '#providers/SessionProvider';
+import { useErrorHandlers } from '#providers/ErrorHandlersProvider';
 
 import style from '#styles/widgets/AdminConfigWidget.module.scss';
 
@@ -21,6 +22,7 @@ const AdminPublicConfigWidget: Component = () => {
   const [, { addNotification }] = useNotification();
   const [saving, setSaving] = createSignal(false);
   const [session] = useSession();
+  const { popupApiError } = useErrorHandlers();
 
   const [config] = createResource(fetchPublicConfig);
 
@@ -56,11 +58,9 @@ const AdminPublicConfigWidget: Component = () => {
         duration: 5000,
       });
     } else {
-      addNotification({
-        type: 'error',
+      await popupApiError(resp, {
         title: 'Public Config Not Saved',
-        message: 'There was an error saving the public config.',
-        duration: 5000,
+        action: 'saving public config',
       });
     }
 

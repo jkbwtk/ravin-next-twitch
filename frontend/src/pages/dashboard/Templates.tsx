@@ -7,6 +7,7 @@ import { useNotification } from '#providers/NotificationProvider';
 import TemplateEditor from '#components/TemplateEditor';
 import { useConfirmationBox } from '#providers/ConfirmationBoxProvider';
 import { useTemplates } from '#providers/TemplatesProvider';
+import { useErrorHandlers } from '#providers/ErrorHandlersProvider';
 
 import style from '#styles/dashboard/Templates.module.scss';
 
@@ -17,6 +18,7 @@ const Templates: RouteComponent = (props) => {
   const [template, setTemplate] = createSignal<Template | null>(null);
   const [, { addNotification }] = useNotification();
   const [, { deleteTemplate: deleteProviderTemplate }] = useTemplates();
+  const { popupApiError } = useErrorHandlers();
 
   const deleteTemplate = async (template: Template) => {
     openConfirmationBox({
@@ -38,11 +40,9 @@ const Templates: RouteComponent = (props) => {
           duration: 5000,
         });
       } else {
-        addNotification({
-          type: 'error',
+        popupApiError(response, {
           title: 'Template not deleted',
-          message: `An error occurred while deleting the template ${template.name}.`,
-          duration: 10000,
+          action: `deleting the template ${template.name}`,
         });
       }
     });

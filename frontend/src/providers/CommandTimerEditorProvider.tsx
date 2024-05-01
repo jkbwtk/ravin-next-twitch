@@ -20,6 +20,7 @@ import AnchorText from '#components/AnchorText';
 import { useConfirmationBox } from '#providers/ConfirmationBoxProvider';
 import { useTemplates } from '#providers/TemplatesProvider';
 import { SelectChangeEvent } from '@suid/material/Select';
+import { useErrorHandlers } from '#providers/ErrorHandlersProvider';
 
 import style from '#styles/CustomCommandsEditorProvider.module.scss';
 
@@ -69,6 +70,7 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
   const [state, setState] = createStore(structuredClone(defaultState));
   const [, { addNotification }] = useNotification();
   const { open: openConfirmationBox } = useConfirmationBox();
+  const { popupApiError } = useErrorHandlers();
 
   const [templates] = useTemplates();
 
@@ -103,11 +105,9 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
     });
 
     if (!response.ok) {
-      addNotification({
-        type: 'error',
-        title: 'Command not created',
-        message: `An error occurred while creating timer. ${(await response.json()).message}`,
-        duration: 10000,
+      popupApiError(response, {
+        title: 'Timer not created',
+        action: 'creating timer',
       });
     }
 
@@ -124,11 +124,9 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
     });
 
     if (!response.ok) {
-      addNotification({
-        type: 'error',
-        title: 'Command not updated',
-        message: `An error occurred while updating timer. ${(await response.json()).message}`,
-        duration: 10000,
+      popupApiError(response, {
+        title: 'Timer not updated',
+        action: 'updating timer',
       });
     }
 
@@ -145,11 +143,9 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
     });
 
     if (!response.ok) {
-      addNotification({
-        type: 'error',
+      popupApiError(response, {
         title: 'Timer not deleted',
-        message: `An error occurred while deleting timer. ${(await response.json()).message}`,
-        duration: 10000,
+        action: 'deleting timer',
       });
     }
 

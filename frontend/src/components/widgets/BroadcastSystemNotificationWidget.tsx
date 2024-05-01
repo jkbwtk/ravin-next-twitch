@@ -6,6 +6,7 @@ import Widget from '#components/Widget';
 import { PostSystemNotificationBroadcastReqBody } from '#shared/types/api/systemNotifications';
 import InputBase from '#components/InputBase';
 import TextArea from '#components/TextArea';
+import { useErrorHandlers } from '#providers/ErrorHandlersProvider';
 
 import style from '#styles/widgets/BroadcastSystemNotificationWidget.module.scss';
 
@@ -13,6 +14,7 @@ import style from '#styles/widgets/BroadcastSystemNotificationWidget.module.scss
 const BroadcastSystemNotificationWidget: Component = () => {
   const [, { addNotification }] = useNotification();
   const [saving, setSaving] = createSignal(false);
+  const { popupApiError } = useErrorHandlers();
 
 
   const handleFormSubmit = async (ev: SubmitEvent) => {
@@ -50,11 +52,9 @@ const BroadcastSystemNotificationWidget: Component = () => {
       title.value = '';
       content.value = '';
     } else {
-      addNotification({
-        type: 'error',
-        title: 'Failed to broadcast notification',
-        message: 'Your notification could not be broadcasted to all users.',
-        duration: 5000,
+      await popupApiError(request, {
+        title: 'Notification broadcast failed',
+        action: 'broadcasting notification',
       });
     }
 

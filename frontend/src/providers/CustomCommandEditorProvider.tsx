@@ -14,6 +14,7 @@ import Modal from '#components/Modal';
 import AnchorText from '#components/AnchorText';
 import { useConfirmationBox } from '#providers/ConfirmationBoxProvider';
 import { useTemplates } from '#providers/TemplatesProvider';
+import { useErrorHandlers } from '#providers/ErrorHandlersProvider';
 
 import style from '#styles/CustomCommandsEditorProvider.module.scss';
 
@@ -65,6 +66,7 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
   const [state, setState] = createStore(structuredClone(defaultState));
   const [, { addNotification }] = useNotification();
   const { open: openConfirmationBox } = useConfirmationBox();
+  const { popupApiError } = useErrorHandlers();
 
   const [templates] = useTemplates();
 
@@ -100,11 +102,9 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
     });
 
     if (!response.ok) {
-      addNotification({
-        type: 'error',
+      await popupApiError(response, {
         title: 'Command not created',
-        message: `An error occurred while creating command. ${(await response.json()).message}`,
-        duration: 10000,
+        action: 'creating command',
       });
     }
 
@@ -121,11 +121,9 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
     });
 
     if (!response.ok) {
-      addNotification({
-        type: 'error',
+      await popupApiError(response, {
         title: 'Command not updated',
-        message: `An error occurred while updating command. ${(await response.json()).message}`,
-        duration: 10000,
+        action: 'updating command',
       });
     }
 
@@ -142,11 +140,9 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
     });
 
     if (!response.ok) {
-      addNotification({
-        type: 'error',
+      await popupApiError(response, {
         title: 'Command not deleted',
-        message: `An error occurred while deleting command. ${(await response.json()).message}`,
-        duration: 10000,
+        action: 'deleting command',
       });
     }
 

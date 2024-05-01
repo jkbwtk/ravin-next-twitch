@@ -15,6 +15,7 @@ import ErrorFallback from '#components/ErrorFallback';
 import MaterialSymbol from '#components/MaterialSymbol';
 import Pill from '#components/Pill';
 import { useTemplates } from '#providers/TemplatesProvider';
+import { useErrorHandlers } from '#providers/ErrorHandlersProvider';
 
 import style from '#styles/TemplateEditor.module.scss';
 
@@ -60,6 +61,7 @@ const TemplateStatusSkeleton: Component = () => (
 
 const TemplateEditorBase: Component<TemplateEditorProps> = (props) => {
   const [, { addNotification }] = useNotification();
+  const { popupApiError } = useErrorHandlers();
   const [, { addTemplate, updateTemplate: updateProviderTemplate }] = useTemplates();
 
   const [code, setCode] = createSignal(props.template?.template ?? '');
@@ -77,11 +79,9 @@ const TemplateEditorBase: Component<TemplateEditorProps> = (props) => {
     const response = await addTemplate(template);
 
     if (!response.ok) {
-      addNotification({
-        type: 'error',
-        title: 'Command not created',
-        message: `An error occurred while creating command. ${(await response.json()).message}`,
-        duration: 10000,
+      popupApiError(response, {
+        title: 'Template not created',
+        action: 'creating template',
       });
     }
 
@@ -92,11 +92,9 @@ const TemplateEditorBase: Component<TemplateEditorProps> = (props) => {
     const response = await updateProviderTemplate(template);
 
     if (!response.ok) {
-      addNotification({
-        type: 'error',
+      popupApiError(response, {
         title: 'Template not updated',
-        message: `An error occurred while updating template. ${(await response.json()).message}`,
-        duration: 10000,
+        action: 'updating template',
       });
     }
 

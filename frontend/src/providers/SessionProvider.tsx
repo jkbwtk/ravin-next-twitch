@@ -8,6 +8,7 @@ import { makeRequest } from '#lib/fetch';
 import { isDev } from 'solid-js/web';
 import { Config } from '#shared/types/api/auth';
 import { defaultConfigValues } from '#shared/config';
+import { useErrorHandlers } from '#providers/ErrorHandlersProvider';
 
 import style from '#styles/SessionProvider.module.scss';
 
@@ -81,6 +82,8 @@ const SessionContext = createContext<SessionContextValue>([
 export const SessionProvider: ParentComponent = (props) => {
   const [state, setState] = createStore(structuredClone(defaultState));
   const [, { addNotification }] = useNotification();
+  const { popupApiError } = useErrorHandlers();
+
   const [loaded, setLoaded] = createSignal(false);
 
   const isAuthenticated = () => state.user !== null;
@@ -180,11 +183,9 @@ export const SessionProvider: ParentComponent = (props) => {
     });
 
     if (!response.ok) {
-      addNotification({
-        type: 'error',
+      popupApiError(response, {
         title: 'Notification Error',
-        message: 'Failed to mark notification as read',
-        duration: 5000,
+        action: 'marking notification as read',
       });
     }
   };
@@ -202,11 +203,9 @@ export const SessionProvider: ParentComponent = (props) => {
     });
 
     if (!response.ok) {
-      addNotification({
-        type: 'error',
+      popupApiError(response, {
         title: 'Notification Error',
-        message: 'Failed to mark all notifications as read',
-        duration: 5000,
+        action: 'marking all notifications as read',
       });
     }
   };

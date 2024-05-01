@@ -10,9 +10,10 @@ import MaterialSymbol from '#components/MaterialSymbol';
 import { Transition } from 'solid-transition-group';
 import Widget from '#components/Widget';
 import { makeRequest } from '#lib/fetch';
+import ErrorFallback from '#components/ErrorFallback';
+import { useErrorHandlers } from '#providers/ErrorHandlersProvider';
 
 import style from '#styles/widgets/ChantingSettingsWidget.module.scss';
-import ErrorFallback from '#components/ErrorFallback';
 
 
 const fetchChantingSettings = async (): Promise<ChantingSettings> => {
@@ -30,6 +31,7 @@ const defaultValues: ChantingSettings = {
 const ChantingSettingsBase: Component<{ settings: InitializedResourceReturn<ChantingSettings> }> = (props) => {
   const [settings, { mutate: mutateSettings }] = props.settings;
   const [, { addNotification }] = useNotification();
+  const { popupApiError } = useErrorHandlers();
 
   const [isDirty, setDirty] = createSignal(false);
 
@@ -80,11 +82,9 @@ const ChantingSettingsBase: Component<{ settings: InitializedResourceReturn<Chan
 
       mutateSettings(newSettings);
     } else {
-      addNotification({
-        type: 'error',
-        title: 'Error Saving Settings',
-        message: 'There was an error saving your chanting settings.',
-        duration: 5000,
+      popupApiError(request, {
+        title: 'Settings not saved',
+        action: 'saving chanting settings',
       });
     }
 
