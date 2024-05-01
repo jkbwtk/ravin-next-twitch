@@ -4,7 +4,6 @@ import {
   CommandTimer,
   CustomCommand,
   DeleteCommandTimerReqBody,
-  DeleteCustomCommandReqBody,
   PatchCommandTimerReqBody,
   PostCommandTimerReqBody,
 } from '#shared/types/api/commands';
@@ -306,8 +305,9 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
                 minLength={1}
                 maxLength={32}
                 placeholder='*/20 * * * *'
+                pattern='^((((\d+,)+\d+|(\d+(\/|-|#)\d+)|\d+L?|\*(\/\d+)?|L(-\d+)?|\?|[A-Z]{3}(-[A-Z]{3})?) ?){5,6})$'
                 value={state.timer.cron ?? ''}
-                title='Must be a valid cron expression.'
+                title='Must be a valid cron expression'
               />
             </InputLabeled>
 
