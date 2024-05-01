@@ -36,8 +36,13 @@ export const Config = z.object({
   defaultPaginationLimit: z.coerce.number(),
   paginationLimitOptions: z.preprocess((v) => {
     if (Array.isArray(v)) return v;
-    return JSON.parse(String(v));
-  }, z.array(z.number().int().min(1))),
+    try {
+      const wrapped = String(v).replaceAll(/(\w+)/g, '"$1"');
+      return JSON.parse(wrapped);
+    } catch {}
+
+    return v;
+  }, z.array(z.coerce.number().int().min(1))),
 });
 
 export type Config = z.infer<typeof Config>;
