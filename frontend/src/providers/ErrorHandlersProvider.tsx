@@ -56,6 +56,11 @@ export const ErrorHandlersProvider: ParentComponent = (props) => {
                   {(error) => (
                     <li>
                       <p>
+                        <code>
+                          {error.path.join(':').toUpperCase()}
+                        </code>
+                      </p>
+                      <p>
                         {error.message}
                       </p>
                     </li>
