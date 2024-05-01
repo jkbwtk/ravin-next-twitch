@@ -12,6 +12,7 @@ import javascript from 'highlight.js/lib/languages/javascript';
 import { RouteSectionProps } from '@solidjs/router';
 import { OptionalRouteMetadata } from '#routers/utils';
 import { ConfirmationBoxProvider } from '#providers/ConfirmationBoxProvider';
+import { ErrorHandlersProvider } from '#providers/ErrorHandlersProvider';
 
 import '#styles/index.scss';
 import 'highlight.js/styles/nord.css';
@@ -39,7 +40,9 @@ if (root instanceof HTMLElement) {
             <SessionProvider>
               <SocketProvider>
                 <ConfirmationBoxProvider>
-                  <AppRouter />
+                  <ErrorHandlersProvider>
+                    <AppRouter />
+                  </ErrorHandlersProvider>
                 </ConfirmationBoxProvider>
               </SocketProvider>
             </SessionProvider>
