@@ -42,13 +42,15 @@ export const validate = <T extends ValidatorSchema>(schema: T): Middleware<never
     return [temp, res];
   } catch (error) {
     if (error instanceof ZodError) {
-      const invalids = error.issues.map((issue) => issue.path.pop());
+      const invalidFields = error.issues.map((issue) => issue.path.at(-1));
 
       throw new ServerError(
         HttpCodes.BadRequest,
-        `Invalid or missing input${
-          invalids.length > 1 ? 's' : ''
-        } provided for: ${invalids.join(', ')}`,
+        `Invalid or missing input${invalidFields.length > 1 ? 's' : ''
+        } provided for: ${invalidFields.join(', ')}`,
+        {
+          errors: error.issues,
+        },
       );
     } else {
       throw new ServerError(HttpCodes.BadRequest, 'Invalid input');
