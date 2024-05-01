@@ -45,7 +45,7 @@ export const ErrorHandlersProvider: ParentComponent = (props) => {
 
       if (error.success) {
         if (error.data.details?.errors === undefined) {
-          message = mergedOptions.genericMessage;
+          message = `${mergedOptions.genericMessage} ${error.data.message}`;
         } else {
           message = (
             <>
