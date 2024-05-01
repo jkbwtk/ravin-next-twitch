@@ -30,8 +30,9 @@ export const makeRequest = async <T extends ZodTypeAny>(url: string | URL, optio
   if (!res.ok) {
     const error = ServerErrorResponse.safeParse(body);
     const message = error.success ? error.data.message : getVerboseName(res.status);
+    const details = error.success ? error.data.details : undefined;
 
-    throw new ServerError(res.status, message);
+    throw new ServerError(res.status, message, details);
   }
 
   if (options?.schema) {
