@@ -45,19 +45,36 @@ export const routes: ExtendedRouteDefinition[] = [
     ],
   },
   {
+    path: 'filters',
+    metadata: {
+      symbol: 'filter_list',
+      name: 'Filters',
+    },
+    children: [
+      {
+        path: 'phrases',
+        component: lazy(() => import('#pages/dashboard/PhraseFilters')),
+        metadata: {
+          symbol: 'abc',
+          name: 'Phrases',
+        },
+      },
+      {
+        path: 'regex',
+        component: lazy(() => import('#pages/dashboard/RegexFilters')),
+        metadata: {
+          symbol: 'regular_expression',
+          name: 'Regex',
+        },
+      },
+    ],
+  },
+  {
     path: 'templates',
     component: lazy(() => import('#pages/dashboard/Templates')),
     metadata: {
       name: 'Templates',
       symbol: 'description',
-    },
-  },
-  {
-    path: 'filters',
-    component: lazy(() => import('#pages/dashboard/Filters')),
-    metadata: {
-      symbol: 'filter_list',
-      name: 'Filters',
     },
   },
   {

@@ -9,6 +9,7 @@ import { StyledEngineProvider } from '@suid/material';
 import AppRouter from '#routers/AppRouter';
 import hljs from 'highlight.js/lib/core';
 import javascript from 'highlight.js/lib/languages/javascript';
+import cmake from 'highlight.js/lib/languages/cmake';
 import { RouteSectionProps } from '@solidjs/router';
 import { OptionalRouteMetadata } from '#routers/utils';
 import { ConfirmationBoxProvider } from '#providers/ConfirmationBoxProvider';
@@ -28,6 +29,7 @@ declare global {
 }
 
 hljs.registerLanguage('javascript', javascript);
+hljs.registerLanguage('cmake', cmake);
 
 const root = document.getElementById('root');
 
