@@ -80,6 +80,44 @@ model Command {
   @@index([channelUserId])
 }
 
+model PhraseFilter {
+  id             Int     @id() @default(autoincrement())
+  phrase         String  @db.VarChar
+  caseSensitive  Boolean @default(false)
+  similarity     Int     @default(0)
+  // [FilterActions]
+  action         Int     @default(0)
+  actionDuration Int     @default(10)
+  reason         String?
+  enabled        Boolean @default(true)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
+  chanelUserId String   @db.VarChar
+  user         User     @relation(fields: [chanelUserId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  // @@unique([chanelUserId])
+  @@index([chanelUserId])
+}
+
+model RegexFilter {
+  id             Int     @id() @default(autoincrement())
+  regex          String  @db.VarChar
+  // [FilterActions]
+  action         Int     @default(0)
+  actionDuration Int     @default(10)
+  reason         String?
+  enabled        Boolean @default(true)
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
+  chanelUserId String   @db.VarChar
+  user         User     @relation(fields: [chanelUserId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  // @@unique([chanelUserId])
+  @@index([chanelUserId])
+}
+
 model Config {
   key       String   @id() @db.VarChar(32)
   value     String
@@ -205,6 +243,8 @@ model User {
   token               Token?
   commandTimer        CommandTimer[]
   template            Template[]
+  filter              PhraseFilter[]
+  regexFilter         RegexFilter[]
 
   @@index([login])
 }
