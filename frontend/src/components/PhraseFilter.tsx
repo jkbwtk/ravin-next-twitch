@@ -2,9 +2,9 @@ import MaterialSymbol from '#components/MaterialSymbol';
 import TemplateButton from '#components/TemplateButton';
 import { Match, Switch } from 'solid-js';
 import { TableType } from '#components/widgets/CommandTimersTableWidget';
-import { useCommandTimerEditor } from '#providers/CommandTimerEditorProvider';
 import { TableCell, TableRow } from '@suid/material';
 import { Actions, PhraseFilter as PhraseFilterType } from '#shared/types/api/filters';
+import { usePhraseFilterEditor } from '#providers/PhraseFilterEditorProvider';
 
 import style from '#styles/widgets/TableWidget.module.scss';
 
@@ -15,10 +15,10 @@ export type PhraseFilterProps = {
 };
 
 const PhraseFilter: Component<PhraseFilterProps> = (props) => {
-  const [, { open, updateTimer }] = useCommandTimerEditor();
+  const [, { open, updateFilter, removeFilter }] = usePhraseFilterEditor();
 
   const toggleEnabled = () => {
-    updateTimer({
+    updateFilter({
       id: props.filter.id,
       enabled: !props.filter.enabled,
     });
@@ -27,7 +27,7 @@ const PhraseFilter: Component<PhraseFilterProps> = (props) => {
   return (
     <TableRow>
       <TableCell>{props.filter.phrase}</TableCell>
-      <TableCell align='right'>{props.filter.similarity}</TableCell>
+      <TableCell align='right'>{props.filter.similarity}%</TableCell>
       <TableCell align='right' class={props.tableType > TableType.Full ? style.disabled : ''}>
         <div class={style.actionsContainer}>
           <Switch>
@@ -70,7 +70,7 @@ const PhraseFilter: Component<PhraseFilterProps> = (props) => {
             <MaterialSymbol symbol='edit' color='yellow' size='alt' interactive class={style.commandButton} />
           </TemplateButton>
 
-          <TemplateButton>
+          <TemplateButton onClick={() => removeFilter(props.filter)}>
             <MaterialSymbol symbol='delete' color='red' size='alt' interactive class={style.commandButton} />
           </TemplateButton>
         </div>
