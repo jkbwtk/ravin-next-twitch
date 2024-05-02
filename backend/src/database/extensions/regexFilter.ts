@@ -57,7 +57,6 @@ export const regexFilterExtension = Prisma.defineExtension((client) => {
             data: {
               ...regexFilter,
               chanelUserId: channelId,
-              regex: `/${regexFilter.regex.source}/${regexFilter.regex.flags}`,
             },
           });
 
@@ -68,7 +67,6 @@ export const regexFilterExtension = Prisma.defineExtension((client) => {
             where: { id: regexFilter.id, chanelUserId: channelId },
             data: {
               ...regexFilter,
-              regex: regexFilter.regex ? `/${regexFilter.regex.source}/${regexFilter.regex.flags}` : undefined,
             },
           });
 
