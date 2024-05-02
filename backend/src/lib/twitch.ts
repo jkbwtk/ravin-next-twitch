@@ -128,7 +128,7 @@ export const revokeTokenUnsafe = async (userId: string): Promise<void> => {
         },
       });
 
-    console.log(resp.data);
+    resp.data;
   } catch (err) {
     console.error(err);
   }

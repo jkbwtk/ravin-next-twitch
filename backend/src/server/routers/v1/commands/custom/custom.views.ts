@@ -91,8 +91,6 @@ export const deleteCustomCommandsView = new ExpressStack()
   .use(validate(DeleteCustomCommandSchema))
   .use(async (req, res) => {
     try {
-      console.log(req.validated);
-
       await prisma.command.deleteFromApi(req.validated.body);
       await Bot.reloadChannelCommands(req.user.id);
       SocketServer.emitToUser(req.user.id, 'DEL_CUSTOM_COMMAND', req.validated.body.id);
