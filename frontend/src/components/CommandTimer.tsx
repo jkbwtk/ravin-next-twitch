@@ -15,7 +15,7 @@ export type CommandTimerProps = {
 };
 
 const CommandTimer: Component<CommandTimerProps> = (props) => {
-  const [, { open, updateTimer }] = useCommandTimerEditor();
+  const [, { open, updateTimer, removeTimer }] = useCommandTimerEditor();
 
   const toggleEnabled = () => {
     updateTimer({
@@ -61,7 +61,7 @@ const CommandTimer: Component<CommandTimerProps> = (props) => {
             <MaterialSymbol symbol='edit' color='yellow' size='alt' interactive class={style.commandButton} />
           </TemplateButton>
 
-          <TemplateButton>
+          <TemplateButton onClick={() => removeTimer(props.timer)}>
             <MaterialSymbol symbol='delete' color='red' size='alt' interactive class={style.commandButton} />
           </TemplateButton>
         </div>
