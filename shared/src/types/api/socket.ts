@@ -4,6 +4,7 @@ import { SystemNotification } from './systemNotifications';
 import { Message } from './logs';
 import { ScheduledJob } from 'types/api/admin';
 import { Template } from 'types/api/templates';
+import { PhraseFilter, RegexFilter } from 'types/api/filters';
 
 
 export type ServerToClientEvents = {
@@ -33,6 +34,14 @@ export type ServerToClientEvents = {
   NEW_TEMPLATE: (template: Template) => void;
   UPD_TEMPLATE: (template: Template) => void;
   DEL_TEMPLATE: (templateId: number) => void;
+
+  NEW_PHRASE_FILTER: (filter: PhraseFilter) => void;
+  UPD_PHRASE_FILTER: (filter: PhraseFilter) => void;
+  DEL_PHRASE_FILTER: (filterId: number) => void;
+
+  NEW_REGEX_FILTER: (filter: RegexFilter) => void;
+  UPD_REGEX_FILTER: (filter: RegexFilter) => void;
+  DEL_REGEX_FILTER: (filterId: number) => void;
 
   UPD_SESSION: () => void;
 };

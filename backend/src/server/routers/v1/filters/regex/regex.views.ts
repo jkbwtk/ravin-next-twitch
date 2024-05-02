@@ -1,8 +1,9 @@
 import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
+import { SocketServer } from '#server/SocketServer';
 import { limitOffsetPagination } from '#server/middlewares/pagination';
-import { PatchRegexFilterSchema, PostRegexFilterSchema } from '#server/routers/v1/filters/regex/regex.schemas';
+import { DeleteRegexFilterSchema, PatchRegexFilterSchema, PostRegexFilterSchema } from '#server/routers/v1/filters/regex/regex.schemas';
 import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
 import { ServerError } from '#shared/ServerError';
 import { HttpCodes } from '#shared/httpCodes';
@@ -51,6 +52,7 @@ export const postRegexFiltersView = new ExpressStack()
   .use(async (req, res) => {
     try {
       const filter = await prisma.regexFilter.createFromApi(req.user.id, req.validated.body);
+      SocketServer.emitToUser(req.user.id, 'NEW_REGEX_FILTER', filter.serialize());
 
       res.jsonValidated(filter.serialize());
     } catch (err) {
@@ -71,6 +73,7 @@ export const patchRegexFiltersView = new ExpressStack()
   .use(async (req, res) => {
     try {
       const filter = await prisma.regexFilter.updateFromApi(req.user.id, req.validated.body);
+      SocketServer.emitToUser(req.user.id, 'UPD_REGEX_FILTER', filter.serialize());
 
       res.json(filter.serialize());
     } catch (err) {
@@ -86,10 +89,11 @@ export const patchRegexFiltersView = new ExpressStack()
 export const deleteRegexFiltersView = new ExpressStack()
   .usePreflight(authenticated)
   .useNative(json())
-  .use(validate(PatchRegexFilterSchema))
+  .use(validate(DeleteRegexFilterSchema))
   .use(async (req, res) => {
     try {
       await prisma.regexFilter.deleteFromApi(req.user.id, req.validated.body);
+      SocketServer.emitToUser(req.user.id, 'DEL_REGEX_FILTER', req.validated.body.id);
 
       res.sendStatus(HttpCodes.OK);
     } catch (err) {

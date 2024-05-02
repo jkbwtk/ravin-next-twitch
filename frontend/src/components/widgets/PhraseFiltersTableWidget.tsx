@@ -8,7 +8,7 @@ import ErrorFallback from '#components/ErrorFallback';
 import Paginator from '#components/Paginator';
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@suid/material';
 import FetchFallback from '#components/FetchFallback';
-import { GetPhraseFiltersPaginatedResponse } from '#types/api/filters';
+import { GetPhraseFiltersPaginatedResponse, PhraseFilter as PhraseFilterType } from '#types/api/filters';
 import PhraseFilter from '#components/PhraseFilter';
 
 import style from '#styles/widgets/TableWidget.module.scss';
@@ -53,17 +53,17 @@ const PhraseFiltersTable: Component = () => {
 
   let tableRef = document.createElement('table');
 
-  // const createCommand = (timer: CommandTimerType) => {
-  //   setTimers((timers) => ({ ...timers, data: [...timers.data, timer] }));
-  // };
+  const createFilter = (filter: PhraseFilterType) => {
+    setFilters((filters) => ({ ...filters, data: [...filters.data, filter] }));
+  };
 
-  // const updateCommand = (timer: CommandTimerType) => {
-  //   setTimers((timers) => ({ ...timers, data: timers.data.map((c) => c.id === timer.id ? timer : c) }));
-  // };
+  const updateFilter = (filter: PhraseFilterType) => {
+    setFilters((filters) => ({ ...filters, data: filters.data.map((f) => f.id === filter.id ? filter : f) }));
+  };
 
-  // const removeCommand = (timerId: number) => {
-  //   setTimers((timers) => ({ ...timers, data: timers.data.filter((timer) => timer.id !== timerId) }));
-  // };
+  const removeFilter = (filterId: number) => {
+    setFilters((filters) => ({ ...filters, data: filters.data.filter((filter) => filter.id !== filterId) }));
+  };
 
   const handleResize = () => {
     const width = tableRef.scrollWidth;
@@ -74,18 +74,18 @@ const PhraseFiltersTable: Component = () => {
   };
 
   onMount(() => {
-    // socket.client.on('NEW_COMMAND_TIMER', createCommand);
-    // socket.client.on('UPD_COMMAND_TIMER', updateCommand);
-    // socket.client.on('DEL_COMMAND_TIMER', removeCommand);
+    socket.client.on('NEW_PHRASE_FILTER', createFilter);
+    socket.client.on('UPD_PHRASE_FILTER', updateFilter);
+    socket.client.on('DEL_PHRASE_FILTER', removeFilter);
 
     window.addEventListener('resize', handleResize);
     handleResize();
   });
 
   onCleanup(() => {
-    // socket.client.off('NEW_COMMAND_TIMER', createCommand);
-    // socket.client.off('UPD_COMMAND_TIMER', updateCommand);
-    // socket.client.off('DEL_COMMAND_TIMER', removeCommand);
+    socket.client.off('NEW_PHRASE_FILTER', createFilter);
+    socket.client.off('UPD_PHRASE_FILTER', updateFilter);
+    socket.client.off('DEL_PHRASE_FILTER', removeFilter);
 
     window.removeEventListener('resize', handleResize);
   });

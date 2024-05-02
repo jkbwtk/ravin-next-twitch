@@ -1,6 +1,7 @@
 import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
+import { SocketServer } from '#server/SocketServer';
 import { limitOffsetPagination } from '#server/middlewares/pagination';
 import { PatchPhraseFilterSchema, PostPhraseFilterSchema } from '#server/routers/v1/filters/phrase/phrase.schemas';
 import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
@@ -51,6 +52,7 @@ export const postPhraseFiltersView = new ExpressStack()
   .use(async (req, res) => {
     try {
       const filter = await prisma.phraseFilter.createFromApi(req.user.id, req.validated.body);
+      SocketServer.emitToUser(req.user.id, 'NEW_PHRASE_FILTER', filter.serialize());
 
       res.jsonValidated(filter.serialize());
     } catch (err) {
@@ -71,6 +73,7 @@ export const patchPhraseFiltersView = new ExpressStack()
   .use(async (req, res) => {
     try {
       const filter = await prisma.phraseFilter.updateFromApi(req.user.id, req.validated.body);
+      SocketServer.emitToUser(req.user.id, 'UPD_PHRASE_FILTER', filter.serialize());
 
       res.json(filter.serialize());
     } catch (err) {
@@ -90,6 +93,7 @@ export const deletePhraseFiltersView = new ExpressStack()
   .use(async (req, res) => {
     try {
       await prisma.phraseFilter.deleteFromApi(req.user.id, req.validated.body);
+      SocketServer.emitToUser(req.user.id, 'DEL_PHRASE_FILTER', req.validated.body.id);
 
       res.sendStatus(HttpCodes.OK);
     } catch (err) {
