@@ -1,4 +1,4 @@
-import { batch, createContext, createSignal, useContext } from 'solid-js';
+import { batch, createContext, createEffect, createMemo, createSignal, useContext } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { useNotification } from '#providers/NotificationProvider';
 import InputRange from '#components/InputRange';
@@ -12,55 +12,55 @@ import Modal from '#components/Modal';
 import { useConfirmationBox } from '#providers/ConfirmationBoxProvider';
 import { SelectChangeEvent } from '@suid/material/Select';
 import { useErrorHandlers } from '#providers/ErrorHandlersProvider';
-import InputCheckbox from '#components/InputCheckbox';
-import { Actions, DeletePhraseFilterReqBody, PatchPhraseFilterReqBody, PhraseFilter, PostPhraseFilterReqBody } from '#shared/types/api/filters';
+import { Actions, DeleteRegexFilterReqBody, PatchRegexFilterReqBody, PostRegexFilterReqBody, RegexFilter, RegExpType } from '#shared/types/api/filters';
 import TextArea from '#components/TextArea';
+import Input from '#components/Input';
 
 import style from '#styles/CustomCommandsEditorProvider.module.scss';
 
 
-export type PhraseFilterEditorContextState = {
+export type RegexFilterEditorContextState = {
   open: boolean;
-  filter: Partial<PhraseFilter>;
+  filter: Partial<RegexFilter>;
 };
 
-export type PhraseFilterEditorContextValue = [
-  state: PhraseFilterEditorContextState,
+export type RegexFilterEditorContextValue = [
+  state: RegexFilterEditorContextState,
   actions: {
-    open: (command?: Partial<PhraseFilter>) => void;
+    open: (command?: Partial<RegexFilter>) => void;
     close: () => void;
 
-    updateFilter: (timer: PatchPhraseFilterReqBody) => void;
-    removeFilter: (timer: PhraseFilter) => void;
+    updateFilter: (timer: PatchRegexFilterReqBody) => void;
+    removeFilter: (timer: RegexFilter) => void;
   }
 ];
 
-export const defaultState: PhraseFilterEditorContextState = {
+export const defaultState: RegexFilterEditorContextState = {
   open: false,
   filter: {},
 };
 
-const PhraseFilterEditorContext = createContext<PhraseFilterEditorContextValue>([
+const RegexFilterEditorContext = createContext<RegexFilterEditorContextValue>([
   defaultState,
   {
     open: () => {
-      throw new Error('PhraseFilterEditorContext: open() called before provider');
+      throw new Error('RegexFilterEditorContext: open() called before provider');
     },
     close: () => {
-      throw new Error('PhraseFilterEditorContext: close() called before provider');
+      throw new Error('RegexFilterEditorContext: close() called before provider');
     },
 
     updateFilter: (): Promise<boolean> => {
-      throw new Error('PhraseFilterEditorContext: updateFilter() called before provider');
+      throw new Error('RegexFilterEditorContext: updateFilter() called before provider');
     },
     removeFilter: (): Promise<boolean> => {
-      throw new Error('PhraseFilterEditorContext: removeFilter() called before provider');
+      throw new Error('RegexFilterEditorContext: removeFilter() called before provider');
     },
   },
 ]);
 
 
-export const PhraseFilterEditorProvider: ParentComponent = (props) => {
+export const RegexFilterEditorProvider: ParentComponent = (props) => {
   const [state, setState] = createStore(structuredClone(defaultState));
   const [, { addNotification }] = useNotification();
   const { open: openConfirmationBox } = useConfirmationBox();
@@ -68,7 +68,7 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
 
   const [actionId, setActionId] = createSignal(Actions.Delete);
 
-  const open = (filter?: Partial<PhraseFilter>) => {
+  const open = (filter?: Partial<RegexFilter>) => {
     batch(() => {
       setState({
         open: true,
@@ -86,8 +86,8 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
     });
   };
 
-  const createFilter = async (filter: PostPhraseFilterReqBody): Promise<boolean> => {
-    const response = await fetch(`/api/v1/filters/phrase`, {
+  const createFilter = async (filter: PostRegexFilterReqBody): Promise<boolean> => {
+    const response = await fetch(`/api/v1/filters/regex`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -97,16 +97,16 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
 
     if (!response.ok) {
       popupApiError(response, {
-        title: 'Phrase filter not created',
-        action: 'creating phrase filter',
+        title: 'Regex filter not created',
+        action: 'creating regex filter',
       });
     }
 
     return response.ok;
   };
 
-  const updateFilter = async (filter: PatchPhraseFilterReqBody): Promise<boolean> => {
-    const response = await fetch(`/api/v1/filters/phrase`, {
+  const updateFilter = async (filter: PatchRegexFilterReqBody): Promise<boolean> => {
+    const response = await fetch(`/api/v1/filters/regex`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -116,16 +116,16 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
 
     if (!response.ok) {
       popupApiError(response, {
-        title: 'Phrase filter not updated',
-        action: 'updating phrase filter',
+        title: 'Regex filter not updated',
+        action: 'updating regex filter',
       });
     }
 
     return response.ok;
   };
 
-  const deleteFilter = async (filter: DeletePhraseFilterReqBody): Promise<boolean> => {
-    const response = await fetch(`/api/v1/filters/phrase`, {
+  const deleteFilter = async (filter: DeleteRegexFilterReqBody): Promise<boolean> => {
+    const response = await fetch(`/api/v1/filters/regex`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -135,18 +135,18 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
 
     if (!response.ok) {
       popupApiError(response, {
-        title: 'Phrase filter not deleted',
-        action: 'deleting phrase filter',
+        title: 'Regex filter not deleted',
+        action: 'deleting regex filter',
       });
     }
 
     return response.ok;
   };
 
-  const removeFilter = async (filter: PhraseFilter): Promise<boolean> => {
+  const removeFilter = async (filter: RegexFilter): Promise<boolean> => {
     const confirmed = await openConfirmationBox({
-      title: 'Delete phrase filter',
-      message: 'Are you sure you want to delete this phrase filter?',
+      title: 'Delete regex filter',
+      message: 'Are you sure you want to delete this regex filter?',
       confirmText: 'Delete',
     });
 
@@ -159,8 +159,8 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
     if (ok) {
       addNotification({
         type: 'success',
-        title: 'Phrase filter deleted',
-        message: `Phrase filter was successfully deleted.`,
+        title: 'Regex filter deleted',
+        message: `Regex filter was successfully deleted.`,
         duration: 5000,
       });
     }
@@ -177,9 +177,8 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
 
     if (!(ev.target instanceof HTMLFormElement)) return;
 
-    const phrase = ev.target.elements.namedItem('phrase') as HTMLInputElement;
-    const caseSensitive = ev.target.elements.namedItem('caseSensitive') as HTMLInputElement;
-    const similarity = ev.target.elements.namedItem('similarity') as HTMLInputElement;
+    const regexPattern = ev.target.elements.namedItem('regexPattern') as HTMLInputElement;
+    const regexFlags = ev.target.elements.namedItem('regexFlags') as HTMLInputElement;
     const action = ev.target.elements.namedItem('action') as HTMLInputElement;
     const actionDuration = ev.target.elements.namedItem('actionDuration') as HTMLInputElement;
     const reason = ev.target.elements.namedItem('reason') as HTMLInputElement;
@@ -188,17 +187,13 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
     const ok = state.filter.id ?
       await updateFilter({
         id: state.filter.id,
-        phrase: phrase.value,
-        caseSensitive: caseSensitive.checked,
-        similarity: parseInt(similarity.value),
+        regex: `/${regexPattern.value}/${regexFlags.value}`,
         action: parseInt(action.value),
         actionDuration: parseInt(actionDuration.value),
         reason: reason.value.length > 0 ? reason.value : null,
       }) :
       await createFilter({
-        phrase: phrase.value,
-        caseSensitive: caseSensitive.checked,
-        similarity: parseInt(similarity.value),
+        regex: `/${regexPattern.value}/${regexFlags.value}`,
         action: parseInt(action.value),
         actionDuration: parseInt(actionDuration.value),
         reason: reason.value.length > 0 ? reason.value : null,
@@ -207,11 +202,11 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
 
     if (ok) {
       const metadata = state.filter.id ? {
-        title: 'Phrase filter updated',
-        message: `Phrase filter was successfully updated.`,
+        title: 'Regex filter updated',
+        message: `Regex filter was successfully updated.`,
       } : {
-        title: 'Phrase created',
-        message: `Phrase filter was successfully created.`,
+        title: 'Regex created',
+        message: `Regex filter was successfully created.`,
       };
 
       addNotification({
@@ -224,9 +219,14 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
     }
   };
 
+  const convertedRegex = createMemo(() => RegExpType.safeParse(state.filter.regex ?? '').data);
+
+  createEffect(() => {
+    console.log(state.filter.regex, convertedRegex());
+  });
 
   return (
-    <PhraseFilterEditorContext.Provider
+    <RegexFilterEditorContext.Provider
       value={[
         state,
         {
@@ -239,58 +239,38 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
     >
       {props.children}
 
-      <Modal open={state.open} title='Add phrase filter' onClose={() => close()}>
+      <Modal open={state.open} title='Add regex filter' onClose={() => close()}>
         <form class={style.form} onSubmit={handleForm}>
           <div class={style.group}>
-            <InputLabeled label='Phrase' for='phrase'>
-              <InputBase
-                id='phrase'
-                name='phrase'
+            <div style={{ display: 'flex', gap: '0.8rem', width: '100%' }}>
+              <InputLabeled label='Regex Pattern' for='regexPattern'>
+                <InputBase
+                  id='regexPattern'
+                  name='regexPattern'
+                  autocomplete='off'
+                  required
+                  minLength={1}
+                  maxLength={64}
+                  placeholder=''
+                  value={convertedRegex()?.source ?? ''}
+                  title='Regex must be between 1 and 64 characters long.'
+                />
+              </InputLabeled>
+
+              <Input
+                type='text'
+                name='regexFlags'
+                id='regexFlags'
+                label='Regex Flags'
                 autocomplete='off'
-                required
-                minLength={1}
-                maxLength={64}
-                placeholder='i hate cookies'
-                value={state.filter.phrase ?? ''}
-                title='Phrase must be between 1 and 64 characters long.'
+                placeholder='g'
+                value={convertedRegex()?.flags ?? ''}
+                style={{ width: '16.2rem', 'box-sizing': 'border-box' }}
               />
-            </InputLabeled>
-
-            <div class={style.description}>
-                      Phrase that will trigger the filter.
             </div>
-          </div>
-
-          <div class={style.group}>
-            <InputCheckbox
-              id='caseSensitive'
-              name='caseSensitive'
-              label='Case sensitive'
-              checked={state.filter.caseSensitive ?? false}
-            />
 
             <div class={style.description}>
-                      Controls whether the phrase is case sensitive.
-            </div>
-          </div>
-
-          <div class={style.group}>
-            <InputLabeled label='Similarity factor' for='similarity'>
-              <InputRange
-                id='similarity'
-                name='similarity'
-                type='range'
-                min='0'
-                max='100'
-                step='1'
-                label='Similarity factor:'
-                unit='%'
-                value={state.filter.similarity ?? '100'}
-              />
-            </InputLabeled>
-
-            <div class={style.description}>
-                      Controls similarity factor required to trigger the filter.
+                      Regex pattern to be matched against the message.
             </div>
           </div>
 
@@ -360,7 +340,7 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
           </div>
         </form>
       </Modal>
-    </PhraseFilterEditorContext.Provider>);
+    </RegexFilterEditorContext.Provider>);
 };
 
-export const usePhraseFilterEditor = (): PhraseFilterEditorContextValue => useContext(PhraseFilterEditorContext);
+export const useRegexFilterEditor = (): RegexFilterEditorContextValue => useContext(RegexFilterEditorContext);

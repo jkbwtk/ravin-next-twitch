@@ -2,10 +2,10 @@ import MaterialSymbol from '#components/MaterialSymbol';
 import TemplateButton from '#components/TemplateButton';
 import { Match, Switch } from 'solid-js';
 import { TableType } from '#components/widgets/CommandTimersTableWidget';
-import { useCommandTimerEditor } from '#providers/CommandTimerEditorProvider';
 import { TableCell, TableRow } from '@suid/material';
 import { Actions, RegexFilter as RegexFilterType } from '#shared/types/api/filters';
 import HighlightedCode from '#components/HighlightedCode';
+import { useRegexFilterEditor } from '#providers/RegexFilterEditorProvider';
 
 import style from '#styles/widgets/TableWidget.module.scss';
 
@@ -16,10 +16,10 @@ export type RegexFilterProps = {
 };
 
 const RegexFilter: Component<RegexFilterProps> = (props) => {
-  const [, { open, updateTimer }] = useCommandTimerEditor();
+  const [, { open, updateFilter }] = useRegexFilterEditor();
 
   const toggleEnabled = () => {
-    updateTimer({
+    updateFilter({
       id: props.filter.id,
       enabled: !props.filter.enabled,
     });
@@ -28,7 +28,7 @@ const RegexFilter: Component<RegexFilterProps> = (props) => {
   return (
     <TableRow>
       <TableCell>
-        <HighlightedCode code='/test\s/g' language='cmake' />
+        <HighlightedCode code={props.filter.regex} language='cmake' />
       </TableCell>
       <TableCell align='center'>
         <code>
