@@ -1,5 +1,4 @@
-import { DeleteCommandTimerReqBody, PatchCommandTimerReqBody } from '#shared/types/api/commands';
-import { PostRegexFilterReqBody } from '#shared/types/api/filters';
+import { DeleteRegexFilterReqBody, PatchRegexFilterReqBody, PostRegexFilterReqBody } from '#shared/types/api/filters';
 import { z } from 'zod';
 
 
@@ -11,14 +10,14 @@ export type PostRegexFilterSchema = z.infer<typeof PostRegexFilterSchema>;
 
 
 export const PatchRegexFilterSchema = z.object({
-  body: PatchCommandTimerReqBody,
+  body: PatchRegexFilterReqBody,
 });
 
 export type PatchRegexFilterSchema = z.infer<typeof PatchRegexFilterSchema>;
 
 
 export const DeleteRegexFilterSchema = z.object({
-  body: DeleteCommandTimerReqBody,
+  body: DeleteRegexFilterReqBody,
 });
 
 export type DeleteRegexFilterSchema = z.infer<typeof DeleteRegexFilterSchema>;
