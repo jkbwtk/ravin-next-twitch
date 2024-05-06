@@ -12,6 +12,7 @@
     "forceConsistentCasingInFileNames": true,
     "tsBuildInfoFile": "../build/shared.tsbuildinfo",
     "moduleResolution": "node",
-    "module": "commonjs"
+    "module": "commonjs",
+    "noUncheckedIndexedAccess": true
   },
 }
