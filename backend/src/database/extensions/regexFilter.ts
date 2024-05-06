@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { DeleteRegexFilterReqBody, PatchRegexFilterReqBody, PostRegexFilterReqBody, RegexFilter, RegExpType } from '#types/api/filters';
+import { DeleteRegexFilterReqBody, PatchRegexFilterReqBody, PostRegexFilterReqBody, RegexFilter } from '#types/api/filters';
 import { LimitOffsetPaginationState } from '#server/middlewares/pagination';
 
 
@@ -20,7 +20,7 @@ export const regexFilterExtension = Prisma.defineExtension((client) => {
             return (): RegexFilter => {
               return {
                 id: regexFilter.id,
-                regex: RegExpType.parse(regexFilter.regex),
+                regex: regexFilter.regex,
                 action: regexFilter.action,
                 actionDuration: regexFilter.actionDuration,
                 reason: regexFilter.reason,

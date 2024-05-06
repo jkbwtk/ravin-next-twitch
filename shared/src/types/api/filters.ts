@@ -52,72 +52,57 @@ export const DeletePhraseFilterReqBody = PhraseFilter.pick({ id: true });
 
 export type DeletePhraseFilterReqBody = z.infer<typeof DeletePhraseFilterReqBody>;
 
+export const RegExpLiteralType = z.string().regex(/^\/.*\/.*$/).superRefine((val, ctx) => {
+  const regexDeserializer = /^\/(.*)\/(.*)$/;
+  const matched = val.match(regexDeserializer);
 
-export const RegExpType = z.preprocess((val, ctx) => {
-  if (val instanceof RegExp) {
-    return `/${val.source}/${val.flags}`;
-  }
-
-  if (typeof val !== 'string') {
+  if (matched === null) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: 'Invalid regex format. Must be in the form of /regex/flags',
+      fatal: true,
     });
 
-    return val;
+    return z.NEVER;
   }
 
+  try {
+    const pattern = matched[1]!;
+    const flags = matched[2]!;
+
+    new RegExp(pattern, flags);
+  } catch (err) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: err instanceof Error ? err.message : 'Unknown error',
+      fatal: true,
+    });
+  }
+});
+
+export type RegExpLiteralType = z.infer<typeof RegExpLiteralType>;
+
+
+export const RegExpType = RegExpLiteralType.transform<RegExp>((val) => {
   const regexDeserializer = /^\/(.*)\/(.*)$/;
   const matched = val.match(regexDeserializer);
 
   if (!matched) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: 'Invalid regex format. Must be in the form of /regex/flags',
-    });
-
-    return val;
+    throw new Error('Invalid regex format. Must be in the form of /regex/flags');
   }
 
-  try {
-    const pattern = matched[1];
-    const flags = matched[2];
+  const pattern = matched[1]!;
+  const flags = matched[2]!;
 
-    if (typeof pattern !== 'string' || typeof flags !== 'string') {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Invalid regex format. Must be in the form of /regex/flags',
-      });
-
-      return val;
-    }
-
-    new RegExp(pattern, flags);
-
-    return val;
-  } catch (err) {
-    if (err instanceof Error) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: err.message,
-      });
-    } else {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'Unknown error',
-      });
-    }
-
-    return val;
-  }
-}, z.string());
+  return new RegExp(pattern, flags);
+});
 
 export type RegExpType = z.infer<typeof RegExpType>;
 
 
 export const RegexFilter = z.object({
   id: z.number().int().positive(),
-  regex: RegExpType,
+  regex: RegExpLiteralType,
   action: FilterActions,
   actionDuration: z.number().int().positive().default(10),
   reason: z.string().optional().nullable().default(null),
