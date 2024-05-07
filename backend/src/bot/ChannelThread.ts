@@ -4,13 +4,13 @@ import { getChatters } from '#lib/twitch';
 import { ChannelWithUser } from '#database/extensions/channel';
 import { prisma } from '#database/database';
 import { ExtendedCron } from '#lib/ExtendedCron';
-import { ChantHandler } from '#bot/ChantHandler';
+import { ChantHandler } from '#bot/handlers/ChantHandler';
 import { mergeOptions, RequiredDefaults } from '#shared/utils';
 import { CacheFIFO } from '#lib/CacheArray';
-import { CommandHandler } from '#bot/CommandHandler';
+import { CommandHandler } from '#bot/handlers/CommandHandler';
 import { MessageWithUser } from '#database/extensions/message';
 import { AutoWirable, ClassInstance, Wirable } from '#lib/autowire';
-import { CommandTimerHandler } from '#bot/CommandTimerHandler';
+import { CommandTimerHandler } from '#bot/handlers/CommandTimerHandler';
 import { Isolate } from 'isolated-vm';
 
 

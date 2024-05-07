@@ -1,5 +1,5 @@
 import { ChannelThread } from '#bot/ChannelThread';
-import { CustomCommand } from '#bot/CustomCommand';
+import { CustomCommand } from '#bot/handlers/CustomCommand';
 import { prisma } from '#database/database';
 import { MessageWithUser } from '#database/extensions/message';
 import { ExtendedMap } from '#lib/ExtendedMap';

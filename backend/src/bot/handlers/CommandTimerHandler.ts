@@ -1,5 +1,5 @@
 import { ChannelThread } from '#bot/ChannelThread';
-import { CommandTimer } from '#bot/CommandTimer';
+import { CommandTimer } from '#bot/handlers/CommandTimer';
 import { prisma } from '#database/database';
 import { MessageWithUser } from '#database/extensions/message';
 import { ExtendedMap } from '#lib/ExtendedMap';
