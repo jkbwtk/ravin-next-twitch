@@ -16,7 +16,7 @@ export type RegexFilterProps = {
 };
 
 const RegexFilter: Component<RegexFilterProps> = (props) => {
-  const [, { open, updateFilter }] = useRegexFilterEditor();
+  const [, { open, updateFilter, removeFilter }] = useRegexFilterEditor();
 
   const toggleEnabled = () => {
     updateFilter({
@@ -60,7 +60,7 @@ const RegexFilter: Component<RegexFilterProps> = (props) => {
             <MaterialSymbol symbol='edit' color='yellow' size='alt' interactive class={style.commandButton} />
           </TemplateButton>
 
-          <TemplateButton>
+          <TemplateButton onClick={() => removeFilter(props.filter)}>
             <MaterialSymbol symbol='delete' color='red' size='alt' interactive class={style.commandButton} />
           </TemplateButton>
         </div>
