@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { DeleteRegexFilterReqBody, PatchRegexFilterReqBody, PostRegexFilterReqBody, RegexFilter } from '#types/api/filters';
 import { LimitOffsetPaginationState } from '#server/middlewares/pagination';
+import { Bot } from '#bot/Bot';
 
 
 export const regexFilterExtension = Prisma.defineExtension((client) => {
@@ -60,6 +61,8 @@ export const regexFilterExtension = Prisma.defineExtension((client) => {
             },
           });
 
+          await Bot.updateChannelRegexFilter(channelId, result);
+
           return result;
         },
         async updateFromApi(channelId: string, regexFilter: PatchRegexFilterReqBody) {
@@ -70,12 +73,16 @@ export const regexFilterExtension = Prisma.defineExtension((client) => {
             },
           });
 
+          await Bot.updateChannelRegexFilter(channelId, result);
+
           return result;
         },
         async deleteFromApi(channelId: string, regexFilter: DeleteRegexFilterReqBody) {
           const result = await Prisma.getExtensionContext(this).delete({
             where: { id: regexFilter.id, chanelUserId: channelId },
           });
+
+          await Bot.deleteChannelRegexFilter(channelId, result.id);
 
           return result;
         },

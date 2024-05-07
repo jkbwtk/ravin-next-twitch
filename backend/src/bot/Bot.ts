@@ -10,6 +10,7 @@ import { logger } from '#lib/logger';
 import { Wirable } from '#lib/autowire';
 import { SocketServer } from '#server/SocketServer';
 import { ExtendedCron } from '#lib/ExtendedCron';
+import { PhraseFilter, RegexFilter } from '@prisma/client';
 
 
 export interface BotOptions {
@@ -347,6 +348,54 @@ export class Bot {
     }
 
     await channelThread.commandTimerHandler.syncCommandTimers();
+  }
+
+  public static async updateChannelPhraseFilter(channelId: string, filter: PhraseFilter): Promise<void> {
+    const channel = await prisma.channel.getByUserIdOrFail(channelId);
+    const channelThread = Bot.getChannelThread(channel.user.login);
+
+    if (!channelThread) {
+      logger.warn('Channel thread for [%s] not found', channel.user.login, { label: ['Bot', 'updateChannelPhraseFilter'] });
+      return;
+    }
+
+    channelThread.phraseFilterHandler.updateFilter(filter);
+  }
+
+  public static async updateChannelRegexFilter(channelId: string, filter: RegexFilter): Promise<void> {
+    const channel = await prisma.channel.getByUserIdOrFail(channelId);
+    const channelThread = Bot.getChannelThread(channel.user.login);
+
+    if (!channelThread) {
+      logger.warn('Channel thread for [%s] not found', channel.user.login, { label: ['Bot', 'updateChannelRegexFilter'] });
+      return;
+    }
+
+    channelThread.regexFilterHandler.updateFilter(filter);
+  }
+
+  public static async deleteChannelPhraseFilter(channelId: string, filterId: number): Promise<void> {
+    const channel = await prisma.channel.getByUserIdOrFail(channelId);
+    const channelThread = Bot.getChannelThread(channel.user.login);
+
+    if (!channelThread) {
+      logger.warn('Channel thread for [%s] not found', channel.user.login, { label: ['Bot', 'deleteChannelPhraseFilter'] });
+      return;
+    }
+
+    channelThread.phraseFilterHandler.deleteFilter(filterId);
+  }
+
+  public static async deleteChannelRegexFilter(channelId: string, filterId: number): Promise<void> {
+    const channel = await prisma.channel.getByUserIdOrFail(channelId);
+    const channelThread = Bot.getChannelThread(channel.user.login);
+
+    if (!channelThread) {
+      logger.warn('Channel thread for [%s] not found', channel.user.login, { label: ['Bot', 'deleteChannelRegexFilter'] });
+      return;
+    }
+
+    channelThread.regexFilterHandler.deleteFilter(filterId);
   }
 
   public async destroy(): Promise<void> {

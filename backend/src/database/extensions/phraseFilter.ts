@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { DeletePhraseFilterReqBody, PatchPhraseFilterReqBody, PhraseFilter, PostPhraseFilterReqBody } from '#types/api/filters';
 import { LimitOffsetPaginationState } from '#server/middlewares/pagination';
+import { Bot } from '#bot/Bot';
 
 
 export const phraseFilterExtension = Prisma.defineExtension((client) => {
@@ -64,6 +65,8 @@ export const phraseFilterExtension = Prisma.defineExtension((client) => {
             },
           });
 
+          await Bot.updateChannelPhraseFilter(channelId, result);
+
           return result;
         },
         async updateFromApi(channelId: string, phraseFiler: PatchPhraseFilterReqBody) {
@@ -74,12 +77,16 @@ export const phraseFilterExtension = Prisma.defineExtension((client) => {
             },
           });
 
+          await Bot.updateChannelPhraseFilter(channelId, result);
+
           return result;
         },
         async deleteFromApi(channelId: string, phraseFiler: DeletePhraseFilterReqBody) {
           const result = await Prisma.getExtensionContext(this).delete({
             where: { id: phraseFiler.id, chanelUserId: channelId },
           });
+
+          await Bot.deleteChannelPhraseFilter(channelId, result.id);
 
           return result;
         },

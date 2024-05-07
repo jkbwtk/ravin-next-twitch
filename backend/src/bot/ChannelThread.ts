@@ -12,6 +12,8 @@ import { MessageWithUser } from '#database/extensions/message';
 import { AutoWirable, ClassInstance, Wirable } from '#lib/autowire';
 import { CommandTimerHandler } from '#bot/handlers/CommandTimerHandler';
 import { Isolate } from 'isolated-vm';
+import { RegexFilterHandler } from '#bot/handlers/RegexFilterHandler';
+import { PhraseFilterHandler } from '#bot/handlers/PhraseFilterHandler';
 
 
 export type ChannelThreadOptions = {
@@ -26,6 +28,8 @@ export class ChannelThread implements AutoWirable {
   public chantHandler: ChantHandler;
   public commandHandler: CommandHandler;
   public commandTimerHandler: CommandTimerHandler;
+  public phraseFilterHandler: PhraseFilterHandler;
+  public regexFilterHandler: RegexFilterHandler;
 
   @Wirable() private isolate: Isolate;
 
@@ -45,6 +49,8 @@ export class ChannelThread implements AutoWirable {
     this.chantHandler = new ChantHandler(this);
     this.commandHandler = new CommandHandler(this);
     this.commandTimerHandler = new CommandTimerHandler(this);
+    this.phraseFilterHandler = new PhraseFilterHandler(this);
+    this.regexFilterHandler = new RegexFilterHandler(this);
 
     this.isolate = new Isolate({ memoryLimit: 32 });
 
@@ -55,6 +61,8 @@ export class ChannelThread implements AutoWirable {
     await this.startChatMemberSyncing();
     await this.commandHandler.init();
     await this.commandTimerHandler.init();
+    await this.phraseFilterHandler.init();
+    await this.regexFilterHandler.init();
   }
 
   public destroy(): void {
@@ -72,6 +80,8 @@ export class ChannelThread implements AutoWirable {
     await this.chantHandler.handleMessage(self, message);
     await this.commandHandler.handleMessage(self, message);
     await this.commandTimerHandler.processMessage(self, message);
+    await this.phraseFilterHandler.handleMessage(self, message);
+    await this.regexFilterHandler.handleMessage(self, message);
 
     this.messages.push(message.content);
   }
