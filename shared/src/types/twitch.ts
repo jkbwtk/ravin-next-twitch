@@ -333,3 +333,13 @@ export interface GetChatters {
   };
   total: number;
 }
+
+export type BanUsers = {
+  data: {
+    broadcaster_id: string;
+    moderator_id: string;
+    user_id: string;
+    created_at: string;
+    ends_at: string | null;
+  } []
+};

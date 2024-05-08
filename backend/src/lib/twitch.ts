@@ -10,6 +10,7 @@ import {
   TooManyParameters,
 } from '#lib/twitchErrors';
 import {
+  BanUsers,
   GetChatters,
   GetTwitchModerators,
   GetTwitchUsers,
@@ -302,3 +303,60 @@ export async function getChattersUnsafe(userId: string, first?: number, after?: 
 }
 
 export const getChatters: CloneFunction<typeof getChattersUnsafe> = async (...args) => requestGuardian({}, getChattersUnsafe, ...args);
+
+
+export async function deleteChatMessagesUnsafe(userId: string, messageId?: string): Promise<void> {
+  try {
+    const token = await prisma.token.getByUserIdOrFail(userId);
+
+    await twitch.request({
+      method: 'DELETE',
+      url: 'moderation/chat',
+      headers: {
+        'Client-ID': await Config.getOrFail('twitchClientId'),
+        Authorization: `Bearer ${token.accessToken}`,
+      },
+      params: {
+        broadcaster_id: token.user.id,
+        moderator_id: token.user.id,
+        message_id: messageId,
+      },
+    });
+  } catch (error) {
+    throw errorConverter(error);
+  }
+}
+
+export const deleteChatMessages: CloneFunction<typeof deleteChatMessagesUnsafe> = async (...args) => requestGuardian({}, deleteChatMessagesUnsafe, ...args);
+
+
+export async function banUserUnsafe(userId: string, targetId: string, duration?: number): Promise<BanUsers> {
+  try {
+    const token = await prisma.token.getByUserIdOrFail(userId);
+
+    const response = await twitch.request<BanUsers>({
+      method: 'POST',
+      url: 'moderation/bans',
+      headers: {
+        'Client-ID': await Config.getOrFail('twitchClientId'),
+        Authorization: `Bearer ${token.accessToken}`,
+      },
+      params: {
+        broadcaster_id: token.user.id,
+        moderator_id: token.user.id,
+      },
+      data: {
+        data: {
+          user_id: targetId,
+          duration,
+        },
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    throw errorConverter(error);
+  }
+}
+
+export const banUser: CloneFunction<typeof banUserUnsafe> = async (...args) => requestGuardian({}, banUserUnsafe, ...args);
