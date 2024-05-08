@@ -84,6 +84,10 @@ export class PhraseFilterHandler implements AutoWirable {
     const phrase = filter.caseSensitive ? message : message.toLowerCase();
     const filterPhrase = filter.caseSensitive ? filter.phrase : filter.phrase.toLowerCase();
 
+    if (filter.similarity === 100) {
+      return phrase.includes(filterPhrase) ? { filter, match: filterPhrase, similarity: 100 } : null;
+    }
+
     const similarity = this.getSimilarity(phrase, filterPhrase);
 
     if (similarity >= filter.similarity) {
