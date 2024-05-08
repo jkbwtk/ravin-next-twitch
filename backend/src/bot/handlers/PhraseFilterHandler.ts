@@ -3,6 +3,7 @@ import { prisma } from '#database/database';
 import { MessageWithUser } from '#database/extensions/message';
 import { ExtendedMap } from '#lib/ExtendedMap';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
+import { banUser, deleteChatMessages } from '#lib/twitch';
 import { UserLevel } from '#shared/types/api/commands';
 import { Actions } from '#shared/types/api/filters';
 import { PhraseFilter } from '@prisma/client';
@@ -31,8 +32,14 @@ export class PhraseFilterHandler implements AutoWirable {
     await this.syncFilters();
   }
 
-  public async handleMessage(self: boolean, message: MessageWithUser): Promise<void> {
-    if (self || message.getUserLevel() < UserLevel.Moderator) return;
+  /**
+   * Handles a message by checking it against all filters.
+   * @param {boolean} self
+   * @param {MessageWithUser} message
+   * @return {boolean} Returns true if message was handled.
+   */
+  public async handleMessage(self: boolean, message: MessageWithUser): Promise<boolean> {
+    if (self || message.getUserLevel() > UserLevel.Moderator) return false;
 
     const matches = this.getMatches(message.content).toSorted((a, b) => {
       if (a.filter.action === b.filter.action) return a.filter.actionDuration - b.filter.actionDuration;
@@ -40,21 +47,24 @@ export class PhraseFilterHandler implements AutoWirable {
     });
 
     const priorityMatch = matches.at(0);
-    if (priorityMatch === undefined) return;
+    if (priorityMatch === undefined) return false;
 
+    console.log(`Matched phrase filter: ${priorityMatch.filter.phrase} (${priorityMatch.similarity})`);
     switch (priorityMatch.filter.action) {
       case Actions.Delete:
-        await this.client.deletemessage(message.channelName, message.uuid);
+        await deleteChatMessages(this.channelThread.channel.user.id, message.uuid);
         break;
 
       case Actions.Timeout:
-        await this.client.timeout(message.channelName, message.username, priorityMatch.filter.actionDuration);
+        await banUser(this.channelThread.channel.user.id, message.userId, priorityMatch.filter.actionDuration);
         break;
 
       case Actions.Ban:
-        await this.client.ban(message.channelName, message.username);
+        await banUser(this.channelThread.channel.user.id, message.userId);
         break;
     }
+
+    return true;
   }
 
   private getMatches(message: string): PhraseMatch[] {

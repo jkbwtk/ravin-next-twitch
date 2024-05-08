@@ -80,8 +80,11 @@ export class ChannelThread implements AutoWirable {
     await this.chantHandler.handleMessage(self, message);
     await this.commandHandler.handleMessage(self, message);
     await this.commandTimerHandler.processMessage(self, message);
-    await this.phraseFilterHandler.handleMessage(self, message);
-    await this.regexFilterHandler.handleMessage(self, message);
+
+    // Handle phrase filters first, if it returns false, handle regex filters
+    if (await this.phraseFilterHandler.handleMessage(self, message) === false) {
+      await this.regexFilterHandler.handleMessage(self, message);
+    }
 
     this.messages.push(message.content);
   }
