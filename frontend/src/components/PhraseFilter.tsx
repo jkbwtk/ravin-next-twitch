@@ -24,20 +24,29 @@ const PhraseFilter: Component<PhraseFilterProps> = (props) => {
     });
   };
 
+  const toggleCaseSensitive = () => {
+    updateFilter({
+      id: props.filter.id,
+      caseSensitive: !props.filter.caseSensitive,
+    });
+  };
+
   return (
     <TableRow>
       <TableCell>{props.filter.phrase}</TableCell>
       <TableCell align='right'>{props.filter.similarity}%</TableCell>
       <TableCell align='right' class={props.tableType > TableType.Full ? style.disabled : ''}>
         <div class={style.actionsContainer}>
-          <Switch>
-            <Match when={props.filter.caseSensitive}>
-              <MaterialSymbol symbol='check' color='green' />
-            </Match>
-            <Match when={!props.filter.caseSensitive}>
-              <MaterialSymbol symbol='close' color='gray' />
-            </Match>
-          </Switch>
+          <TemplateButton onClick={toggleCaseSensitive}>
+            <Switch>
+              <Match when={props.filter.caseSensitive}>
+                <MaterialSymbol symbol='check' color='green' interactive />
+              </Match>
+              <Match when={!props.filter.caseSensitive}>
+                <MaterialSymbol symbol='close' color='gray' interactive />
+              </Match>
+            </Switch>
+          </TemplateButton>
         </div>
       </TableCell>
       <TableCell align='center'>
