@@ -84,12 +84,14 @@ export class PhraseFilterHandler implements AutoWirable {
     let phrase = filter.caseSensitive ? message : message.toLowerCase();
     let filterPhrase = filter.caseSensitive ? filter.phrase : filter.phrase.toLowerCase();
 
+    if (filter.ignoreWhitespace) {
+      phrase = phrase.replace(/\s+/g, '');
+      filterPhrase = filterPhrase.replace(/\s+/g, '');
+    }
+
     if (filter.similarity === 100) {
       return phrase.includes(filterPhrase) ? { filter, match: filterPhrase, similarity: 100 } : null;
     }
-
-    phrase = phrase.replace(/\s+/g, '');
-    filterPhrase = filterPhrase.replace(/\s+/g, '');
 
     let bestMatch: PhraseMatch | null = null;
     let head = 0;

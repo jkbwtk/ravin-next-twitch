@@ -179,6 +179,7 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
 
     const phrase = ev.target.elements.namedItem('phrase') as HTMLInputElement;
     const caseSensitive = ev.target.elements.namedItem('caseSensitive') as HTMLInputElement;
+    const ignoreWhitespace = ev.target.elements.namedItem('ignoreWhitespace') as HTMLInputElement;
     const similarity = ev.target.elements.namedItem('similarity') as HTMLInputElement;
     const action = ev.target.elements.namedItem('action') as HTMLInputElement;
     const actionDuration = ev.target.elements.namedItem('actionDuration') as HTMLInputElement;
@@ -190,6 +191,7 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
         id: state.filter.id,
         phrase: phrase.value,
         caseSensitive: caseSensitive.checked,
+        ignoreWhitespace: ignoreWhitespace.checked,
         similarity: parseInt(similarity.value),
         action: parseInt(action.value),
         actionDuration: parseInt(actionDuration.value),
@@ -198,6 +200,7 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
       await createFilter({
         phrase: phrase.value,
         caseSensitive: caseSensitive.checked,
+        ignoreWhitespace: ignoreWhitespace.checked,
         similarity: parseInt(similarity.value),
         action: parseInt(action.value),
         actionDuration: parseInt(actionDuration.value),
@@ -271,6 +274,19 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
 
             <div class={style.description}>
                       Controls whether the phrase is case sensitive.
+            </div>
+          </div>
+
+          <div class={style.group}>
+            <InputCheckbox
+              id='ignoreWhitespace'
+              name='ignoreWhitespace'
+              label='Ignore Whitespace'
+              checked={state.filter.ignoreWhitespace ?? false}
+            />
+
+            <div class={style.description}>
+                      Controls whether whitespace is ignored when comparing the phrase.
             </div>
           </div>
 

@@ -81,15 +81,16 @@ model Command {
 }
 
 model PhraseFilter {
-  id             Int     @id() @default(autoincrement())
-  phrase         String  @db.VarChar
-  caseSensitive  Boolean @default(false)
-  similarity     Int     @default(0)
+  id               Int     @id() @default(autoincrement())
+  phrase           String  @db.VarChar
+  caseSensitive    Boolean @default(false)
+  ignoreWhitespace Boolean @default(false)
+  similarity       Int     @default(0)
   // [FilterActions]
-  action         Int     @default(0)
-  actionDuration Int     @default(10)
-  reason         String?
-  enabled        Boolean @default(true)
+  action           Int     @default(0)
+  actionDuration   Int     @default(10)
+  reason           String?
+  enabled          Boolean @default(true)
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @default(now())

@@ -118,6 +118,9 @@ const PhraseFiltersTable: Component = () => {
                   <TableCell align='center' class={style.minWidthColumn} classList={{
                     [style.disabled]: tableType() > TableType.Full,
                   }}>Case Sensitive</TableCell>
+                  <TableCell align='center' class={style.minWidthColumn} classList={{
+                    [style.disabled]: tableType() > TableType.Full,
+                  }}>Ignore Whitespace</TableCell>
                   <TableCell align='center'>Action</TableCell>
                   <TableCell align='center' classList={{
                     [style.disabled]: tableType() > TableType.Compact,

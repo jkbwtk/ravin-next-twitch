@@ -17,6 +17,7 @@ export const PhraseFilter = z.object({
   id: z.number().int().positive(),
   phrase: z.string().min(1),
   caseSensitive: z.boolean(),
+  ignoreWhitespace: z.boolean(),
   similarity: z.number().int().min(0).max(100),
   action: FilterActions,
   actionDuration: z.number().int().positive().default(10),

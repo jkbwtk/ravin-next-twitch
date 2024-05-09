@@ -31,6 +31,13 @@ const PhraseFilter: Component<PhraseFilterProps> = (props) => {
     });
   };
 
+  const toggleIgnoreWhitespace = () => {
+    updateFilter({
+      id: props.filter.id,
+      ignoreWhitespace: !props.filter.ignoreWhitespace,
+    });
+  };
+
   return (
     <TableRow>
       <TableCell>{props.filter.phrase}</TableCell>
@@ -43,6 +50,20 @@ const PhraseFilter: Component<PhraseFilterProps> = (props) => {
                 <MaterialSymbol symbol='check' color='green' interactive />
               </Match>
               <Match when={!props.filter.caseSensitive}>
+                <MaterialSymbol symbol='close' color='gray' interactive />
+              </Match>
+            </Switch>
+          </TemplateButton>
+        </div>
+      </TableCell>
+      <TableCell align='right' class={props.tableType > TableType.Full ? style.disabled : ''}>
+        <div class={style.actionsContainer}>
+          <TemplateButton onClick={toggleIgnoreWhitespace}>
+            <Switch>
+              <Match when={props.filter.ignoreWhitespace}>
+                <MaterialSymbol symbol='check' color='green' interactive />
+              </Match>
+              <Match when={!props.filter.ignoreWhitespace}>
                 <MaterialSymbol symbol='close' color='gray' interactive />
               </Match>
             </Switch>
