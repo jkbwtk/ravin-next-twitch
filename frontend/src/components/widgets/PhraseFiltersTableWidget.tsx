@@ -68,8 +68,8 @@ const PhraseFiltersTable: Component = () => {
   const handleResize = () => {
     const width = tableRef.scrollWidth;
 
-    if (width > 800) return setTableType(TableType.Full);
-    if (width > 600) return setTableType(TableType.Compact);
+    if (width > 1100) return setTableType(TableType.Full);
+    if (width > 800) return setTableType(TableType.Compact);
     return setTableType(TableType.Mobile);
   };
 
@@ -109,8 +109,8 @@ const PhraseFiltersTable: Component = () => {
         <Paginator page={[page, setPage]} limit={[limit, setLimit]} total={() => filters().total} />
 
         <Suspense fallback={<FetchFallback class={style.fallback}>Fetching Filters</FetchFallback>}>
-          <TableContainer ref={tableRef} class={style.commandsContainer} component={Paper}>
-            <Table stickyHeader>
+          <TableContainer class={style.commandsContainer} component={Paper}>
+            <Table ref={tableRef} stickyHeader>
               <TableHead >
                 <TableRow>
                   <TableCell align='center'>Phrase</TableCell>
