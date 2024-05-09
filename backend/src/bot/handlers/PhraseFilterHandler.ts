@@ -81,25 +81,72 @@ export class PhraseFilterHandler implements AutoWirable {
   }
 
   private matchPhrases(message: string, filter: PhraseFilter): PhraseMatch | null {
-    const phrase = filter.caseSensitive ? message : message.toLowerCase();
-    const filterPhrase = filter.caseSensitive ? filter.phrase : filter.phrase.toLowerCase();
+    let phrase = filter.caseSensitive ? message : message.toLowerCase();
+    let filterPhrase = filter.caseSensitive ? filter.phrase : filter.phrase.toLowerCase();
 
     if (filter.similarity === 100) {
       return phrase.includes(filterPhrase) ? { filter, match: filterPhrase, similarity: 100 } : null;
     }
 
-    const similarity = this.getSimilarity(phrase, filterPhrase);
+    phrase = phrase.replace(/\s+/g, '');
+    filterPhrase = filterPhrase.replace(/\s+/g, '');
 
-    if (similarity >= filter.similarity) {
-      return { filter, match: filterPhrase, similarity };
+    let bestMatch: PhraseMatch | null = null;
+    let head = 0;
+    let fragment = '';
+
+    while (head + filterPhrase.length <= phrase.length) {
+      fragment = phrase.slice(head, head + filterPhrase.length);
+      const similarity = this.getSimilarity(fragment, filterPhrase);
+      console.log(fragment, filterPhrase, similarity);
+
+      if (similarity >= filter.similarity && similarity > (bestMatch?.similarity ?? 0)) {
+        bestMatch = { filter, match: fragment, similarity };
+      }
+
+      head += 1;
     }
 
-    return null;
+    return bestMatch;
   }
 
-  // temporary implementation
   private getSimilarity(phrase: string, filter: string): number {
-    return phrase.includes(filter) ? 100 : 0;
+    const matrix: number[][] = [];
+
+    for (let i = 0; i <= phrase.length; i += 1) {
+      const row: number[] = [];
+
+      for (let j = 0; j <= filter.length; j += 1) {
+        if (i === 0) {
+          row.push(j);
+        } else if (j === 0) {
+          row.push(i);
+        } else {
+          row.push(0);
+        }
+      }
+
+      matrix.push(row);
+    }
+
+    for (let i = 0; i < phrase.length; i += 1) {
+      for (let j = 0; j < filter.length; j += 1) {
+        if (phrase[i] === filter[j]) {
+          matrix[i + 1]![j + 1] = matrix[i]![j]!;
+        } else {
+          matrix[i + 1]![j + 1] = Math.min(
+            matrix[i]![j]!,
+            matrix[i]![j + 1]!,
+            matrix[i + 1]![j]!,
+          ) + 1;
+        }
+      }
+    }
+
+    const length = (matrix[phrase.length] ?? [])[filter.length];
+
+    if (length === undefined) return 0;
+    return 100 * Math.max(0, filter.length - length) / filter.length;
   }
 
   public async syncFilters(): Promise<void> {
