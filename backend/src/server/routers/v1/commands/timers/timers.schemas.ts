@@ -34,7 +34,7 @@ export type PostCommandTimerSchema = z.infer<typeof PostCommandTimerSchema>;
 
 
 export const PatchCommandTimerSchema = z.object({
-  body: PatchCommandTimerReqBody.merge(CommandTimerCronValidatorMixin),
+  body: PatchCommandTimerReqBody.merge(CommandTimerCronValidatorMixin.partial()),
 });
 
 export type PatchCommandTimerSchema = z.infer<typeof PatchCommandTimerSchema>;
