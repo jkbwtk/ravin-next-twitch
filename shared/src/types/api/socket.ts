@@ -5,6 +5,7 @@ import { Message } from './logs';
 import { ScheduledJob } from 'types/api/admin';
 import { Template } from 'types/api/templates';
 import { PhraseFilter, RegexFilter } from 'types/api/filters';
+import { BotAction } from 'types/api/botActions';
 
 
 export type ServerToClientEvents = {
@@ -44,6 +45,8 @@ export type ServerToClientEvents = {
   DEL_REGEX_FILTER: (filterId: number) => void;
 
   UPD_SESSION: () => void;
+
+  NEW_BOT_ACTION: (action: BotAction) => void;
 };
 
 export type ClientToServerEvents = {
