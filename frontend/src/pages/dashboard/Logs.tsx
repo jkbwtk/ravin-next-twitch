@@ -1,5 +1,5 @@
 import DashboardInfoBar from '#components/DashboardInfoBar';
-import LogsWidget from '#components/widgets/LogsWidget';
+import BotActionsTableWidget from '#components/widgets/BotActionsTableWidget';
 
 import style from '#styles/dashboard/Logs.module.scss';
 
@@ -9,7 +9,7 @@ const Logs: RouteComponent = (props) => {
     <div class={style.container}>
       <DashboardInfoBar metadata={props.data?.metadata} />
       <div class={style.widgets}>
-        <LogsWidget />
+        <BotActionsTableWidget />
       </div>
     </div>
   );

@@ -110,7 +110,6 @@ export class PhraseFilterHandler implements AutoWirable {
     while (head + filterPhrase.length <= phrase.length) {
       fragment = phrase.slice(head, head + filterPhrase.length);
       const similarity = this.getSimilarity(fragment, filterPhrase);
-      console.log(fragment, filterPhrase, similarity);
 
       if (similarity >= filter.similarity && similarity > (bestMatch?.similarity ?? 0)) {
         bestMatch = { filter, match: fragment, similarity };
