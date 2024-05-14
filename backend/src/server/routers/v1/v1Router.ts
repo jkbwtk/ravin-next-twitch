@@ -10,6 +10,7 @@ import { createDashboardRouter } from '#server/routers/v1/dashboard/dashboard.ro
 import { createAuthRouter } from '#server/routers/v1/auth/auth.router';
 import { createTemplatesRouter } from '#server/routers/v1/templates/templates.router';
 import { createFiltersRouter } from '#server/routers/v1/filters/filters.router';
+import { createBotActionsRouter } from '#server/routers/v1/botActions/botActions.router';
 
 
 export const createV1Router = async (): Promise<Router> => {
@@ -36,6 +37,8 @@ export const createV1Router = async (): Promise<Router> => {
   v1Router.use('/templates', createTemplatesRouter());
 
   v1Router.use('/filters', createFiltersRouter());
+
+  v1Router.use('botActions', createBotActionsRouter());
 
   return v1Router;
 };

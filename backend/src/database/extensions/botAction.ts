@@ -55,6 +55,11 @@ export const botActionExtension = Prisma.defineExtension((client) => {
             ...pagination,
           });
         },
+        async countByChannelId(channelId: string) {
+          return Prisma.getExtensionContext(this).count({
+            where: { channelUserId: channelId },
+          });
+        },
 
         async createAndEmit<T extends BotActionType>(channelUserId: string, type: T, ...data: Parameters<BotActionTypeParams[T]>) {
           const result = await Prisma.getExtensionContext(this).create({
