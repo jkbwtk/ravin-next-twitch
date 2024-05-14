@@ -48,6 +48,7 @@ export const botActionExtension = Prisma.defineExtension((client) => {
         async getByChannelId(channelId: string, pagination: LimitOffsetPaginationState = null) {
           return Prisma.getExtensionContext(this).findMany({
             where: { channelUserId: channelId },
+            orderBy: { createdAt: 'desc' },
             include: {
               user: true,
             },

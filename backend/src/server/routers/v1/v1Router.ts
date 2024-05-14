@@ -38,7 +38,7 @@ export const createV1Router = async (): Promise<Router> => {
 
   v1Router.use('/filters', createFiltersRouter());
 
-  v1Router.use('botActions', createBotActionsRouter());
+  v1Router.use('/botActions', createBotActionsRouter());
 
   return v1Router;
 };
