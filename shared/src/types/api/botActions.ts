@@ -25,7 +25,7 @@ export enum BotActionType {
   CommandTimerExecuted = 400,
   CommandTimerExecutedCommand = 401,
   CommandTimerFailedError = 402,
-  CommandTimerFailedLines= 403,
+  CommandTimerFailedLines = 403,
 };
 
 
@@ -55,7 +55,7 @@ export type BotActionTypeParams = {
   [BotActionType.CommandTimerExecuted]: (timer: string, lines: number) => void;
   [BotActionType.CommandTimerExecutedCommand]: (timer: string, lines: number, userDisplayName: string) => void;
   [BotActionType.CommandTimerFailedError]: (timer: string, error: string) => void;
-  [BotActionType.CommandTimerFailedLines]: (timer: string, lanes: string) => void;
+  [BotActionType.CommandTimerFailedLines]: (timer: string, lines: number) => void;
 };
 
 export const BotActionData = z.array(z.coerce.string()).default([]);

@@ -1,8 +1,10 @@
 import { ChannelThread } from '#bot/ChannelThread';
+import { prisma } from '#database/database';
 import { MessageWithUser } from '#database/extensions/message';
 import ExtendedSet from '#lib/ExtendedSet';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { logger } from '#lib/logger';
+import { BotActionType } from '#shared/types/api/botActions';
 import { mergeOptions, RequiredDefaults } from '#shared/utils';
 import { Client } from 'tmi.js';
 
@@ -89,6 +91,13 @@ export class ChantHandler implements AutoWirable {
       await this.client.say(
         message.channelName,
         message.content,
+      );
+
+      await prisma.botAction.createAndEmit(
+        this.channelThread.channel.user.id,
+        BotActionType.ChantingDetected,
+        message.content,
+        this.chantParticipants.size,
       );
     } catch (err) {
       logger.error('Failed to send chant response', {

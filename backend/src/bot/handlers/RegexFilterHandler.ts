@@ -5,6 +5,7 @@ import { ExtendedMap } from '#lib/ExtendedMap';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { logger } from '#lib/logger';
 import { banUser, deleteChatMessages } from '#lib/twitch';
+import { BotActionType } from '#shared/types/api/botActions';
 import { UserLevel } from '#shared/types/api/commands';
 import { Actions, RegExpType } from '#shared/types/api/filters';
 import { RegexFilter } from '@prisma/client';
@@ -48,6 +49,15 @@ export class RegexFilterHandler implements AutoWirable {
 
     const priorityMatch = matches.at(0);
     if (priorityMatch === undefined) return false;
+
+    await prisma.botAction.createAndEmit(
+      this.channelThread.channel.user.id,
+      BotActionType.FilteredRegex,
+      priorityMatch.filter.regex,
+      priorityMatch.match,
+      message.displayName,
+      priorityMatch.filter.action,
+    );
 
     switch (priorityMatch.filter.action) {
       case Actions.Delete:

@@ -25,7 +25,7 @@ export class CommandTimerHandler implements AutoWirable {
 
   public async processMessage(self: boolean, message: MessageWithUser): Promise<void> {
     for (const commandTimer of this.commandTimers.values()) {
-      commandTimer.processMessage(self, message);
+      await commandTimer.processMessage(self, message);
     }
   }
 

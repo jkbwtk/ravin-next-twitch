@@ -56,7 +56,7 @@ export const botActionExtension = Prisma.defineExtension((client) => {
           });
         },
 
-        async register<T extends BotActionType>(channelUserId: string, type: T, ...data: Parameters<BotActionTypeParams[T]>) {
+        async createAndEmit<T extends BotActionType>(channelUserId: string, type: T, ...data: Parameters<BotActionTypeParams[T]>) {
           const result = await Prisma.getExtensionContext(this).create({
             data: {
               channelUserId,

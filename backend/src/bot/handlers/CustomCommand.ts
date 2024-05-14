@@ -7,6 +7,7 @@ import { Template } from '#database/extensions/template';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { logger } from '#lib/logger';
 import { SocketServer } from '#server/SocketServer';
+import { BotActionType } from '#shared/types/api/botActions';
 import { CustomCommandState } from '#shared/types/api/commands';
 import { Isolate } from 'isolated-vm';
 import { Client } from 'tmi.js';
@@ -32,39 +33,82 @@ export class CustomCommand implements AutoWirable {
   public async execute(self: boolean, message: MessageWithUser): Promise<void> {
     if (self) return;
 
-    if (
-      this.command.enabled &&
-      Date.now() - this.lastUsed >= this.command.cooldown * 1000 &&
-      message.getUserLevel() >= this.command.userLevel
-    ) {
-      const response = await this.templateRunner.run({
-        channel: this.channelThread.channel.user.displayName,
-        args: message.content.replace(this.command.command, '').trim(),
-        user: message.displayName,
-        username: message.username,
-      });
+    if (!this.command.enabled) {
+      await prisma.botAction.createAndEmit(
+        this.channelThread.channel.user.id,
+        BotActionType.CustomCommandFailedDisabled,
+        this.command.command,
+        message.displayName,
+      );
 
-      if (response === null) {
-        logger.warn('Failed to execute template for command %s in #%s', this.command.command, this.command.user.login, {
-          label: ['CustomCommand', 'execute'],
-        });
-
-        return;
-      }
-
-      await this.client.say(message.channelName, response);
-      await prisma.channelStats.incrementCommands(this.channelThread.channel.user.id);
-      await prisma.command.incrementUsage(this.command.id);
-
-      this.lastUsed = Date.now();
-      this.lastUsedBy = message.displayName;
-
-      SocketServer.emitToUser(this.channelThread.channel.user.id, 'COMMAND_EXECUTED', {
-        command: this.command.serialize(),
-        lastUsed: this.lastUsed,
-        lastUsedBy: this.lastUsedBy,
-      });
+      return;
     }
+
+    if (message.getUserLevel() < this.command.userLevel) {
+      await prisma.botAction.createAndEmit(
+        this.channelThread.channel.user.id,
+        BotActionType.CustomCommandFailedUserLevel,
+        this.command.command,
+        message.displayName,
+        message.getUserLevel(),
+      );
+
+      return;
+    }
+
+    if (Date.now() - this.lastUsed < this.command.cooldown * 1000) {
+      await prisma.botAction.createAndEmit(
+        this.channelThread.channel.user.id,
+        BotActionType.CustomCommandFailedCooldown,
+        this.command.command,
+        message.displayName,
+      );
+
+      return;
+    }
+
+    const response = await this.templateRunner.run({
+      channel: this.channelThread.channel.user.displayName,
+      args: message.content.replace(this.command.command, '').trim(),
+      user: message.displayName,
+      username: message.username,
+    });
+
+    if (response === null) {
+      logger.warn('Failed to execute template for command %s in #%s', this.command.command, this.command.user.login, {
+        label: ['CustomCommand', 'execute'],
+      });
+
+      await prisma.botAction.createAndEmit(
+        this.channelThread.channel.user.id,
+        BotActionType.CustomCommandFailedError,
+        this.command.command,
+        message.displayName,
+        'Failed to execute template',
+      );
+
+      return;
+    }
+
+    await this.client.say(message.channelName, response);
+    await prisma.channelStats.incrementCommands(this.channelThread.channel.user.id);
+    await prisma.command.incrementUsage(this.command.id);
+
+    this.lastUsed = Date.now();
+    this.lastUsedBy = message.displayName;
+
+    SocketServer.emitToUser(this.channelThread.channel.user.id, 'COMMAND_EXECUTED', {
+      command: this.command.serialize(),
+      lastUsed: this.lastUsed,
+      lastUsedBy: this.lastUsedBy,
+    });
+
+    await prisma.botAction.createAndEmit(
+      this.channelThread.channel.user.id,
+      BotActionType.CustomCommandExecuted,
+      this.command.command,
+      message.displayName,
+    );
   }
 
   public getState(): CustomCommandState {

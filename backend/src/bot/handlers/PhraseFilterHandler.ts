@@ -4,6 +4,7 @@ import { MessageWithUser } from '#database/extensions/message';
 import { ExtendedMap } from '#lib/ExtendedMap';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { banUser, deleteChatMessages } from '#lib/twitch';
+import { BotActionType } from '#shared/types/api/botActions';
 import { UserLevel } from '#shared/types/api/commands';
 import { Actions } from '#shared/types/api/filters';
 import { PhraseFilter } from '@prisma/client';
@@ -49,7 +50,16 @@ export class PhraseFilterHandler implements AutoWirable {
     const priorityMatch = matches.at(0);
     if (priorityMatch === undefined) return false;
 
-    console.log(`Matched phrase filter: ${priorityMatch.filter.phrase} (${priorityMatch.similarity})`);
+    await prisma.botAction.createAndEmit(
+      this.channelThread.channel.user.id,
+      BotActionType.FilteredPhrase,
+      priorityMatch.filter.phrase,
+      priorityMatch.match,
+      priorityMatch.similarity,
+      message.displayName,
+      priorityMatch.filter.action,
+    );
+
     switch (priorityMatch.filter.action) {
       case Actions.Delete:
         await deleteChatMessages(this.channelThread.channel.user.id, message.uuid);

@@ -11,6 +11,7 @@ import { Wirable } from '#lib/autowire';
 import { SocketServer } from '#server/SocketServer';
 import { ExtendedCron } from '#lib/ExtendedCron';
 import { PhraseFilter, RegexFilter } from '@prisma/client';
+import { BotActionType } from '#shared/types/api/botActions';
 
 
 export interface BotOptions {
@@ -273,6 +274,7 @@ export class Bot {
       logger.debug('Joining channel [%s]', channel.user.login, { label: ['Bot', 'joinChannel'] });
       await Bot.waitForConnection();
       await instance.client.join(channel.user.login);
+      await prisma.botAction.createAndEmit(id, BotActionType.ChannelJoined);
       logger.debug('Joined channel [%s]', channel.user.login, { label: ['Bot', 'joinChannel'] });
 
       return true;
@@ -298,6 +300,7 @@ export class Bot {
       instance.channels.get(channel.user.login)?.destroy();
       instance.channels.delete(channel.user.login);
       await instance.client.part(channel.user.login);
+      await prisma.botAction.createAndEmit(id, BotActionType.ChannelLeft);
       logger.debug('Left channel [%s]', channel.user.login, { label: ['Bot', 'leaveChannel'] });
 
       return true;

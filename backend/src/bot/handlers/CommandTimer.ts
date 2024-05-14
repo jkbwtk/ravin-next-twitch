@@ -1,5 +1,6 @@
 import { ChannelThread } from '#bot/ChannelThread';
 import { TemplateRunner } from '#bot/templates/TemplateRunner';
+import { prisma } from '#database/database';
 import { CommandTimerWithUser } from '#database/extensions/commandTimer';
 import { MessageWithUser } from '#database/extensions/message';
 import { Template } from '#database/extensions/template';
@@ -7,6 +8,7 @@ import { ExtendedCron } from '#lib/ExtendedCron';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { logger } from '#lib/logger';
 import { SocketServer } from '#server/SocketServer';
+import { BotActionType } from '#shared/types/api/botActions';
 import { CommandTimerState, UserLevel } from '#shared/types/api/commands';
 import { Isolate } from 'isolated-vm';
 import { Client } from 'tmi.js';
@@ -43,10 +45,26 @@ export class CommandTimer implements AutoWirable {
   private processTimer = async (self: ExtendedCron): Promise<void> => {
     if (this.messageCounter < this.timer.lines) {
       self.pause('Not enough messages');
+
+      await prisma.botAction.createAndEmit(
+        this.channelThread.channel.user.id,
+        BotActionType.CommandTimerFailedLines,
+        this.timer.name,
+        this.messageCounter,
+      );
+
       return;
     }
 
     await this.execute();
+
+    await prisma.botAction.createAndEmit(
+      this.channelThread.channel.user.id,
+      BotActionType.CommandTimerExecuted,
+      this.timer.name,
+      this.messageCounter,
+    );
+
     this.messageCounter = 0;
   };
 
@@ -57,8 +75,15 @@ export class CommandTimer implements AutoWirable {
 
     if (response === null) {
       logger.warn('Failed to execute template for command timer %s in #%s', this.timer.name, this.timer.user.login, {
-        label: ['CustomCommand', 'execute'],
+        label: ['CommandTimer', 'execute'],
       });
+
+      await prisma.botAction.createAndEmit(
+        this.channelThread.channel.user.id,
+        BotActionType.CommandTimerFailedError,
+        this.timer.name,
+        'Failed to execute template',
+      );
 
       return;
     }
@@ -68,7 +93,7 @@ export class CommandTimer implements AutoWirable {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public processMessage(self: boolean, message: MessageWithUser): void {
+  public async processMessage(self: boolean, message: MessageWithUser): Promise<void> {
     if (self) return;
 
     if (
@@ -80,7 +105,15 @@ export class CommandTimer implements AutoWirable {
       this.lastUsedBy = message.displayName ?? 'Chat Member';
       this.messageCounter = 0;
 
-      this.execute();
+      await this.execute();
+
+      await prisma.botAction.createAndEmit(
+        this.channelThread.channel.user.id,
+        BotActionType.CommandTimerExecutedCommand,
+        this.timer.name,
+        this.messageCounter,
+        message.displayName,
+      );
 
       return;
     }
