@@ -35,10 +35,10 @@ export type BotActionTypes = z.infer<typeof BotActionTypes>;
 
 
 export type BotActionTypeParams = {
-  [BotActionType.Unknown]: () => void;
+  [BotActionType.Unknown]: (...data: Array<string | number>) => void;
 
-  [BotActionType.ChannelJoined]: () => void;
-  [BotActionType.ChannelLeft]: () => void;
+  [BotActionType.ChannelJoined]: (userDisplayName: string) => void;
+  [BotActionType.ChannelLeft]: (userDisplayName: string) => void;
 
   [BotActionType.CustomCommandExecuted]: (command: string, userDisplayName: string) => void;
 

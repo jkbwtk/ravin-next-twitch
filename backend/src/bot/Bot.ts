@@ -274,7 +274,7 @@ export class Bot {
       logger.debug('Joining channel [%s]', channel.user.login, { label: ['Bot', 'joinChannel'] });
       await Bot.waitForConnection();
       await instance.client.join(channel.user.login);
-      await prisma.botAction.createAndEmit(id, BotActionType.ChannelJoined);
+      await prisma.botAction.createAndEmit(id, BotActionType.ChannelJoined, channel.user.displayName);
       logger.debug('Joined channel [%s]', channel.user.login, { label: ['Bot', 'joinChannel'] });
 
       return true;
@@ -300,7 +300,7 @@ export class Bot {
       instance.channels.get(channel.user.login)?.destroy();
       instance.channels.delete(channel.user.login);
       await instance.client.part(channel.user.login);
-      await prisma.botAction.createAndEmit(id, BotActionType.ChannelLeft);
+      await prisma.botAction.createAndEmit(id, BotActionType.ChannelLeft, channel.user.displayName);
       logger.debug('Left channel [%s]', channel.user.login, { label: ['Bot', 'leaveChannel'] });
 
       return true;
