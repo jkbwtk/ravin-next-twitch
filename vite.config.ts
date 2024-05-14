@@ -45,6 +45,7 @@ export default defineConfig({
       { find: '#lib', replacement: resolve(frontendDevelopmentPath, 'src/lib') },
       { find: '#providers', replacement: resolve(frontendDevelopmentPath, 'src/providers') },
       { find: '#routers', replacement: resolve(frontendDevelopmentPath, 'src/routers') },
+      { find: '#locales', replacement: resolve(frontendDevelopmentPath, 'src/locales') },
     ],
   },
 
