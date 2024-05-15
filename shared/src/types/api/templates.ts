@@ -6,19 +6,6 @@ export const TemplateEnvironments = z.enum(['generic', 'command', 'timer']);
 export type TemplateEnvironments = z.infer<typeof TemplateEnvironments>;
 
 
-export const environmentNameMap: Record<TemplateEnvironments, string> = {
-  generic: 'Generic',
-  command: 'Command',
-  timer: 'Command Timer',
-};
-
-export const environmentAbbreviationMap: Record<TemplateEnvironments, string> = {
-  generic: 'Gen',
-  command: 'Cmd',
-  timer: 'Tim',
-};
-
-
 export const Template = z.object({
   id: z.number().int().positive(),
   name: z.string().min(3),

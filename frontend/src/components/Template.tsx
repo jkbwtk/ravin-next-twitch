@@ -2,10 +2,11 @@ import MaterialSymbol from '#components/MaterialSymbol';
 import TemplateButton from '#components/TemplateButton';
 import TableRow from '@suid/material/TableRow/TableRow';
 import TableCell from '@suid/material/TableCell/TableCell';
-import { environmentAbbreviationMap, Template as TemplateType } from '#shared/types/api/templates';
+import { Template as TemplateType } from '#shared/types/api/templates';
 import HighlightedCode from '#components/HighlightedCode';
 import { For } from 'solid-js';
 import Pill from '#components/Pill';
+import { templateEnvironmentAbbreviations } from '#locales/en-us/templates';
 
 import style from '#styles/widgets/TableWidget.module.scss';
 
@@ -27,7 +28,7 @@ const Template: Component<TemplateProps> = (props) => {
       <TableCell align='center'>
         <div class={style.pillContainer}>
           <For each={props.template.environments}>
-            {(env) => <Pill class={style.pill} content={environmentAbbreviationMap[env] ?? env.slice(0, 3)} />}
+            {(env) => <Pill class={style.pill} content={templateEnvironmentAbbreviations.get(env)} />}
           </For>
         </div>
       </TableCell>

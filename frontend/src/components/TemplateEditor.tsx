@@ -6,7 +6,7 @@ import Modal from '#components/Modal';
 import TextArea from '#components/TextArea';
 import { makeRequest } from '#lib/fetch';
 import { useNotification } from '#providers/NotificationProvider';
-import { environmentNameMap, PatchTemplateReqBody, PostTemplateReqBody, Template, TestTemplateResponse } from '#shared/types/api/templates';
+import { PatchTemplateReqBody, PostTemplateReqBody, Template, TestTemplateResponse } from '#shared/types/api/templates';
 import { createResource, createSignal, ErrorBoundary, Index, Show } from 'solid-js';
 import { Debounce } from '#shared/Debounce';
 import Stack from '@suid/material/Stack/Stack';
@@ -16,6 +16,7 @@ import MaterialSymbol from '#components/MaterialSymbol';
 import Pill from '#components/Pill';
 import { useTemplates } from '#providers/TemplatesProvider';
 import { useErrorHandlers } from '#providers/ErrorHandlersProvider';
+import { templateEnvironments } from '#locales/en-us/templates';
 
 import style from '#styles/TemplateEditor.module.scss';
 
@@ -148,7 +149,7 @@ const TemplateEditorBase: Component<TemplateEditorProps> = (props) => {
   };
 
   const mappedStatus = () => Object.entries(templateStatus()?.data ?? {}).map(([env, status]) => ({
-    name: (environmentNameMap as Record<string, string>)[env] ?? env,
+    name: templateEnvironments.getCoerced(env),
     status,
   }));
 
