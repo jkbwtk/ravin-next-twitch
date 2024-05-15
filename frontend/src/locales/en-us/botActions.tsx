@@ -5,35 +5,37 @@ import { BotActionType } from '#shared/types/api/botActions';
 import { JSX } from 'solid-js';
 
 
-export const botActions = new Dictionary<BotActionType, string>('Unknown Action', {
-  [BotActionType.Unknown]: 'Unknown',
+export const botActions = new Dictionary<BotActionType, string>(
+  (key) => `Unknown Action: ${key}`.trim(),
+  {
+    [BotActionType.Unknown]: 'Unknown',
 
-  [BotActionType.ChannelJoined]: 'Channel Joined',
-  [BotActionType.ChannelLeft]: 'Channel Left',
+    [BotActionType.ChannelJoined]: 'Channel Joined',
+    [BotActionType.ChannelLeft]: 'Channel Left',
 
-  [BotActionType.CustomCommandExecuted]: 'Custom Command Executed',
+    [BotActionType.CustomCommandExecuted]: 'Custom Command Executed',
 
-  [BotActionType.CustomCommandFailedError]: 'Custom Command Failed Error',
-  [BotActionType.CustomCommandFailedCooldown]: 'Custom Command Failed Cooldown',
-  [BotActionType.CustomCommandFailedUserLevel]: 'Custom Command Failed User Level',
-  [BotActionType.CustomCommandFailedDisabled]: 'Custom Command Failed Disabled',
+    [BotActionType.CustomCommandFailedError]: 'Custom Command Failed Error',
+    [BotActionType.CustomCommandFailedCooldown]: 'Custom Command Failed Cooldown',
+    [BotActionType.CustomCommandFailedUserLevel]: 'Custom Command Failed User Level',
+    [BotActionType.CustomCommandFailedDisabled]: 'Custom Command Failed Disabled',
 
-  [BotActionType.ChantingDetected]: 'Chanting Detected',
+    [BotActionType.ChantingDetected]: 'Chanting Detected',
 
-  [BotActionType.FilteredPhrase]: 'Filtered Phrase',
-  [BotActionType.FilteredRegex]: 'Filtered Regex',
+    [BotActionType.FilteredPhrase]: 'Filtered Phrase',
+    [BotActionType.FilteredRegex]: 'Filtered Regex',
 
-  [BotActionType.CommandTimerExecuted]: 'Command Timer Executed',
-  [BotActionType.CommandTimerExecutedCommand]: 'Command Timer Executed Command',
-  [BotActionType.CommandTimerFailedError]: 'Command Timer Failed Error',
-  [BotActionType.CommandTimerFailedLines]: 'Command Timer Failed Lines',
-});
+    [BotActionType.CommandTimerExecuted]: 'Command Timer Executed',
+    [BotActionType.CommandTimerExecutedCommand]: 'Command Timer Executed Command',
+    [BotActionType.CommandTimerFailedError]: 'Command Timer Failed Error',
+    [BotActionType.CommandTimerFailedLines]: 'Command Timer Failed Lines',
+  });
 
 
 type BotActionsDescriptionsReturnType = (data: string[]) => string | JSX.Element;
 
 export const botActionsDescriptions = new Dictionary<BotActionType, BotActionsDescriptionsReturnType>(
-  (data) => (<span>Unknown action performed. Raw data: <code>{data.join(' ')}</code></span>),
+  (key) => (data) => (<span>Unknown action performed. Acton id: <code>{key}</code>. Raw data: <code>{data.join(' ')}</code></span>),
   {
     [BotActionType.Unknown]: (data) => (<span>Unknown action performed. Raw data: <code>{data.join(' ')}</code></span>),
 

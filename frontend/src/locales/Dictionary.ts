@@ -1,19 +1,19 @@
 export class Dictionary<K extends string | number, S> {
-  constructor(private readonly defaultValue: S, private readonly locale: Record<K, S>) {}
+  constructor(private readonly defaultValue: (key: K | undefined) => S, private readonly locale: Record<K, S>) {}
 
-  get(key: K | undefined): S {
-    if (key === undefined) return this.defaultValue;
+  public get(key: K | undefined): S {
+    if (key === undefined) return this.defaultValue(undefined);
 
     const entry = this.locale[key];
 
-    return entry ?? this.defaultValue;
+    return entry ?? this.defaultValue(key);
   }
 
-  getCoerced(key: string | undefined): S {
-    if (key === undefined) return this.defaultValue;
+  public getCoerced(key: string | undefined): S {
+    if (key === undefined) return this.defaultValue(undefined);
 
     const entry = this.locale[key as K];
 
-    return entry ?? this.defaultValue;
+    return entry ?? this.defaultValue(key as K);
   }
 }
