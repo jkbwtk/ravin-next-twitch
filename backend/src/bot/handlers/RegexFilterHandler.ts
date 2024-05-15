@@ -7,7 +7,8 @@ import { logger } from '#lib/logger';
 import { banUser, deleteChatMessages } from '#lib/twitch';
 import { BotActionType } from '#shared/types/api/botActions';
 import { UserLevel } from '#shared/types/api/commands';
-import { Actions, RegExpType } from '#shared/types/api/filters';
+import { Actions } from '#shared/types/api/filters';
+import { RegExpType } from '#shared/types/regExp';
 import { RegexFilter } from '@prisma/client';
 import { Client } from 'tmi.js';
 
