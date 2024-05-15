@@ -1,6 +1,13 @@
 import { batch, createContext, createSignal, For, useContext } from 'solid-js';
 import { createStore } from 'solid-js/store';
-import { CustomCommand, DeleteCustomCommandReqBody, PatchCustomCommandReqBody, PostCustomCommandReqBody, UserLevel } from '#shared/types/api/commands';
+import {
+  CustomCommand,
+  DeleteCustomCommandReqBody,
+  PatchCustomCommandReqBody,
+  PostCustomCommandReqBody,
+  UserLevel,
+  UserLevelsArray,
+} from '#shared/types/api/commands';
 import { useNotification } from '#providers/NotificationProvider';
 import InputRange from '#components/InputRange';
 import InputBase from '#components/InputBase';
@@ -17,6 +24,7 @@ import { useTemplates } from '#providers/TemplatesProvider';
 import { useErrorHandlers } from '#providers/ErrorHandlersProvider';
 
 import style from '#styles/CustomCommandsEditorProvider.module.scss';
+import { userLevels } from '#locales/en-us/commands';
 
 
 export const translateUserLevel = (userLevel: UserLevel): keyof typeof UserLevel => UserLevel[userLevel] as keyof typeof UserLevel;
@@ -304,11 +312,9 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
                   onChange={handleUserStatusChange}
                   required
                 >
-                  <MenuItem value={UserLevel['Everyone']}>Everyone</MenuItem>
-                  <MenuItem value={UserLevel['Subscriber']}>Subscriber</MenuItem>
-                  <MenuItem value={UserLevel['VIP']}>VIP</MenuItem>
-                  <MenuItem value={UserLevel['Moderator']}>Moderator</MenuItem>
-                  <MenuItem value={UserLevel['Owner']}>Owner</MenuItem>
+                  <For each={UserLevelsArray}>
+                    {(level) => <MenuItem value={level}>{userLevels.get(level)}</MenuItem>}
+                  </For>
                 </Select>
               </InputLabeled>
             </FormControl>

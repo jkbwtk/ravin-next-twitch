@@ -12,6 +12,13 @@ export enum UserLevel {
 }
 
 
+export const UserLevels = z.nativeEnum(UserLevel);
+
+export type UserLevels = z.infer<typeof UserLevels>;
+
+
+export const UserLevelsArray = Object.values(UserLevel).filter((v) => !isNaN(Number(v))) as UserLevel[];
+
 export const TemplateIdMixin = z.object({
   templateId: z.number().int().positive(),
 });
@@ -23,7 +30,7 @@ export const CustomCommand = z.object({
   channelId: z.string().min(1),
   command: z.string().min(1).max(64),
   template: Template,
-  userLevel: z.nativeEnum(UserLevel),
+  userLevel: UserLevels,
   cooldown: z.number().int().min(0).max(86400).multipleOf(5),
   enabled: z.boolean(),
 });
