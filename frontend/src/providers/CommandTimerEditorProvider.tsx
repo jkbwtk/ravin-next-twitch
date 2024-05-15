@@ -1,4 +1,4 @@
-import { batch, createContext, createSignal, For, useContext } from 'solid-js';
+import { batch, createContext, createSignal, useContext } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import {
   CommandTimer,
@@ -14,13 +14,14 @@ import InputLabeled from '#components/InputLabeled';
 import Button from '#components/Button';
 import FormControl from '@suid/material/FormControl/FormControl';
 import Select from '@suid/material/Select/Select';
-import MenuItem from '@suid/material/MenuItem/MenuItem';
 import Modal from '#components/Modal';
 import AnchorText from '#components/AnchorText';
 import { useConfirmationBox } from '#providers/ConfirmationBoxProvider';
 import { useTemplates } from '#providers/TemplatesProvider';
 import { SelectChangeEvent } from '@suid/material/Select';
 import { useErrorHandlers } from '#providers/ErrorHandlersProvider';
+import TemplateMenuItems from '#components/TemplateMenuItems';
+import { TemplateEnvironments } from '#shared/types/api/templates';
 
 import style from '#styles/CustomCommandsEditorProvider.module.scss';
 
@@ -323,11 +324,7 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
                   onChange={handleTemplateChange}
                   required
                 >
-                  <For each={templates()}>
-                    {(template) => (
-                      <MenuItem value={template.id}>{template.name}</MenuItem>
-                    )}
-                  </For>
+                  <TemplateMenuItems templates={templates()} compatibleEnvironment={TemplateEnvironments.Enum.timer} />
                 </Select>
               </InputLabeled>
             </FormControl>

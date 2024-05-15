@@ -22,9 +22,11 @@ import AnchorText from '#components/AnchorText';
 import { useConfirmationBox } from '#providers/ConfirmationBoxProvider';
 import { useTemplates } from '#providers/TemplatesProvider';
 import { useErrorHandlers } from '#providers/ErrorHandlersProvider';
+import { userLevels } from '#locales/en-us/commands';
+import TemplateMenuItems from '#components/TemplateMenuItems';
+import { TemplateEnvironments } from '#shared/types/api/templates';
 
 import style from '#styles/CustomCommandsEditorProvider.module.scss';
-import { userLevels } from '#locales/en-us/commands';
 
 
 export const translateUserLevel = (userLevel: UserLevel): keyof typeof UserLevel => UserLevel[userLevel] as keyof typeof UserLevel;
@@ -266,11 +268,7 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
                   onChange={handleTemplateChange}
                   required
                 >
-                  <For each={templates()}>
-                    {(template) => (
-                      <MenuItem value={template.id}>{template.name}</MenuItem>
-                    )}
-                  </For>
+                  <TemplateMenuItems templates={templates()} compatibleEnvironment={TemplateEnvironments.Enum.command} />
                 </Select>
               </InputLabeled>
             </FormControl>
