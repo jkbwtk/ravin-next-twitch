@@ -42,14 +42,14 @@ export const regexFilterExtension = Prisma.defineExtension((client) => {
         },
         async getByChannelId(channelId: string, pagination: LimitOffsetPaginationState = null) {
           return Prisma.getExtensionContext(this).findMany({
-            where: { chanelUserId: channelId },
+            where: { channelUserId: channelId },
 
             ...pagination,
           });
         },
         async countByChannelId(channelId: string) {
           return Prisma.getExtensionContext(this).count({
-            where: { chanelUserId: channelId },
+            where: { channelUserId: channelId },
           });
         },
 
@@ -57,7 +57,7 @@ export const regexFilterExtension = Prisma.defineExtension((client) => {
           const result = await Prisma.getExtensionContext(this).create({
             data: {
               ...regexFilter,
-              chanelUserId: channelId,
+              channelUserId: channelId,
             },
           });
 
@@ -67,7 +67,7 @@ export const regexFilterExtension = Prisma.defineExtension((client) => {
         },
         async updateFromApi(channelId: string, regexFilter: PatchRegexFilterReqBody) {
           const result = await Prisma.getExtensionContext(this).update({
-            where: { id: regexFilter.id, chanelUserId: channelId },
+            where: { id: regexFilter.id, channelUserId: channelId },
             data: {
               ...regexFilter,
             },
@@ -79,7 +79,7 @@ export const regexFilterExtension = Prisma.defineExtension((client) => {
         },
         async deleteFromApi(channelId: string, regexFilter: DeleteRegexFilterReqBody) {
           const result = await Prisma.getExtensionContext(this).delete({
-            where: { id: regexFilter.id, chanelUserId: channelId },
+            where: { id: regexFilter.id, channelUserId: channelId },
           });
 
           await Bot.deleteChannelRegexFilter(channelId, result.id);

@@ -17,6 +17,7 @@ import { templateExtension } from '#database/extensions/template';
 import { phraseFilterExtension } from '#database/extensions/phraseFilter';
 import { regexFilterExtension } from '#database/extensions/regexFilter';
 import { botActionExtension } from '#database/extensions/botAction';
+import { behaviorProfileExtension } from '#database/extensions/behaviorProfile';
 
 
 export const redisOptions: RedisOptions = {
@@ -54,7 +55,8 @@ const prismaExtended = prismaBase
   .$extends(templateExtension)
   .$extends(phraseFilterExtension)
   .$extends(regexFilterExtension)
-  .$extends(botActionExtension);
+  .$extends(botActionExtension)
+  .$extends(behaviorProfileExtension);
 
 export type ExtendedPrismaClient = typeof prismaExtended;
 
