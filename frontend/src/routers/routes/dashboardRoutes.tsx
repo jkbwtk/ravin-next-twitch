@@ -78,6 +78,13 @@ export const routes: ExtendedRouteDefinition[] = [
     },
   },
   {
+    path: 'profiles',
+    metadata: {
+      symbol: 'theater_comedy',
+      name: 'Profiles',
+    },
+  },
+  {
     path: 'ai',
     metadata: {
       symbol: 'psychology',

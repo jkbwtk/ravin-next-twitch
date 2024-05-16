@@ -1,6 +1,6 @@
-import { BehaviorProfile, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { LimitOffsetPaginationState } from '#server/middlewares/pagination';
-import { DeleteBehaviorProfileReqBody, PatchBehaviorProfileReqBody, PostBehaviorProfileReqBody } from '#types/api/behaviorProfiles';
+import { BehaviorProfile, DeleteBehaviorProfileReqBody, PatchBehaviorProfileReqBody, PostBehaviorProfileReqBody } from '#types/api/behaviorProfiles';
 
 
 export const behaviorProfileExtension = Prisma.defineExtension((client) => {
@@ -26,13 +26,13 @@ export const behaviorProfileExtension = Prisma.defineExtension((client) => {
                 activatorCategory: profile.activatorCategory,
                 activatorTitle: profile.activatorTitle,
                 // @ts-expect-error - Prisma does not like relations in the result
-                commands: profile.commands,
+                commands: profile.commands.map((command) => command.serialize()),
                 // @ts-expect-error - Prisma does not like relations in the result
-                phraseFilters: profile.phraseFilters,
+                phraseFilters: profile.phraseFilters.map((filter) => filter.serialize()),
                 // @ts-expect-error - Prisma does not like relations in the result
-                regexFilters: profile.regexFilters,
+                regexFilters: profile.regexFilters.map((filter) => filter.serialize()),
                 // @ts-expect-error - Prisma does not like relations in the result
-                commandTimers: profile.commandTimers,
+                commandTimers: profile.commandTimers.map((timer) => timer.serialize()),
               };
             };
           },
@@ -45,11 +45,23 @@ export const behaviorProfileExtension = Prisma.defineExtension((client) => {
         async getById(id: number) {
           return Prisma.getExtensionContext(this).findFirst({
             where: { id },
+            include: {
+              commands: true,
+              phraseFilters: true,
+              regexFilters: true,
+              commandTimers: true,
+            },
           });
         },
         async getByChannelId(channelId: string, pagination: LimitOffsetPaginationState = null) {
           return Prisma.getExtensionContext(this).findMany({
             where: { channelUserId: channelId },
+            include: {
+              commands: true,
+              phraseFilters: true,
+              regexFilters: true,
+              commandTimers: true,
+            },
 
             ...pagination,
           });
@@ -67,16 +79,16 @@ export const behaviorProfileExtension = Prisma.defineExtension((client) => {
               channelUserId: channelId,
 
               commands: {
-                connect: profile.commands.map((id) => ({ id })),
+                connect: profile.commands.map((id) => ({ id, channelUserId: channelId })),
               },
               phraseFilters: {
-                connect: profile.phraseFilters.map((id) => ({ id })),
+                connect: profile.phraseFilters.map((id) => ({ id, channelUserId: channelId })),
               },
               regexFilters: {
-                connect: profile.regexFilters.map((id) => ({ id })),
+                connect: profile.regexFilters.map((id) => ({ id, channelUserId: channelId })),
               },
               commandTimers: {
-                connect: profile.commandTimers.map((id) => ({ id })),
+                connect: profile.commandTimers.map((id) => ({ id, channelUserId: channelId })),
               },
             },
           });
@@ -90,16 +102,16 @@ export const behaviorProfileExtension = Prisma.defineExtension((client) => {
               ...profile,
 
               commands: profile.commands ? {
-                set: profile.commands.map((id) => ({ id })),
+                set: profile.commands.map((id) => ({ id, channelUserId: channelId })),
               } : undefined,
               phraseFilters: profile.phraseFilters ? {
-                set: profile.phraseFilters.map((id) => ({ id })),
+                set: profile.phraseFilters.map((id) => ({ id, channelUserId: channelId })),
               } : undefined,
               regexFilters: profile.regexFilters ? {
-                set: profile.regexFilters.map((id) => ({ id })),
+                set: profile.regexFilters.map((id) => ({ id, channelUserId: channelId })),
               } : undefined,
               commandTimers: profile.commandTimers ? {
-                set: profile.commandTimers.map((id) => ({ id })),
+                set: profile.commandTimers.map((id) => ({ id, channelUserId: channelId })),
               } : undefined,
             },
           });

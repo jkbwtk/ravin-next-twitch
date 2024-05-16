@@ -11,6 +11,7 @@ import { createAuthRouter } from '#server/routers/v1/auth/auth.router';
 import { createTemplatesRouter } from '#server/routers/v1/templates/templates.router';
 import { createFiltersRouter } from '#server/routers/v1/filters/filters.router';
 import { createBotActionsRouter } from '#server/routers/v1/botActions/botActions.router';
+import { createBehaviorProfilesRouter } from '#server/routers/v1/behaviorProfiles/behaviorProfiles.router';
 
 
 export const createV1Router = async (): Promise<Router> => {
@@ -39,6 +40,8 @@ export const createV1Router = async (): Promise<Router> => {
   v1Router.use('/filters', createFiltersRouter());
 
   v1Router.use('/botActions', createBotActionsRouter());
+
+  v1Router.use('/behaviorProfiles', createBehaviorProfilesRouter());
 
   return v1Router;
 };
