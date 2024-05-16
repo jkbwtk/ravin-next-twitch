@@ -2,7 +2,6 @@ import { Bot } from '#bot/Bot';
 import { ExtensionReturnType, ExtensionType } from '#database/extensions/utils';
 import { LimitOffsetPaginationState } from '#server/middlewares/pagination';
 import { CustomCommand, DeleteCustomCommandReqBody, PatchCustomCommandReqBody, PostCustomCommandReqBody, UserLevel } from '#shared/types/api/commands';
-import { Template } from '#shared/types/api/templates';
 import { Prisma } from '@prisma/client';
 
 
@@ -32,20 +31,11 @@ export const commandExtension = Prisma.defineExtension((client) => {
           },
           compute(command) {
             return (): CustomCommand => {
-              const template = 'template' in command ? command.template : null;
-              const validatedTemplate = Template.parse(template);
-
               return {
                 id: command.id,
                 channelId: command.channelUserId,
                 command: command.command,
-                template: {
-                  id: command.templateId,
-                  name: validatedTemplate.name,
-                  template: validatedTemplate.template,
-                  userId: validatedTemplate.userId,
-                  environments: validatedTemplate.environments,
-                },
+                templateId: command.templateId,
                 userLevel: command.userLevel,
                 cooldown: command.cooldown,
                 enabled: command.enabled,

@@ -2,7 +2,6 @@ import { CommandTimer, DeleteCommandTimerReqBody, PatchCommandTimerReqBody, Post
 import { ExtensionReturnType, ExtensionType } from '#database/extensions/utils';
 import { Prisma } from '@prisma/client';
 import { Bot } from '#bot/Bot';
-import { Template } from '#shared/types/api/templates';
 import { LimitOffsetPaginationState } from '#server/middlewares/pagination';
 
 
@@ -28,22 +27,13 @@ export const commandTimerExtension = Prisma.defineExtension((client) => {
           },
           compute(command) {
             return (): CommandTimer => {
-              const template = 'template' in command ? command.template : null;
-              const validatedTemplate = Template.parse(template);
-
               return {
                 id: command.id,
                 channelId: command.channelUserId,
                 name: command.name,
                 alias: command.alias,
                 cooldown: command.cooldown,
-                template: {
-                  id: command.templateId,
-                  name: validatedTemplate.name,
-                  template: validatedTemplate.template,
-                  userId: validatedTemplate.userId,
-                  environments: validatedTemplate.environments,
-                },
+                templateId: command.templateId,
                 cron: command.cron,
                 enabled: command.enabled,
                 lines: command.lines,

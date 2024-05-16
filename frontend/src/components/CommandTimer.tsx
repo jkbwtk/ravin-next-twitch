@@ -7,6 +7,7 @@ import { useCommandTimerEditor } from '#providers/CommandTimerEditorProvider';
 import { TableCell, TableRow } from '@suid/material';
 
 import style from '#styles/widgets/TableWidget.module.scss';
+import { useTemplates } from '#providers/TemplatesProvider';
 
 
 export type CommandTimerProps = {
@@ -16,6 +17,7 @@ export type CommandTimerProps = {
 
 const CommandTimer: Component<CommandTimerProps> = (props) => {
   const [, { open, updateTimer, removeTimer }] = useCommandTimerEditor();
+  const [, { getTemplateById }] = useTemplates();
 
   const toggleEnabled = () => {
     updateTimer({
@@ -31,7 +33,7 @@ const CommandTimer: Component<CommandTimerProps> = (props) => {
       <TableCell align='left' class={props.tableType > TableType.Full ? style.disabled : ''}>
         {props.timer.alias}
       </TableCell>
-      <TableCell>{props.timer.template.name}</TableCell>
+      <TableCell>{getTemplateById(props.timer.templateId)?.name}</TableCell>
       <TableCell align='center'>
         <code class={style.noWrap}>
           {props.timer.cron}

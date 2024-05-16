@@ -1,13 +1,15 @@
 import { makeRequest } from '#lib/fetch';
 import { useSocket } from '#providers/SocketProvider';
 import { DeleteTemplateReqBody, GetTemplatesResponse, PatchTemplateReqBody, PostTemplateReqBody, Template } from '#shared/types/api/templates';
-import { createContext, createResource, InitializedResource, onCleanup, onMount, useContext } from 'solid-js';
+import { createContext, createMemo, createResource, InitializedResource, onCleanup, onMount, useContext } from 'solid-js';
 
 
 export type TemplatesContextValue = [
   templates: InitializedResource<Template[]>,
   actions: {
     refetchTemplates: () => void;
+
+    getTemplateById: (templateId: number) => Template | undefined;
 
     addTemplate: (template: PostTemplateReqBody) => Promise<Response>;
     updateTemplate: (template: PatchTemplateReqBody) => Promise<Response>;
@@ -20,6 +22,10 @@ const TemplatesContext = createContext<TemplatesContextValue>([
   {
     refetchTemplates: () => {
       throw Error('TemplatesContext: fetchTemplates() called before provider');
+    },
+
+    getTemplateById: () => {
+      throw Error('TemplatesContext: getTemplateById() called before provider');
     },
 
     addTemplate: () => {
@@ -40,13 +46,6 @@ const fetchTemplates = async () => {
     schema: GetTemplatesResponse,
   });
 
-
-  data.sort((a, b) => {
-    if (a.id < b.id) return -1;
-    if (a.id > b.id) return 1;
-    return 0;
-  });
-
   return data;
 };
 
@@ -58,6 +57,14 @@ export const TemplatesProvider: ParentComponent = (props) => {
     name: 'templates',
   });
 
+  const mappedTemplates = createMemo(() => {
+    return new Map(templates().map((template) => [template.id, template]));
+  });
+
+
+  const getTemplateById = (templateId: number): Template | undefined => {
+    return mappedTemplates().get(templateId);
+  };
 
   const addTemplate = async (template: PostTemplateReqBody): Promise<Response> => {
     const response = await fetch(`/api/v1/templates`, {
@@ -129,6 +136,7 @@ export const TemplatesProvider: ParentComponent = (props) => {
       templates,
       {
         refetchTemplates,
+        getTemplateById,
         addTemplate,
         updateTemplate,
         deleteTemplate,

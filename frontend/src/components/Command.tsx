@@ -8,6 +8,7 @@ import TableRow from '@suid/material/TableRow/TableRow';
 import TableCell from '@suid/material/TableCell/TableCell';
 
 import style from '#styles/widgets/TableWidget.module.scss';
+import { useTemplates } from '#providers/TemplatesProvider';
 
 
 export type CommandProps = {
@@ -17,6 +18,7 @@ export type CommandProps = {
 
 const Command: Component<CommandProps> = (props) => {
   const [, { open, updateCommand, removeCommand }] = useCustomCommandEditor();
+  const [, { getTemplateById }] = useTemplates();
 
   const toggleEnabled = () => {
     updateCommand({
@@ -28,7 +30,7 @@ const Command: Component<CommandProps> = (props) => {
   return (
     <TableRow>
       <TableCell align='left'>{props.command.command}</TableCell>
-      <TableCell align='left'>{props.command.template.name}</TableCell>
+      <TableCell align='left'>{getTemplateById(props.command.templateId)?.name}</TableCell>
       {/* Use class instead classList due to broken reactivity */}
       <TableCell class={props.tableType > TableType.Full ? style.disabled : ''}>
         {translateUserLevel(props.command.userLevel)}

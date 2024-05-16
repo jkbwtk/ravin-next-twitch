@@ -91,7 +91,7 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
         command: command ?? {},
       });
 
-      setTemplate(command?.template?.id ?? -1);
+      setTemplate(command?.templateId ?? -1);
     });
   };
 

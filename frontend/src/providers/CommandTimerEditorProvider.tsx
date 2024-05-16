@@ -85,7 +85,7 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
         timer: timer ?? {},
       });
 
-      setTemplateId(timer?.template?.id ?? -1);
+      setTemplateId(timer?.templateId ?? -1);
     });
   };
 
