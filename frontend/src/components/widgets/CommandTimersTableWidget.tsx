@@ -1,4 +1,4 @@
-import { createEffect, createResource, createSignal, ErrorBoundary, For, onCleanup, onMount, Suspense } from 'solid-js';
+import { batch, createEffect, createResource, createSignal, ErrorBoundary, For, onCleanup, onMount, Suspense } from 'solid-js';
 import { CommandTimer as CommandTimerType, GetCommandTimersPaginatedResponse } from '#types/api/commands';
 import { useSocket } from '#providers/SocketProvider';
 import Widget from '#components/Widget';
@@ -26,12 +26,6 @@ const fetchTimers = async (pagination: Pagination) => {
     params: getSearchParams(pagination),
   });
 
-  response.data.sort((a, b) => {
-    if (a.id > b.id) return 1;
-    if (a.id < b.id) return -1;
-    return 0;
-  });
-
   return response;
 };
 
@@ -53,8 +47,8 @@ const CommandTimersTable: Component = () => {
 
   let tableRef = document.createElement('table');
 
-  const createCommand = (timer: CommandTimerType) => {
-    setTimers((timers) => ({ ...timers, data: [...timers.data, timer] }));
+  const createCommand = () => {
+    refetchTimers();
   };
 
   const updateCommand = (timer: CommandTimerType) => {
@@ -62,7 +56,14 @@ const CommandTimersTable: Component = () => {
   };
 
   const removeCommand = (timerId: number) => {
-    setTimers((timers) => ({ ...timers, data: timers.data.filter((timer) => timer.id !== timerId) }));
+    batch(() => {
+      setTimers((timers) => ({ ...timers, data: timers.data.filter((timer) => timer.id !== timerId), total: timers.total - 1 }));
+
+      // If we are on the last page and the last command was removed, go back a page
+      if (timers().total <= page() * limit()) {
+        setPage((page) => Math.max(0, page - 1));
+      }
+    });
   };
 
   const handleResize = () => {

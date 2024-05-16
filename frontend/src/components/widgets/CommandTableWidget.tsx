@@ -1,4 +1,4 @@
-import { createEffect, createResource, createSignal, ErrorBoundary, For, onCleanup, onMount, Suspense } from 'solid-js';
+import { batch, createEffect, createResource, createSignal, ErrorBoundary, For, onCleanup, onMount, Suspense } from 'solid-js';
 import { CustomCommand, GetCustomCommandsPaginatedResponse } from '#types/api/commands';
 import { useSocket } from '#providers/SocketProvider';
 import { makeRequest } from '#lib/fetch';
@@ -32,12 +32,6 @@ const fetchCommands = async (pagination: Pagination) => {
     params: getSearchParams(pagination),
   });
 
-  response.data.sort((a, b) => {
-    if (a.id > b.id) return 1;
-    if (a.id < b.id) return -1;
-    return 0;
-  });
-
   return response;
 };
 
@@ -59,8 +53,8 @@ const CommandTable: Component = () => {
 
   let tableRef = document.createElement('table');
 
-  const createCommand = (command: CustomCommand) => {
-    setCommands((commands) => ({ ...commands, data: [...commands.data, command] }));
+  const createCommand = () => {
+    refetchCommands();
   };
 
   const updateCommand = (command: CustomCommand) => {
@@ -68,7 +62,14 @@ const CommandTable: Component = () => {
   };
 
   const removeCommand = (commandId: number) => {
-    setCommands((commands) => ({ ...commands, data: commands.data.filter((command) => command.id !== commandId) }));
+    batch(() => {
+      setCommands((commands) => ({ ...commands, data: commands.data.filter((command) => command.id !== commandId), total: commands.total - 1 }));
+
+      // If we are on the last page and the last command was removed, go back a page
+      if (commands().total <= page() * limit()) {
+        setPage((page) => Math.max(0, page - 1));
+      }
+    });
   };
 
   const handleResize = () => {

@@ -1,4 +1,4 @@
-import { createEffect, createResource, createSignal, ErrorBoundary, For, onCleanup, onMount, Suspense } from 'solid-js';
+import { batch, createEffect, createResource, createSignal, ErrorBoundary, For, onCleanup, onMount, Suspense } from 'solid-js';
 import { useSocket } from '#providers/SocketProvider';
 import Widget from '#components/Widget';
 import { makeRequest } from '#lib/fetch';
@@ -26,12 +26,6 @@ const fetchFilters = async (pagination: Pagination) => {
     params: getSearchParams(pagination),
   });
 
-  response.data.sort((a, b) => {
-    if (a.id > b.id) return 1;
-    if (a.id < b.id) return -1;
-    return 0;
-  });
-
   return response;
 };
 
@@ -53,8 +47,8 @@ const RegexFiltersTable: Component = () => {
 
   let tableRef = document.createElement('table');
 
-  const createFilter = (filter: RegexFilterType) => {
-    setFilters((filters) => ({ ...filters, data: [...filters.data, filter] }));
+  const createFilter = () => {
+    refetchFilters();
   };
 
   const updateFilter = (filter: RegexFilterType) => {
@@ -62,7 +56,14 @@ const RegexFiltersTable: Component = () => {
   };
 
   const removeFilter = (filterId: number) => {
-    setFilters((filters) => ({ ...filters, data: filters.data.filter((filter) => filter.id !== filterId) }));
+    batch(() => {
+      setFilters((filters) => ({ ...filters, data: filters.data.filter((filter) => filter.id !== filterId), total: filters.total - 1 }));
+
+      // If we are on the last page and the last command was removed, go back a page
+      if (filters().total <= page() * limit()) {
+        setPage((page) => Math.max(0, page - 1));
+      }
+    });
   };
   const handleResize = () => {
     const width = tableRef.scrollWidth;

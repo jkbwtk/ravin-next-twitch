@@ -1,4 +1,4 @@
-import { createMemo, createResource, ErrorBoundary, For, InitializedResourceReturn, onCleanup, onMount, Show, Suspense } from 'solid-js';
+import { createMemo, createResource, ErrorBoundary, For, InitializedResourceReturn, onCleanup, onMount, Suspense } from 'solid-js';
 import Widget from '#components/Widget';
 import { Action, GetRecentActionsResponse } from '#types/api/dashboard';
 import ActionSwitch from '#components/widgets/RecentActionsWidget/ActionSwitch';
