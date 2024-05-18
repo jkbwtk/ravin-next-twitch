@@ -79,6 +79,7 @@ export const routes: ExtendedRouteDefinition[] = [
   },
   {
     path: 'profiles',
+    component: lazy(() => import('#pages/dashboard/Profiles')),
     metadata: {
       symbol: 'theater_comedy',
       name: 'Profiles',
