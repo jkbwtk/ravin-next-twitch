@@ -35,7 +35,7 @@ export const botActions = new Dictionary<BotActionType, string>(
 type BotActionsDescriptionsReturnType = (data: string[]) => string | JSX.Element;
 
 export const botActionsDescriptions = new Dictionary<BotActionType, BotActionsDescriptionsReturnType>(
-  (key) => (data) => (<span>Unknown action performed. Acton id: <code>{key}</code>. Raw data: <code>{data.join(' ')}</code></span>),
+  (key) => (data = []) => (<span>Unknown action performed. Acton id: <code>{key}</code>. Raw data: <code>{data.join(' ')}</code></span>),
   {
     [BotActionType.Unknown]: (data) => (<span>Unknown action performed. Raw data: <code>{data.join(' ')}</code></span>),
 
