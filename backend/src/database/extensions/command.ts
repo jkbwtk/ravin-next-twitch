@@ -3,6 +3,7 @@ import { ExtensionReturnType, ExtensionType } from '#database/extensions/utils';
 import { LimitOffsetPaginationState } from '#server/middlewares/pagination';
 import { CustomCommand, DeleteCustomCommandReqBody, PatchCustomCommandReqBody, PostCustomCommandReqBody, UserLevel } from '#shared/types/api/commands';
 import { Prisma } from '@prisma/client';
+import { idListFilterState } from '#server/middlewares/idListFilter';
 
 
 declare global {
@@ -57,9 +58,17 @@ export const commandExtension = Prisma.defineExtension((client) => {
             },
           });
         },
-        async getByChannelId(channelId: string, pagination: LimitOffsetPaginationState = null) {
+        async getByChannelId(
+          channelId: string,
+          pagination: LimitOffsetPaginationState = null,
+          idListFilter: idListFilterState = null,
+        ) {
           return Prisma.getExtensionContext(this).findMany({
-            where: { channelUserId: channelId },
+            ...idListFilter,
+            where: {
+              channelUserId: channelId,
+              ...idListFilter,
+            },
             include: {
               user: true,
               template: true,

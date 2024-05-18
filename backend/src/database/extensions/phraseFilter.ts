@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 import { DeletePhraseFilterReqBody, PatchPhraseFilterReqBody, PhraseFilter, PostPhraseFilterReqBody } from '#types/api/filters';
 import { LimitOffsetPaginationState } from '#server/middlewares/pagination';
 import { Bot } from '#bot/Bot';
+import { idListFilterState } from '#server/middlewares/idListFilter';
 
 
 export const phraseFilterExtension = Prisma.defineExtension((client) => {
@@ -46,9 +47,17 @@ export const phraseFilterExtension = Prisma.defineExtension((client) => {
             where: { id },
           });
         },
-        async getByChannelId(channelId: string, pagination: LimitOffsetPaginationState = null) {
+        async getByChannelId(
+          channelId: string,
+          pagination: LimitOffsetPaginationState = null,
+          idListFilter: idListFilterState = null,
+        ) {
           return Prisma.getExtensionContext(this).findMany({
-            where: { channelUserId: channelId },
+            where: {
+              channelUserId: channelId,
+              ...idListFilter,
+            },
+
 
             ...pagination,
           });

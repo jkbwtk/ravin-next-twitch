@@ -2,6 +2,7 @@ import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
 import { SocketServer } from '#server/SocketServer';
+import { idListFilter } from '#server/middlewares/idListFilter';
 import { limitOffsetPagination } from '#server/middlewares/pagination';
 import { PatchPhraseFilterSchema, PostPhraseFilterSchema } from '#server/routers/v1/filters/phrase/phrase.schemas';
 import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
@@ -15,10 +16,11 @@ export const getPhraseFiltersView = new ExpressStack()
   .usePreflight(authenticated)
   .use(validateResponse(GetPhraseFiltersPaginatedResponse.or(GetPhraseFiltersResponse)))
   .use(limitOffsetPagination())
+  .use(idListFilter())
   .use(async (req, res) => {
     try {
       if (req.pagination) {
-        const filters = await prisma.phraseFilter.getByChannelId(req.user.id, req.pagination);
+        const filters = await prisma.phraseFilter.getByChannelId(req.user.id, req.pagination, req.idListFilter);
 
         res.jsonValidated({
           data: filters.map((f) => f.serialize()),
@@ -28,7 +30,7 @@ export const getPhraseFiltersView = new ExpressStack()
           offset: req.pagination.skip,
         });
       } else {
-        const filters = await prisma.phraseFilter.getByChannelId(req.user.id);
+        const filters = await prisma.phraseFilter.getByChannelId(req.user.id, req.pagination, req.idListFilter);
 
         res.jsonValidated({
           data: filters.map((f) => f.serialize()),

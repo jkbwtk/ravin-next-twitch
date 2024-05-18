@@ -4,6 +4,7 @@ import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
 import { ServerError } from '#shared/ServerError';
 import { SocketServer } from '#server/SocketServer';
+import { idListFilter } from '#server/middlewares/idListFilter';
 import { DeleteCustomCommandSchema, PatchCustomCommandSchema, PostCustomCommandSchema } from '#server/routers/v1/commands/custom/custom.schemas';
 import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
 import { GetCustomCommandsPaginatedResponse, GetCustomCommandsResponse, GetCustomCommandsStatusResponse } from '#shared/types/api/commands';
@@ -16,10 +17,11 @@ export const getCustomCommandsView = new ExpressStack()
   .usePreflight(authenticated)
   .use(validateResponse(GetCustomCommandsPaginatedResponse.or(GetCustomCommandsResponse)))
   .use(limitOffsetPagination())
+  .use(idListFilter())
   .use(async (req, res) => {
     try {
       if (req.pagination) {
-        const commands = await prisma.command.getByChannelId(req.user.id, req.pagination);
+        const commands = await prisma.command.getByChannelId(req.user.id, req.pagination, req.idListFilter);
 
         res.jsonValidated({
           data: commands.map((c) => c.serialize()),
@@ -29,7 +31,7 @@ export const getCustomCommandsView = new ExpressStack()
           offset: req.pagination.skip,
         });
       } else {
-        const commands = await prisma.command.getByChannelId(req.user.id);
+        const commands = await prisma.command.getByChannelId(req.user.id, req.pagination, req.idListFilter);
 
         res.jsonValidated({
           data: commands.map((c) => c.serialize()),

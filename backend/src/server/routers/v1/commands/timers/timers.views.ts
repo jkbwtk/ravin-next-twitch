@@ -4,6 +4,7 @@ import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
 import { ServerError } from '#shared/ServerError';
 import { SocketServer } from '#server/SocketServer';
+import { idListFilter } from '#server/middlewares/idListFilter';
 import { DeleteCommandTimerSchema, PatchCommandTimerSchema, PostCommandTimerSchema } from '#server/routers/v1/commands/timers/timers.schemas';
 import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
 import { GetCommandTimersPaginatedResponse, GetCommandTimersResponse, GetCommandTimersStatusResponse } from '#shared/types/api/commands';
@@ -16,6 +17,7 @@ export const getCommandTimersView = new ExpressStack()
   .usePreflight(authenticated)
   .use(validateResponse(GetCommandTimersPaginatedResponse.or(GetCommandTimersResponse)))
   .use(limitOffsetPagination())
+  .use(idListFilter())
   .use(async (req, res) => {
     try {
       if (req.pagination) {
