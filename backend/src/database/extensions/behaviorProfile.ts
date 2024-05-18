@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { LimitOffsetPaginationState } from '#server/middlewares/pagination';
 import { BehaviorProfile, DeleteBehaviorProfileReqBody, PatchBehaviorProfileReqBody, PostBehaviorProfileReqBody } from '#types/api/behaviorProfiles';
+import { SocketServer } from '#server/SocketServer';
 
 
 export const behaviorProfileExtension = Prisma.defineExtension((client) => {
@@ -91,7 +92,16 @@ export const behaviorProfileExtension = Prisma.defineExtension((client) => {
                 connect: profile.commandTimers.map((id) => ({ id, channelUserId: channelId })),
               },
             },
+
+            include: {
+              commands: true,
+              phraseFilters: true,
+              regexFilters: true,
+              commandTimers: true,
+            },
           });
+
+          SocketServer.emitToUser(channelId, 'NEW_BEHAVIOR_PROFILE', result.serialize());
 
           return result;
         },
@@ -114,14 +124,25 @@ export const behaviorProfileExtension = Prisma.defineExtension((client) => {
                 set: profile.commandTimers.map((id) => ({ id, channelUserId: channelId })),
               } : undefined,
             },
+
+            include: {
+              commands: true,
+              phraseFilters: true,
+              regexFilters: true,
+              commandTimers: true,
+            },
           });
+
+          SocketServer.emitToUser(channelId, 'UPD_BEHAVIOR_PROFILE', result.serialize());
 
           return result;
         },
-        async deleteFromApi(channelId: string, phraseFiler: DeleteBehaviorProfileReqBody) {
+        async deleteFromApi(channelId: string, profile: DeleteBehaviorProfileReqBody) {
           const result = await Prisma.getExtensionContext(this).delete({
-            where: { id: phraseFiler.id, channelUserId: channelId },
+            where: { id: profile.id, channelUserId: channelId },
           });
+
+          SocketServer.emitToUser(channelId, 'DEL_BEHAVIOR_PROFILE', profile.id);
 
           return result;
         },
