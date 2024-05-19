@@ -147,7 +147,7 @@ export class ChannelThread implements AutoWirable {
     this.messages.setMaxLength(this.options.messageCacheSize);
   }
 
-  private syncChatMembers = async (): Promise<void> => {
+  public syncChatMembers = async (): Promise<void> => {
     const chatters = await getChatters(this.channel.user.id, 1000);
     const mappedChatters = chatters.users.map((chatter) => chatter.user_id);
 
@@ -169,13 +169,13 @@ export class ChannelThread implements AutoWirable {
     this.jobs.delete(this.refreshChatMembersJobName);
   }
 
-  private syncChannelInformation = async (): Promise<void> => {
+  public syncChannelInformation = async (): Promise<void> => {
     const channelInformation = await getChannelInformation(this.channel.userId);
     await this.handleChannelInformation(channelInformation);
   };
 
   private async startChannelInformationSyncing(): Promise<void> {
-    const job = new ExtendedCron('*/30 * * * * *', {
+    const job = new ExtendedCron('* * * * *', {
       name: this.refreshChannelInformationJobName,
     }, this.syncChannelInformation);
 
@@ -189,13 +189,29 @@ export class ChannelThread implements AutoWirable {
     this.jobs.delete(this.refreshChannelInformationJobName);
   }
 
-  private syncStreamStatus = async (): Promise<void> => {
+  public syncStreamStatus = async (): Promise<void> => {
     const stream = await getStreams(this.channel.userId);
     await this.handleStreamStatus(stream);
+
+    if (this.channelInformation !== null && stream !== null) {
+      await this.handleChannelInformation({
+        ...this.channelInformation,
+
+        title: stream.title,
+        game_id: stream.game_id,
+        game_name: stream.game_name,
+        tags: stream.tags,
+
+        broadcaster_id: stream.user_id,
+        broadcaster_name: stream.user_name,
+        broadcaster_login: stream.user_login,
+        broadcaster_language: stream.language,
+      });
+    }
   };
 
   private async startStreamStatusSyncing(): Promise<void> {
-    const job = new ExtendedCron('*/30 * * * * *', {
+    const job = new ExtendedCron('15,45 * * * * *', {
       name: this.refreshStreamStatusJobName,
     }, this.syncStreamStatus);
 
