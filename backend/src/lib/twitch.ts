@@ -12,11 +12,15 @@ import {
 import {
   BanUsers,
   GetChatters,
+  GetTwitchChannelInformation,
   GetTwitchModerators,
+  GetTwitchStreams,
   GetTwitchUsers,
   GetUsersOptions,
   RefreshAccessToken,
   TwitchBriefUser,
+  TwitchChannelInformation,
+  TwitchStream,
   TwitchUser,
 } from '#types/twitch';
 import { twitchApiUrl } from '#shared/constants';
@@ -360,3 +364,61 @@ export async function banUserUnsafe(userId: string, targetId: string, duration?:
 }
 
 export const banUser: CloneFunction<typeof banUserUnsafe> = async (...args) => requestGuardian({}, banUserUnsafe, ...args);
+
+
+export async function getChannelInformationUnsafe(userId: string): Promise<TwitchChannelInformation | null> {
+  try {
+    const token = await prisma.token.getByUserIdOrFail(userId);
+
+    const response = await twitch.request<GetTwitchChannelInformation>({
+      method: 'GET',
+      url: 'channels',
+      headers: {
+        'Client-ID': await Config.getOrFail('twitchClientId'),
+        Authorization: `Bearer ${token.accessToken}`,
+      },
+      params: {
+        broadcaster_id: token.user.id,
+      },
+    });
+
+    return response.data.data[0] ?? null;
+  } catch (error) {
+    if (error instanceof NotFound) return null;
+
+    throw errorConverter(error);
+  }
+};
+
+export const getChannelInformation: CloneFunction<typeof getChannelInformationUnsafe> = async (...args) => requestGuardian(
+  {},
+  getChannelInformationUnsafe,
+  ...args,
+);
+
+
+export async function getStreamsUnsafe(userId: string): Promise<TwitchStream | null> {
+  try {
+    const token = await prisma.token.getByUserIdOrFail(userId);
+
+    const response = await twitch.request<GetTwitchStreams>({
+      method: 'GET',
+      url: 'streams',
+      headers: {
+        'Client-ID': await Config.getOrFail('twitchClientId'),
+        Authorization: `Bearer ${token.accessToken}`,
+      },
+      params: {
+        user_id: token.user.id,
+      },
+    });
+
+    return response.data.data[0] ?? null;
+  } catch (error) {
+    if (error instanceof NotFound) return null;
+
+    throw errorConverter(error);
+  }
+}
+
+export const getStreams: CloneFunction<typeof getStreamsUnsafe> = async (...args) => requestGuardian({}, getStreamsUnsafe, ...args);

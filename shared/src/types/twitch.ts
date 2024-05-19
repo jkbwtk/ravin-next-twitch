@@ -184,34 +184,6 @@ export interface TwitchGlobalEmote {
   theme_mode: ('dark' | 'light')[],
 }
 
-export interface TwitchStream {
-  id: string,
-  user_id: string,
-  user_login: string,
-  user_name: string,
-  game_id: string,
-  game_name: string,
-  type: 'live' | '',
-  title: string,
-  viewer_count: number,
-  started_at: string,
-  language: string,
-  thumbnail_url: string,
-  tag_ids: string[],
-  is_mature: boolean,
-}
-
-export interface TwitchStreamTag {
-  tag_id: string,
-  is_auto: boolean,
-  localization_names: {
-    [key: string]: string,
-  },
-  localization_descriptions: {
-    [key: string]: string,
-  },
-}
-
 export interface TwitchTeam {
   users: TwitchBriefUser[],
   background_image_url: string,
@@ -342,4 +314,46 @@ export type BanUsers = {
     created_at: string;
     ends_at: string | null;
   } []
+};
+
+export type TwitchChannelInformation = {
+  broadcaster_id: string;
+  broadcaster_login: string;
+  broadcaster_name: string;
+  broadcaster_language: string;
+  game_id: string;
+  game_name: string;
+  title: string;
+  delay: number;
+  tags: string[];
+  content_classification_labels: string[];
+  is_branded_content: boolean;
+};
+
+export type GetTwitchChannelInformation = {
+  data: TwitchChannelInformation[];
+};
+
+export type TwitchStream = {
+  id: string;
+  user_id: string;
+  user_login: string;
+  user_name: string;
+  game_id: string;
+  game_name: string;
+  type: 'live' | '';
+  title: string;
+  tags: string[];
+  viewer_count: number;
+  started_at: string;
+  language: string;
+  thumbnail_url: string;
+  is_mature: boolean;
+};
+
+export type GetTwitchStreams = {
+  data: TwitchStream[];
+  pagination: {
+    cursor: string;
+  };
 };
