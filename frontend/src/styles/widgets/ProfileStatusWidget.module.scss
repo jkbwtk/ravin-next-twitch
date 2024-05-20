@@ -1,0 +1,92 @@
+@use '../app' as *;
+
+
+.outer-container {
+  width: 100% !important;
+  max-width: 100%;
+}
+
+.container {
+  height: 12.2rem;
+  width: 100%;
+
+  box-sizing: border-box;
+  padding: 2rem;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+
+  column-gap: 1rem;
+  row-gap: 0.5rem;
+}
+
+.channel-info {
+  display: grid;
+  grid-template-columns: min-content 1fr;
+
+  align-content: start;
+
+  column-gap: 0.5rem;
+  row-gap: 0.5rem;
+}
+
+.stream-info {
+  display: grid;
+  grid-template-columns: min-content 1fr;
+
+  column-gap: 0.5rem;
+  row-gap: 0.5rem;
+
+  align-content: start;
+
+  .stream-thumbnail {
+    grid-row: 1 / 4;
+
+    height: 8.2rem;
+
+    border-radius: $borderRadius;
+  }
+}
+
+.profile-info {
+  display: grid;
+  grid-template-columns: min-content 1fr;
+
+  column-gap: 0.5rem;
+  row-gap: 0.5rem;
+
+  align-content: start;
+}
+
+.name {
+  display: flex;
+  align-items: center;
+  justify-content: right;
+
+  text-wrap: nowrap;
+
+  font-size: $smallFontSize;
+
+  user-select: none;
+}
+
+.value {
+  color: $textBrightColor;
+
+  align-self: center;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-size: $smallFontSize;
+}
+
+.value-container {
+  display: flex;
+  flex-wrap: wrap;
+
+  align-items: center;
+
+  gap: 0.5rem;
+}
