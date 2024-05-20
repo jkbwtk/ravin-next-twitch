@@ -53,3 +53,28 @@ export type PatchBehaviorProfileReqBody = z.infer<typeof PatchBehaviorProfileReq
 export const DeleteBehaviorProfileReqBody = BehaviorProfile.pick({ id: true });
 
 export type DeleteBehaviorProfileReqBody = z.infer<typeof DeleteBehaviorProfileReqBody>;
+
+
+export const BehaviorProfilesStatus = z.object({
+  channelInformation: z.object({
+    title: z.string().min(1).max(255),
+    game_name: z.string().min(1).max(255),
+    game_id: z.string().min(1).max(255),
+    tags: z.array(z.string().min(1).max(255)),
+  }).nullable().optional().default(null),
+  streamStatus: z.object({
+    viewer_count: z.number().int().positive(),
+    started_at: z.string().min(1).max(255),
+    language: z.string().min(1).max(255),
+    thumbnail_url: z.string().min(1).max(255),
+  }).nullable().optional().default(null),
+  activeProfiles: z.array(BehaviorProfile),
+});
+
+export type BehaviorProfilesStatus = z.infer<typeof BehaviorProfilesStatus>;
+
+export const GetBehaviorProfilesStatusResponse = z.object({
+  data: BehaviorProfilesStatus,
+});
+
+export type GetBehaviorProfilesStatusResponse = z.infer<typeof GetBehaviorProfilesStatusResponse>;

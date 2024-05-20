@@ -1,3 +1,4 @@
+import { Bot } from '#bot/Bot';
 import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
@@ -5,7 +6,7 @@ import { limitOffsetPagination } from '#server/middlewares/pagination';
 import { authenticated, validateResponse } from '#server/stackMiddlewares';
 import { ServerError } from '#shared/ServerError';
 import { HttpCodes } from '#shared/httpCodes';
-import { GetBehaviorProfilesPaginatedResponse, GetBehaviorProfilesResponse } from '#shared/types/api/behaviorProfiles';
+import { GetBehaviorProfilesPaginatedResponse, GetBehaviorProfilesResponse, GetBehaviorProfilesStatusResponse } from '#shared/types/api/behaviorProfiles';
 
 
 export const getBehaviorProfilesView = new ExpressStack()
@@ -38,5 +39,37 @@ export const getBehaviorProfilesView = new ExpressStack()
       });
 
       throw new ServerError(HttpCodes.InternalServerError, 'Failed to get behavior profiles');
+    }
+  });
+
+export const getBehaviorProfilesStatus = new ExpressStack()
+  .usePreflight(authenticated)
+  .use(validateResponse(GetBehaviorProfilesStatusResponse))
+  .use(async (req, res) => {
+    try {
+      const channelThread = Bot.getChannelThread(req.user.login);
+
+      if (!channelThread) {
+        throw new ServerError(HttpCodes.BadRequest, 'Channel thread not found');
+      }
+
+      if (channelThread.channelInformation === null) {
+        await channelThread.syncChannelInformation();
+      }
+
+      res.jsonValidated({
+        data: {
+          channelInformation: channelThread.channelInformation,
+          streamStatus: channelThread.streamStatus,
+          activeProfiles: [],
+        },
+      });
+    } catch (err) {
+      logger.warn('Failed to get status of behavior profiles', {
+        error: err,
+        label: ['APIv1', 'behaviorProfiles', 'getBehaviorProfilesStatus'],
+      });
+
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to get status of behavior profiles');
     }
   });

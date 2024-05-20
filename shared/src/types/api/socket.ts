@@ -52,6 +52,8 @@ export type ServerToClientEvents = {
   NEW_BEHAVIOR_PROFILE: (profile: BehaviorProfile) => void;
   UPD_BEHAVIOR_PROFILE: (profile: BehaviorProfile) => void;
   DEL_BEHAVIOR_PROFILE: (profileId: number) => void;
+
+  UPD_BEHAVIOR_PROFILE_STATUS: () => void;
 };
 
 export type ClientToServerEvents = {

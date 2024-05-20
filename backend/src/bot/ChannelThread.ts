@@ -15,6 +15,7 @@ import { Isolate } from 'isolated-vm';
 import { RegexFilterHandler } from '#bot/handlers/RegexFilterHandler';
 import { PhraseFilterHandler } from '#bot/handlers/PhraseFilterHandler';
 import { TwitchChannelInformation, TwitchStream } from '#shared/types/twitch';
+import { SocketServer } from '#server/SocketServer';
 
 
 export type ChannelThreadInformation = {
@@ -117,6 +118,8 @@ export class ChannelThread implements AutoWirable {
   }
 
   public async handleChannelInformation(info: TwitchChannelInformation | null): Promise<void> {
+    const oldInfo = structuredClone(this.channelInformation);
+
     if (info !== null) {
       this.channelInformation = {
         game_id: info.game_id,
@@ -128,9 +131,18 @@ export class ChannelThread implements AutoWirable {
         is_branded_content: info.is_branded_content,
       };
     }
+
+    if (
+      oldInfo?.title !== this.channelInformation?.title ||
+      oldInfo?.game_id !== this.channelInformation?.game_id
+    ) {
+      SocketServer.emitToUser(this.channel.userId, 'UPD_BEHAVIOR_PROFILE_STATUS');
+    }
   };
 
   public async handleStreamStatus(stream: TwitchStream | null): Promise<void> {
+    const oldStream = structuredClone(this.streamStatus);
+
     this.streamStatus = stream === null ? null : {
       id: stream.id,
       viewer_count: stream.viewer_count,
@@ -139,6 +151,14 @@ export class ChannelThread implements AutoWirable {
       thumbnail_url: stream.thumbnail_url,
       is_mature: stream.is_mature,
     };
+
+    if (
+      oldStream?.viewer_count !== this.streamStatus?.viewer_count ||
+      oldStream?.thumbnail_url !== this.streamStatus?.thumbnail_url ||
+      oldStream?.id !== this.streamStatus?.id
+    ) {
+      SocketServer.emitToUser(this.channel.userId, 'UPD_BEHAVIOR_PROFILE_STATUS');
+    }
   }
 
   public updateConfig(options: ChannelThreadOptions): void {
