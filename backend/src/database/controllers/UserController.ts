@@ -1,13 +1,8 @@
 import { eq, getTableColumns } from 'drizzle-orm';
 import { db } from '#database/database';
-import { channelsTable, usersTable } from '#shared/schema/schema';
+import { Channel, channelsTable, User, usersTable } from '#shared/schema/schema';
 import { trackQueryPerformance } from '#database/utils';
 
-
-export type Channel = typeof channelsTable.$inferSelect;
-export type User = typeof usersTable.$inferSelect;
-
-export type UserController = typeof UserControllerTarget;
 
 const UserControllerTarget = {
   async createChannel(userId: string): Promise<Channel | null> {
