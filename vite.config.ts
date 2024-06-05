@@ -38,6 +38,7 @@ export default defineConfig({
     alias: [
       { find: '#shared', replacement: resolve(cwd(), 'shared/src') },
       { find: '#types', replacement: resolve(cwd(), 'shared/src/types') },
+      { find: '#schema', replacement: '#shared/src/schema' },
       { find: '#components', replacement: resolve(frontendDevelopmentPath, 'src/components') },
       { find: '#pages', replacement: resolve(frontendDevelopmentPath, 'src/pages') },
       { find: '#styles', replacement: resolve(frontendDevelopmentPath, 'src/styles') },
