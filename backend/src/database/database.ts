@@ -18,6 +18,11 @@ import { phraseFilterExtension } from '#database/extensions/phraseFilter';
 import { regexFilterExtension } from '#database/extensions/regexFilter';
 import { botActionExtension } from '#database/extensions/botAction';
 import { behaviorProfileExtension } from '#database/extensions/behaviorProfile';
+import { Client as PostgresClient, ClientConfig as PostgresConfig } from 'pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
+import * as schema from '#schema/schema';
+import * as relations from '#schema/relations';
+import { logger } from '#lib/logger';
 
 
 export const redisOptions: RedisOptions = {
@@ -34,6 +39,14 @@ export const prismaOptions: Prisma.PrismaClientOptions = {
     error: true,
   }),
   errorFormat: 'pretty',
+};
+
+export const postgresOptions: PostgresConfig = {
+  host: process.env.DB_HOST!,
+  port: parseInt(process.env.DB_PORT!, 10),
+  user: process.env.DB_USER!,
+  password: process.env.DB_PASSWORD!,
+  database: process.env.DB_NAME!,
 };
 
 
@@ -61,3 +74,7 @@ const prismaExtended = prismaBase
 export type ExtendedPrismaClient = typeof prismaExtended;
 
 export const prisma = prismaExtended;
+
+export const postgresClient = new PostgresClient(postgresOptions);
+
+export const db = drizzle(postgresClient, { schema: { ...schema, ...relations }, logger: logger });
