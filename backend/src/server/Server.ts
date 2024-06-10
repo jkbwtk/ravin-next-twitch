@@ -12,7 +12,7 @@ import { TokenManager } from '#server/TokenManager';
 import { Bot } from '#bot/Bot';
 import http, { Server as HTTPServer } from 'http';
 import { SocketServer } from '#server/SocketServer';
-import { UserWithChannel } from '#database/extensions/user';
+import { User as UserModel } from '#shared/schema/schema';
 import { logger } from '#lib/logger';
 
 
@@ -20,7 +20,7 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     // eslint-disable-next-line @typescript-eslint/no-empty-interface
-    interface User extends UserWithChannel {}
+    interface User extends UserModel {}
   }
 }
 

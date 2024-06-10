@@ -1,6 +1,6 @@
-import { eq } from 'drizzle-orm';
+import { eq, getTableColumns } from 'drizzle-orm';
 import { db } from '#database/database';
-import { User, usersTable } from '#shared/schema/schema';
+import { User, UserInsert, usersTable } from '#shared/schema/schema';
 import { trackQueryPerformance } from '#database/utils';
 
 
@@ -38,6 +38,21 @@ const UserControllerTarget = {
     const result = await query;
 
     return result.map((user) => user.id);
+  },
+
+  async upsert(user: UserInsert): Promise<User | null> {
+    const query = db
+      .insert(usersTable)
+      .values(user)
+      .onConflictDoUpdate({
+        target: usersTable.id,
+        set: user,
+      })
+      .returning(getTableColumns(usersTable));
+
+    const result = await query;
+
+    return result.at(0) ?? null;
   },
 } as const;
 
