@@ -1,22 +1,10 @@
-import { eq, getTableColumns } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { db } from '#database/database';
-import { Channel, channelsTable, User, usersTable } from '#shared/schema/schema';
+import { User, usersTable } from '#shared/schema/schema';
 import { trackQueryPerformance } from '#database/utils';
 
 
 const UserControllerTarget = {
-  async createChannel(userId: string): Promise<Channel | null> {
-    const query = db
-      .insert(channelsTable)
-      .values({ userId })
-      .returning(getTableColumns(channelsTable))
-      .onConflictDoNothing();
-
-    const result = await query;
-
-    return result.at(0) ?? null;
-  },
-
   async getById(id: string): Promise<User | null> {
     const query = db
       .query.usersTable.findFirst({
@@ -37,6 +25,19 @@ const UserControllerTarget = {
     const result = await query;
 
     return result ?? null;
+  },
+
+  async getAllIds(): Promise<string[]> {
+    const query = db
+      .query.usersTable.findMany({
+        columns: {
+          id: true,
+        },
+      });
+
+    const result = await query;
+
+    return result.map((user) => user.id);
   },
 } as const;
 
