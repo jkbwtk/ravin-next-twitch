@@ -40,13 +40,23 @@ const ChannelControllerTarget = {
   },
 
   async getOrCreateChannel(userId: string): Promise<Channel | null> {
-    const createdChannel = await this.create(userId);
+    return db.transaction(async (tx) => {
+      const existingChannel = await tx
+        .query.channelsTable.findFirst({
+          where: eq(channelsTable.userId, userId),
+        });
 
-    if (createdChannel === null) {
-      return this.getByUserId(userId);
-    }
+      if (existingChannel !== undefined) {
+        return existingChannel;
+      }
 
-    return createdChannel;
+      const inserted = await tx
+        .insert(channelsTable)
+        .values({ userId })
+        .returning(getTableColumns(channelsTable));
+
+      return inserted.at(0) ?? null;
+    });
   },
 };
 
