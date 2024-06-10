@@ -1,4 +1,4 @@
-import { prisma } from '#database/database';
+import { UserController } from '#database/controllers/UserController';
 import { logger } from '#lib/logger';
 import { createDevAuthStrategy } from '#server/routers/v1/auth/authDev';
 import { createProdAuthStrategy } from '#server/routers/v1/auth/authProd';
@@ -35,7 +35,7 @@ export const setupPassport = async (): Promise<void> => {
   });
 
   passport.deserializeUser<string>(async (id, done) => {
-    const user = await prisma.user.getById(id);
+    const user = await UserController.getById(id);
 
     if (user !== null) return done(null, user);
 
