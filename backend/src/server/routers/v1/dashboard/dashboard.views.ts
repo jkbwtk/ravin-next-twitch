@@ -8,6 +8,7 @@ import { ServerError } from '#shared/ServerError';
 import { authenticated, validateResponse } from '#server/stackMiddlewares';
 import { GetBotConnectionStatusResponse } from '#shared/types/api/dashboard';
 import { HttpCodes } from '#shared/httpCodes';
+import { ChannelController } from '#database/controllers/ChannelController';
 
 
 export const getConnectionStatusView = new ExpressStack()
@@ -19,11 +20,16 @@ export const getConnectionStatusView = new ExpressStack()
         .map((mod) => mod.user_login);
 
       const botLogin = await Config.getOrFail('botLogin');
+      const channel = await ChannelController.getOrCreate(req.user.id);
+
+      if (channel === null) {
+        throw new ServerError(HttpCodes.InternalServerError, 'Failed to get channel');
+      }
 
       res.jsonValidated({
         data: {
           channel: req.user.login,
-          joined: req.user.channel.joined ?? false,
+          joined: channel.joined ?? false,
           admin: moderatorLogins.includes(botLogin) || botLogin === req.user.login,
         },
       });
