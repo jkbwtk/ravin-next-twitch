@@ -16,6 +16,7 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
+import type { ChantingSettings } from '../types/api/channel';
 
 
 type UtilityRows = 'createdAt' | 'updatedAt';
@@ -44,7 +45,7 @@ export const channelsTable = pgTable('Channels', {
   joined: boolean('joined')
     .default(false)
     .notNull(),
-  chantingSettings: json('chantingSettings')
+  chantingSettings: json('chantingSettings').$type<ChantingSettings>()
     .default({ enabled: false, interval: 60, length: 3 })
     .notNull(),
   createdAt: timestamp('createdAt', { precision: 3, mode: 'string' })
