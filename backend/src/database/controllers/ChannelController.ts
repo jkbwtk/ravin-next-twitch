@@ -39,7 +39,7 @@ const ChannelControllerTarget = {
     return result ?? null;
   },
 
-  async getOrCreateChannel(userId: string): Promise<Channel | null> {
+  async getOrCreate(userId: string): Promise<Channel | null> {
     return db.transaction(async (tx) => {
       const existingChannel = await tx
         .query.channelsTable.findFirst({
