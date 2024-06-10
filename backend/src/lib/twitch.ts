@@ -6,6 +6,7 @@ import {
   InvalidRefreshToken,
   InvalidRequestParameters,
   NotFound,
+  NoTokensFile,
   TimedOut,
   TooManyParameters,
 } from '#lib/twitchErrors';
@@ -25,11 +26,11 @@ import {
 } from '#types/twitch';
 import { twitchApiUrl } from '#shared/constants';
 import { Config } from '#lib/Config';
-import { prisma } from '#database/database';
 import { TokenManager } from '#server/TokenManager';
 import { arrayFrom, AtLeastOne, sleep } from '#lib/utils';
-import { TokenWithUserAndChannel } from '#database/extensions/token';
 import { logger } from '#lib/logger';
+import { Token } from '#shared/schema/schema';
+import { TokenController } from '#database/controllers/TokenController';
 
 
 const apiSettings = {
@@ -62,9 +63,17 @@ function errorConverter(error: unknown) {
 }
 
 
+async function getTokenOrThrow(userId: string): Promise<Token> {
+  const token = await TokenController.getByUserId(userId);
+
+  if (token === null) throw new NoTokensFile(`Token for user [${userId}] not found`);
+
+  return token;
+}
+
 export async function validateTokenUnsafe(userId: string): Promise<boolean> {
   try {
-    const token = await prisma.token.getByUserIdOrFail(userId);
+    const token = await getTokenOrThrow(userId);
 
     await twitch.request({
       method: 'GET',
@@ -86,9 +95,9 @@ export async function validateTokenUnsafe(userId: string): Promise<boolean> {
   }
 }
 
-export async function refreshTokenUnsafe(userId: string): Promise<TokenWithUserAndChannel> {
+export async function refreshTokenUnsafe(userId: string): Promise<Token> {
   try {
-    const token = await prisma.token.getByUserIdOrFail(userId);
+    const token = await getTokenOrThrow(userId);
 
     const response = await twitch.request<RefreshAccessToken>({
       method: 'POST',
@@ -120,7 +129,7 @@ export async function refreshTokenUnsafe(userId: string): Promise<TokenWithUserA
 
 export const revokeTokenUnsafe = async (userId: string): Promise<void> => {
   try {
-    const token = await prisma.token.getByUserIdOrFail(userId);
+    const token = await getTokenOrThrow(userId);
 
     const resp = await axios.post(
       'https://id.twitch.tv/oauth2/revoke',
@@ -179,7 +188,7 @@ const requestGuardian: RequestGuardian = async (settings, func, userId, ...args)
       if (remainingNetworkErrors <= 0 || remainingTimeouts <= 0) throw err;
 
       if (err instanceof InvalidAccessToken) {
-        const token = await prisma.token.getByUserIdOrFail(userId);
+        const token = await getTokenOrThrow(userId);
         if (token.refreshToken === null) throw new InvalidRefreshToken('Refresh token is null. Token possibly owned by local user');
         await TokenManager.refresh(userId);
 
@@ -227,7 +236,7 @@ export async function getUsersUnsafe(userId: string, params: AtLeastOne<GetUsers
 
 
   try {
-    const token = await prisma.token.getByUserIdOrFail(userId);
+    const token = await getTokenOrThrow(userId);
 
     const response = await twitch.request<GetTwitchUsers>({
       method: 'GET',
@@ -250,7 +259,7 @@ export const getUsers: CloneFunction<typeof getUsersUnsafe> = async (...args) =>
 
 export async function getModeratorsUnsafe(userId: string): Promise<TwitchBriefUser[]> {
   try {
-    const token = await prisma.token.getByUserIdOrFail(userId);
+    const token = await getTokenOrThrow(userId);
 
     const response = await twitch.request<GetTwitchModerators>({
       method: 'GET',
@@ -260,7 +269,7 @@ export async function getModeratorsUnsafe(userId: string): Promise<TwitchBriefUs
         Authorization: `Bearer ${token.accessToken}`,
       },
       params: {
-        broadcaster_id: token.user.id,
+        broadcaster_id: token.userId,
       },
     });
 
@@ -279,7 +288,7 @@ export async function getChattersUnsafe(userId: string, first?: number, after?: 
   total: number;
 }> {
   try {
-    const token = await prisma.token.getByUserIdOrFail(userId);
+    const token = await getTokenOrThrow(userId);
 
     const response = await twitch.request<GetChatters>({
       method: 'GET',
@@ -289,8 +298,8 @@ export async function getChattersUnsafe(userId: string, first?: number, after?: 
         Authorization: `Bearer ${token.accessToken}`,
       },
       params: {
-        broadcaster_id: token.user.id,
-        moderator_id: token.user.id,
+        broadcaster_id: token.userId,
+        moderator_id: token.userId,
         first,
         after,
       },
@@ -311,7 +320,7 @@ export const getChatters: CloneFunction<typeof getChattersUnsafe> = async (...ar
 
 export async function deleteChatMessagesUnsafe(userId: string, messageId?: string): Promise<void> {
   try {
-    const token = await prisma.token.getByUserIdOrFail(userId);
+    const token = await getTokenOrThrow(userId);
 
     await twitch.request({
       method: 'DELETE',
@@ -321,8 +330,8 @@ export async function deleteChatMessagesUnsafe(userId: string, messageId?: strin
         Authorization: `Bearer ${token.accessToken}`,
       },
       params: {
-        broadcaster_id: token.user.id,
-        moderator_id: token.user.id,
+        broadcaster_id: token.userId,
+        moderator_id: token.userId,
         message_id: messageId,
       },
     });
@@ -336,7 +345,7 @@ export const deleteChatMessages: CloneFunction<typeof deleteChatMessagesUnsafe> 
 
 export async function banUserUnsafe(userId: string, targetId: string, duration?: number): Promise<BanUsers> {
   try {
-    const token = await prisma.token.getByUserIdOrFail(userId);
+    const token = await getTokenOrThrow(userId);
 
     const response = await twitch.request<BanUsers>({
       method: 'POST',
@@ -346,8 +355,8 @@ export async function banUserUnsafe(userId: string, targetId: string, duration?:
         Authorization: `Bearer ${token.accessToken}`,
       },
       params: {
-        broadcaster_id: token.user.id,
-        moderator_id: token.user.id,
+        broadcaster_id: token.userId,
+        moderator_id: token.userId,
       },
       data: {
         data: {
@@ -368,7 +377,7 @@ export const banUser: CloneFunction<typeof banUserUnsafe> = async (...args) => r
 
 export async function getChannelInformationUnsafe(userId: string): Promise<TwitchChannelInformation | null> {
   try {
-    const token = await prisma.token.getByUserIdOrFail(userId);
+    const token = await getTokenOrThrow(userId);
 
     const response = await twitch.request<GetTwitchChannelInformation>({
       method: 'GET',
@@ -378,7 +387,7 @@ export async function getChannelInformationUnsafe(userId: string): Promise<Twitc
         Authorization: `Bearer ${token.accessToken}`,
       },
       params: {
-        broadcaster_id: token.user.id,
+        broadcaster_id: token.userId,
       },
     });
 
@@ -399,7 +408,7 @@ export const getChannelInformation: CloneFunction<typeof getChannelInformationUn
 
 export async function getStreamsUnsafe(userId: string): Promise<TwitchStream | null> {
   try {
-    const token = await prisma.token.getByUserIdOrFail(userId);
+    const token = await getTokenOrThrow(userId);
 
     const response = await twitch.request<GetTwitchStreams>({
       method: 'GET',
@@ -409,7 +418,7 @@ export async function getStreamsUnsafe(userId: string): Promise<TwitchStream | n
         Authorization: `Bearer ${token.accessToken}`,
       },
       params: {
-        user_id: token.user.id,
+        user_id: token.userId,
       },
     });
 
