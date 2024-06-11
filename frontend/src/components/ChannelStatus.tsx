@@ -1,7 +1,7 @@
 import { createResource, ErrorBoundary, Suspense } from 'solid-js';
 import MaterialSymbol from '#components/MaterialSymbol';
 import Button from '#components/Button';
-import { BotConnectionStatus, GetBotConnectionStatusResponse } from '#shared/types/api/dashboard';
+import { BotConnectionStatus, GetBotConnectionStatusResponse } from '#types/api/dashboard';
 import { makeRequest } from '#lib/fetch';
 import ErrorFallback from '#components/ErrorFallback';
 

@@ -2,7 +2,7 @@ import MaterialSymbol from '#components/MaterialSymbol';
 import TemplateButton from '#components/TemplateButton';
 import TableRow from '@suid/material/TableRow/TableRow';
 import TableCell from '@suid/material/TableCell/TableCell';
-import { Template as TemplateType } from '#shared/types/api/templates';
+import { Template as TemplateType } from '#types/api/templates';
 import HighlightedCode from '#components/HighlightedCode';
 import { For } from 'solid-js';
 import Pill from '#components/Pill';

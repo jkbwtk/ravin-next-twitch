@@ -1,7 +1,7 @@
 import { ExtendedMap } from '#lib/ExtendedMap';
 import { logger } from '#lib/logger';
 import { getUsers } from '#lib/twitch';
-import { TwitchUser } from '#shared/types/twitch';
+import { TwitchUser } from '#types/twitch';
 
 
 export interface CachedTwitchUser {

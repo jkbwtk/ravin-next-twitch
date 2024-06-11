@@ -4,9 +4,9 @@ import { MessageWithUser } from '#database/extensions/message';
 import { ExtendedMap } from '#lib/ExtendedMap';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { banUser, deleteChatMessages } from '#lib/twitch';
-import { BotActionType } from '#shared/types/api/botActions';
-import { UserLevel } from '#shared/types/api/commands';
-import { Actions } from '#shared/types/api/filters';
+import { BotActionType } from '#types/api/botActions';
+import { UserLevel } from '#types/api/commands';
+import { Actions } from '#types/api/filters';
 import { PhraseFilter } from '@prisma/client';
 import { Client } from 'tmi.js';
 

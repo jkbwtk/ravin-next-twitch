@@ -4,7 +4,7 @@ import { MessageWithUser } from '#database/extensions/message';
 import ExtendedSet from '#lib/ExtendedSet';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { logger } from '#lib/logger';
-import { BotActionType } from '#shared/types/api/botActions';
+import { BotActionType } from '#types/api/botActions';
 import { mergeOptions, RequiredDefaults } from '#shared/utils';
 import { Client } from 'tmi.js';
 

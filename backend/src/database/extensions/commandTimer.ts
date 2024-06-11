@@ -1,4 +1,4 @@
-import { CommandTimer, DeleteCommandTimerReqBody, PatchCommandTimerReqBody, PostCommandTimerReqBody } from '#shared/types/api/commands';
+import { CommandTimer, DeleteCommandTimerReqBody, PatchCommandTimerReqBody, PostCommandTimerReqBody } from '#types/api/commands';
 import { ExtensionReturnType, ExtensionType } from '#database/extensions/utils';
 import { Prisma } from '@prisma/client';
 import { Bot } from '#bot/Bot';

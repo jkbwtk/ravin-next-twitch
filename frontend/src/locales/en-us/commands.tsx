@@ -1,5 +1,5 @@
 import { Dictionary } from '#locales/Dictionary';
-import { UserLevel } from '#shared/types/api/commands';
+import { UserLevel } from '#types/api/commands';
 
 
 export const userLevels = new Dictionary<UserLevel, string>(

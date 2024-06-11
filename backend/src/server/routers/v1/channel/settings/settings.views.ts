@@ -4,7 +4,7 @@ import { ExpressStack } from '#server/ExpressStack';
 import { ServerError } from '#shared/ServerError';
 import { PostChantingSchema } from '#server/routers/v1/channel/settings/settings.schemas';
 import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
-import { GetChantingSettingsResponse } from '#shared/types/api/channel';
+import { GetChantingSettingsResponse } from '#types/api/channel';
 import { json } from 'body-parser';
 import { HttpCodes } from '#shared/httpCodes';
 import { ChannelController } from '#database/controllers/ChannelController';

@@ -5,7 +5,7 @@ import { limitOffsetPagination } from '#server/middlewares/pagination';
 import { authenticated, validateResponse } from '#server/stackMiddlewares';
 import { ServerError } from '#shared/ServerError';
 import { HttpCodes } from '#shared/httpCodes';
-import { GetBotActionsPaginatedResponse, GetBotActionsResponse } from '#shared/types/api/botActions';
+import { GetBotActionsPaginatedResponse, GetBotActionsResponse } from '#types/api/botActions';
 
 
 export const getBotActionsView = new ExpressStack()

@@ -12,10 +12,10 @@ import Modal from '#components/Modal';
 import { useConfirmationBox } from '#providers/ConfirmationBoxProvider';
 import { SelectChangeEvent } from '@suid/material/Select';
 import { useErrorHandlers } from '#providers/ErrorHandlersProvider';
-import { Actions, DeleteRegexFilterReqBody, PatchRegexFilterReqBody, PostRegexFilterReqBody, RegexFilter } from '#shared/types/api/filters';
+import { Actions, DeleteRegexFilterReqBody, PatchRegexFilterReqBody, PostRegexFilterReqBody, RegexFilter } from '#types/api/filters';
 import TextArea from '#components/TextArea';
 import Input from '#components/Input';
-import { RegExpType } from '#shared/types/regExp';
+import { RegExpType } from '#types/regExp';
 
 import style from '#styles/CustomCommandsEditorProvider.module.scss';
 

@@ -1,6 +1,6 @@
 import { makeRequest } from '#lib/fetch';
 import { useSocket } from '#providers/SocketProvider';
-import { DeleteTemplateReqBody, GetTemplatesResponse, PatchTemplateReqBody, PostTemplateReqBody, Template } from '#shared/types/api/templates';
+import { DeleteTemplateReqBody, GetTemplatesResponse, PatchTemplateReqBody, PostTemplateReqBody, Template } from '#types/api/templates';
 import { createContext, createMemo, createResource, InitializedResource, onCleanup, onMount, useContext } from 'solid-js';
 
 

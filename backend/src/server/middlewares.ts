@@ -1,6 +1,6 @@
 import { logger } from '#lib/logger';
 import { ServerError } from '#shared/ServerError';
-import { ServerErrorResponse } from '#shared/types/api/serverError';
+import { ServerErrorResponse } from '#types/api/serverError';
 import { ErrorRequestHandler, RequestHandler } from 'express';
 import onHeaders from 'on-headers';
 import onFinished from 'on-finished';

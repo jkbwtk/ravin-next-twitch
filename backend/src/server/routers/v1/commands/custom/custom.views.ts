@@ -7,7 +7,7 @@ import { SocketServer } from '#server/SocketServer';
 import { idListFilter } from '#server/middlewares/idListFilter';
 import { DeleteCustomCommandSchema, PatchCustomCommandSchema, PostCustomCommandSchema } from '#server/routers/v1/commands/custom/custom.schemas';
 import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
-import { GetCustomCommandsPaginatedResponse, GetCustomCommandsResponse, GetCustomCommandsStatusResponse } from '#shared/types/api/commands';
+import { GetCustomCommandsPaginatedResponse, GetCustomCommandsResponse, GetCustomCommandsStatusResponse } from '#types/api/commands';
 import { json } from 'body-parser';
 import { HttpCodes } from '#shared/httpCodes';
 import { limitOffsetPagination } from '#server/middlewares/pagination';

@@ -5,10 +5,10 @@ import { ExpressStack } from '#server/ExpressStack';
 import { ServerError } from '#shared/ServerError';
 import { PatchConfigSchema, PostPublicConfigSchema } from '#server/routers/v1/admin/admin.schemas';
 import { admin, authenticated, validate, validateResponse } from '#server/stackMiddlewares';
-import { GetScheduledJobsResponse } from '#shared/types/api/admin';
+import { GetScheduledJobsResponse } from '#types/api/admin';
 import { json } from 'body-parser';
 import { HttpCodes } from '#shared/httpCodes';
-import { GetConfig } from '#shared/types/api/auth';
+import { GetConfig } from '#types/api/auth';
 import { SocketServer } from '#server/SocketServer';
 
 

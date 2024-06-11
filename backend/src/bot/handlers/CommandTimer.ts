@@ -8,8 +8,8 @@ import { ExtendedCron } from '#lib/ExtendedCron';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { logger } from '#lib/logger';
 import { SocketServer } from '#server/SocketServer';
-import { BotActionType } from '#shared/types/api/botActions';
-import { CommandTimerState, UserLevel } from '#shared/types/api/commands';
+import { BotActionType } from '#types/api/botActions';
+import { CommandTimerState, UserLevel } from '#types/api/commands';
 import { Isolate } from 'isolated-vm';
 import { Client } from 'tmi.js';
 

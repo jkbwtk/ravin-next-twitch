@@ -7,7 +7,7 @@ import { SocketServer } from '#server/SocketServer';
 import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
 import { json } from 'body-parser';
 import { HttpCodes } from '#shared/httpCodes';
-import { GetTemplatesPaginatedResponse, GetTemplatesResponse, TestTemplateResponse } from '#shared/types/api/templates';
+import { GetTemplatesPaginatedResponse, GetTemplatesResponse, TestTemplateResponse } from '#types/api/templates';
 import { DeleteTemplateSchema, PatchTemplateSchema, PostTemplateSchema, TestTemplateSchema } from '#server/routers/v1/templates/templates.schemas';
 import { TemplateTester } from '#bot/templates/TemplateTester';
 import { limitOffsetPagination } from '#server/middlewares/pagination';

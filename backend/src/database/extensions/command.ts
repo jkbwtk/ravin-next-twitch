@@ -1,7 +1,7 @@
 import { Bot } from '#bot/Bot';
 import { ExtensionReturnType, ExtensionType } from '#database/extensions/utils';
 import { LimitOffsetPaginationState } from '#server/middlewares/pagination';
-import { CustomCommand, DeleteCustomCommandReqBody, PatchCustomCommandReqBody, PostCustomCommandReqBody, UserLevel } from '#shared/types/api/commands';
+import { CustomCommand, DeleteCustomCommandReqBody, PatchCustomCommandReqBody, PostCustomCommandReqBody, UserLevel } from '#types/api/commands';
 import { Prisma } from '@prisma/client';
 import { idListFilterState } from '#server/middlewares/idListFilter';
 

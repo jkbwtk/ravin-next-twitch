@@ -6,7 +6,7 @@ import { ServerError } from '#shared/ServerError';
 import { SocketServer } from '#server/SocketServer';
 import { PostBroadcastNotificationSchema, PostReadNotificationsSchema } from '#server/routers/v1/systemNotifications/systemNotifications.schemas';
 import { admin, authenticated, validate, validateResponse } from '#server/stackMiddlewares';
-import { GetSystemNotificationsReadResponse } from '#shared/types/api/systemNotifications';
+import { GetSystemNotificationsReadResponse } from '#types/api/systemNotifications';
 import { json } from 'body-parser';
 import { HttpCodes } from '#shared/httpCodes';
 

@@ -1,7 +1,7 @@
 import { createResource, ErrorBoundary, For, onCleanup, onMount, Suspense } from 'solid-js';
 import { useSocket } from '#providers/SocketProvider';
 import Widget from '#components/Widget';
-import { GetMessagesResponse, Message as MessagePublic } from '#shared/types/api/logs';
+import { GetMessagesResponse, Message as MessagePublic } from '#types/api/logs';
 import { makeRequest } from '#lib/fetch';
 
 import style from '#styles/widgets/LogsWidget.module.scss';

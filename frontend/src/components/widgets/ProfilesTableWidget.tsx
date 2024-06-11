@@ -8,7 +8,7 @@ import ErrorFallback from '#components/ErrorFallback';
 import Paginator from '#components/Paginator';
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@suid/material';
 import FetchFallback from '#components/FetchFallback';
-import { BehaviorProfile, GetBehaviorProfilesPaginatedResponse } from '#shared/types/api/behaviorProfiles';
+import { BehaviorProfile, GetBehaviorProfilesPaginatedResponse } from '#types/api/behaviorProfiles';
 import Profile from '#components/Profile';
 
 import style from '#styles/widgets/TableWidget.module.scss';

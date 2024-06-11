@@ -11,7 +11,7 @@ import { Wirable } from '#lib/autowire';
 import { SocketServer } from '#server/SocketServer';
 import { ExtendedCron } from '#lib/ExtendedCron';
 import { PhraseFilter, RegexFilter } from '@prisma/client';
-import { BotActionType } from '#shared/types/api/botActions';
+import { BotActionType } from '#types/api/botActions';
 
 
 export interface BotOptions {

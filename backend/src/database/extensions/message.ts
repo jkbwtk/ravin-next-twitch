@@ -1,8 +1,8 @@
 import { ExtensionType } from '#database/extensions/utils';
 import { logger } from '#lib/logger';
 import { definedOrFail } from '#lib/utils';
-import { UserLevel } from '#shared/types/api/commands';
-import { EmotesUsed as EmotesUsed, Message as MessagePublic } from '#shared/types/api/logs';
+import { UserLevel } from '#types/api/commands';
+import { EmotesUsed as EmotesUsed, Message as MessagePublic } from '#types/api/logs';
 import { Message, Prisma } from '@prisma/client';
 import { BadgeInfo, Badges, ChatUserstate } from 'tmi.js';
 

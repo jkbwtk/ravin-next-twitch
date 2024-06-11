@@ -6,7 +6,7 @@ import { limitOffsetPagination } from '#server/middlewares/pagination';
 import { authenticated, validateResponse } from '#server/stackMiddlewares';
 import { ServerError } from '#shared/ServerError';
 import { HttpCodes } from '#shared/httpCodes';
-import { GetBehaviorProfilesPaginatedResponse, GetBehaviorProfilesResponse, GetBehaviorProfilesStatusResponse } from '#shared/types/api/behaviorProfiles';
+import { GetBehaviorProfilesPaginatedResponse, GetBehaviorProfilesResponse, GetBehaviorProfilesStatusResponse } from '#types/api/behaviorProfiles';
 
 
 export const getBehaviorProfilesView = new ExpressStack()

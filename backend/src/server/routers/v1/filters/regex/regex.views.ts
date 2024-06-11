@@ -8,7 +8,7 @@ import { DeleteRegexFilterSchema, PatchRegexFilterSchema, PostRegexFilterSchema 
 import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
 import { ServerError } from '#shared/ServerError';
 import { HttpCodes } from '#shared/httpCodes';
-import { GetRegexFiltersPaginatedResponse, GetRegexFiltersResponse, RegexFilter } from '#shared/types/api/filters';
+import { GetRegexFiltersPaginatedResponse, GetRegexFiltersResponse, RegexFilter } from '#types/api/filters';
 import { json } from 'body-parser';
 
 

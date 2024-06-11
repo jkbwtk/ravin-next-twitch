@@ -1,5 +1,5 @@
 import { Dictionary } from '#locales/Dictionary';
-import { TemplateEnvironments } from '#shared/types/api/templates';
+import { TemplateEnvironments } from '#types/api/templates';
 
 
 export const templateEnvironments = new Dictionary<TemplateEnvironments, string>(

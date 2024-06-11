@@ -5,10 +5,10 @@ import { ExtendedMap } from '#lib/ExtendedMap';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { logger } from '#lib/logger';
 import { banUser, deleteChatMessages } from '#lib/twitch';
-import { BotActionType } from '#shared/types/api/botActions';
-import { UserLevel } from '#shared/types/api/commands';
-import { Actions } from '#shared/types/api/filters';
-import { RegExpType } from '#shared/types/regExp';
+import { BotActionType } from '#types/api/botActions';
+import { UserLevel } from '#types/api/commands';
+import { Actions } from '#types/api/filters';
+import { RegExpType } from '#types/regExp';
 import { RegexFilter } from '@prisma/client';
 import { Client } from 'tmi.js';
 

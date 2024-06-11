@@ -1,4 +1,4 @@
-import { DeletePhraseFilterReqBody, PatchPhraseFilterReqBody, PostPhraseFilterReqBody } from '#shared/types/api/filters';
+import { DeletePhraseFilterReqBody, PatchPhraseFilterReqBody, PostPhraseFilterReqBody } from '#types/api/filters';
 import { z } from 'zod';
 
 

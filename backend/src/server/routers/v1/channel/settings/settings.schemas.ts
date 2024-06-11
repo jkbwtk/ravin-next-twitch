@@ -1,4 +1,4 @@
-import { PostChantingSettingsReqBody } from '#shared/types/api/channel';
+import { PostChantingSettingsReqBody } from '#types/api/channel';
 import { z } from 'zod';
 
 

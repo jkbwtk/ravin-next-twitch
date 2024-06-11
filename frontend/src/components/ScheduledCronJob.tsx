@@ -1,5 +1,5 @@
 import { timeDiff } from '#shared/timeUtils';
-import { ScheduledJob } from '#shared/types/api/admin';
+import { ScheduledJob } from '#types/api/admin';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import duration from 'dayjs/plugin/duration';

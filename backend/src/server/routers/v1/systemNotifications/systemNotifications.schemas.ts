@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { PostSystemNotificationBroadcastReqBody, PostSystemNotificationReadReqBody } from '#shared/types/api/systemNotifications';
+import { PostSystemNotificationBroadcastReqBody, PostSystemNotificationReadReqBody } from '#types/api/systemNotifications';
 
 
 export const PostReadNotificationsSchema = z.object({

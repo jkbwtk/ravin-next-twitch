@@ -6,7 +6,7 @@ import Modal from '#components/Modal';
 import TextArea from '#components/TextArea';
 import { makeRequest } from '#lib/fetch';
 import { useNotification } from '#providers/NotificationProvider';
-import { PatchTemplateReqBody, PostTemplateReqBody, Template, TestTemplateResponse } from '#shared/types/api/templates';
+import { PatchTemplateReqBody, PostTemplateReqBody, Template, TestTemplateResponse } from '#types/api/templates';
 import { createResource, createSignal, ErrorBoundary, Index, Show } from 'solid-js';
 import { Debounce } from '#shared/Debounce';
 import Stack from '@suid/material/Stack/Stack';

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DeleteTemplateReqBody, PatchTemplateReqBody, PostTemplateReqBody, TestTemplateReqBody } from '#shared/types/api/templates';
+import { DeleteTemplateReqBody, PatchTemplateReqBody, PostTemplateReqBody, TestTemplateReqBody } from '#types/api/templates';
 
 
 export const PostTemplateSchema = z.object({

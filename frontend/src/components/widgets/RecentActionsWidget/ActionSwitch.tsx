@@ -1,5 +1,5 @@
 import { Match, Switch } from 'solid-js';
-import { Action } from '#shared/types/api/dashboard';
+import { Action } from '#types/api/dashboard';
 import ActionBan from '#components/widgets/RecentActionsWidget/ActionElementBan';
 import ActionTimeout from '#components/widgets/RecentActionsWidget/ActionElementTimeout';
 import ActionDelete from '#components/widgets/RecentActionsWidget/ActionElementDelete';

@@ -1,5 +1,5 @@
 import { logger } from '#lib/logger';
-import { TemplateIssue } from '#shared/types/api/templates';
+import { TemplateIssue } from '#types/api/templates';
 import { TemplateEnvironments } from '#types/database/columns';
 
 

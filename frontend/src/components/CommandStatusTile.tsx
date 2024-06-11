@@ -1,6 +1,6 @@
 import MaterialSymbol from '#components/MaterialSymbol';
 import { timeFromNowAlt } from '#shared/timeUtils';
-import { CustomCommandState } from '#shared/types/api/commands';
+import { CustomCommandState } from '#types/api/commands';
 import { createEffect, createSignal, Match, onCleanup, onMount, Switch } from 'solid-js';
 
 import style from '#styles/CommandStatusTile.module.scss';

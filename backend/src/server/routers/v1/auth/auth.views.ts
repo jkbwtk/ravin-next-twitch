@@ -6,7 +6,7 @@ import { SocketServer } from '#server/SocketServer';
 import { authScopes } from '#server/routers/v1/auth/authShared';
 import { passportReady } from '#server/routers/v1/auth/passportUtils';
 import { authenticated, validateResponse, waitUntilReady } from '#server/stackMiddlewares';
-import { GetSession } from '#shared/types/api/auth';
+import { GetSession } from '#types/api/auth';
 import passport from 'passport';
 import { HttpCodes } from '#shared/httpCodes';
 import { Config } from '#lib/Config';

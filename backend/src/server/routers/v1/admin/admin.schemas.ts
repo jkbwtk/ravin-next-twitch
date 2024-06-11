@@ -1,4 +1,4 @@
-import { PostConfigReqBody } from '#shared/types/api/auth';
+import { PostConfigReqBody } from '#types/api/auth';
 import { PatchConfigReqBody } from '#types/api/admin';
 import { z } from 'zod';
 

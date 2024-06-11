@@ -1,7 +1,7 @@
 import { prisma } from '#database/database';
 import { VerifyCallback } from 'passport-oauth2';
 import { isDevApi } from '#shared/constants';
-import { TwitchUser } from '#shared/types/twitch';
+import { TwitchUser } from '#types/twitch';
 import { revokeTokenUnsafe } from '#lib/twitch';
 import { Config } from '#lib/Config';
 import { logger } from '#lib/logger';

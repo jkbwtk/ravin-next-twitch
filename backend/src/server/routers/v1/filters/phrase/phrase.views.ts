@@ -8,7 +8,7 @@ import { PatchPhraseFilterSchema, PostPhraseFilterSchema } from '#server/routers
 import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
 import { ServerError } from '#shared/ServerError';
 import { HttpCodes } from '#shared/httpCodes';
-import { GetPhraseFiltersPaginatedResponse, GetPhraseFiltersResponse, PhraseFilter } from '#shared/types/api/filters';
+import { GetPhraseFiltersPaginatedResponse, GetPhraseFiltersResponse, PhraseFilter } from '#types/api/filters';
 import { json } from 'body-parser';
 
 

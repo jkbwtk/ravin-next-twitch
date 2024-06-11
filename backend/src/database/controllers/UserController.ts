@@ -1,6 +1,6 @@
 import { eq, getTableColumns } from 'drizzle-orm';
 import { db } from '#database/database';
-import { usersTable } from '#shared/schema/schema';
+import { usersTable } from '#schema/schema';
 import { trackQueryPerformance } from '#database/utils';
 import { User, UserInsert } from '#types/database/tables';
 

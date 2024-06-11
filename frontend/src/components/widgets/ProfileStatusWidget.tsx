@@ -2,7 +2,7 @@ import { createResource, ErrorBoundary, For, Match, onCleanup, onMount, Suspense
 import Widget from '#components/Widget';
 import { makeRequest } from '#lib/fetch';
 import ErrorFallback from '#components/ErrorFallback';
-import { BehaviorProfilesStatus, GetBehaviorProfilesStatusResponse } from '#shared/types/api/behaviorProfiles';
+import { BehaviorProfilesStatus, GetBehaviorProfilesStatusResponse } from '#types/api/behaviorProfiles';
 import Pill from '#components/Pill';
 import { useSocket } from '#providers/SocketProvider';
 import { timeDiff } from '#shared/timeUtils';

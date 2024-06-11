@@ -6,7 +6,7 @@ import { getModerators } from '#lib/twitch';
 import { ExpressStack } from '#server/ExpressStack';
 import { ServerError } from '#shared/ServerError';
 import { authenticated, validateResponse } from '#server/stackMiddlewares';
-import { GetBotConnectionStatusResponse } from '#shared/types/api/dashboard';
+import { GetBotConnectionStatusResponse } from '#types/api/dashboard';
 import { HttpCodes } from '#shared/httpCodes';
 import { ChannelController } from '#database/controllers/ChannelController';
 

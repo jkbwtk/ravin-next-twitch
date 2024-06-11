@@ -1,5 +1,5 @@
 import { SocketServer } from '#server/SocketServer';
-import { Action } from '#shared/types/api/dashboard';
+import { Action } from '#types/api/dashboard';
 import { Prisma } from '@prisma/client';
 
 

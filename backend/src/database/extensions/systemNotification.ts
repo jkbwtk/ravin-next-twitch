@@ -1,6 +1,6 @@
 import { arrayFrom } from '#lib/utils';
 import { SocketServer } from '#server/SocketServer';
-import { SystemNotification } from '#shared/types/api/systemNotifications';
+import { SystemNotification } from '#types/api/systemNotifications';
 import { Prisma } from '@prisma/client';
 
 

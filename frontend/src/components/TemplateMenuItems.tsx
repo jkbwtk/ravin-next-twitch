@@ -1,5 +1,5 @@
 import MaterialSymbol from '#components/MaterialSymbol';
-import { Template, TemplateEnvironments } from '#shared/types/api/templates';
+import { Template, TemplateEnvironments } from '#types/api/templates';
 import { MenuItem } from '@suid/material';
 import { For, Show } from 'solid-js';
 

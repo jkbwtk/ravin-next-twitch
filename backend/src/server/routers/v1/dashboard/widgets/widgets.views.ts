@@ -13,7 +13,7 @@ import {
   GetModeratorsResponse,
   GetRecentActionsResponse,
   GetTopStatsResponse,
-} from '#shared/types/api/dashboard';
+} from '#types/api/dashboard';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { HttpCodes } from '#shared/httpCodes';

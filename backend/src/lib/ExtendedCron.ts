@@ -1,5 +1,5 @@
 import { logger } from '#lib/logger';
-import { ScheduledJob } from '#shared/types/api/admin';
+import { ScheduledJob } from '#types/api/admin';
 import { quickSwitch } from '#shared/utils';
 import Cron, { CronOptions } from 'croner';
 import { createHash } from 'crypto';

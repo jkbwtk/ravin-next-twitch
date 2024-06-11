@@ -9,7 +9,7 @@ import Paper from '@suid/material/Paper/Paper';
 import TableRow from '@suid/material/TableRow/TableRow';
 import TableCell from '@suid/material/TableCell/TableCell';
 import TableBody from '@suid/material/TableBody/TableBody';
-import { Template as TemplateType } from '#shared/types/api/templates';
+import { Template as TemplateType } from '#types/api/templates';
 import Template from '#components/Template';
 import Paginator from '#components/Paginator';
 import { useSession } from '#providers/SessionProvider';

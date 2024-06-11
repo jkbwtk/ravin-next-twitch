@@ -3,7 +3,7 @@ import TemplateButton from '#components/TemplateButton';
 import { Match, Switch } from 'solid-js';
 import { TableType } from '#components/widgets/CommandTimersTableWidget';
 import { TableCell, TableRow } from '@suid/material';
-import { Actions, RegexFilter as RegexFilterType } from '#shared/types/api/filters';
+import { Actions, RegexFilter as RegexFilterType } from '#types/api/filters';
 import HighlightedCode from '#components/HighlightedCode';
 import { useRegexFilterEditor } from '#providers/RegexFilterEditorProvider';
 

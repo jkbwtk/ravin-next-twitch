@@ -14,7 +14,7 @@ import { CommandTimerHandler } from '#bot/handlers/CommandTimerHandler';
 import { Isolate } from 'isolated-vm';
 import { RegexFilterHandler } from '#bot/handlers/RegexFilterHandler';
 import { PhraseFilterHandler } from '#bot/handlers/PhraseFilterHandler';
-import { TwitchChannelInformation, TwitchStream } from '#shared/types/twitch';
+import { TwitchChannelInformation, TwitchStream } from '#types/twitch';
 import { SocketServer } from '#server/SocketServer';
 
 
