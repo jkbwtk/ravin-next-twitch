@@ -8,6 +8,8 @@
     "dev": "cross-env DEV=true VITE_CJS_IGNORE_WARNING=true TS_NODE_PROJECT=./backend/tsconfig.json tsnd -r tsconfig-paths/register --no-node-snapshot ./backend/src/index.ts",
     "playground": "cross-env DEV=true VITE_CJS_IGNORE_WARNING=true TS_NODE_PROJECT=./backend/tsconfig.json tsnd -r tsconfig-paths/register --no-node-snapshot ./backend/src/playground.ts",
     "build": "vite build && cd ./backend && tsc -b",
+    "build-backend": "cd ./backend && tsc -b",
+    "build-frontend": "vite build",
     "watch": "cd backend && tsc -b --watch",
     "lint": "eslint --fix --ext .ts,.tsx ./frontend/src ./backend/src ./shared/src",
     "test": "vitest"
@@ -20,7 +22,6 @@
     "url": "git+https://github.com/jkbwtk/ravin-next-twitch.git"
   },
   "_moduleAliases": {
-    "#shared": "build/shared/",
     "#types": "build/shared/types",
     "#lib": "build/backend/lib",
     "#database": "build/backend/database",
@@ -28,7 +29,8 @@
     "#server": "build/backend/server",
     "#routers": "build/backend/server/routers",
     "#jobs": "build/backend/jobs",
-    "#schema": "build/shared/schema"
+    "#schema": "build/shared/schema",
+    "#shared": "build/shared/"
   },
   "dependencies": {
     "@colors/colors": "^1.6.0",

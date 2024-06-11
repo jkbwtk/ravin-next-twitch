@@ -29,9 +29,6 @@
     "rootDir": "src/",
     "baseUrl": "src",
     "paths": {
-      "#shared/*": [
-        "../../shared/src/*"
-      ],
       "#types/*": [
         "../../shared/src/types/*"
       ],
@@ -58,6 +55,9 @@
       ],
       "#locales/*": [
         "./locales/*"
+      ],
+      "#shared/*": [
+        "../../shared/src/*"
       ],
     }
   },

@@ -36,7 +36,6 @@ export default defineConfig({
 
   resolve: {
     alias: [
-      { find: '#shared', replacement: resolve(cwd(), 'shared/src') },
       { find: '#types', replacement: resolve(cwd(), 'shared/src/types') },
       { find: '#schema', replacement: '#shared/src/schema' },
       { find: '#components', replacement: resolve(frontendDevelopmentPath, 'src/components') },
@@ -47,6 +46,7 @@ export default defineConfig({
       { find: '#providers', replacement: resolve(frontendDevelopmentPath, 'src/providers') },
       { find: '#routers', replacement: resolve(frontendDevelopmentPath, 'src/routers') },
       { find: '#locales', replacement: resolve(frontendDevelopmentPath, 'src/locales') },
+      { find: '#shared', replacement: resolve(cwd(), 'shared/src') },
     ],
   },
 
