@@ -1,5 +1,5 @@
-import { DefaultStates, StatesObject } from '#bot/templates/TemplateRunner';
 import { prisma } from '#database/database';
+import { DefaultStates, StatesObject } from '#types/database/columns';
 import { Template } from '@prisma/client';
 
 

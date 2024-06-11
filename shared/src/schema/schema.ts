@@ -16,12 +16,8 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
-import type { ChantingSettings } from '../types/api/channel';
+import { ChantingSettings, StatesObject, TemplateEnvironments } from '../types/database/columns';
 
-
-type UtilityRows = 'createdAt' | 'updatedAt';
-
-export type StripUtilityRows<T> = Omit<T, UtilityRows>;
 
 export const ChannelActionType = pgEnum('ChannelActionType', ['ban', 'timeout', 'delete']);
 
@@ -36,9 +32,6 @@ export const configTable = pgTable('Config', {
     .notNull(),
 });
 
-export type Config = typeof configTable.$inferSelect;
-
-export type ConfigInsert = StripUtilityRows<typeof configTable.$inferInsert>;
 
 export const channelsTable = pgTable(
   'Channels',
@@ -62,10 +55,6 @@ export const channelsTable = pgTable(
     };
   },
 );
-
-export type Channel = typeof channelsTable.$inferSelect;
-
-export type ChannelInsert = StripUtilityRows<typeof channelsTable.$inferInsert>;
 
 export const channelActionsTable = pgTable(
   'ChannelActions',
@@ -94,9 +83,6 @@ export const channelActionsTable = pgTable(
   },
 );
 
-export type ChannelAction = typeof channelActionsTable.$inferSelect;
-
-export type ChannelActionInsert = StripUtilityRows<typeof channelActionsTable.$inferInsert>;
 
 export const channelStatsTable = pgTable(
   'ChannelStats',
@@ -127,9 +113,6 @@ export const channelStatsTable = pgTable(
   },
 );
 
-export type ChannelStat = typeof channelStatsTable.$inferSelect;
-
-export type ChannelStatInsert = StripUtilityRows<typeof channelStatsTable.$inferInsert>;
 
 export const commandsTable = pgTable(
   'Commands',
@@ -160,9 +143,6 @@ export const commandsTable = pgTable(
   },
 );
 
-export type Command = typeof commandsTable.$inferSelect;
-
-export type CommandInsert = StripUtilityRows<typeof commandsTable.$inferInsert>;
 
 export const messagesTable = pgTable(
   'Messages',
@@ -204,10 +184,6 @@ export const messagesTable = pgTable(
   },
 );
 
-export type Message = typeof messagesTable.$inferSelect;
-
-export type MessageInsert = StripUtilityRows<typeof messagesTable.$inferInsert>;
-
 export const tokensTable = pgTable(
   'Tokens',
   {
@@ -233,9 +209,6 @@ export const tokensTable = pgTable(
   },
 );
 
-export type Token = typeof tokensTable.$inferSelect;
-
-export type TokenInsert = StripUtilityRows<typeof tokensTable.$inferInsert>;
 
 export const usersTable = pgTable(
   'Users',
@@ -261,9 +234,6 @@ export const usersTable = pgTable(
   },
 );
 
-export type User = typeof usersTable.$inferSelect;
-
-export type UserInsert = StripUtilityRows<typeof usersTable.$inferInsert>;
 
 export const systemNotificationsTable = pgTable(
   'SystemNotifications',
@@ -288,17 +258,13 @@ export const systemNotificationsTable = pgTable(
   },
 );
 
-export type SystemNotification = typeof systemNotificationsTable.$inferSelect;
-
-export type SystemNotificationInsert = StripUtilityRows<typeof systemNotificationsTable.$inferInsert>;
-
 export const templatesTable = pgTable(
   'Templates',
   {
     id: serial('id').primaryKey().notNull(),
     name: varchar('name').notNull(),
     template: varchar('template').notNull(),
-    states: jsonb('states').default({}).notNull(),
+    states: jsonb('states').$type<StatesObject>().default({}).notNull(),
     createdAt: timestamp('updatedAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { precision: 3, mode: 'date' })
       .defaultNow()
@@ -307,7 +273,7 @@ export const templatesTable = pgTable(
     userId: varchar('userId')
       .notNull()
       .references(() => usersTable.id, { onDelete: 'cascade' }),
-    environments: jsonb('environments').default([]).notNull(),
+    environments: jsonb('environments').$type<TemplateEnvironments[]>().default([]).notNull(),
   },
   (table) => {
     return {
@@ -317,9 +283,6 @@ export const templatesTable = pgTable(
   },
 );
 
-export type Template = typeof templatesTable.$inferSelect;
-
-export type TemplateInsert = StripUtilityRows<typeof templatesTable.$inferInsert>;
 
 export const commandTimersTable = pgTable(
   'CommandTimers',
@@ -352,10 +315,6 @@ export const commandTimersTable = pgTable(
   },
 );
 
-export type CommandTimer = typeof commandTimersTable.$inferSelect;
-
-export type CommandTimerInsert = StripUtilityRows<typeof commandTimersTable.$inferInsert>;
-
 export const behaviorProfilesTable = pgTable(
   'BehaviorProfiles',
   {
@@ -381,10 +340,6 @@ export const behaviorProfilesTable = pgTable(
     };
   },
 );
-
-export type BehaviorProfile = typeof behaviorProfilesTable.$inferSelect;
-
-export type BehaviorProfileInsert = StripUtilityRows<typeof behaviorProfilesTable.$inferInsert>;
 
 export const behaviorProfilesToCommandsTable = pgTable(
   'BehaviorProfilesToCommands',
@@ -480,10 +435,6 @@ export const botActionsTable = pgTable(
   },
 );
 
-export type BotAction = typeof botActionsTable.$inferSelect;
-
-export type BotActionInsert = StripUtilityRows<typeof botActionsTable.$inferInsert>;
-
 export const phraseFiltersTable = pgTable(
   'PhraseFilters',
   {
@@ -512,9 +463,6 @@ export const phraseFiltersTable = pgTable(
   },
 );
 
-export type PhraseFilter = typeof phraseFiltersTable.$inferSelect;
-
-export type PhraseFilterInsert = StripUtilityRows<typeof phraseFiltersTable.$inferInsert>;
 
 export const regexFiltersTable = pgTable(
   'RegexFilters',
@@ -541,6 +489,3 @@ export const regexFiltersTable = pgTable(
   },
 );
 
-export type RegexFilter = typeof regexFiltersTable.$inferSelect;
-
-export type RegexFilterInsert = StripUtilityRows<typeof regexFiltersTable.$inferInsert>;

@@ -12,7 +12,7 @@ import { TokenManager } from '#server/TokenManager';
 import { Bot } from '#bot/Bot';
 import http, { Server as HTTPServer } from 'http';
 import { SocketServer } from '#server/SocketServer';
-import { User as UserModel } from '#shared/schema/schema';
+import { User as UserModel } from '#types/database/tables';
 import { logger } from '#lib/logger';
 
 

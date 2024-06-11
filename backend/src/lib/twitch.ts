@@ -29,8 +29,8 @@ import { Config } from '#lib/Config';
 import { TokenManager } from '#server/TokenManager';
 import { arrayFrom, AtLeastOne, sleep } from '#lib/utils';
 import { logger } from '#lib/logger';
-import { Token } from '#shared/schema/schema';
 import { TokenController } from '#database/controllers/TokenController';
+import { Token } from '#types/database/tables';
 
 
 const apiSettings = {

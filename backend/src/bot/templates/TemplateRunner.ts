@@ -12,11 +12,6 @@ dayjs.extend(timezone);
 
 export type GlobalReference = Reference<Record<string | number | symbol, unknown>>;
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export type DefaultStates = 'customState' | 'counterState' | (string & {});
-
-export type StatesObject = Partial<Record<DefaultStates, unknown>>;
-
 export type TemplateRunnerOptions = {
   /**
    * Maximum allowed length of stringified custom state

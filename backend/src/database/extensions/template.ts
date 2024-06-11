@@ -1,11 +1,11 @@
 import { Bot } from '#bot/Bot';
-import { StatesObject } from '#bot//templates/TemplateRunner';
 import { ExtensionReturnType, ExtensionType } from '#database/extensions/utils';
 import { DeleteTemplateReqBody, PatchTemplateReqBody, PostTemplateReqBody } from '#shared/types/api/templates';
 import { Template as TemplateApi } from '#shared/types/api/templates';
 import { Prisma } from '@prisma/client';
 import { LimitOffsetPaginationState } from '#server/middlewares/pagination';
 import { TemplateIssues } from '#bot/templates/TemplateIssues';
+import { StatesObject } from '#types/database/columns';
 
 
 declare global {

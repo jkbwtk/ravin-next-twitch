@@ -1,6 +1,6 @@
 import { TemplateIssues } from '#bot/templates/TemplateIssues';
 import { EnvironmentProvider, testEnvironments } from '#bot/templates/templateEnvironments';
-import { TemplateEnvironments } from '#shared/types/api/templates';
+import { TemplateEnvironments } from '#types/database/columns';
 import { Context, Isolate, Script } from 'isolated-vm';
 
 

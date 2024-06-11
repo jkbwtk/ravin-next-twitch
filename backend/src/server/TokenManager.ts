@@ -5,8 +5,8 @@ import { logger } from '#lib/logger';
 import { refreshTokenUnsafe, validateTokenUnsafe } from '#lib/twitch';
 import { isDevApi } from '#shared/constants';
 import { TokenController } from '#database/controllers/TokenController';
-import { Token } from '#shared/schema/schema';
 import { UserController } from '#database/controllers/UserController';
+import { Token } from '#types/database/tables';
 
 
 export class TokenManager {

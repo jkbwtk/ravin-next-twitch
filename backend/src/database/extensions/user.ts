@@ -1,4 +1,4 @@
-import { ChantingSettings } from '#shared/types/api/channel';
+import { ChantingSettings } from '#types/database/columns';
 import { Prisma } from '@prisma/client';
 
 

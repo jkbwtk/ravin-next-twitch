@@ -1,9 +1,6 @@
+import { TemplateEnvironments } from '../database/columns';
 import { PaginatedResponse } from '../pagination';
 import { z } from 'zod';
-
-export const TemplateEnvironments = z.enum(['generic', 'command', 'timer']);
-
-export type TemplateEnvironments = z.infer<typeof TemplateEnvironments>;
 
 
 export const Template = z.object({

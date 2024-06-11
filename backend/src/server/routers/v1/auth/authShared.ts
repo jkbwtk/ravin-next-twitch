@@ -7,7 +7,7 @@ import { Config } from '#lib/Config';
 import { logger } from '#lib/logger';
 import { TokenController } from '#database/controllers/TokenController';
 import { UserController } from '#database/controllers/UserController';
-import { Token, TokenInsert, User, UserInsert } from '#shared/schema/schema';
+import { Token, TokenInsert, User, UserInsert } from '#types/database/tables';
 
 
 export const authScopes: string[] = [

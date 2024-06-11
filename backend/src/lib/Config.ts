@@ -1,5 +1,5 @@
 import { ExtendedMap } from '#lib/ExtendedMap';
-import { Config as ConfigEntity } from '#schema/schema';
+import { Config as ConfigEntity } from '#types/database/tables';
 import { logger } from '#lib/logger';
 import { ConfigController } from '#database/controllers/ConfigController';
 

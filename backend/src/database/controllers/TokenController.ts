@@ -1,6 +1,7 @@
 import { db } from '#database/database';
 import { trackQueryPerformance } from '#database/utils';
-import { Token, TokenInsert, tokensTable } from '#shared/schema/schema';
+import { tokensTable } from '#shared/schema/schema';
+import { Token, TokenInsert } from '#types/database/tables';
 import { eq, getTableColumns } from 'drizzle-orm';
 
 

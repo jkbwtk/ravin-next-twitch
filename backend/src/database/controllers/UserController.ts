@@ -1,7 +1,8 @@
 import { eq, getTableColumns } from 'drizzle-orm';
 import { db } from '#database/database';
-import { User, UserInsert, usersTable } from '#shared/schema/schema';
+import { usersTable } from '#shared/schema/schema';
 import { trackQueryPerformance } from '#database/utils';
+import { User, UserInsert } from '#types/database/tables';
 
 
 const UserControllerTarget = {

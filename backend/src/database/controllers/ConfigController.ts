@@ -1,7 +1,8 @@
 import { db } from '#database/database';
 import { InsertResultError } from '#database/errors';
 import { trackQueryPerformance } from '#database/utils';
-import { Config, ConfigInsert, configTable } from '#shared/schema/schema';
+import { configTable } from '#shared/schema/schema';
+import { Config, ConfigInsert } from '#types/database/tables';
 import { eq, getTableColumns } from 'drizzle-orm';
 
 
