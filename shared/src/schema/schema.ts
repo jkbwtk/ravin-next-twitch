@@ -95,7 +95,7 @@ export const channelStatsTable = pgTable(
     deleted: integer('deleted').default(0).notNull(),
     commands: integer('commands').default(0).notNull(),
     frameDuration: integer('frameDuration').default(60000).notNull(),
-    createdAt: timestamp('updatedAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
+    createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { precision: 3, mode: 'date' })
       .defaultNow()
       .$onUpdate(() => new Date())
@@ -123,7 +123,7 @@ export const commandsTable = pgTable(
     cooldown: integer('cooldown').default(10).notNull(),
     enabled: boolean('enabled').default(false).notNull(),
     usage: integer('usage').default(0).notNull(),
-    createdAt: timestamp('updatedAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
+    createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { precision: 3, mode: 'date' })
       .defaultNow()
       .$onUpdate(() => new Date())
@@ -164,7 +164,7 @@ export const messagesTable = pgTable(
     firstMessage: boolean('firstMessage').notNull(),
     mod: boolean('mod').notNull(),
     subscriber: boolean('subscriber').notNull(),
-    createdAt: timestamp('updatedAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
+    createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { precision: 3, mode: 'date' })
       .defaultNow()
       .$onUpdate(() => new Date())
@@ -190,7 +190,7 @@ export const tokensTable = pgTable(
     id: serial('id').primaryKey().notNull(),
     accessToken: varchar('accessToken').notNull(),
     refreshToken: varchar('refreshToken'),
-    createdAt: timestamp('updatedAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
+    createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { precision: 3, mode: 'date' })
       .defaultNow()
       .$onUpdate(() => new Date())
@@ -218,7 +218,7 @@ export const usersTable = pgTable(
     displayName: varchar('displayName').notNull(),
     email: varchar('email'),
     profileImageUrl: varchar('profileImageUrl').notNull(),
-    createdAt: timestamp('updatedAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
+    createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { precision: 3, mode: 'date' })
       .defaultNow()
       .$onUpdate(() => new Date())
@@ -241,7 +241,7 @@ export const systemNotificationsTable = pgTable(
     id: serial('id').primaryKey().notNull(),
     title: varchar('title').notNull(),
     content: varchar('content').notNull(),
-    createdAt: timestamp('updatedAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
+    createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { precision: 3, mode: 'date' })
       .defaultNow()
       .$onUpdate(() => new Date())
@@ -265,7 +265,7 @@ export const templatesTable = pgTable(
     name: varchar('name').notNull(),
     template: varchar('template').notNull(),
     states: jsonb('states').$type<StatesObject>().default({}).notNull(),
-    createdAt: timestamp('updatedAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
+    createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { precision: 3, mode: 'date' })
       .defaultNow()
       .$onUpdate(() => new Date())
@@ -294,7 +294,7 @@ export const commandTimersTable = pgTable(
     cron: varchar('cron').notNull(),
     enabled: boolean('enabled').default(false).notNull(),
     lines: integer('lines').default(0).notNull(),
-    createdAt: timestamp('updatedAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
+    createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { precision: 3, mode: 'date' })
       .defaultNow()
       .$onUpdate(() => new Date())
@@ -324,7 +324,7 @@ export const behaviorProfilesTable = pgTable(
     description: text('description'),
     activatorCategory: text('activatorCategory'),
     activatorTitle: text('activatorTitle'),
-    createdAt: timestamp('updatedAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
+    createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { precision: 3, mode: 'date' })
       .defaultNow()
       .$onUpdate(() => new Date())
@@ -418,7 +418,7 @@ export const botActionsTable = pgTable(
   {
     id: serial('id').primaryKey().notNull(),
     data: json('data').default([]).notNull(),
-    createdAt: timestamp('updatedAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
+    createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { precision: 3, mode: 'date' })
       .defaultNow()
       .$onUpdate(() => new Date())
@@ -444,7 +444,7 @@ export const phraseFiltersTable = pgTable(
     similarity: integer('similarity').default(0).notNull(),
     action: integer('action').default(0).notNull(),
     reason: text('reason'),
-    createdAt: timestamp('updatedAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
+    createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { precision: 3, mode: 'date' })
       .defaultNow()
       .$onUpdate(() => new Date())
@@ -471,7 +471,7 @@ export const regexFiltersTable = pgTable(
     regex: varchar('regex').notNull(),
     action: integer('action').default(0).notNull(),
     reason: text('reason'),
-    createdAt: timestamp('updatedAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
+    createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { precision: 3, mode: 'date' })
       .defaultNow()
       .$onUpdate(() => new Date())
