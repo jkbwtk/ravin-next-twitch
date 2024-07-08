@@ -146,7 +146,7 @@ export type BasicCRUD<T extends Table> = {
 
   create(data: InferCreate<T['$inferInsert']>): Promise<T['$inferSelect'] | null>;
   update(data: InferUpdate<T['$inferInsert']>): Promise<T['$inferSelect'] | null>;
-  delete(data: InferDelete<T['$inferInsert']>): Promise<InferDelete<T['$inferInsert']> | null>;
+  delete(data: InferDelete<T['$inferInsert']>): Promise<T['$inferInsert'] | null>;
 };
 
 
