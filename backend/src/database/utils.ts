@@ -26,7 +26,6 @@ export const aggregateResults = <
 
     for (const [key, value] of Object.entries(mapped)) {
       if (existing && key in existing && value instanceof MapperArray && existing[key] instanceof MapperArray) {
-        // @ts-expect-error it should be fine
         existing[key].push(...value);
       }
     }
@@ -43,16 +42,91 @@ export const timeQuery = async <T>(query: Awaitable<T>, data: QueryTimerData): P
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type PerformanceMetricsCompatible = Record<string, (...args: any[]) => Awaitable<any>>;
+export type ModelControllerCompatible = Record<string, (...args: any[]) => Awaitable<any>>;
 
-export const trackQueryPerformance = <T extends PerformanceMetricsCompatible>(name: string, controller: T): T => new Proxy(controller, {
-  get(target, prop) {
-    return (...args: unknown[]) => timeQuery(
-      Reflect.get(target, prop)(...args),
-      {
-        operation: String(prop),
-        model: name,
-        args,
-      });
+export type SignalDispatcher<T extends ModelControllerCompatible> = {
+  registeredBefore: Map<keyof T, Set<((...params: Parameters<T[keyof T]>) => void)>>;
+  registeredAfter: Map<keyof T, Set<((result: ReturnType<T[keyof T]>, ...params: Parameters<T[keyof T]>) => void)>>;
+
+  registerBefore<K extends keyof T>(name: K, callback: (...params: Parameters<T[K]>) => void): void;
+  registerAfter<K extends keyof T>(name: K, callback: (result: ReturnType<T[K]>, ...params: Parameters<T[K]>) => void): void;
+
+  unregisterBefore<K extends keyof T>(name: K, callback: (...params: Parameters<T[K]>) => void): void;
+  unregisterAfter<K extends keyof T>(name: K, callback: (result: ReturnType<T[K]>, ...params: Parameters<T[K]>) => void): void;
+
+};
+
+
+export type SignalDispatcherMixin<T extends ModelControllerCompatible> = T & { $signals: SignalDispatcher<T> };
+
+export const applySignalDispatcherMixin = <T extends ModelControllerCompatible & {}>(target: T): SignalDispatcherMixin<T> => ({
+  ...target,
+
+  $signals: {
+    registeredBefore: new Map(),
+    registeredAfter: new Map(),
+
+    registerBefore(name, callback) {
+      let set = this.registeredBefore.get(name);
+
+      if (set === undefined) {
+        this.registeredBefore.set(name, new Set([callback]));
+      } else {
+        set.add(callback);
+      }
+    },
+    registerAfter(name, callback) {
+      let set = this.registeredAfter.get(name);
+
+      if (set === undefined) {
+        this.registeredAfter.set(name, new Set([callback]));
+      } else {
+        set.add(callback);
+      }
+    },
+
+    unregisterBefore(name, callback) {
+      let set = this.registeredBefore.get(name);
+      if (set !== undefined) set.delete(callback);
+    },
+    unregisterAfter(name, callback) {
+      let set = this.registeredAfter.get(name);
+      if (set !== undefined) set.delete(callback);
+    },
   },
 });
+
+
+export const convertToControllerProxy = <T extends ModelControllerCompatible>(name: string, controller: T): T & SignalDispatcherMixin<T> => new Proxy(
+  applySignalDispatcherMixin(controller), {
+    get(target, prop) {
+      if (typeof prop === 'symbol' || !Object.keys(target).includes(prop) || prop.toString().startsWith('$')) {
+        return Reflect.get(target, prop);
+      }
+
+      const beforeCallbacks = target.$signals.registeredBefore.get(prop as keyof T) ?? [];
+      const afterCallbacks = target.$signals.registeredAfter.get(prop as keyof T) ?? [];
+
+      return async (...args: unknown[]) => {
+        for (const callback of beforeCallbacks) {
+          // @ts-expect-error this could be casted
+          callback(...args);
+        }
+
+        const result = await timeQuery(
+          Reflect.get(target, prop)(...args),
+          {
+            operation: String(prop),
+            model: name,
+            args,
+          });
+
+        for (const callback of afterCallbacks) {
+          // @ts-expect-error this could be casted
+          callback(result, ...args);
+        }
+
+        return result;
+      };
+    },
+  });
