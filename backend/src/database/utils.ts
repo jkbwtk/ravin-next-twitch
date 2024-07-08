@@ -54,13 +54,13 @@ export type ModelControllerCompatible = Record<string, (...args: any[]) => Await
 
 export type SignalDispatcher<T extends ModelControllerCompatible> = {
   registeredBefore: Map<keyof T, Set<((...params: Parameters<T[keyof T]>) => void)>>;
-  registeredAfter: Map<keyof T, Set<((result: ReturnType<T[keyof T]>, ...params: Parameters<T[keyof T]>) => void)>>;
+  registeredAfter: Map<keyof T, Set<((result: Awaited<ReturnType<T[keyof T]>>, ...params: Parameters<T[keyof T]>) => void)>>;
 
   registerBefore<K extends keyof T>(name: K, callback: (...params: Parameters<T[K]>) => void): void;
-  registerAfter<K extends keyof T>(name: K, callback: (result: ReturnType<T[K]>, ...params: Parameters<T[K]>) => void): void;
+  registerAfter<K extends keyof T>(name: K, callback: (result: Awaited<ReturnType<T[K]>>, ...params: Parameters<T[K]>) => void): void;
 
   unregisterBefore<K extends keyof T>(name: K, callback: (...params: Parameters<T[K]>) => void): void;
-  unregisterAfter<K extends keyof T>(name: K, callback: (result: ReturnType<T[K]>, ...params: Parameters<T[K]>) => void): void;
+  unregisterAfter<K extends keyof T>(name: K, callback: (result: Awaited<ReturnType<T[K]>>, ...params: Parameters<T[K]>) => void): void;
 
 };
 
