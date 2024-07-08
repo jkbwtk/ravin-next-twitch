@@ -140,8 +140,8 @@ export const convertToControllerProxy = <T extends ModelControllerCompatible>(na
   });
 
 
-export type BasicCRUD<T extends Table> = {
-  getById(id: number): Promise<T['$inferSelect'] | null>;
+export type BasicCRUD<T extends Table & { id: Column }> = {
+  getById(id: T['$inferSelect']['id']): Promise<T['$inferSelect'] | null>;
   getAll(): Promise<T['$inferSelect'][]>;
 
   create(data: InferCreate<T['$inferInsert']>): Promise<T['$inferSelect'] | null>;
