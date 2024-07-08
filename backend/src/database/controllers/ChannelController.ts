@@ -1,33 +1,12 @@
 import { db } from '#database/database';
-import { convertToControllerProxy } from '#database/utils';
+import { convertToControllerProxy, createBasicCRUD } from '#database/utils';
 import { channelsTable } from '#schema/schema';
 import { Channel } from '#types/database/tables';
 import { eq, getTableColumns } from 'drizzle-orm';
 
 
 const ChannelControllerTarget = {
-  async create(userId: string): Promise<Channel | null> {
-    const query = db
-      .insert(channelsTable)
-      .values({ userId })
-      .returning(getTableColumns(channelsTable))
-      .onConflictDoNothing();
-
-    const result = await query;
-
-    return result.at(0) ?? null;
-  },
-
-  async getById(id: number): Promise<Channel | null> {
-    const query = db
-      .query.channelsTable.findFirst({
-        where: eq(channelsTable.id, id),
-      });
-
-    const result = await query;
-
-    return result ?? null;
-  },
+  ...createBasicCRUD(channelsTable),
 
   async getByUserId(userId: string): Promise<Channel | null> {
     const query = db

@@ -1,11 +1,13 @@
 import { db } from '#database/database';
-import { convertToControllerProxy } from '#database/utils';
+import { convertToControllerProxy, createBasicCRUD } from '#database/utils';
 import { tokensTable } from '#schema/schema';
 import { Token, TokenInsert } from '#types/database/tables';
 import { eq, getTableColumns } from 'drizzle-orm';
 
 
 const TokenControllerTarget = {
+  ...createBasicCRUD(tokensTable),
+
   async getByUserId(userId: string): Promise<Token | null> {
     const query = db
       .query.tokensTable.findFirst({
@@ -15,21 +17,6 @@ const TokenControllerTarget = {
     const result = await query;
 
     return result ?? null;
-  },
-
-  async update(token: Token): Promise<Token | null> {
-    const query = db
-      .update(tokensTable)
-      .set({
-        accessToken: token.accessToken,
-        refreshToken: token.refreshToken,
-      })
-      .where(eq(tokensTable.id, token.id))
-      .returning(getTableColumns(tokensTable));
-
-    const result = await query;
-
-    return result.at(0) ?? null;
   },
 
   async upsert(token: TokenInsert): Promise<Token | null> {

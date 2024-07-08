@@ -1,21 +1,12 @@
 import { eq, getTableColumns } from 'drizzle-orm';
 import { db } from '#database/database';
 import { usersTable } from '#schema/schema';
-import { convertToControllerProxy } from '#database/utils';
+import { convertToControllerProxy, createBasicCRUD } from '#database/utils';
 import { User, UserInsert } from '#types/database/tables';
 
 
 const UserControllerTarget = {
-  async getById(id: string): Promise<User | null> {
-    const query = db
-      .query.usersTable.findFirst({
-        where: eq(usersTable.id, id),
-      });
-
-    const result = await query;
-
-    return result ?? null;
-  },
+  ...createBasicCRUD(usersTable),
 
   async getByLogin(login: string): Promise<User | null> {
     const query = db
