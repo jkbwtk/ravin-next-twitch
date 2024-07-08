@@ -26,8 +26,8 @@ export const getRegexFiltersView = new ExpressStack()
           data: filters.map((f) => f.serialize()),
 
           total: await prisma.regexFilter.countByChannelId(req.user.id),
-          limit: req.pagination.take,
-          offset: req.pagination.skip,
+          limit: req.pagination.limit,
+          offset: req.pagination.offset,
         });
       } else {
         const filters = await prisma.regexFilter.getByChannelId(req.user.id, req.pagination, req.idListFilter);

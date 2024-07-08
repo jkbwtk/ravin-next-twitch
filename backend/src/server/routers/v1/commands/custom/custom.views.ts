@@ -27,8 +27,8 @@ export const getCustomCommandsView = new ExpressStack()
           data: commands.map((c) => c.serialize()),
 
           total: await prisma.command.countByChannelId(req.user.id),
-          limit: req.pagination.take,
-          offset: req.pagination.skip,
+          limit: req.pagination.limit,
+          offset: req.pagination.offset,
         });
       } else {
         const commands = await prisma.command.getByChannelId(req.user.id, req.pagination, req.idListFilter);

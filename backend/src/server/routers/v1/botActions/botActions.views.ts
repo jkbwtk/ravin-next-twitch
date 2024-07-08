@@ -21,8 +21,8 @@ export const getBotActionsView = new ExpressStack()
           data: botActions.map((c) => c.serialize()),
 
           total: await prisma.botAction.countByChannelId(req.user.id),
-          limit: req.pagination.take,
-          offset: req.pagination.skip,
+          limit: req.pagination.limit,
+          offset: req.pagination.offset,
         });
       } else {
         const botActions = await prisma.botAction.getByChannelId(req.user.id);

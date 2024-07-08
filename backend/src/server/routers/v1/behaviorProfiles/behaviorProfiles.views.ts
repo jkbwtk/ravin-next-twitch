@@ -22,8 +22,8 @@ export const getBehaviorProfilesView = new ExpressStack()
           data: profiles.map((c) => c.serialize()),
 
           total: await prisma.behaviorProfile.countByChannelId(req.user.id),
-          limit: req.pagination.take,
-          offset: req.pagination.skip,
+          limit: req.pagination.limit,
+          offset: req.pagination.offset,
         });
       } else {
         const profiles = await prisma.behaviorProfile.getByChannelId(req.user.id);

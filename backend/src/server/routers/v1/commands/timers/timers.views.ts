@@ -27,8 +27,8 @@ export const getCommandTimersView = new ExpressStack()
           data: timers.map((c) => c.serialize()),
 
           total: await prisma.commandTimer.countByChannelId(req.user.id),
-          limit: req.pagination.take,
-          offset: req.pagination.skip,
+          limit: req.pagination.limit,
+          offset: req.pagination.offset,
         });
       } else {
         const commandTimers = await prisma.commandTimer.getByChannelId(req.user.id);
