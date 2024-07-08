@@ -1,4 +1,7 @@
+import { db } from '#database/database';
 import { logger, QueryTimerData } from '#lib/logger';
+import { InferCreate, InferDelete, InferUpdate } from '#types/database/utils';
+import { Column, eq, getTableColumns, Table } from 'drizzle-orm';
 import { Awaitable } from 'vitest';
 
 
@@ -130,3 +133,75 @@ export const convertToControllerProxy = <T extends ModelControllerCompatible>(na
       };
     },
   });
+
+
+export type BasicCRUD<T extends Table> = {
+  getById(id: number): Promise<T['$inferSelect'] | null>;
+  getAll(): Promise<T['$inferSelect'][]>;
+
+  create(data: InferCreate<T['$inferInsert']>): Promise<T['$inferSelect'] | null>;
+  update(data: InferUpdate<T['$inferInsert']>): Promise<T['$inferSelect'] | null>;
+  delete(data: InferDelete<T['$inferInsert']>): Promise<InferDelete<T['$inferInsert']> | null>;
+};
+
+
+export const createBasicCRUD = <T extends Table & { id: Column }>(table: T): BasicCRUD<T> => ({
+  async getById(id) {
+    const query = db
+      .select(getTableColumns(table))
+      .from(table)
+      .where(eq(table.id, id));
+
+    const result = await query;
+
+    return result.at(0) ?? null;
+  },
+
+  async getAll() {
+    const query = db
+      .select(getTableColumns(table))
+      .from(table);
+
+    const result = await query;
+
+    return result;
+  },
+
+  async create(data) {
+    const query = db
+      .insert(table)
+      // @ts-expect-error this should work
+      .values(data)
+      .returning(getTableColumns(table));
+
+    const result = await query;
+
+    // @ts-expect-error this should work
+    return result.at(0) ?? null;
+  },
+
+  async update(data) {
+    const query = db
+      .update(table)
+      .set(data)
+      .where(eq(table.id, data.id))
+      .returning(getTableColumns(table));
+
+    const result = await query;
+
+    // @ts-expect-error this should work
+    return result.at(0) ?? null;
+  },
+
+  async delete(data) {
+    const query = db
+      .delete(table)
+      .where(eq(table.id, data.id))
+      .returning(getTableColumns(table));
+
+    const result = await query;
+
+    // @ts-expect-error this should work
+    return result.at(0) ?? null;
+  },
+});
