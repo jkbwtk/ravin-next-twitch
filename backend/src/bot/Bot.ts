@@ -12,6 +12,7 @@ import { SocketServer } from '#server/SocketServer';
 import { ExtendedCron } from '#lib/ExtendedCron';
 import { PhraseFilter, RegexFilter } from '@prisma/client';
 import { BotActionType } from '#types/api/botActions';
+import { TemplateController } from '#database/controllers/TemplateController';
 
 
 export interface BotOptions {
@@ -39,6 +40,7 @@ export class Bot {
   private async init(): Promise<void> {
     this.client = await this.createClient();
     this.registerEventHandlers();
+    this.registerSignalHandlers();
 
     await this.client.connect();
 
@@ -399,6 +401,29 @@ export class Bot {
     }
 
     channelThread.regexFilterHandler.deleteFilter(filterId);
+  }
+
+  private registerSignalHandlers(): void {
+    TemplateController.$signals.registerAfter('create', async (result) => {
+      if (result === null) return;
+
+      await Bot.reloadChannelCommands(result.userId);
+      await Bot.reloadChannelCommandTimers(result.userId);
+    });
+
+    TemplateController.$signals.registerAfter('update', async (result) => {
+      if (result === null) return;
+
+      await Bot.reloadChannelCommands(result.userId);
+      await Bot.reloadChannelCommandTimers(result.userId);
+    });
+
+    TemplateController.$signals.registerAfter('delete', async (result) => {
+      if (result === null) return;
+
+      await Bot.reloadChannelCommands(result.userId);
+      await Bot.reloadChannelCommandTimers(result.userId);
+    });
   }
 
   public async destroy(): Promise<void> {

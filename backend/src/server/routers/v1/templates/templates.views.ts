@@ -1,5 +1,4 @@
 import { Bot } from '#bot/Bot';
-import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
 import { ServerError } from '#shared/ServerError';
@@ -12,6 +11,8 @@ import { DeleteTemplateSchema, PatchTemplateSchema, PostTemplateSchema, TestTemp
 import { TemplateTester } from '#bot/templates/TemplateTester';
 import { limitOffsetPagination } from '#server/middlewares/pagination';
 import { templateTesterMiddleware } from '#server/routers/v1/templates/templates.middlewares';
+import { TemplateController } from '#database/controllers/TemplateController';
+import { TemplateSerializer } from '#server/routers/v1/templates/templates.serializers';
 
 
 export const getTemplatesView = new ExpressStack()
@@ -20,21 +21,19 @@ export const getTemplatesView = new ExpressStack()
   .use(limitOffsetPagination())
   .use(async (req, res) => {
     try {
+      const templates = await TemplateController.getByUserId(req.user.id, { pagination: req.pagination });
+
       if (req.pagination) {
-        const templates = await prisma.template.getByChannelId(req.user.id, req.pagination);
-
         res.jsonValidated({
-          data: templates.map((c) => c.serialize()),
+          data: TemplateSerializer(templates),
 
-          total: await prisma.template.countByChannelId(req.user.id),
-          limit: req.pagination.take,
-          offset: req.pagination.skip,
+          total: await TemplateController.countByUserId(req.user.id),
+          limit: req.pagination.limit,
+          offset: req.pagination.offset,
         });
       } else {
-        const templates = await prisma.template.getByChannelId(req.user.id);
-
         res.jsonValidated({
-          data: templates.map((c) => c.serialize()),
+          data: TemplateSerializer(templates),
         });
       }
     } catch (err) {
@@ -54,8 +53,17 @@ export const postTemplatesView = new ExpressStack()
   .use(templateTesterMiddleware)
   .use(async (req, res) => {
     try {
-      const template = await prisma.template.createFromApi(req.user.id, req.validated.body, req.templateIssues);
-      SocketServer.emitToUser(req.user.id, 'NEW_TEMPLATE', template.serialize());
+      const template = await TemplateController.create({
+        ...req.validated.body,
+        environments: req.templateIssues?.getSupportedEnvironments(),
+        userId: req.user.id,
+      });
+
+      if (!template) {
+        throw new Error('Failed to create template');
+      }
+
+      SocketServer.emitToUser(req.user.id, 'NEW_TEMPLATE', TemplateSerializer(template));
 
       res.sendStatus(HttpCodes.Created);
     } catch (err) {
@@ -98,8 +106,16 @@ export const patchTemplatesView = new ExpressStack()
   .use(templateTesterMiddleware)
   .use(async (req, res) => {
     try {
-      const command = await prisma.template.updateFromApi(req.validated.body, req.templateIssues);
-      SocketServer.emitToUser(req.user.id, 'UPD_TEMPLATE', command.serialize());
+      const template = await TemplateController.update({
+        ...req.validated.body,
+        environments: req.templateIssues?.getSupportedEnvironments(),
+      });
+
+      if (!template) {
+        throw new Error('Failed to update template');
+      }
+
+      SocketServer.emitToUser(req.user.id, 'UPD_TEMPLATE', TemplateSerializer(template));
 
       res.sendStatus(HttpCodes.OK);
     } catch (err) {
@@ -118,7 +134,8 @@ export const deleteTemplatesView = new ExpressStack()
   .use(validate(DeleteTemplateSchema))
   .use(async (req, res) => {
     try {
-      await prisma.template.deleteFromApi(req.validated.body);
+      await TemplateController.delete(req.validated.body);
+
       await Bot.reloadChannelCommands(req.user.id);
       SocketServer.emitToUser(req.user.id, 'DEL_TEMPLATE', req.validated.body.id);
 
