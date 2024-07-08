@@ -1,7 +1,7 @@
 import { eq, getTableColumns } from 'drizzle-orm';
 import { db } from '#database/database';
 import { usersTable } from '#schema/schema';
-import { trackQueryPerformance } from '#database/utils';
+import { convertToControllerProxy } from '#database/utils';
 import { User, UserInsert } from '#types/database/tables';
 
 
@@ -57,4 +57,4 @@ const UserControllerTarget = {
   },
 } as const;
 
-export const UserController = trackQueryPerformance('UserController', UserControllerTarget);
+export const UserController = convertToControllerProxy('UserController', UserControllerTarget);

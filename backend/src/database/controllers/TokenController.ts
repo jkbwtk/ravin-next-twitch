@@ -1,5 +1,5 @@
 import { db } from '#database/database';
-import { trackQueryPerformance } from '#database/utils';
+import { convertToControllerProxy } from '#database/utils';
 import { tokensTable } from '#schema/schema';
 import { Token, TokenInsert } from '#types/database/tables';
 import { eq, getTableColumns } from 'drizzle-orm';
@@ -51,4 +51,4 @@ const TokenControllerTarget = {
   },
 };
 
-export const TokenController = trackQueryPerformance('TokenController', TokenControllerTarget);
+export const TokenController = convertToControllerProxy('TokenController', TokenControllerTarget);

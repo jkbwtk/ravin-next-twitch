@@ -1,5 +1,5 @@
 import { db } from '#database/database';
-import { trackQueryPerformance } from '#database/utils';
+import { convertToControllerProxy } from '#database/utils';
 import { channelsTable } from '#schema/schema';
 import { Channel } from '#types/database/tables';
 import { eq, getTableColumns } from 'drizzle-orm';
@@ -61,4 +61,4 @@ const ChannelControllerTarget = {
   },
 };
 
-export const ChannelController = trackQueryPerformance('ChannelController', ChannelControllerTarget);
+export const ChannelController = convertToControllerProxy('ChannelController', ChannelControllerTarget);
