@@ -21,7 +21,7 @@ import { useTemplates } from '#providers/TemplatesProvider';
 import { SelectChangeEvent } from '@suid/material/Select';
 import { useErrorHandlers } from '#providers/ErrorHandlersProvider';
 import TemplateMenuItems from '#components/TemplateMenuItems';
-import { TemplateEnvironments } from '#types/api/templates';
+import { TemplateEnvironments } from '#types/database/columns';
 
 import style from '#styles/CustomCommandsEditorProvider.module.scss';
 
