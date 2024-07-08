@@ -1,5 +1,6 @@
 import { db } from '#database/database';
 import { logger, QueryTimerData } from '#lib/logger';
+import { LimitOffsetPaginationState } from '#server/middlewares/pagination';
 import { InferCreate, InferDelete, InferUpdate } from '#types/database/utils';
 import { Column, eq, getTableColumns, Table } from 'drizzle-orm';
 import { Awaitable } from 'vitest';
@@ -10,6 +11,10 @@ class MapperArray<T> extends Array<T> {}
 export const many = <T extends { id: string | number }>(entry: T | null): MapperArray<T> => {
   return entry === null ? new MapperArray() : new MapperArray(entry);
 };
+
+export type SelectOptions = Partial<{
+  pagination: LimitOffsetPaginationState | null;
+}>;
 
 export const aggregateResults = <
   E extends { [key: string]: { id: string | number } | null },
