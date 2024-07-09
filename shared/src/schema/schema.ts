@@ -39,7 +39,7 @@ export const channelsTable = pgTable(
     id: serial('id').primaryKey().notNull(),
     joined: boolean('joined').default(false).notNull(),
     chantingSettings: json('chantingSettings').$type<ChantingSettings>().default({ enabled: false, interval: 60, length: 3 }).notNull(),
-    createdAt: timestamp('updatedAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
+    createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { precision: 3, mode: 'date' })
       .defaultNow()
       .$onUpdate(() => new Date())
@@ -64,7 +64,7 @@ export const channelActionsTable = pgTable(
     targetDisplayName: varchar('targetDisplayName').notNull(),
     type: ChannelActionType('type').notNull(),
     data: varchar('data').notNull(),
-    createdAt: timestamp('updatedAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
+    createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { precision: 3, mode: 'date' })
       .defaultNow()
       .$onUpdate(() => new Date())
