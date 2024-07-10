@@ -49,10 +49,15 @@ export const timeQuery = async <T>(query: Awaitable<T>, data: QueryTimerData): P
   return result;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ModelControllerCompatible = Record<string, (...args: any[]) => Awaitable<any>>;
 
-export type SignalDispatcher<T extends ModelControllerCompatible> = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type ModelControllerMethod = (...args: any[]) => Awaitable<any>;
+
+export type ModelControllerMethods = Record<string, ModelControllerMethod>;
+
+export type ModelControllerProperties = Record<string, unknown>;
+
+export type SignalDispatcher<T extends ModelControllerMethods> = {
   registeredBefore: Map<keyof T, Set<((...params: Parameters<T[keyof T]>) => void)>>;
   registeredAfter: Map<keyof T, Set<((result: Awaited<ReturnType<T[keyof T]>>, ...params: Parameters<T[keyof T]>) => void)>>;
 
@@ -65,9 +70,9 @@ export type SignalDispatcher<T extends ModelControllerCompatible> = {
 };
 
 
-export type SignalDispatcherMixin<T extends ModelControllerCompatible> = T & { $signals: SignalDispatcher<T> };
+export type SignalDispatcherMixin<T extends ModelControllerMethods> = T & { $signals: SignalDispatcher<T> };
 
-export const applySignalDispatcherMixin = <T extends ModelControllerCompatible & {}>(target: T): SignalDispatcherMixin<T> => ({
+export const applySignalDispatcherMixin = <T extends ModelControllerMethods>(target: T): SignalDispatcherMixin<T> => ({
   ...target,
 
   $signals: {
@@ -105,15 +110,19 @@ export const applySignalDispatcherMixin = <T extends ModelControllerCompatible &
 });
 
 
-export const convertToControllerProxy = <T extends ModelControllerCompatible>(name: string, controller: T): T & SignalDispatcherMixin<T> => new Proxy(
-  applySignalDispatcherMixin(controller), {
+export const convertToControllerProxy = <M extends ModelControllerMethods, P extends ModelControllerProperties>(
+  name: string,
+  methods: M,
+  properties: P = {} as P,
+): P & SignalDispatcherMixin<M> => {
+  return new Proxy({ ...properties, ...applySignalDispatcherMixin(methods) }, {
     get(target, prop) {
       if (typeof prop === 'symbol' || !Object.keys(target).includes(prop) || prop.toString().startsWith('$')) {
         return Reflect.get(target, prop);
       }
 
-      const beforeCallbacks = target.$signals.registeredBefore.get(prop as keyof T) ?? [];
-      const afterCallbacks = target.$signals.registeredAfter.get(prop as keyof T) ?? [];
+      const beforeCallbacks = target.$signals.registeredBefore.get(prop as keyof M) ?? [];
+      const afterCallbacks = target.$signals.registeredAfter.get(prop as keyof M) ?? [];
 
       return async (...args: unknown[]) => {
         for (const callback of beforeCallbacks) {
@@ -138,6 +147,7 @@ export const convertToControllerProxy = <T extends ModelControllerCompatible>(na
       };
     },
   });
+};
 
 
 export type BasicCRUD<T extends Table & { id: Column }> = {
