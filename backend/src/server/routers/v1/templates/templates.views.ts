@@ -136,7 +136,6 @@ export const deleteTemplatesView = new ExpressStack()
     try {
       await TemplateController.delete(req.validated.body);
 
-      await Bot.reloadChannelCommands(req.user.id);
       SocketServer.emitToUser(req.user.id, 'DEL_TEMPLATE', req.validated.body.id);
 
       res.sendStatus(HttpCodes.OK);

@@ -4,8 +4,9 @@ import { Context, Isolate, Reference, Script } from 'isolated-vm';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import dayjs from 'dayjs';
-import { Template } from '#database/extensions/template';
 import { StateMap } from '#bot/templates/StateMap';
+import { Template } from '#types/database/tables';
+
 
 dayjs.extend(utc);
 dayjs.extend(timezone);

@@ -1,5 +1,6 @@
 import { db } from '#database/database';
 import { logger, QueryTimerData } from '#lib/logger';
+import { idListFilterState } from '#server/middlewares/idListFilter';
 import { LimitOffsetPaginationState } from '#server/middlewares/pagination';
 import { InferCreate, InferDelete, InferUpdate } from '#types/database/utils';
 import { Column, eq, getTableColumns, Table } from 'drizzle-orm';
@@ -14,6 +15,7 @@ export const many = <T extends { id: string | number }>(entry: T | null): Mapper
 
 export type SelectOptions = Partial<{
   pagination: LimitOffsetPaginationState | null;
+  idListFilter: idListFilterState | null;
 }>;
 
 export const aggregateResults = <

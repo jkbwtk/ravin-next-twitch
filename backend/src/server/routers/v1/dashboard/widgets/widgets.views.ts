@@ -17,6 +17,7 @@ import {
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { HttpCodes } from '#shared/httpCodes';
+import { CommandController } from '#database/controllers/CommandController';
 
 dayjs.extend(utc);
 
@@ -62,7 +63,7 @@ export const getTopStatsView = new ExpressStack()
       const topChatterId = await prisma.message.getTopChatter(req.user.id);
       const topChatter = topChatterId ? await TwitchUserRepo.get(req.user.id, topChatterId ?? '') : null;
 
-      const topCommand = await prisma.command.getTopCommand(req.user.id);
+      const topCommand = await CommandController.getTopCommand(req.user.id);
 
       const topEmote = await prisma.message.getTopEmote(req.user.id);
 

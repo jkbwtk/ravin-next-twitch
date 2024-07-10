@@ -13,6 +13,7 @@ import { ExtendedCron } from '#lib/ExtendedCron';
 import { PhraseFilter, RegexFilter } from '@prisma/client';
 import { BotActionType } from '#types/api/botActions';
 import { TemplateController } from '#database/controllers/TemplateController';
+import { CommandController } from '#database/controllers/CommandController';
 
 
 export interface BotOptions {
@@ -423,6 +424,25 @@ export class Bot {
 
       await Bot.reloadChannelCommands(result.userId);
       await Bot.reloadChannelCommandTimers(result.userId);
+    });
+
+
+    CommandController.$signals.registerAfter('create', async (result) => {
+      if (result === null) return;
+
+      await Bot.reloadChannelCommands(result.channelUserId);
+    });
+
+    CommandController.$signals.registerAfter('update', async (result) => {
+      if (result === null) return;
+
+      await Bot.reloadChannelCommands(result.channelUserId);
+    });
+
+    CommandController.$signals.registerAfter('delete', async (result) => {
+      if (result === null) return;
+
+      await Bot.reloadChannelCommands(result.channelUserId);
     });
   }
 

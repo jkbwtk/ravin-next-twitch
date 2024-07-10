@@ -1,14 +1,14 @@
 import { ChannelThread } from '#bot/ChannelThread';
 import { TemplateRunner } from '#bot/templates/TemplateRunner';
+import { CommandController } from '#database/controllers/CommandController';
 import { prisma } from '#database/database';
-import { CommandWithUserAndTemplate } from '#database/extensions/command';
 import { MessageWithUser } from '#database/extensions/message';
-import { Template } from '#database/extensions/template';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { logger } from '#lib/logger';
 import { SocketServer } from '#server/SocketServer';
 import { BotActionType } from '#types/api/botActions';
 import { CustomCommandState } from '#types/api/commands';
+import { CommandWithUserAndTemplate } from '#types/database/tables';
 import { Isolate } from 'isolated-vm';
 import { Client } from 'tmi.js';
 
@@ -27,7 +27,7 @@ export class CustomCommand implements AutoWirable {
     this.channelThread = wire(this, ChannelThread);
 
     const isolate = wire(this, Isolate);
-    this.templateRunner = new TemplateRunner(isolate, this.command.template as Template);
+    this.templateRunner = new TemplateRunner(isolate, this.command.template);
   }
 
   public async execute(self: boolean, message: MessageWithUser): Promise<void> {
@@ -92,13 +92,13 @@ export class CustomCommand implements AutoWirable {
 
     await this.client.say(message.channelName, response);
     await prisma.channelStats.incrementCommands(this.channelThread.channel.user.id);
-    await prisma.command.incrementUsage(this.command.id);
+    await CommandController.incrementUsage(this.command.id);
 
     this.lastUsed = Date.now();
     this.lastUsedBy = message.displayName;
 
     SocketServer.emitToUser(this.channelThread.channel.user.id, 'COMMAND_EXECUTED', {
-      command: this.command.serialize(),
+      command: CommandController.$utils.serialize(this.command),
       lastUsed: this.lastUsed,
       lastUsedBy: this.lastUsedBy,
     });
@@ -115,7 +115,7 @@ export class CustomCommand implements AutoWirable {
     return {
       lastUsed: this.lastUsed,
       lastUsedBy: this.lastUsedBy,
-      command: this.command.serialize(),
+      command: CommandController.$utils.serialize(this.command),
     };
   }
 }
