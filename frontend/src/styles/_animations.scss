@@ -44,9 +44,9 @@ $defaultDuration: 0.2s;
 @mixin inlineAnimation($duration: $defaultDuration, $ease: ease-in-out, $delay: 0s, $iteration: 1, $direction: normal, $fill: forwards) {
   $name: inline-#{unique-id()};
 
+  animation: #{$name} $duration $ease $delay $iteration $direction $fill;
+
   @keyframes #{$name} {
     @content;
   }
-
-  animation: #{$name} $duration $ease $delay $iteration $direction $fill;
 }

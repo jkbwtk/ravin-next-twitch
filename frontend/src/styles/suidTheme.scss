@@ -95,14 +95,13 @@
     line-height: normal !important;
     letter-spacing: normal !important;
 
-    &:not(:last-of-type) {
-      border-right: 0.1rem dashed $borderColor !important;
-    }
-
-
     padding: 0.8rem 1.6rem !important;
 
     box-sizing: border-box;
     height: 5.1rem !important;
+
+    &:not(:last-of-type) {
+      border-right: 0.1rem dashed $borderColor !important;
+    }
   }
 }

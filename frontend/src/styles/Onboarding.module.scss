@@ -13,6 +13,12 @@
 
   align-items: center;
 
+  padding: 6rem;
+  box-sizing: border-box;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
   // stupid hack to center container and allow scrolling at the same time
   // justify-content: safe center;
   &::before,
@@ -20,12 +26,6 @@
     content: '';
     flex: 1;
   }
-
-  padding: 6rem;
-  box-sizing: border-box;
-
-  overflow-y: auto;
-  overflow-x: hidden;
 
   .header {
     display: flex;
@@ -36,6 +36,8 @@
     gap: 1rem;
 
     text-align: center;
+
+    margin-bottom: 3rem;
 
     .title {
       font-size: 6.4rem;
@@ -49,8 +51,6 @@
       font-weight: 400;
       color: app.$textColor;
     }
-
-    margin-bottom: 3rem;
   }
 
   .form {
