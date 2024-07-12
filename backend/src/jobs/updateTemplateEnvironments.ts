@@ -19,9 +19,20 @@ const updateTemplateEnvironments: Job = {
       try {
         const supportedEnvironments = (await TemplateTester.test(template.template)).getSupportedEnvironments();
 
-        template.environments = supportedEnvironments;
+        const difference = new Set(template.environments).symmetricDifference(new Set(supportedEnvironments));
 
-        await TemplateController.update(template);
+        logger.debug('Difference between sets: %o', difference, { label: ['Job', 'updateTemplateEnvironments'] });
+
+        if (difference.size === 0) {
+          continue;
+        }
+
+        await TemplateController.update({
+          id: template.id,
+          environments: supportedEnvironments,
+        });
+
+        logger.debug('Updated environments for template [%s]', template.id, { label: ['Job', 'updateTemplateEnvironments'] });
       } catch (err) {
         logger.warn('Failed to update environments for template [%s]', template.id, { error: err, label: ['Job', 'updateTemplateEnvironments'] });
       }
