@@ -33,8 +33,6 @@
     align-items: center;
 
     :global(.material-symbols-rounded) {
-      animation-play-state: paused;
-
       @include inlineAnimation(.5s, ease-in-out, 0s, infinite, normal, forwards) {
         from {
           rotate: 0deg;
@@ -43,6 +41,10 @@
         to {
           rotate: 360deg;
         }
+      }
+
+      & {
+        animation-play-state: paused;
       }
     }
   }
