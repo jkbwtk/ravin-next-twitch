@@ -63,8 +63,6 @@ export const postCustomCommandsView = new ExpressStack()
         throw new ServerError(HttpCodes.InternalServerError, 'Failed to create custom command');
       }
 
-      SocketServer.emitToUser(req.user.id, 'NEW_CUSTOM_COMMAND', CommandController.$utils.serialize(command));
-
       res.sendStatus(HttpCodes.Created);
     } catch (err) {
       logger.warn('Failed to create custom command', {
@@ -88,8 +86,6 @@ export const patchCustomCommandsView = new ExpressStack()
         throw new ServerError(HttpCodes.InternalServerError, 'Failed to update custom command');
       }
 
-      SocketServer.emitToUser(req.user.id, 'UPD_CUSTOM_COMMAND', CommandController.$utils.serialize(command));
-
       res.sendStatus(HttpCodes.OK);
     } catch (err) {
       logger.warn('Failed to update custom command', {
@@ -108,8 +104,6 @@ export const deleteCustomCommandsView = new ExpressStack()
   .use(async (req, res) => {
     try {
       await CommandController.delete(req.validated.body);
-
-      SocketServer.emitToUser(req.user.id, 'DEL_CUSTOM_COMMAND', req.validated.body.id);
 
       res.sendStatus(HttpCodes.OK);
     } catch (err) {
