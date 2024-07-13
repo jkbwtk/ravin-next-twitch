@@ -1,7 +1,7 @@
 import { db } from '#database/database';
 import { convertToControllerProxy, createBasicCRUD } from '#database/utils';
 import { serializer } from '#lib/serializer';
-import { systemNotificationsTable, templatesTable } from '#schema/schema';
+import { systemNotificationsTable } from '#schema/schema';
 import { arrayFrom } from '#shared/utils';
 import { SystemNotification, SystemNotificationCreate } from '#types/database/tables';
 import { and, eq, getTableColumns, inArray, isNull } from 'drizzle-orm';
@@ -49,7 +49,7 @@ const SystemNotificationControllerMethods = {
         readAt: new Date(),
       })
       .where(
-        inArray(templatesTable.id, arrayFrom(id)),
+        inArray(systemNotificationsTable.id, arrayFrom(id)),
       ).returning(getTableColumns(systemNotificationsTable));
 
     const result = await query;

@@ -2,7 +2,6 @@ import { Bot } from '#bot/Bot';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
 import { ServerError } from '#shared/ServerError';
-import { SocketServer } from '#server/SocketServer';
 import { idListFilter } from '#server/middlewares/idListFilter';
 import { DeleteCustomCommandSchema, PatchCustomCommandSchema, PostCustomCommandSchema } from '#server/routers/v1/commands/custom/custom.schemas';
 import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
