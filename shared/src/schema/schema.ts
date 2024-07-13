@@ -156,7 +156,7 @@ export const messagesTable = pgTable(
     userId: varchar('userId').notNull(),
     content: varchar('content').notNull(),
     emotes: jsonb('emotes'),
-    timestamp: timestamp('timestamp', { precision: 3, mode: 'string' }).notNull(),
+    timestamp: timestamp('timestamp', { precision: 3, mode: 'date' }).notNull(),
     badgeInfo: jsonb('badgeInfo'),
     badges: jsonb('badges'),
     flags: varchar('flags'),
@@ -249,7 +249,7 @@ export const systemNotificationsTable = pgTable(
     userId: varchar('userId')
       .notNull()
       .references(() => usersTable.id, { onDelete: 'cascade' }),
-    readAt: timestamp('readAt', { precision: 3, mode: 'string' }),
+    readAt: timestamp('readAt', { precision: 3, mode: 'date' }),
   },
   (table) => {
     return {

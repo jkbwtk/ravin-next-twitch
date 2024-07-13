@@ -1,0 +1,112 @@
+import { db } from '#database/database';
+import { convertToControllerProxy, createBasicCRUD } from '#database/utils';
+import { serializer } from '#lib/serializer';
+import { systemNotificationsTable, templatesTable } from '#schema/schema';
+import { arrayFrom } from '#shared/utils';
+import { SystemNotification, SystemNotificationCreate } from '#types/database/tables';
+import { and, eq, getTableColumns, inArray, isNull } from 'drizzle-orm';
+import { SystemNotification as SystemNotificationApi } from '#types/api/systemNotifications';
+
+
+const SystemNotificationControllerMethods = {
+  ...createBasicCRUD(systemNotificationsTable),
+
+  async getByUserId(userId: string): Promise<SystemNotification[]> {
+    const query = db
+      .query.systemNotificationsTable.findMany({
+        where: eq(systemNotificationsTable.userId, userId),
+      });
+
+    const result = await query;
+
+    return result;
+  },
+
+  async broadcast(notification: Pick<SystemNotificationCreate, 'title' | 'content'>): Promise<SystemNotification[]> {
+    return db.transaction(async (tx) => {
+      const users = await tx.query.usersTable.findMany();
+
+      const notifications: SystemNotificationCreate[] = users.map((user) => ({
+        userId: user.id,
+        ...notification,
+      }));
+
+      const query = tx
+        .insert(systemNotificationsTable)
+        .values(notifications)
+        .returning(getTableColumns(systemNotificationsTable));
+
+      const result = await query;
+
+      return result;
+    });
+  },
+
+  async markAsReadById(id: number | number[]): Promise<SystemNotification[]> {
+    const query = db
+      .update(systemNotificationsTable)
+      .set({
+        readAt: new Date(),
+      })
+      .where(
+        inArray(templatesTable.id, arrayFrom(id)),
+      ).returning(getTableColumns(systemNotificationsTable));
+
+    const result = await query;
+
+    return result;
+  },
+
+  async markAsReadByUserId(userId: string): Promise<SystemNotification[]> {
+    const query = db
+      .update(systemNotificationsTable)
+      .set({
+        readAt: new Date(),
+      })
+      .where(
+        and(
+          eq(systemNotificationsTable.userId, userId),
+          isNull(systemNotificationsTable.readAt),
+        ),
+      )
+      .returning(getTableColumns(systemNotificationsTable));
+
+    const result = await query;
+
+    return result;
+  },
+
+  async getReadByUserId(userId: string): Promise<SystemNotification[]> {
+    const query = db
+      .query.systemNotificationsTable.findMany({
+        where: and(
+          eq(systemNotificationsTable.userId, userId),
+          isNull(systemNotificationsTable.readAt),
+        ),
+      });
+
+    const result = await query;
+
+    return result;
+  },
+};
+
+const SystemNotificationControllerProperties = {
+  $utils: {
+    serialize: serializer<SystemNotification, SystemNotificationApi>((notification) => ({
+      id: notification.id,
+      userId: notification.userId,
+      title: notification.title,
+      content: notification.content,
+      read: notification.readAt !== null,
+      createdAt: notification.createdAt,
+    }),
+    ),
+  },
+};
+
+export const SystemNotificationController = convertToControllerProxy(
+  'SystemNotificationController',
+  SystemNotificationControllerMethods,
+  SystemNotificationControllerProperties,
+);

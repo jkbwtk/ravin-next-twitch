@@ -1,4 +1,3 @@
-import { prisma } from '#database/database';
 import { VerifyCallback } from 'passport-oauth2';
 import { isDevApi } from '#shared/constants';
 import { TwitchUser } from '#types/twitch';
@@ -8,6 +7,7 @@ import { logger } from '#lib/logger';
 import { TokenController } from '#database/controllers/TokenController';
 import { UserController } from '#database/controllers/UserController';
 import { Token, TokenInsert, User, UserInsert } from '#types/database/tables';
+import { SystemNotificationController } from '#database/controllers/SystemNotificationController';
 
 
 export const authScopes: string[] = [
@@ -61,10 +61,11 @@ export const verifyCallback = async (accessToken: string, refreshToken: string |
 
     await createOrUpdateToken(accessToken, refreshToken, user);
 
-    await prisma.systemNotification.createNotification(
-      user.id,
-      'Logged in',
-      'You have successfully logged in to the dashboard.',
+    await SystemNotificationController.create(
+      { userId: user.id,
+        title: 'Logged in',
+        content: 'You have successfully logged in to the dashboard.',
+      },
     );
 
     done(null, user);

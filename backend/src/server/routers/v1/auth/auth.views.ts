@@ -1,4 +1,3 @@
-import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
 import { ServerError } from '#shared/ServerError';
@@ -10,6 +9,7 @@ import { GetSession } from '#types/api/auth';
 import passport from 'passport';
 import { HttpCodes } from '#shared/httpCodes';
 import { Config } from '#lib/Config';
+import { SystemNotificationController } from '#database/controllers/SystemNotificationController';
 
 
 export const getSessionView = new ExpressStack()
@@ -60,11 +60,11 @@ export const postLogoutView = new ExpressStack()
         return reject(new ServerError(HttpCodes.InternalServerError, 'Failed to logout user'));
       }
 
-      await prisma.systemNotification.createNotification(
-        user.id,
-        'Logged out',
-        'You have been logged out of the dashboard.',
-      );
+      await SystemNotificationController.create({
+        userId: user.id,
+        title: 'Logged out',
+        content: 'You have been logged out of the dashboard.',
+      });
 
       SocketServer.disconnectUser(user.id);
       res.sendStatus(HttpCodes.OK);

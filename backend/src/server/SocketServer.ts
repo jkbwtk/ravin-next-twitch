@@ -7,6 +7,7 @@ import { mapOptionsToArray } from '#lib/utils';
 import { ExtendedCron } from '#lib/ExtendedCron';
 import passport from 'passport';
 import { getSessionMiddleware } from '#server/sessionMiddleware';
+import { SystemNotificationController } from '#database/controllers/SystemNotificationController';
 
 
 export class SocketServer {
@@ -41,6 +42,36 @@ export class SocketServer {
 
       ExtendedCron.registerEffect('delete', (self) => {
         SocketServer.emitToRoom('admin', 'DEL_CRON_JOB', self.creationTimestamp);
+      });
+
+      SystemNotificationController.$signals.registerAfter('create', (notification) => {
+        if (notification === null) return;
+        SocketServer.emitToUser(notification.userId, 'NEW_SYSTEM_NOTIFICATION', SystemNotificationController.$utils.serialize(notification));
+      });
+
+      SystemNotificationController.$signals.registerAfter('broadcast', (notifications) => {
+        for (const notification of notifications) {
+          SocketServer.emitToUser(notification.userId, 'NEW_SYSTEM_NOTIFICATION', SystemNotificationController.$utils.serialize(notification));
+        }
+      });
+
+      SystemNotificationController.$signals.registerAfter('markAsReadById', (notifications) => {
+        const aggregated: Map<string, number[]> = new Map();
+
+        for (const notification of notifications) {
+          const list = aggregated.get(notification.userId);
+
+          if (list === undefined) {
+            aggregated.set(notification.userId, [notification.id]);
+            continue;
+          }
+
+          list.push(notification.id);
+        }
+
+        for (const [userId, ids] of aggregated) {
+          SocketServer.emitToUser(userId, 'RAD_SYSTEM_NOTIFICATION', ids);
+        }
       });
 
       return SocketServer.instance;

@@ -1,14 +1,12 @@
-import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
-import { arrayFrom } from '#lib/utils';
 import { ExpressStack } from '#server/ExpressStack';
 import { ServerError } from '#shared/ServerError';
-import { SocketServer } from '#server/SocketServer';
 import { PostBroadcastNotificationSchema, PostReadNotificationsSchema } from '#server/routers/v1/systemNotifications/systemNotifications.schemas';
 import { admin, authenticated, validate, validateResponse } from '#server/stackMiddlewares';
 import { GetSystemNotificationsReadResponse } from '#types/api/systemNotifications';
 import { json } from 'body-parser';
 import { HttpCodes } from '#shared/httpCodes';
+import { SystemNotificationController } from '#database/controllers/SystemNotificationController';
 
 
 export const getNotifications = new ExpressStack()
@@ -16,10 +14,10 @@ export const getNotifications = new ExpressStack()
   .use(validateResponse(GetSystemNotificationsReadResponse))
   .use(async (req, res) => {
     try {
-      const notifications = await prisma.systemNotification.getByUserId(req.user.id);
+      const notifications = await SystemNotificationController.getByUserId(req.user.id);
 
       res.jsonValidated({
-        data: notifications.map((notification) => notification.serialize()),
+        data: SystemNotificationController.$utils.serialize(notifications),
       });
     } catch (err) {
       logger.error('Failed to get notifications', {
@@ -39,8 +37,7 @@ export const postMarkAsRead = new ExpressStack()
     try {
       const body = req.validated.body;
 
-      await prisma.systemNotification.markAsReadById(body.id);
-      SocketServer.emitToUser(req.user.id, 'RAD_SYSTEM_NOTIFICATION', arrayFrom(body.id));
+      await SystemNotificationController.markAsReadById(body.id);
 
       res.sendStatus(HttpCodes.OK);
     } catch (err) {
@@ -62,7 +59,10 @@ export const postBroadcastNotification = new ExpressStack()
   .use(async (req, res) => {
     try {
       const body = req.validated.body;
-      await prisma.systemNotification.broadcastNotification(body.title, body.content);
+      await SystemNotificationController.broadcast({
+        title: body.title,
+        content: body.content,
+      });
 
       res.sendStatus(HttpCodes.OK);
     } catch (err) {
