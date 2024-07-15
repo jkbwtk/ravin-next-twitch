@@ -1,6 +1,6 @@
 import { ChannelThread } from '#bot/ChannelThread';
 import { TemplateRunner } from '#bot/templates/TemplateRunner';
-import { prisma } from '#database/database';
+import { BotActionController } from '#database/controllers/BotActionController';
 import { CommandTimerWithUser } from '#database/extensions/commandTimer';
 import { MessageWithUser } from '#database/extensions/message';
 import { Template } from '#database/extensions/template';
@@ -46,7 +46,7 @@ export class CommandTimer implements AutoWirable {
     if (this.messageCounter < this.timer.lines) {
       self.pause('Not enough messages');
 
-      await prisma.botAction.createAndEmit(
+      await BotActionController.createFromType(
         this.channelThread.channel.user.id,
         BotActionType.CommandTimerFailedLines,
         this.timer.name,
@@ -58,7 +58,7 @@ export class CommandTimer implements AutoWirable {
 
     await this.execute();
 
-    await prisma.botAction.createAndEmit(
+    await BotActionController.createFromType(
       this.channelThread.channel.user.id,
       BotActionType.CommandTimerExecuted,
       this.timer.name,
@@ -78,7 +78,7 @@ export class CommandTimer implements AutoWirable {
         label: ['CommandTimer', 'execute'],
       });
 
-      await prisma.botAction.createAndEmit(
+      await BotActionController.createFromType(
         this.channelThread.channel.user.id,
         BotActionType.CommandTimerFailedError,
         this.timer.name,
@@ -107,7 +107,7 @@ export class CommandTimer implements AutoWirable {
 
       await this.execute();
 
-      await prisma.botAction.createAndEmit(
+      await BotActionController.createFromType(
         this.channelThread.channel.user.id,
         BotActionType.CommandTimerExecutedCommand,
         this.timer.name,

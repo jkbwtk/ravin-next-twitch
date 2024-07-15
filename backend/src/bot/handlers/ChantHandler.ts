@@ -1,5 +1,4 @@
 import { ChannelThread } from '#bot/ChannelThread';
-import { prisma } from '#database/database';
 import { MessageWithUser } from '#database/extensions/message';
 import ExtendedSet from '#lib/ExtendedSet';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
@@ -7,6 +6,7 @@ import { logger } from '#lib/logger';
 import { BotActionType } from '#types/api/botActions';
 import { mergeOptions, RequiredDefaults } from '#shared/utils';
 import { Client } from 'tmi.js';
+import { BotActionController } from '#database/controllers/BotActionController';
 
 
 export type ChantHandlerOptions = {
@@ -93,7 +93,7 @@ export class ChantHandler implements AutoWirable {
         message.content,
       );
 
-      await prisma.botAction.createAndEmit(
+      await BotActionController.createFromType(
         this.channelThread.channel.user.id,
         BotActionType.ChantingDetected,
         message.content,

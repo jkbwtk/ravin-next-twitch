@@ -16,6 +16,9 @@ export const many = <T extends { id: string | number }>(entry: T | null): Mapper
 export type SelectOptions = Partial<{
   pagination: LimitOffsetPaginationState | null;
   idListFilter: idListFilterState | null;
+  orderBy: {
+    [key: string]: 'asc' | 'desc';
+  };
 }>;
 
 export const aggregateResults = <

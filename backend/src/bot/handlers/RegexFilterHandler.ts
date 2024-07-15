@@ -1,4 +1,5 @@
 import { ChannelThread } from '#bot/ChannelThread';
+import { BotActionController } from '#database/controllers/BotActionController';
 import { prisma } from '#database/database';
 import { MessageWithUser } from '#database/extensions/message';
 import { ExtendedMap } from '#lib/ExtendedMap';
@@ -51,7 +52,7 @@ export class RegexFilterHandler implements AutoWirable {
     const priorityMatch = matches.at(0);
     if (priorityMatch === undefined) return false;
 
-    await prisma.botAction.createAndEmit(
+    await BotActionController.createFromType(
       this.channelThread.channel.user.id,
       BotActionType.FilteredRegex,
       priorityMatch.filter.regex,

@@ -17,6 +17,7 @@ import {
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import { ChantingSettings, StatesObject, TemplateEnvironments } from '../types/database/columns';
+import { BotActionData } from '../types/api/botActions';
 
 
 export const ChannelActionType = pgEnum('ChannelActionType', ['ban', 'timeout', 'delete']);
@@ -417,7 +418,7 @@ export const botActionsTable = pgTable(
   'BotActions',
   {
     id: serial('id').primaryKey().notNull(),
-    data: json('data').default([]).notNull(),
+    data: json('data').$type<BotActionData>().default([]).notNull(),
     createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { precision: 3, mode: 'date' })
       .defaultNow()

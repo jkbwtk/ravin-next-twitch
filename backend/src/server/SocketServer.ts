@@ -9,6 +9,7 @@ import passport from 'passport';
 import { getSessionMiddleware } from '#server/sessionMiddleware';
 import { SystemNotificationController } from '#database/controllers/SystemNotificationController';
 import { CommandController } from '#database/controllers/CommandController';
+import { BotActionController } from '#database/controllers/BotActionController';
 
 
 export class SocketServer {
@@ -147,6 +148,11 @@ export class SocketServer {
     CommandController.$signals.registerAfter('delete', (command) => {
       if (command === null) return;
       SocketServer.emitToUser(command.channelUserId, 'DEL_CUSTOM_COMMAND', command.id);
+    });
+
+    BotActionController.$signals.registerAfter('create', (action) => {
+      if (action === null) return;
+      SocketServer.emitToUser(action.channelUserId, 'NEW_BOT_ACTION', BotActionController.$utils.serialize(action));
     });
   }
 

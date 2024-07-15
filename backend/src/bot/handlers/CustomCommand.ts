@@ -1,5 +1,6 @@
 import { ChannelThread } from '#bot/ChannelThread';
 import { TemplateRunner } from '#bot/templates/TemplateRunner';
+import { BotActionController } from '#database/controllers/BotActionController';
 import { CommandController } from '#database/controllers/CommandController';
 import { prisma } from '#database/database';
 import { MessageWithUser } from '#database/extensions/message';
@@ -34,7 +35,7 @@ export class CustomCommand implements AutoWirable {
     if (self) return;
 
     if (!this.command.enabled) {
-      await prisma.botAction.createAndEmit(
+      await BotActionController.createFromType(
         this.channelThread.channel.user.id,
         BotActionType.CustomCommandFailedDisabled,
         this.command.command,
@@ -45,7 +46,7 @@ export class CustomCommand implements AutoWirable {
     }
 
     if (message.getUserLevel() < this.command.userLevel) {
-      await prisma.botAction.createAndEmit(
+      await BotActionController.createFromType(
         this.channelThread.channel.user.id,
         BotActionType.CustomCommandFailedUserLevel,
         this.command.command,
@@ -57,7 +58,7 @@ export class CustomCommand implements AutoWirable {
     }
 
     if (Date.now() - this.lastUsed < this.command.cooldown * 1000) {
-      await prisma.botAction.createAndEmit(
+      await BotActionController.createFromType(
         this.channelThread.channel.user.id,
         BotActionType.CustomCommandFailedCooldown,
         this.command.command,
@@ -79,7 +80,7 @@ export class CustomCommand implements AutoWirable {
         label: ['CustomCommand', 'execute'],
       });
 
-      await prisma.botAction.createAndEmit(
+      await BotActionController.createFromType(
         this.channelThread.channel.user.id,
         BotActionType.CustomCommandFailedError,
         this.command.command,
@@ -103,7 +104,7 @@ export class CustomCommand implements AutoWirable {
       lastUsedBy: this.lastUsedBy,
     });
 
-    await prisma.botAction.createAndEmit(
+    await BotActionController.createFromType(
       this.channelThread.channel.user.id,
       BotActionType.CustomCommandExecuted,
       this.command.command,

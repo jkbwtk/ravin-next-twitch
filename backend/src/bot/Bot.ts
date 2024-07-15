@@ -14,6 +14,7 @@ import { PhraseFilter, RegexFilter } from '@prisma/client';
 import { BotActionType } from '#types/api/botActions';
 import { TemplateController } from '#database/controllers/TemplateController';
 import { CommandController } from '#database/controllers/CommandController';
+import { BotActionController } from '#database/controllers/BotActionController';
 
 
 export interface BotOptions {
@@ -277,7 +278,7 @@ export class Bot {
       logger.debug('Joining channel [%s]', channel.user.login, { label: ['Bot', 'joinChannel'] });
       await Bot.waitForConnection();
       await instance.client.join(channel.user.login);
-      await prisma.botAction.createAndEmit(id, BotActionType.ChannelJoined, channel.user.displayName);
+      await BotActionController.createFromType(id, BotActionType.ChannelJoined, channel.user.displayName);
       logger.debug('Joined channel [%s]', channel.user.login, { label: ['Bot', 'joinChannel'] });
 
       return true;
@@ -303,7 +304,7 @@ export class Bot {
       instance.channels.get(channel.user.login)?.destroy();
       instance.channels.delete(channel.user.login);
       await instance.client.part(channel.user.login);
-      await prisma.botAction.createAndEmit(id, BotActionType.ChannelLeft, channel.user.displayName);
+      await BotActionController.createFromType(id, BotActionType.ChannelLeft, channel.user.displayName);
       logger.debug('Left channel [%s]', channel.user.login, { label: ['Bot', 'leaveChannel'] });
 
       return true;
