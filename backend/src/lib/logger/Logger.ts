@@ -39,6 +39,7 @@ export declare interface Logger<
   defaultLevelFunction(callback: LogCallback, level: keyof MergedOptions<T>['levels'], entry: LogEntry<T>): void;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class Logger<
   T extends Partial<LoggerOptions> = DefaultLoggerOptions,
   F = LoggerMethods<T>,
