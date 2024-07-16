@@ -20,10 +20,10 @@ export const getConnectionStatusView = new ExpressStack()
         .map((mod) => mod.user_login);
 
       const botLogin = await Config.getOrFail('botLogin');
-      const channel = await ChannelController.getOrCreate(req.user.id);
+      const channel = await ChannelController.getByUserId(req.user.id);
 
       if (channel === null) {
-        throw new ServerError(HttpCodes.InternalServerError, 'Failed to get channel');
+        throw Error(`Failed to get channel for user ${req.user.id}`);
       }
 
       res.jsonValidated({
@@ -47,7 +47,11 @@ export const postJoinChannelView = new ExpressStack()
   .usePreflight(authenticated)
   .use(async (req, res) => {
     try {
-      const channel = await prisma.channel.getByUserIdOrFail(req.user.id);
+      const channel = await ChannelController.getByUserId(req.user.id);
+
+      if (channel === null) {
+        throw Error(`Failed to get channel for user ${req.user.id}`);
+      }
 
       channel.joined = !channel.joined;
 

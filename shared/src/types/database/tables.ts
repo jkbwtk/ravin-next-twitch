@@ -31,6 +31,10 @@ export type ConfigDelete = Pick<Config, 'key'>;
 
 export type Channel = typeof channelsTable.$inferSelect;
 
+export type ChannelWithUser = Channel & {
+  user: User;
+};
+
 export type ChannelInsert = StripUtilityRows<typeof channelsTable.$inferInsert>;
 
 export type ChannelCreate = InferCreate<ChannelInsert>;

@@ -1,17 +1,33 @@
 import { db } from '#database/database';
 import { convertToControllerProxy, createBasicCRUD } from '#database/utils';
 import { channelsTable } from '#schema/schema';
-import { Channel } from '#types/database/tables';
+import { Channel, ChannelUpdate, ChannelWithUser } from '#types/database/tables';
 import { eq, getTableColumns } from 'drizzle-orm';
 
 
 const ChannelControllerTarget = {
   ...createBasicCRUD(channelsTable),
 
-  async getByUserId(userId: string): Promise<Channel | null> {
+  async updateByUserId(userId: string, channel: Omit<ChannelUpdate, 'id' | 'userId'>): Promise<Channel | null> {
+    const query = db
+      .update(channelsTable)
+      .set(channel)
+      .where(eq(channelsTable.userId, userId))
+      .returning(getTableColumns(channelsTable));
+
+    const result = await query;
+
+    return result.at(0) ?? null;
+  },
+
+  async getByUserId(userId: string): Promise<ChannelWithUser | null> {
     const query = db
       .query.channelsTable.findFirst({
         where: eq(channelsTable.userId, userId),
+
+        with: {
+          user: true,
+        },
       });
 
     const result = await query;
@@ -24,6 +40,10 @@ const ChannelControllerTarget = {
       const existingChannel = await tx
         .query.channelsTable.findFirst({
           where: eq(channelsTable.userId, userId),
+
+          with: {
+            user: true,
+          },
         });
 
       if (existingChannel !== undefined) {

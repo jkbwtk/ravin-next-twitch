@@ -1,4 +1,3 @@
-import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
 import { ServerError } from '#shared/ServerError';
@@ -16,7 +15,7 @@ export const getChantingView = new ExpressStack()
   .use(validateResponse(GetChantingSettingsResponse))
   .use(async (req, res) => {
     try {
-      const channel = await ChannelController.getOrCreate(req.user.id);
+      const channel = await ChannelController.getByUserId(req.user.id);
 
       if (channel === null) {
         throw new ServerError(HttpCodes.InternalServerError, 'Failed to get channel');
@@ -41,7 +40,9 @@ export const postChantingView = new ExpressStack()
   .use(validate(PostChantingSchema))
   .use(async (req, res) => {
     try {
-      await prisma.channel.updateChantingFromApi(req.user.id, req.validated.body);
+      await ChannelController.updateByUserId(req.user.id, {
+        chantingSettings: req.validated.body,
+      });
 
       res.sendStatus(HttpCodes.OK);
     } catch (err) {
