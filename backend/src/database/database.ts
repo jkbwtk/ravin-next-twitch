@@ -2,21 +2,13 @@ import { Redis, RedisOptions } from 'ioredis';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { channelActionExtension } from '#database/extensions/channelAction';
 import { databaseDebug, databaseLogging } from '#shared/constants';
-import { configExtension } from '#database/extensions/config';
-import { userExtension } from '#database/extensions/user';
-import { systemNotificationExtension } from '#database/extensions/systemNotification';
-import { tokenExtension } from '#database/extensions/token';
-import { channelExtension } from '#database/extensions/channel';
 import { messageExtension } from '#database/extensions/message';
-import { commandExtension } from '#database/extensions/command';
 import { channelStatsExtension } from '#database/extensions/channelStats';
 import { mapOptionsToArray } from '#lib/utils';
 import { utilsExtension } from '#database/extensions/utils';
 import { commandTimerExtension } from '#database/extensions/commandTimer';
-import { templateExtension } from '#database/extensions/template';
 import { phraseFilterExtension } from '#database/extensions/phraseFilter';
 import { regexFilterExtension } from '#database/extensions/regexFilter';
-import { botActionExtension } from '#database/extensions/botAction';
 import { behaviorProfileExtension } from '#database/extensions/behaviorProfile';
 import { Client as PostgresClient, ClientConfig as PostgresConfig } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
@@ -56,19 +48,11 @@ export const prismaBase = new PrismaClient(prismaOptions);
 const prismaExtended = prismaBase
   .$extends(utilsExtension)
   .$extends(channelActionExtension)
-  .$extends(configExtension)
-  .$extends(userExtension)
-  .$extends(systemNotificationExtension)
-  .$extends(tokenExtension)
-  .$extends(channelExtension)
   .$extends(messageExtension)
-  .$extends(commandExtension)
   .$extends(channelStatsExtension)
   .$extends(commandTimerExtension)
-  .$extends(templateExtension)
   .$extends(phraseFilterExtension)
   .$extends(regexFilterExtension)
-  .$extends(botActionExtension)
   .$extends(behaviorProfileExtension);
 
 export type ExtendedPrismaClient = typeof prismaExtended;

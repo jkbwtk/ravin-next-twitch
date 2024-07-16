@@ -3,13 +3,13 @@ import { TemplateRunner } from '#bot/templates/TemplateRunner';
 import { BotActionController } from '#database/controllers/BotActionController';
 import { CommandTimerWithUser } from '#database/extensions/commandTimer';
 import { MessageWithUser } from '#database/extensions/message';
-import { Template } from '#database/extensions/template';
 import { ExtendedCron } from '#lib/ExtendedCron';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { logger } from '#lib/logger';
 import { SocketServer } from '#server/SocketServer';
 import { BotActionType } from '#types/api/botActions';
 import { CommandTimerState, UserLevel } from '#types/api/commands';
+import { Template } from '#types/database/tables';
 import { Isolate } from 'isolated-vm';
 import { Client } from 'tmi.js';
 
