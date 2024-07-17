@@ -16,6 +16,7 @@ import { TemplateController } from '#database/controllers/TemplateController';
 import { CommandController } from '#database/controllers/CommandController';
 import { BotActionController } from '#database/controllers/BotActionController';
 import { ChannelController } from '#database/controllers/ChannelController';
+import { PhraseFilterController } from '#database/controllers/PhraseFilterController';
 
 
 export interface BotOptions {
@@ -495,6 +496,24 @@ export class Bot {
       if (result === null) return;
 
       await Bot.reloadChannelCommands(result.channelUserId);
+    });
+
+    PhraseFilterController.$signals.registerAfter('create', async (result) => {
+      if (result === null) return;
+
+      await Bot.updateChannelPhraseFilter(result.channelUserId, result);
+    });
+
+    PhraseFilterController.$signals.registerAfter('update', async (result) => {
+      if (result === null) return;
+
+      await Bot.updateChannelPhraseFilter(result.channelUserId, result);
+    });
+
+    PhraseFilterController.$signals.registerAfter('delete', async (result) => {
+      if (result === null) return;
+
+      await Bot.deleteChannelPhraseFilter(result.channelUserId, result.id);
     });
   }
 

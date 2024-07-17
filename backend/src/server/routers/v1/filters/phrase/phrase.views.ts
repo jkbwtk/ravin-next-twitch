@@ -1,7 +1,6 @@
-import { prisma } from '#database/database';
+import { PhraseFilterController } from '#database/controllers/PhraseFilterController';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
-import { SocketServer } from '#server/SocketServer';
 import { idListFilter } from '#server/middlewares/idListFilter';
 import { limitOffsetPagination } from '#server/middlewares/pagination';
 import { PatchPhraseFilterSchema, PostPhraseFilterSchema } from '#server/routers/v1/filters/phrase/phrase.schemas';
@@ -19,21 +18,22 @@ export const getPhraseFiltersView = new ExpressStack()
   .use(idListFilter())
   .use(async (req, res) => {
     try {
+      const filters = await PhraseFilterController.getByUserId(req.user.id, {
+        pagination: req.pagination,
+        idListFilter: req.idListFilter,
+      });
+
       if (req.pagination) {
-        const filters = await prisma.phraseFilter.getByChannelId(req.user.id, req.pagination, req.idListFilter);
-
         res.jsonValidated({
-          data: filters.map((f) => f.serialize()),
+          data: PhraseFilterController.$utils.serialize(filters),
 
-          total: await prisma.phraseFilter.countByChannelId(req.user.id),
+          total: await PhraseFilterController.countByUserId(req.user.id),
           limit: req.pagination.limit,
           offset: req.pagination.offset,
         });
       } else {
-        const filters = await prisma.phraseFilter.getByChannelId(req.user.id, req.pagination, req.idListFilter);
-
         res.jsonValidated({
-          data: filters.map((f) => f.serialize()),
+          data: PhraseFilterController.$utils.serialize(filters),
         });
       }
     } catch (err) {
@@ -53,10 +53,16 @@ export const postPhraseFiltersView = new ExpressStack()
   .use(validateResponse(PhraseFilter))
   .use(async (req, res) => {
     try {
-      const filter = await prisma.phraseFilter.createFromApi(req.user.id, req.validated.body);
-      SocketServer.emitToUser(req.user.id, 'NEW_PHRASE_FILTER', filter.serialize());
+      const filter = await PhraseFilterController.create({
+        ...req.validated.body,
+        channelUserId: req.user.id,
+      });
 
-      res.jsonValidated(filter.serialize());
+      if (filter === null) {
+        throw new Error('Create phrase filter returned null');
+      }
+
+      res.jsonValidated(PhraseFilterController.$utils.serialize(filter));
     } catch (err) {
       logger.warn('Failed to create phrase filter', {
         error: err,
@@ -74,10 +80,16 @@ export const patchPhraseFiltersView = new ExpressStack()
   .use(validateResponse(PhraseFilter))
   .use(async (req, res) => {
     try {
-      const filter = await prisma.phraseFilter.updateFromApi(req.user.id, req.validated.body);
-      SocketServer.emitToUser(req.user.id, 'UPD_PHRASE_FILTER', filter.serialize());
+      const filter = await PhraseFilterController.update({
+        ...req.validated.body,
+        channelUserId: req.user.id,
+      });
 
-      res.json(filter.serialize());
+      if (filter === null) {
+        throw new Error('Update phrase filter returned null');
+      }
+
+      res.json(PhraseFilterController.$utils.serialize(filter));
     } catch (err) {
       logger.warn('Failed to update phrase filter', {
         error: err,
@@ -94,8 +106,9 @@ export const deletePhraseFiltersView = new ExpressStack()
   .use(validate(PatchPhraseFilterSchema))
   .use(async (req, res) => {
     try {
-      await prisma.phraseFilter.deleteFromApi(req.user.id, req.validated.body);
-      SocketServer.emitToUser(req.user.id, 'DEL_PHRASE_FILTER', req.validated.body.id);
+      await PhraseFilterController.delete({
+        ...req.validated.body,
+      });
 
       res.sendStatus(HttpCodes.OK);
     } catch (err) {

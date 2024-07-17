@@ -10,6 +10,7 @@ import { getSessionMiddleware } from '#server/sessionMiddleware';
 import { SystemNotificationController } from '#database/controllers/SystemNotificationController';
 import { CommandController } from '#database/controllers/CommandController';
 import { BotActionController } from '#database/controllers/BotActionController';
+import { PhraseFilterController } from '#database/controllers/PhraseFilterController';
 
 
 export class SocketServer {
@@ -153,6 +154,21 @@ export class SocketServer {
     BotActionController.$signals.registerAfter('create', (action) => {
       if (action === null) return;
       SocketServer.emitToUser(action.channelUserId, 'NEW_BOT_ACTION', BotActionController.$utils.serialize(action));
+    });
+
+    PhraseFilterController.$signals.registerAfter('create', (filter) => {
+      if (filter === null) return;
+      SocketServer.emitToUser(filter.channelUserId, 'NEW_PHRASE_FILTER', PhraseFilterController.$utils.serialize(filter));
+    });
+
+    PhraseFilterController.$signals.registerAfter('update', (filter) => {
+      if (filter === null) return;
+      SocketServer.emitToUser(filter.channelUserId, 'UPD_PHRASE_FILTER', PhraseFilterController.$utils.serialize(filter));
+    });
+
+    PhraseFilterController.$signals.registerAfter('delete', (filter) => {
+      if (filter === null) return;
+      SocketServer.emitToUser(filter.channelUserId, 'DEL_PHRASE_FILTER', filter.id);
     });
   }
 
