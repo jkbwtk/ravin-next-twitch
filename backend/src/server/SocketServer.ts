@@ -11,6 +11,7 @@ import { SystemNotificationController } from '#database/controllers/SystemNotifi
 import { CommandController } from '#database/controllers/CommandController';
 import { BotActionController } from '#database/controllers/BotActionController';
 import { PhraseFilterController } from '#database/controllers/PhraseFilterController';
+import { RegexFilterController } from '#database/controllers/RegexFilterController';
 
 
 export class SocketServer {
@@ -169,6 +170,21 @@ export class SocketServer {
     PhraseFilterController.$signals.registerAfter('delete', (filter) => {
       if (filter === null) return;
       SocketServer.emitToUser(filter.channelUserId, 'DEL_PHRASE_FILTER', filter.id);
+    });
+
+    RegexFilterController.$signals.registerAfter('create', (filter) => {
+      if (filter === null) return;
+      SocketServer.emitToUser(filter.channelUserId, 'NEW_REGEX_FILTER', RegexFilterController.$utils.serialize(filter));
+    });
+
+    RegexFilterController.$signals.registerAfter('update', (filter) => {
+      if (filter === null) return;
+      SocketServer.emitToUser(filter.channelUserId, 'UPD_REGEX_FILTER', RegexFilterController.$utils.serialize(filter));
+    });
+
+    RegexFilterController.$signals.registerAfter('delete', (filter) => {
+      if (filter === null) return;
+      SocketServer.emitToUser(filter.channelUserId, 'DEL_REGEX_FILTER', filter.id);
     });
   }
 

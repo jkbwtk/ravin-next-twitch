@@ -1,6 +1,6 @@
 import { ChannelThread } from '#bot/ChannelThread';
 import { BotActionController } from '#database/controllers/BotActionController';
-import { prisma } from '#database/database';
+import { RegexFilterController } from '#database/controllers/RegexFilterController';
 import { MessageWithUser } from '#database/extensions/message';
 import { ExtendedMap } from '#lib/ExtendedMap';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
@@ -110,7 +110,7 @@ export class RegexFilterHandler implements AutoWirable {
   }
 
   public async syncFilters(): Promise<void> {
-    const filters = await prisma.regexFilter.getByChannelId(this.channelThread.channel.user.id);
+    const filters = await RegexFilterController.getByUserId(this.channelThread.channel.user.id);
 
     this.filters.clear();
     for (const filter of filters) {

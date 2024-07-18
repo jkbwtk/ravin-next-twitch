@@ -7,8 +7,6 @@ import { channelStatsExtension } from '#database/extensions/channelStats';
 import { mapOptionsToArray } from '#lib/utils';
 import { utilsExtension } from '#database/extensions/utils';
 import { commandTimerExtension } from '#database/extensions/commandTimer';
-import { phraseFilterExtension } from '#database/extensions/phraseFilter';
-import { regexFilterExtension } from '#database/extensions/regexFilter';
 import { behaviorProfileExtension } from '#database/extensions/behaviorProfile';
 import { Client as PostgresClient, ClientConfig as PostgresConfig } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
@@ -51,8 +49,6 @@ const prismaExtended = prismaBase
   .$extends(messageExtension)
   .$extends(channelStatsExtension)
   .$extends(commandTimerExtension)
-  .$extends(phraseFilterExtension)
-  .$extends(regexFilterExtension)
   .$extends(behaviorProfileExtension);
 
 export type ExtendedPrismaClient = typeof prismaExtended;
