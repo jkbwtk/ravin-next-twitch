@@ -139,6 +139,11 @@ export type TemplateDelete = InferDelete<TemplateInsert>;
 
 export type CommandTimer = typeof commandTimersTable.$inferSelect;
 
+export type CommandTimerWithUserAndTemplate = CommandTimer & {
+  user: User;
+  template: Template;
+};
+
 export type CommandTimerInsert = StripUtilityRows<typeof commandTimersTable.$inferInsert>;
 
 export type CommandTimerCreate = InferCreate<CommandTimerInsert>;

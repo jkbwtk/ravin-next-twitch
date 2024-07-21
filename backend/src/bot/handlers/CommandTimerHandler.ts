@@ -1,6 +1,6 @@
 import { ChannelThread } from '#bot/ChannelThread';
 import { CommandTimer } from '#bot/handlers/CommandTimer';
-import { prisma } from '#database/database';
+import { CommandTimerController } from '#database/controllers/CommandTImerController';
 import { MessageWithUser } from '#database/extensions/message';
 import { ExtendedMap } from '#lib/ExtendedMap';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
@@ -30,7 +30,7 @@ export class CommandTimerHandler implements AutoWirable {
   }
 
   public async syncCommandTimers(): Promise<void> {
-    const timers = await prisma.commandTimer.getByChannelId(this.channelThread.channel.user.id);
+    const timers = await CommandTimerController.getByUserId(this.channelThread.channel.user.id);
 
     this.clearCommandTimers();
     for (const timer of timers) {
