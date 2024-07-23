@@ -20,6 +20,7 @@ import { PhraseFilterController } from '#database/controllers/PhraseFilterContro
 import { RegexFilterController } from '#database/controllers/RegexFilterController';
 import { CommandTimerController } from '#database/controllers/CommandTImerController';
 import { ChannelActionController } from '#database/controllers/ChannelActionController';
+import { ChannelStatsController } from '#database/controllers/ChannelStatsController';
 
 
 export interface BotOptions {
@@ -156,7 +157,7 @@ export class Bot {
         return;
       }
 
-      await prisma.channelStats.incrementMessages(instance.channelUserId);
+      await ChannelStatsController.incrementMessages(instance.channelUserId);
       SocketServer.emitToUser(instance.channelUserId, 'NEW_MESSAGE', instance.serialize());
 
       await thread.handleMessage(self, instance);
@@ -176,7 +177,7 @@ export class Bot {
       return;
     }
 
-    await prisma.channelStats.incrementTimeouts(thread.channel.user.id);
+    await ChannelStatsController.incrementTimeouts(thread.channel.user.id);
 
     await ChannelActionController.create({
       channelUserId: thread.channel.user.id,
@@ -196,7 +197,7 @@ export class Bot {
       return;
     }
 
-    await prisma.channelStats.incrementBans(thread.channel.user.id);
+    await ChannelStatsController.incrementBans(thread.channel.user.id);
 
     ChannelActionController.create({
       channelUserId: thread.channel.user.id,
@@ -218,7 +219,7 @@ export class Bot {
       return;
     }
 
-    await prisma.channelStats.incrementDeleted(thread.channel.user.id);
+    await ChannelStatsController.incrementDeleted(thread.channel.user.id);
 
     ChannelActionController.create({
       channelUserId: thread.channel.user.id,

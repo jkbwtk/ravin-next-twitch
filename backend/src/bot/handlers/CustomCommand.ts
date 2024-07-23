@@ -1,8 +1,8 @@
 import { ChannelThread } from '#bot/ChannelThread';
 import { TemplateRunner } from '#bot/templates/TemplateRunner';
 import { BotActionController } from '#database/controllers/BotActionController';
+import { ChannelStatsController } from '#database/controllers/ChannelStatsController';
 import { CommandController } from '#database/controllers/CommandController';
-import { prisma } from '#database/database';
 import { MessageWithUser } from '#database/extensions/message';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { logger } from '#lib/logger';
@@ -92,7 +92,7 @@ export class CustomCommand implements AutoWirable {
     }
 
     await this.client.say(message.channelName, response);
-    await prisma.channelStats.incrementCommands(this.channelThread.channel.user.id);
+    await ChannelStatsController.incrementCommands(this.channelThread.channel.user.id);
     await CommandController.incrementUsage(this.command.id);
 
     this.lastUsed = Date.now();

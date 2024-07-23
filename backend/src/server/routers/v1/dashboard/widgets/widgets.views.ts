@@ -1,6 +1,5 @@
 import { Bot } from '#bot/Bot';
 import { prisma } from '#database/database';
-import { FRAME_DURATION } from '#database/extensions/channelStats';
 import { TwitchUserRepo } from '#lib/TwitchUserRepo';
 import { logger } from '#lib/logger';
 import { getModerators } from '#lib/twitch';
@@ -19,6 +18,7 @@ import utc from 'dayjs/plugin/utc';
 import { HttpCodes } from '#shared/httpCodes';
 import { CommandController } from '#database/controllers/CommandController';
 import { ChannelActionController } from '#database/controllers/ChannelActionController';
+import { ChannelStatsController, FRAME_DURATION } from '#database/controllers/ChannelStatsController';
 
 dayjs.extend(utc);
 
@@ -118,11 +118,11 @@ export const getChatStatsView = new ExpressStack()
   .usePreflight(authenticated)
   .use(async (req, res) => {
     try {
-      const oldestFrameId = prisma.channelStats.frameIdFromDate(dayjs.utc().subtract(1, 'hour').toDate());
-      const newestFrameId = prisma.channelStats.frameIdFromDate();
+      const oldestFrameId = ChannelStatsController.$utils.frameIdFromDate(dayjs.utc().subtract(1, 'hour').toDate());
+      const newestFrameId = ChannelStatsController.$utils.frameIdFromDate();
 
-      const stats = await prisma.channelStats.getFramesBetween(req.user.id, oldestFrameId, newestFrameId);
-      const mappedStats = prisma.channelStats.mapFrames(stats);
+      const stats = await ChannelStatsController.getFramesBetween(req.user.id, oldestFrameId, newestFrameId);
+      const mappedStats = ChannelStatsController.$utils.mapFrames(stats);
 
       let messagesTotal = 0;
       let timeoutsTotal = 0;
@@ -136,7 +136,7 @@ export const getChatStatsView = new ExpressStack()
 
         if (frame === undefined) {
           frames.push({
-            timestamp: prisma.channelStats.dateFromFrameId(i).getTime(),
+            timestamp: ChannelStatsController.$utils.dateFromFrameId(i).getTime(),
             frameDuration: FRAME_DURATION,
 
             messages: 0,
@@ -147,7 +147,7 @@ export const getChatStatsView = new ExpressStack()
           });
         } else {
           frames.push({
-            timestamp: frame.getDate().getTime(),
+            timestamp: ChannelStatsController.$utils.getDate(frame).getTime(),
             frameDuration: FRAME_DURATION,
 
             messages: frame.messages,
@@ -167,8 +167,8 @@ export const getChatStatsView = new ExpressStack()
 
       const resp: GetChatStatsResponse = {
         data: {
-          dateStart: prisma.channelStats.dateFromFrameId(oldestFrameId).getTime(),
-          dateEnd: prisma.channelStats.dateFromFrameId(newestFrameId).getTime(),
+          dateStart: ChannelStatsController.$utils.dateFromFrameId(oldestFrameId).getTime(),
+          dateEnd: ChannelStatsController.$utils.dateFromFrameId(newestFrameId).getTime(),
 
           messagesTotal,
           timeoutsTotal,
