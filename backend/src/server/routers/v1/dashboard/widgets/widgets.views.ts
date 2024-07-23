@@ -18,6 +18,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { HttpCodes } from '#shared/httpCodes';
 import { CommandController } from '#database/controllers/CommandController';
+import { ChannelActionController } from '#database/controllers/ChannelActionController';
 
 dayjs.extend(utc);
 
@@ -96,10 +97,10 @@ export const getRecentActionsView = new ExpressStack()
   .usePreflight(authenticated)
   .use(async (req, res) => {
     try {
-      const stats = await prisma.channelAction.getByUserId(req.user.id);
+      const stats = await ChannelActionController.getByUserId(req.user.id);
 
       const resp: GetRecentActionsResponse = {
-        data: stats.map((stat) => stat.serialize()),
+        data: ChannelActionController.$utils.serialize(stats),
       };
 
       res.json(resp);

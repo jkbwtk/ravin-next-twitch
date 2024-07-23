@@ -1,6 +1,5 @@
 import { Redis, RedisOptions } from 'ioredis';
 import { Prisma, PrismaClient } from '@prisma/client';
-import { channelActionExtension } from '#database/extensions/channelAction';
 import { databaseDebug, databaseLogging } from '#shared/constants';
 import { messageExtension } from '#database/extensions/message';
 import { channelStatsExtension } from '#database/extensions/channelStats';
@@ -44,7 +43,6 @@ export const prismaBase = new PrismaClient(prismaOptions);
 
 const prismaExtended = prismaBase
   .$extends(utilsExtension)
-  .$extends(channelActionExtension)
   .$extends(messageExtension)
   .$extends(channelStatsExtension)
   .$extends(behaviorProfileExtension);

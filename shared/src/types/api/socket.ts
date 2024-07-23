@@ -10,7 +10,9 @@ import { BehaviorProfile } from 'types/api/behaviorProfiles';
 
 
 export type ServerToClientEvents = {
-  NEW_RECENT_ACTION: (action: Action) => void;
+  NEW_CHANNEL_ACTION: (action: Action) => void;
+  UPD_CHANNEL_ACTION: (action: Action) => void;
+  DEL_CHANNEL_ACTION: (actionId: number) => void;
 
   NEW_CUSTOM_COMMAND: (command: CustomCommand) => void;
   UPD_CUSTOM_COMMAND: (command: CustomCommand) => void;

@@ -13,6 +13,7 @@ import { BotActionController } from '#database/controllers/BotActionController';
 import { PhraseFilterController } from '#database/controllers/PhraseFilterController';
 import { RegexFilterController } from '#database/controllers/RegexFilterController';
 import { CommandTimerController } from '#database/controllers/CommandTImerController';
+import { ChannelActionController } from '#database/controllers/ChannelActionController';
 
 
 export class SocketServer {
@@ -201,6 +202,21 @@ export class SocketServer {
     CommandTimerController.$signals.registerAfter('delete', (timer) => {
       if (timer === null) return;
       SocketServer.emitToUser(timer.channelUserId, 'DEL_COMMAND_TIMER', timer.id);
+    });
+
+    ChannelActionController.$signals.registerAfter('create', (action) => {
+      if (action === null) return;
+      SocketServer.emitToUser(action.channelUserId, 'NEW_CHANNEL_ACTION', ChannelActionController.$utils.serialize(action));
+    });
+
+    ChannelActionController.$signals.registerAfter('update', (action) => {
+      if (action === null) return;
+      SocketServer.emitToUser(action.channelUserId, 'UPD_CHANNEL_ACTION', ChannelActionController.$utils.serialize(action));
+    });
+
+    ChannelActionController.$signals.registerAfter('delete', (action) => {
+      if (action === null) return;
+      SocketServer.emitToUser(action.channelUserId, 'DEL_CHANNEL_ACTION', action.id);
     });
   }
 

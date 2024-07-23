@@ -19,6 +19,7 @@ import { ChannelController } from '#database/controllers/ChannelController';
 import { PhraseFilterController } from '#database/controllers/PhraseFilterController';
 import { RegexFilterController } from '#database/controllers/RegexFilterController';
 import { CommandTimerController } from '#database/controllers/CommandTImerController';
+import { ChannelActionController } from '#database/controllers/ChannelActionController';
 
 
 export interface BotOptions {
@@ -177,7 +178,7 @@ export class Bot {
 
     await prisma.channelStats.incrementTimeouts(thread.channel.user.id);
 
-    prisma.channelAction.createAndEmit({
+    await ChannelActionController.create({
       channelUserId: thread.channel.user.id,
       issuerDisplayName: thread.channel.user.displayName,
       targetDisplayName: (await TwitchUserRepo.getByLogin(thread.channel.user.id, username))?.display_name ?? username,
@@ -197,7 +198,7 @@ export class Bot {
 
     await prisma.channelStats.incrementBans(thread.channel.user.id);
 
-    await prisma.channelAction.createAndEmit({
+    ChannelActionController.create({
       channelUserId: thread.channel.user.id,
       issuerDisplayName: thread.channel.user.displayName,
       targetDisplayName: (await TwitchUserRepo.getByLogin(thread.channel.user.id, username))?.display_name ?? username,
@@ -219,7 +220,7 @@ export class Bot {
 
     await prisma.channelStats.incrementDeleted(thread.channel.user.id);
 
-    await prisma.channelAction.createAndEmit({
+    ChannelActionController.create({
       channelUserId: thread.channel.user.id,
       issuerDisplayName: thread.channel.user.displayName,
       targetDisplayName: (await TwitchUserRepo.getByLogin(thread.channel.user.id, username))?.display_name ?? 'Chat Member',
