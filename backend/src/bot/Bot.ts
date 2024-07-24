@@ -12,7 +12,6 @@ import { SocketServer } from '#server/SocketServer';
 import { ExtendedCron } from '#lib/ExtendedCron';
 import { PhraseFilter, RegexFilter } from '@prisma/client';
 import { BotActionType } from '#types/api/botActions';
-import { TemplateController } from '#database/controllers/TemplateController';
 import { CommandController } from '#database/controllers/CommandController';
 import { BotActionController } from '#database/controllers/BotActionController';
 import { ChannelController } from '#database/controllers/ChannelController';
@@ -462,28 +461,6 @@ export class Bot {
   }
 
   private registerSignalHandlers(): void {
-    TemplateController.$signals.registerAfter('create', async (result) => {
-      if (result === null) return;
-
-      await Bot.reloadChannelCommands(result.userId);
-      await Bot.reloadChannelCommandTimers(result.userId);
-    });
-
-    TemplateController.$signals.registerAfter('update', async (result) => {
-      if (result === null) return;
-
-      await Bot.reloadChannelCommands(result.userId);
-      await Bot.reloadChannelCommandTimers(result.userId);
-    });
-
-    TemplateController.$signals.registerAfter('delete', async (result) => {
-      if (result === null) return;
-
-      await Bot.reloadChannelCommands(result.userId);
-      await Bot.reloadChannelCommandTimers(result.userId);
-    });
-
-
     CommandController.$signals.registerAfter('create', async (result) => {
       if (result === null) return;
 
