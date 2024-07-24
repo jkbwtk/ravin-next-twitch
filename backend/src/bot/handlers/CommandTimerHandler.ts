@@ -1,5 +1,5 @@
 import { ChannelThread } from '#bot/ChannelThread';
-import { CommandTimer } from '#bot/handlers/CommandTimer';
+import { CommandTimerInstance } from '#bot/handlers/CommandTimer';
 import { CommandTimerController } from '#database/controllers/CommandTImerController';
 import { MessageWithUser } from '#database/extensions/message';
 import { ExtendedMap } from '#lib/ExtendedMap';
@@ -7,7 +7,7 @@ import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 
 
 export class CommandTimerHandler implements AutoWirable {
-  public commandTimers: ExtendedMap<string, CommandTimer> = new ExtendedMap();
+  public commandTimers: ExtendedMap<string, CommandTimerInstance> = new ExtendedMap();
 
   private channelThread: ChannelThread;
 
@@ -36,7 +36,7 @@ export class CommandTimerHandler implements AutoWirable {
     for (const timer of timers) {
       if (timer.enabled === false) continue;
 
-      this.commandTimers.set(timer.name, new CommandTimer(this, timer));
+      this.commandTimers.set(timer.name, new CommandTimerInstance(this, timer));
     }
   }
 

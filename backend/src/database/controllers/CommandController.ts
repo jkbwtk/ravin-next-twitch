@@ -3,13 +3,13 @@ import { convertToControllerProxy, createBasicCRUD, SelectOptions } from '#datab
 import { serializer } from '#lib/serializer';
 import { commandsTable } from '#schema/schema';
 import { CustomCommand } from '#types/api/commands';
-import { Command, CommandWithUserAndTemplate } from '#types/database/tables';
+import { Command } from '#types/database/tables';
 import { and, count, eq, inArray, SQL, sql } from 'drizzle-orm';
 
 const commandControllerMethods = {
   ...createBasicCRUD(commandsTable),
 
-  async getByUserId(userId: string, options: SelectOptions = {}): Promise<CommandWithUserAndTemplate[]> {
+  async getByUserId(userId: string, options: SelectOptions = {}): Promise<Command[]> {
     const filters: SQL[] = [
       eq(commandsTable.channelUserId, userId),
     ];
@@ -23,11 +23,6 @@ const commandControllerMethods = {
       .commandsTable
       .findMany({
         where: and(...filters),
-
-        with: {
-          user: true,
-          template: true,
-        },
 
         ...options.pagination,
       });

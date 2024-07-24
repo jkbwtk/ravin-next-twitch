@@ -3,14 +3,14 @@ import { convertToControllerProxy, createBasicCRUD, SelectOptions } from '#datab
 import { serializer } from '#lib/serializer';
 import { commandTimersTable } from '#schema/schema';
 import { CommandTimer as CommandTimerApi } from '#types/api/commands';
-import { CommandTimer, CommandTimerWithUserAndTemplate } from '#types/database/tables';
+import { CommandTimer } from '#types/database/tables';
 import { and, count, eq, inArray, SQL } from 'drizzle-orm';
 
 
 const commandTimerControllerMethods = {
   ...createBasicCRUD(commandTimersTable),
 
-  async getByUserId(userId: string, options: SelectOptions = {}): Promise<CommandTimerWithUserAndTemplate[]> {
+  async getByUserId(userId: string, options: SelectOptions = {}): Promise<CommandTimer[]> {
     const filters: SQL[] = [
       eq(commandTimersTable.channelUserId, userId),
     ];
@@ -24,11 +24,6 @@ const commandTimerControllerMethods = {
       .commandTimersTable
       .findMany({
         where: and(...filters),
-
-        with: {
-          user: true,
-          template: true,
-        },
 
         ...options.pagination,
       });

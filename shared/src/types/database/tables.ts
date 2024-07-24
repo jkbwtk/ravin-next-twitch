@@ -68,11 +68,6 @@ export type ChannelStatDelete = InferDelete<ChannelStatInsert>;
 
 export type Command = typeof commandsTable.$inferSelect;
 
-export type CommandWithUserAndTemplate = Command & {
-  user: User;
-  template: Template;
-};
-
 export type CommandInsert = StripUtilityRows<typeof commandsTable.$inferInsert>;
 
 export type CommandCreate = InferCreate<CommandInsert>;
@@ -138,11 +133,6 @@ export type TemplateDelete = InferDelete<TemplateInsert>;
 
 
 export type CommandTimer = typeof commandTimersTable.$inferSelect;
-
-export type CommandTimerWithUserAndTemplate = CommandTimer & {
-  user: User;
-  template: Template;
-};
 
 export type CommandTimerInsert = StripUtilityRows<typeof commandTimersTable.$inferInsert>;
 
