@@ -40,10 +40,6 @@ const ChannelControllerTarget = {
       const existingChannel = await tx
         .query.channelsTable.findFirst({
           where: eq(channelsTable.userId, userId),
-
-          with: {
-            user: true,
-          },
         });
 
       if (existingChannel !== undefined) {
