@@ -7,9 +7,10 @@
     "start": "cross-env NODE_ENV=production node --no-node-snapshot .",
     "dev": "cross-env DEV=true VITE_CJS_IGNORE_WARNING=true TS_NODE_PROJECT=./backend/tsconfig.json tsnd -r tsconfig-paths/register --no-node-snapshot ./backend/src/index.ts",
     "playground": "cross-env DEV=true VITE_CJS_IGNORE_WARNING=true TS_NODE_PROJECT=./backend/tsconfig.json tsnd -r tsconfig-paths/register --no-node-snapshot ./backend/src/playground.ts",
-    "build": "vite build && cd ./backend && tsc -b",
-    "build-backend": "cd ./backend && tsc -b",
-    "build-frontend": "vite build",
+    "prebuild": "rm ./build -r && tsc -p shared",
+    "build": "vite build && tsc -p backend",
+    "postbuild": "cp -r backend/src/database/migrations build/backend/database/",
+    "postinstall": "pnpm build",
     "watch": "cd backend && tsc -b --watch",
     "lint": "eslint --fix --ext .ts,.tsx ./frontend/src ./backend/src ./shared/src",
     "test": "vitest"
