@@ -14,6 +14,7 @@ import { PhraseFilterController } from '#database/controllers/PhraseFilterContro
 import { RegexFilterController } from '#database/controllers/RegexFilterController';
 import { CommandTimerController } from '#database/controllers/CommandTImerController';
 import { ChannelActionController } from '#database/controllers/ChannelActionController';
+import { MessageController } from '#database/controllers/MessageController';
 
 
 export class SocketServer {
@@ -217,6 +218,11 @@ export class SocketServer {
     ChannelActionController.$signals.registerAfter('delete', (action) => {
       if (action === null) return;
       SocketServer.emitToUser(action.channelUserId, 'DEL_CHANNEL_ACTION', action.id);
+    });
+
+    MessageController.$signals.registerAfter('create', (message) => {
+      if (message === null) return;
+      SocketServer.emitToUser(message.channelUserId, 'NEW_MESSAGE', MessageController.$utils.serialize(message));
     });
   }
 

@@ -8,7 +8,6 @@ import { TwitchUserRepo } from '#lib/TwitchUserRepo';
 import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { Wirable } from '#lib/autowire';
-import { SocketServer } from '#server/SocketServer';
 import { ExtendedCron } from '#lib/ExtendedCron';
 import { PhraseFilter, RegexFilter } from '@prisma/client';
 import { BotActionType } from '#types/api/botActions';
@@ -20,6 +19,7 @@ import { RegexFilterController } from '#database/controllers/RegexFilterControll
 import { CommandTimerController } from '#database/controllers/CommandTImerController';
 import { ChannelActionController } from '#database/controllers/ChannelActionController';
 import { ChannelStatsController } from '#database/controllers/ChannelStatsController';
+import { MessageController } from '#database/controllers/MessageController';
 
 
 export interface BotOptions {
@@ -148,7 +148,14 @@ export class Bot {
     try {
       if (self) return;
 
-      const instance = await prisma.message.createFromChatUserState(channel, userstate, message);
+      const converted = MessageController.$utils.convertFromChatMessage(channel, userstate, message);
+      const instance = await MessageController.create(converted);
+
+      if (instance === null) {
+        logger.warn('Failed to create message instance', { label: ['Bot', 'handleMessage'] });
+        return;
+      }
+
       const thread = this.channels.get(channel.slice(1));
 
       if (!thread) {
@@ -157,7 +164,6 @@ export class Bot {
       }
 
       await ChannelStatsController.incrementMessages(instance.channelUserId);
-      SocketServer.emitToUser(instance.channelUserId, 'NEW_MESSAGE', instance.serialize());
 
       await thread.handleMessage(self, instance);
     } catch (err) {

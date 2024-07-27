@@ -3,14 +3,14 @@ import { TemplateRunner } from '#bot/templates/TemplateRunner';
 import { BotActionController } from '#database/controllers/BotActionController';
 import { ChannelStatsController } from '#database/controllers/ChannelStatsController';
 import { CommandController } from '#database/controllers/CommandController';
+import { MessageController } from '#database/controllers/MessageController';
 import { TemplateController } from '#database/controllers/TemplateController';
-import { MessageWithUser } from '#database/extensions/message';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { logger } from '#lib/logger';
 import { SocketServer } from '#server/SocketServer';
 import { BotActionType } from '#types/api/botActions';
 import { CustomCommandState } from '#types/api/commands';
-import { Command } from '#types/database/tables';
+import { Command, Message } from '#types/database/tables';
 import { Isolate } from 'isolated-vm';
 import { Client } from 'tmi.js';
 
@@ -54,7 +54,7 @@ export class CustomCommand implements AutoWirable {
     return new TemplateRunner(this.isolate, template);
   }
 
-  public async execute(self: boolean, message: MessageWithUser): Promise<void> {
+  public async execute(self: boolean, message: Message): Promise<void> {
     if (self) return;
 
     if (!this.command.enabled) {
@@ -68,13 +68,15 @@ export class CustomCommand implements AutoWirable {
       return;
     }
 
-    if (message.getUserLevel() < this.command.userLevel) {
+    const userLevel = MessageController.$utils.getUserLevel(message);
+
+    if (userLevel < this.command.userLevel) {
       await BotActionController.createFromType(
         this.channelThread.channel.user.id,
         BotActionType.CustomCommandFailedUserLevel,
         this.command.command,
         message.displayName,
-        message.getUserLevel(),
+        userLevel,
       );
 
       return;

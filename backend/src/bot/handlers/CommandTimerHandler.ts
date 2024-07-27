@@ -1,9 +1,9 @@
 import { ChannelThread } from '#bot/ChannelThread';
 import { CommandTimerInstance } from '#bot/handlers/CommandTimer';
 import { CommandTimerController } from '#database/controllers/CommandTImerController';
-import { MessageWithUser } from '#database/extensions/message';
 import { ExtendedMap } from '#lib/ExtendedMap';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
+import { Message } from '#types/database/tables';
 
 
 export class CommandTimerHandler implements AutoWirable {
@@ -23,7 +23,7 @@ export class CommandTimerHandler implements AutoWirable {
     this.clearCommandTimers();
   }
 
-  public async processMessage(self: boolean, message: MessageWithUser): Promise<void> {
+  public async processMessage(self: boolean, message: Message): Promise<void> {
     for (const commandTimer of this.commandTimers.values()) {
       await commandTimer.processMessage(self, message);
     }

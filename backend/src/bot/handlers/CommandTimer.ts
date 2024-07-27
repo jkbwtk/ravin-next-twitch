@@ -2,15 +2,15 @@ import { ChannelThread } from '#bot/ChannelThread';
 import { TemplateRunner } from '#bot/templates/TemplateRunner';
 import { BotActionController } from '#database/controllers/BotActionController';
 import { CommandTimerController } from '#database/controllers/CommandTImerController';
+import { MessageController } from '#database/controllers/MessageController';
 import { TemplateController } from '#database/controllers/TemplateController';
-import { MessageWithUser } from '#database/extensions/message';
 import { ExtendedCron } from '#lib/ExtendedCron';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { logger } from '#lib/logger';
 import { SocketServer } from '#server/SocketServer';
 import { BotActionType } from '#types/api/botActions';
 import { CommandTimerState, UserLevel } from '#types/api/commands';
-import { CommandTimer } from '#types/database/tables';
+import { CommandTimer, Message } from '#types/database/tables';
 import { Isolate } from 'isolated-vm';
 import { Client } from 'tmi.js';
 
@@ -116,13 +116,15 @@ export class CommandTimerInstance implements AutoWirable {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public async processMessage(self: boolean, message: MessageWithUser): Promise<void> {
+  public async processMessage(self: boolean, message: Message): Promise<void> {
     if (self) return;
+
+    const userLevel = MessageController.$utils.getUserLevel(message);
 
     if (
       message.content.toLowerCase() === this.timer.alias.toLowerCase() &&
       (Date.now() - this.lastUsed >= this.timer.cooldown * 1000 ||
-      message.getUserLevel() >= UserLevel.Moderator)
+      userLevel >= UserLevel.Moderator)
     ) {
       this.lastUsed = Date.now();
       this.lastUsedBy = message.displayName ?? 'Chat Member';

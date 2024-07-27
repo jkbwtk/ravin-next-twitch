@@ -1,7 +1,6 @@
 import { Redis, RedisOptions } from 'ioredis';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { databaseDebug, databaseLogging } from '#shared/constants';
-import { messageExtension } from '#database/extensions/message';
 import { mapOptionsToArray } from '#lib/utils';
 import { utilsExtension } from '#database/extensions/utils';
 import { behaviorProfileExtension } from '#database/extensions/behaviorProfile';
@@ -42,7 +41,6 @@ export const prismaBase = new PrismaClient(prismaOptions);
 
 const prismaExtended = prismaBase
   .$extends(utilsExtension)
-  .$extends(messageExtension)
   .$extends(behaviorProfileExtension);
 
 export type ExtendedPrismaClient = typeof prismaExtended;

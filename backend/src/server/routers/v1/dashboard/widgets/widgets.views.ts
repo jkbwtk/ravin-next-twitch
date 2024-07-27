@@ -1,5 +1,4 @@
 import { Bot } from '#bot/Bot';
-import { prisma } from '#database/database';
 import { TwitchUserRepo } from '#lib/TwitchUserRepo';
 import { logger } from '#lib/logger';
 import { getModerators } from '#lib/twitch';
@@ -19,6 +18,7 @@ import { HttpCodes } from '#shared/httpCodes';
 import { CommandController } from '#database/controllers/CommandController';
 import { ChannelActionController } from '#database/controllers/ChannelActionController';
 import { ChannelStatsController, FRAME_DURATION } from '#database/controllers/ChannelStatsController';
+import { MessageController } from '#database/controllers/MessageController';
 
 dayjs.extend(utc);
 
@@ -61,12 +61,12 @@ export const getTopStatsView = new ExpressStack()
   .usePreflight(authenticated)
   .use(async (req, res) => {
     try {
-      const topChatterId = await prisma.message.getTopChatter(req.user.id);
+      const topChatterId = await MessageController.getTopChatter(req.user.id);
       const topChatter = topChatterId ? await TwitchUserRepo.get(req.user.id, topChatterId ?? '') : null;
 
       const topCommand = await CommandController.getTopCommand(req.user.id);
 
-      const topEmote = await prisma.message.getTopEmote(req.user.id);
+      const topEmote = await MessageController.getTopEmote(req.user.id);
 
       const resp: GetTopStatsResponse = {
         data: {

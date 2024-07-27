@@ -6,7 +6,6 @@ import { ChantHandler } from '#bot/handlers/ChantHandler';
 import { mergeOptions, RequiredDefaults } from '#shared/utils';
 import { CacheFIFO } from '#lib/CacheArray';
 import { CommandHandler } from '#bot/handlers/CommandHandler';
-import { MessageWithUser } from '#database/extensions/message';
 import { AutoWirable, ClassInstance, Wirable } from '#lib/autowire';
 import { CommandTimerHandler } from '#bot/handlers/CommandTimerHandler';
 import { Isolate } from 'isolated-vm';
@@ -15,7 +14,7 @@ import { PhraseFilterHandler } from '#bot/handlers/PhraseFilterHandler';
 import { TwitchChannelInformation, TwitchStream } from '#types/twitch';
 import { SocketServer } from '#server/SocketServer';
 import { ChannelController } from '#database/controllers/ChannelController';
-import { ChannelWithUser } from '#types/database/tables';
+import { ChannelWithUser, Message } from '#types/database/tables';
 import { logger } from '#lib/logger';
 
 
@@ -105,7 +104,7 @@ export class ChannelThread implements AutoWirable {
     this.isolate.dispose();
   }
 
-  public async handleMessage(self: boolean, message: MessageWithUser): Promise<void> {
+  public async handleMessage(self: boolean, message: Message): Promise<void> {
     await this.chantHandler.handleMessage(self, message);
     await this.commandHandler.handleMessage(self, message);
     await this.commandTimerHandler.processMessage(self, message);

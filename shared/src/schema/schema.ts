@@ -18,6 +18,8 @@ import {
 import { sql } from 'drizzle-orm';
 import { ChantingSettings, StatesObject, TemplateEnvironments } from '../types/database/columns';
 import { BotActionData } from '../types/api/botActions';
+import { EmotesUsed } from '../types/api/logs';
+import { BadgeInfo, Badges, ChatUserstate } from 'tmi.js';
 
 
 export const ChannelActionType = pgEnum('ChannelActionType', ['ban', 'timeout', 'delete']);
@@ -156,12 +158,12 @@ export const messagesTable = pgTable(
     color: varchar('color'),
     userId: varchar('userId').notNull(),
     content: varchar('content').notNull(),
-    emotes: jsonb('emotes'),
+    emotes: jsonb('emotes').$type<EmotesUsed>(),
     timestamp: timestamp('timestamp', { precision: 3, mode: 'date' }).notNull(),
-    badgeInfo: jsonb('badgeInfo'),
-    badges: jsonb('badges'),
+    badgeInfo: jsonb('badgeInfo').$type<BadgeInfo>(),
+    badges: jsonb('badges').$type<Badges>(),
     flags: varchar('flags'),
-    messageType: varchar('messageType').notNull(),
+    messageType: varchar('messageType').$type<Exclude<ChatUserstate['message-type'], undefined>>().notNull(),
     firstMessage: boolean('firstMessage').notNull(),
     mod: boolean('mod').notNull(),
     subscriber: boolean('subscriber').notNull(),

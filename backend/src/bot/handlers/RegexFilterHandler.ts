@@ -1,7 +1,7 @@
 import { ChannelThread } from '#bot/ChannelThread';
 import { BotActionController } from '#database/controllers/BotActionController';
+import { MessageController } from '#database/controllers/MessageController';
 import { RegexFilterController } from '#database/controllers/RegexFilterController';
-import { MessageWithUser } from '#database/extensions/message';
 import { ExtendedMap } from '#lib/ExtendedMap';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { logger } from '#lib/logger';
@@ -9,6 +9,7 @@ import { banUser, deleteChatMessages } from '#lib/twitch';
 import { BotActionType } from '#types/api/botActions';
 import { UserLevel } from '#types/api/commands';
 import { Actions } from '#types/api/filters';
+import { Message } from '#types/database/tables';
 import { RegExpType } from '#types/regExp';
 import { RegexFilter } from '@prisma/client';
 import { Client } from 'tmi.js';
@@ -41,8 +42,10 @@ export class RegexFilterHandler implements AutoWirable {
    * @param {MessageWithUser} message
    * @return {boolean} Returns true if message was handled.
    */
-  public async handleMessage(self: boolean, message: MessageWithUser): Promise<boolean> {
-    if (self || message.getUserLevel() > UserLevel.Moderator) return false;
+  public async handleMessage(self: boolean, message: Message): Promise<boolean> {
+    const userLevel = MessageController.$utils.getUserLevel(message);
+
+    if (self || userLevel > UserLevel.Moderator) return false;
 
     const matches = this.getMatches(message.content).toSorted((a, b) => {
       if (a.filter.action === b.filter.action) return a.filter.actionDuration - b.filter.actionDuration;

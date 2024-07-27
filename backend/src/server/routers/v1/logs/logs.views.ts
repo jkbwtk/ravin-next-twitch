@@ -1,20 +1,20 @@
-import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
 import { ServerError } from '#shared/ServerError';
 import { authenticated } from '#server/stackMiddlewares';
 import { GetMessagesResponse } from '#types/api/logs';
 import { HttpCodes } from '#shared/httpCodes';
+import { MessageController } from '#database/controllers/MessageController';
 
 
 export const getMessagesView = new ExpressStack()
   .use(authenticated)
   .use(async (req, res) => {
     try {
-      const messages = await prisma.message.getByChannelId(req.user.id);
+      const messages = await MessageController.getByUserId(req.user.id);
 
       const response: GetMessagesResponse = {
-        data: messages.map((message) => message.serialize()),
+        data: MessageController.$utils.serialize(messages),
       };
 
       res.json(response);
