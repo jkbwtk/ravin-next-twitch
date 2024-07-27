@@ -6,7 +6,7 @@ import { Config, ConfigInsert } from '#types/database/tables';
 import { eq, getTableColumns } from 'drizzle-orm';
 
 
-const ConfigControllerTarget = {
+const ConfigControllerMethods = {
   async getByKey(key: string): Promise<Config | null> {
     const query = db
       .query
@@ -86,4 +86,4 @@ const ConfigControllerTarget = {
   },
 };
 
-export const ConfigController = convertToControllerProxy('ConfigController', ConfigControllerTarget);
+export const ConfigController = convertToControllerProxy('ConfigController', ConfigControllerMethods, {});
