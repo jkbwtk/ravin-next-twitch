@@ -19,3 +19,21 @@ export type StatesObject = Partial<Record<DefaultStates, unknown>>;
 export const TemplateEnvironments = z.enum(['generic', 'command', 'timer']);
 
 export type TemplateEnvironments = z.infer<typeof TemplateEnvironments>;
+
+
+export const BotActionData = z.array(z.coerce.string()).default([]);
+
+export type BotActionData = z.infer<typeof BotActionData>;
+
+
+export const Emote = z.object({
+  name: z.string().min(1),
+  count: z.number().int().nonnegative(),
+  positions: z.array(z.string()),
+});
+
+export type Emote = z.infer<typeof Emote>;
+
+export const EmotesUsed = z.record(Emote);
+
+export type EmotesUsed = z.infer<typeof EmotesUsed>;

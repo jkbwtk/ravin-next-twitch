@@ -16,9 +16,7 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
-import { ChantingSettings, StatesObject, TemplateEnvironments } from '../types/database/columns';
-import { BotActionData } from '../types/api/botActions';
-import { EmotesUsed } from '../types/api/logs';
+import { BotActionData, ChantingSettings, EmotesUsed, StatesObject, TemplateEnvironments } from '../types/database/columns';
 import { BadgeInfo, Badges, ChatUserstate } from 'tmi.js';
 
 
