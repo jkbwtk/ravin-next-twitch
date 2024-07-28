@@ -15,6 +15,7 @@ import { RegexFilterController } from '#database/controllers/RegexFilterControll
 import { CommandTimerController } from '#database/controllers/CommandTImerController';
 import { ChannelActionController } from '#database/controllers/ChannelActionController';
 import { MessageController } from '#database/controllers/MessageController';
+import { MessageSerializer } from '#database/serializers/MessageSerializer';
 
 
 export class SocketServer {
@@ -222,7 +223,7 @@ export class SocketServer {
 
     MessageController.$signals.registerAfter('create', (message) => {
       if (message === null) return;
-      SocketServer.emitToUser(message.channelUserId, 'NEW_MESSAGE', MessageController.$utils.serialize(message));
+      SocketServer.emitToUser(message.channelUserId, 'NEW_MESSAGE', MessageSerializer(message));
     });
   }
 

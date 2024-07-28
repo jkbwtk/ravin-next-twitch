@@ -1,7 +1,7 @@
 import { CommandTimer, CommandTimerState, CustomCommand, CustomCommandState } from 'types/api/commands';
 import { Action } from './dashboard';
 import { SystemNotification } from './systemNotifications';
-import { Message } from './logs';
+import { MessageApi } from './message';
 import { ScheduledJob } from 'types/api/admin';
 import { Template } from 'types/api/templates';
 import { PhraseFilter, RegexFilter } from 'types/api/filters';
@@ -23,7 +23,7 @@ export type ServerToClientEvents = {
   NEW_SYSTEM_NOTIFICATION: (notification: SystemNotification) => void;
   RAD_SYSTEM_NOTIFICATION: (notificationIds: number[]) => void;
 
-  NEW_MESSAGE: (message: Message) => void;
+  NEW_MESSAGE: (message: MessageApi) => void;
 
   NEW_CRON_JOB: (job: ScheduledJob) => void;
   UPD_CRON_JOB: (job: ScheduledJob) => void;

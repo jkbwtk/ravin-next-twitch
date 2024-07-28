@@ -1,10 +1,9 @@
 import { db } from '#database/database';
 import { convertToControllerProxy, createBasicCRUD, SelectOptions } from '#database/utils';
-import { serializer } from '#lib/serializer';
 import { definedOrFail } from '#lib/utils';
 import { messagesTable } from '#schema/schema';
 import { UserLevel } from '#types/api/commands';
-import { EmotesUsed, Message as MessagePublic } from '#types/api/logs';
+import { EmotesUsed } from '#types/api/message';
 import { Message, MessageCreate } from '#types/database/tables';
 import { and, asc, count, desc, eq, inArray, sql, SQL } from 'drizzle-orm';
 import { ChatUserstate } from 'tmi.js';
@@ -42,18 +41,6 @@ const getEmotesUsed = (message: string, emotes: ChatUserstate['emotes']): Emotes
 
 const MessageControllerProperties = {
   $utils: {
-    serialize: serializer<Message, MessagePublic>((message) => ({
-      id: message.uuid,
-      channelId: message.channelUserId,
-      channelName: message.channelName,
-      color: message.color,
-      userId: message.userId,
-      displayName: message.displayName,
-      emotes: message.emotes,
-      content: message.content,
-      timestamp: message.timestamp.getTime(),
-    })),
-
     getUserLevel(message: Message): UserLevel {
       if (message.badges?.broadcaster) return UserLevel.Owner;
       if (message.mod) return UserLevel.Moderator;
