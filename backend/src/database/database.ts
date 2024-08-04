@@ -3,7 +3,6 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import { databaseDebug, databaseLogging } from '#shared/constants';
 import { mapOptionsToArray } from '#lib/utils';
 import { utilsExtension } from '#database/extensions/utils';
-import { behaviorProfileExtension } from '#database/extensions/behaviorProfile';
 import { Client as PostgresClient, ClientConfig as PostgresConfig } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from '#schema/schema';
@@ -40,8 +39,7 @@ export const redis = new Redis(redisOptions);
 export const prismaBase = new PrismaClient(prismaOptions);
 
 const prismaExtended = prismaBase
-  .$extends(utilsExtension)
-  .$extends(behaviorProfileExtension);
+  .$extends(utilsExtension);
 
 export type ExtendedPrismaClient = typeof prismaExtended;
 

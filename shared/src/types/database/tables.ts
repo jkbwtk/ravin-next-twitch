@@ -145,6 +145,13 @@ export type CommandTimerDelete = InferDelete<CommandTimerInsert>;
 
 export type BehaviorProfile = typeof behaviorProfilesTable.$inferSelect;
 
+export type BehaviorProfileWithRelations = BehaviorProfile & {
+  commands: Command[];
+  phraseFilters: PhraseFilter[];
+  regexFilters: RegexFilter[];
+  commandTimers: CommandTimer[];
+};
+
 export type BehaviorProfileInsert = StripUtilityRows<typeof behaviorProfilesTable.$inferInsert>;
 
 export type BehaviorProfileCreate = InferCreate<BehaviorProfileInsert>;
@@ -152,6 +159,17 @@ export type BehaviorProfileCreate = InferCreate<BehaviorProfileInsert>;
 export type BehaviorProfileUpdate = InferUpdate<BehaviorProfileInsert>;
 
 export type BehaviorProfileDelete = InferDelete<BehaviorProfileInsert>;
+
+export type BehaviorProfileWithRelationsInsert = StripUtilityRows<typeof behaviorProfilesTable.$inferInsert> & {
+  commands: number[];
+  phraseFilters: number[];
+  regexFilters: number[];
+  commandTimers: number[];
+};
+
+export type BehaviorProfileWithRelationsCreate = InferCreate<BehaviorProfileWithRelationsInsert>;
+
+export type BehaviorProfileWithRelationsUpdate = InferUpdate<BehaviorProfileWithRelationsInsert>;
 
 
 export type BotAction = typeof botActionsTable.$inferSelect;

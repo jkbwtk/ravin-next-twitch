@@ -345,17 +345,17 @@ export const behaviorProfilesTable = pgTable(
 export const behaviorProfilesToCommandsTable = pgTable(
   'BehaviorProfilesToCommands',
   {
-    A: integer('A')
+    behaviorProfileId: integer('A')
       .notNull()
       .references(() => behaviorProfilesTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    B: integer('B')
+    commandId: integer('B')
       .notNull()
       .references(() => commandsTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
   },
   (table) => {
     return {
-      AB_unique: uniqueIndex('_BehaviorProfileToCommand_AB_unique').using('btree', table.A, table.B),
-      B_idx: index().using('btree', table.B),
+      AB_unique: uniqueIndex('_BehaviorProfileToCommand_AB_unique').using('btree', table.behaviorProfileId, table.commandId),
+      B_idx: index().using('btree', table.commandId),
     };
   },
 );
@@ -363,17 +363,17 @@ export const behaviorProfilesToCommandsTable = pgTable(
 export const behaviorProfilesToPhraseFiltersTable = pgTable(
   'BehaviorProfilesToPhraseFilters',
   {
-    A: integer('A')
+    behaviorProfileId: integer('A')
       .notNull()
       .references(() => behaviorProfilesTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    B: integer('B')
+    phraseFilterId: integer('B')
       .notNull()
       .references(() => phraseFiltersTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
   },
   (table) => {
     return {
-      AB_unique: uniqueIndex('_BehaviorProfileToPhraseFilter_AB_unique').using('btree', table.A, table.B),
-      B_idx: index().using('btree', table.B),
+      AB_unique: uniqueIndex('_BehaviorProfileToPhraseFilter_AB_unique').using('btree', table.behaviorProfileId, table.phraseFilterId),
+      B_idx: index().using('btree', table.phraseFilterId),
     };
   },
 );
@@ -381,17 +381,17 @@ export const behaviorProfilesToPhraseFiltersTable = pgTable(
 export const behaviorProfilesToRegexFiltersTable = pgTable(
   'BehaviorProfilesToRegexFilters',
   {
-    A: integer('A')
+    behaviorProfileId: integer('A')
       .notNull()
       .references(() => behaviorProfilesTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    B: integer('B')
+    regexFilterId: integer('B')
       .notNull()
       .references(() => regexFiltersTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
   },
   (table) => {
     return {
-      AB_unique: uniqueIndex('_BehaviorProfileToRegexFilter_AB_unique').using('btree', table.A, table.B),
-      B_idx: index().using('btree', table.B),
+      AB_unique: uniqueIndex('_BehaviorProfileToRegexFilter_AB_unique').using('btree', table.behaviorProfileId, table.regexFilterId),
+      B_idx: index().using('btree', table.regexFilterId),
     };
   },
 );
@@ -399,17 +399,17 @@ export const behaviorProfilesToRegexFiltersTable = pgTable(
 export const behaviorProfilesToCommandTimersTable = pgTable(
   'BehaviorProfilesToCommandTimers',
   {
-    A: integer('A')
+    behaviorProfileId: integer('A')
       .notNull()
       .references(() => behaviorProfilesTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    B: integer('B')
+    commandTimerId: integer('B')
       .notNull()
       .references(() => commandTimersTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
   },
   (table) => {
     return {
-      AB_unique: uniqueIndex('_BehaviorProfileToCommandTimer_AB_unique').using('btree', table.A, table.B),
-      B_idx: index().using('btree', table.B),
+      AB_unique: uniqueIndex('_BehaviorProfileToCommandTimer_AB_unique').using('btree', table.behaviorProfileId, table.commandTimerId),
+      B_idx: index().using('btree', table.commandTimerId),
     };
   },
 );

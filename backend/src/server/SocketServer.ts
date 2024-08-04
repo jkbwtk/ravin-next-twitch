@@ -16,6 +16,8 @@ import { CommandTimerController } from '#database/controllers/CommandTImerContro
 import { ChannelActionController } from '#database/controllers/ChannelActionController';
 import { MessageController } from '#database/controllers/MessageController';
 import { MessageSerializer } from '#database/serializers/MessageSerializer';
+import { BehaviorProfileController } from '#database/controllers/BehaviorProfileController';
+import { BehaviorProfileSerializer } from '#database/serializers/BehaviorProfileSerializer';
 
 
 export class SocketServer {
@@ -224,6 +226,21 @@ export class SocketServer {
     MessageController.$signals.registerAfter('create', (message) => {
       if (message === null) return;
       SocketServer.emitToUser(message.channelUserId, 'NEW_MESSAGE', MessageSerializer(message));
+    });
+
+    BehaviorProfileController.$signals.registerAfter('createWithRelations', (profile) => {
+      if (profile === null) return;
+      SocketServer.emitToUser(profile.channelUserId, 'NEW_BEHAVIOR_PROFILE', BehaviorProfileSerializer(profile));
+    });
+
+    BehaviorProfileController.$signals.registerAfter('updateWithRelations', (profile) => {
+      if (profile === null) return;
+      SocketServer.emitToUser(profile.channelUserId, 'UPD_BEHAVIOR_PROFILE', BehaviorProfileSerializer(profile));
+    });
+
+    BehaviorProfileController.$signals.registerAfter('delete', (profile) => {
+      if (profile === null) return;
+      SocketServer.emitToUser(profile.channelUserId, 'DEL_BEHAVIOR_PROFILE', profile.id);
     });
   }
 

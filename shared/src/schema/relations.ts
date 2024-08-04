@@ -67,7 +67,7 @@ export const commandsRelations = relations(commandsTable, ({ one, many }) => ({
     fields: [commandsTable.templateId],
     references: [templatesTable.id],
   }),
-  _BehaviorProfileToCommands: many(behaviorProfilesToCommandsTable),
+  commands: many(behaviorProfilesToCommandsTable),
 }));
 
 export const templatesRelations = relations(templatesTable, ({ one, many }) => ({
@@ -109,7 +109,7 @@ export const commandTimersRelations = relations(commandTimersTable, ({ one, many
     fields: [commandTimersTable.templateId],
     references: [templatesTable.id],
   }),
-  _behaviorProfileToCommandTimers: many(behaviorProfilesToCommandTimersTable),
+  commandTimers: many(behaviorProfilesToCommandTimersTable),
 }));
 
 export const behaviorProfilesRelations = relations(behaviorProfilesTable, ({ one, many }) => ({
@@ -117,36 +117,36 @@ export const behaviorProfilesRelations = relations(behaviorProfilesTable, ({ one
     fields: [behaviorProfilesTable.channelUserId],
     references: [usersTable.id],
   }),
-  _behaviorProfileToCommands: many(behaviorProfilesToCommandsTable),
-  _behaviorProfileToPhraseFilters: many(behaviorProfilesToPhraseFiltersTable),
-  _behaviorProfileToRegexFilters: many(behaviorProfilesToRegexFiltersTable),
-  _behaviorProfileToCommandTimers: many(behaviorProfilesToCommandTimersTable),
+  commands: many(behaviorProfilesToCommandsTable),
+  phraseFilters: many(behaviorProfilesToPhraseFiltersTable),
+  regexFilters: many(behaviorProfilesToRegexFiltersTable),
+  commandTimers: many(behaviorProfilesToCommandTimersTable),
 }));
 
 export const behaviorProfilesToCommandsRelations = relations(behaviorProfilesToCommandsTable, ({ one }) => ({
   behaviorProfile: one(behaviorProfilesTable, {
-    fields: [behaviorProfilesToCommandsTable.A],
+    fields: [behaviorProfilesToCommandsTable.behaviorProfileId],
     references: [behaviorProfilesTable.id],
   }),
   command: one(commandsTable, {
-    fields: [behaviorProfilesToCommandsTable.B],
+    fields: [behaviorProfilesToCommandsTable.commandId],
     references: [commandsTable.id],
   }),
 }));
 
 export const behaviorProfilesToPhraseFiltersRelations = relations(behaviorProfilesToPhraseFiltersTable, ({ one }) => ({
   behaviorProfile: one(behaviorProfilesTable, {
-    fields: [behaviorProfilesToPhraseFiltersTable.A],
+    fields: [behaviorProfilesToPhraseFiltersTable.behaviorProfileId],
     references: [behaviorProfilesTable.id],
   }),
   phraseFilter: one(phraseFiltersTable, {
-    fields: [behaviorProfilesToPhraseFiltersTable.B],
+    fields: [behaviorProfilesToPhraseFiltersTable.phraseFilterId],
     references: [phraseFiltersTable.id],
   }),
 }));
 
 export const phraseFiltersRelations = relations(phraseFiltersTable, ({ one, many }) => ({
-  _behaviorProfileToPhraseFilters: many(behaviorProfilesToPhraseFiltersTable),
+  phraseFilters: many(behaviorProfilesToPhraseFiltersTable),
   user: one(usersTable, {
     fields: [phraseFiltersTable.channelUserId],
     references: [usersTable.id],
@@ -155,17 +155,17 @@ export const phraseFiltersRelations = relations(phraseFiltersTable, ({ one, many
 
 export const behaviorProfilesToRegexFiltersRelations = relations(behaviorProfilesToRegexFiltersTable, ({ one }) => ({
   behaviorProfile: one(behaviorProfilesTable, {
-    fields: [behaviorProfilesToRegexFiltersTable.A],
+    fields: [behaviorProfilesToRegexFiltersTable.behaviorProfileId],
     references: [behaviorProfilesTable.id],
   }),
   regexFilter: one(regexFiltersTable, {
-    fields: [behaviorProfilesToRegexFiltersTable.B],
+    fields: [behaviorProfilesToRegexFiltersTable.regexFilterId],
     references: [regexFiltersTable.id],
   }),
 }));
 
 export const regexFiltersRelations = relations(regexFiltersTable, ({ one, many }) => ({
-  _behaviorProfileToRegexFilters: many(behaviorProfilesToRegexFiltersTable),
+  regexFilters: many(behaviorProfilesToRegexFiltersTable),
   user: one(usersTable, {
     fields: [regexFiltersTable.channelUserId],
     references: [usersTable.id],
@@ -174,11 +174,11 @@ export const regexFiltersRelations = relations(regexFiltersTable, ({ one, many }
 
 export const behaviorProfilesToCommandTimersRelations = relations(behaviorProfilesToCommandTimersTable, ({ one }) => ({
   behaviorProfile: one(behaviorProfilesTable, {
-    fields: [behaviorProfilesToCommandTimersTable.A],
+    fields: [behaviorProfilesToCommandTimersTable.behaviorProfileId],
     references: [behaviorProfilesTable.id],
   }),
   commandTimer: one(commandTimersTable, {
-    fields: [behaviorProfilesToCommandTimersTable.B],
+    fields: [behaviorProfilesToCommandTimersTable.commandTimerId],
     references: [commandTimersTable.id],
   }),
 }));
