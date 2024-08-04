@@ -21,7 +21,7 @@ export const UserLevelsArray = Object.values(UserLevel).filter((v) => !isNaN(Num
 
 export const CustomCommand = z.object({
   id: z.number().int().positive(),
-  channelId: z.string().min(1),
+  channelUserId: z.string().min(1),
   command: z.string().min(1).max(64),
   templateId: z.number().int().positive(),
   userLevel: UserLevels,
@@ -44,7 +44,7 @@ export const GetCustomCommandsPaginatedResponse = PaginatedResponse(GetCustomCom
 export type GetCustomCommandsPaginatedResponse = z.infer<typeof GetCustomCommandsPaginatedResponse>;
 
 
-export const PostCustomCommandReqBody = CustomCommand.omit({ id: true, channelId: true });
+export const PostCustomCommandReqBody = CustomCommand.omit({ id: true, channelUserId: true });
 
 export type PostCustomCommandReqBody = z.infer<typeof PostCustomCommandReqBody>;
 
@@ -77,7 +77,7 @@ export type GetCustomCommandsStatusResponse = z.infer<typeof GetCustomCommandsSt
 
 export const CommandTimer = z.object({
   id: z.number().int().positive(),
-  channelId: z.string().min(1),
+  channelUserId: z.string().min(1),
   name: z.string().min(1).max(64),
   alias: z.string().min(1).max(64),
   cooldown: z.number().int().min(0).max(86400).multipleOf(5),
@@ -101,7 +101,7 @@ export const GetCommandTimersPaginatedResponse = PaginatedResponse(GetCommandTim
 export type GetCommandTimersPaginatedResponse = z.infer<typeof GetCommandTimersPaginatedResponse>;
 
 
-export const PostCommandTimerReqBody = CommandTimer.omit({ id: true, channelId: true });
+export const PostCommandTimerReqBody = CommandTimer.omit({ id: true, channelUserId: true });
 
 export type PostCommandTimerReqBody = z.infer<typeof PostCommandTimerReqBody>;
 

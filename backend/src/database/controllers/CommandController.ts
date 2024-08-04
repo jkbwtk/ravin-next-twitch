@@ -76,7 +76,7 @@ const commandControllerProperties = {
   $utils: {
     serialize: serializer<Command, CustomCommand>((command) => ({
       id: command.id,
-      channelId: command.channelUserId,
+      channelUserId: command.channelUserId,
       command: command.command,
       templateId: command.templateId,
       userLevel: command.userLevel,

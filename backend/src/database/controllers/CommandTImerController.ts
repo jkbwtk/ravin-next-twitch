@@ -49,7 +49,7 @@ const commandTimerControllerProperties = {
   $utils: {
     serialize: serializer<CommandTimer, CommandTimerApi>((timer) => ({
       id: timer.id,
-      channelId: timer.channelUserId,
+      channelUserId: timer.channelUserId,
       name: timer.name,
       alias: timer.alias,
       cooldown: timer.cooldown,
