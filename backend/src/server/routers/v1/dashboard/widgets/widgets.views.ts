@@ -19,6 +19,7 @@ import { CommandController } from '#database/controllers/CommandController';
 import { ChannelActionController } from '#database/controllers/ChannelActionController';
 import { ChannelStatsController, FRAME_DURATION } from '#database/controllers/ChannelStatsController';
 import { MessageController } from '#database/controllers/MessageController';
+import { ChannelActionSerializer } from '#database/serializers/ChannelActionSerializer';
 
 dayjs.extend(utc);
 
@@ -100,7 +101,7 @@ export const getRecentActionsView = new ExpressStack()
       const stats = await ChannelActionController.getByUserId(req.user.id);
 
       const resp: GetRecentActionsResponse = {
-        data: ChannelActionController.$utils.serialize(stats),
+        data: ChannelActionSerializer(stats),
       };
 
       res.json(resp);

@@ -2,7 +2,7 @@ import { db } from '#database/database';
 import { convertToControllerProxy, createBasicCRUD, SelectOptions } from '#database/utils';
 import { serializer } from '#lib/serializer';
 import { commandTimersTable } from '#schema/schema';
-import { CommandTimer as CommandTimerApi } from '#types/api/commands';
+import { CommandTimerApi } from '#types/api/commands';
 import { CommandTimer } from '#types/database/tables';
 import { and, count, eq, inArray, SQL } from 'drizzle-orm';
 

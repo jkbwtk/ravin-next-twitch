@@ -3,8 +3,7 @@ import { convertToControllerProxy, createBasicCRUD, SelectOptions } from '#datab
 import { botActionsTable } from '#schema/schema';
 import { BotAction } from '#types/database/tables';
 import { and, asc, count, desc, eq, getTableColumns, inArray, SQL } from 'drizzle-orm';
-import { BotAction as BotActionApi, BotActionData, BotActionType, BotActionTypeParams } from '#types/api/botActions';
-import { serializer } from '#lib/serializer';
+import { BotActionData, BotActionType, BotActionTypeParams } from '#types/api/botActions';
 
 
 const BotActionControllerMethods = {
@@ -68,21 +67,7 @@ const BotActionControllerMethods = {
   },
 };
 
-const BotActionControllerProperties = {
-  $utils: {
-    serialize: serializer<BotAction, BotActionApi>((action) => {
-      return {
-        id: action.id,
-        type: action.type,
-        data: action.data,
-        timestamp: action.createdAt.getTime(),
-      };
-    }),
-  },
-};
-
 export const BotActionController = convertToControllerProxy(
   'BotActionController',
   BotActionControllerMethods,
-  BotActionControllerProperties,
 );

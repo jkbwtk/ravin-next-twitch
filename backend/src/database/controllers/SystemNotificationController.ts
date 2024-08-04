@@ -1,11 +1,9 @@
 import { db } from '#database/database';
 import { convertToControllerProxy, createBasicCRUD } from '#database/utils';
-import { serializer } from '#lib/serializer';
 import { systemNotificationsTable } from '#schema/schema';
 import { arrayFrom } from '#shared/utils';
 import { SystemNotification, SystemNotificationCreate } from '#types/database/tables';
 import { and, eq, getTableColumns, inArray, isNull } from 'drizzle-orm';
-import { SystemNotification as SystemNotificationApi } from '#types/api/systemNotifications';
 
 
 const SystemNotificationControllerMethods = {
@@ -91,22 +89,8 @@ const SystemNotificationControllerMethods = {
   },
 };
 
-const SystemNotificationControllerProperties = {
-  $utils: {
-    serialize: serializer<SystemNotification, SystemNotificationApi>((notification) => ({
-      id: notification.id,
-      userId: notification.userId,
-      title: notification.title,
-      content: notification.content,
-      read: notification.readAt !== null,
-      createdAt: notification.createdAt,
-    }),
-    ),
-  },
-};
 
 export const SystemNotificationController = convertToControllerProxy(
   'SystemNotificationController',
   SystemNotificationControllerMethods,
-  SystemNotificationControllerProperties,
 );

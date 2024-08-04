@@ -1,10 +1,10 @@
 import { TemplateController } from '#database/controllers/TemplateController';
-import { Template } from '#types/api/templates';
+import { TemplateApi } from '#types/api/templates';
 import { DefaultStates, StatesObject } from '#types/database/columns';
 
 
 export class StateMap extends Map<DefaultStates, unknown> {
-  public constructor(private template: Template) {
+  public constructor(private template: TemplateApi) {
     super();
   }
 

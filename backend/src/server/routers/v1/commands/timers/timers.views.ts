@@ -5,7 +5,7 @@ import { ServerError } from '#shared/ServerError';
 import { idListFilter } from '#server/middlewares/idListFilter';
 import { DeleteCommandTimerSchema, PatchCommandTimerSchema, PostCommandTimerSchema } from '#server/routers/v1/commands/timers/timers.schemas';
 import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
-import { CommandTimer, GetCommandTimersPaginatedResponse, GetCommandTimersResponse, GetCommandTimersStatusResponse } from '#types/api/commands';
+import { CommandTimerApi, GetCommandTimersPaginatedResponse, GetCommandTimersResponse, GetCommandTimersStatusResponse } from '#types/api/commands';
 import { json } from 'body-parser';
 import { HttpCodes } from '#shared/httpCodes';
 import { limitOffsetPagination } from '#server/middlewares/pagination';
@@ -50,7 +50,7 @@ export const postCommandTimersView = new ExpressStack()
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PostCommandTimerSchema))
-  .use(validateResponse(CommandTimer))
+  .use(validateResponse(CommandTimerApi))
   .use(async (req, res) => {
     try {
       const timer = await CommandTimerController.create({
@@ -78,7 +78,7 @@ export const patchCommandTimersView = new ExpressStack()
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PatchCommandTimerSchema))
-  .use(validateResponse(CommandTimer))
+  .use(validateResponse(CommandTimerApi))
   .use(async (req, res) => {
     try {
       const timer = await CommandTimerController.update({

@@ -1,16 +1,15 @@
-import { clonePickedKeys, zodSerializer } from '#lib/serializer';
-import { messagesTable } from '#schema/schema';
+import { serializer } from '#lib/serializer';
 import { MessageApi } from '#types/api/message';
 import { Message } from '#types/database/tables';
-import { createSelectSchema } from 'drizzle-zod';
 
 
-const messagesSchemaOverrides = createSelectSchema(messagesTable, {
-  timestamp: (schema) => schema.timestamp.transform((v) => v.getTime()),
-}).pick({
-  timestamp: true,
-});
-
-const messageSchema = MessageApi.omit(clonePickedKeys(messagesSchemaOverrides)).merge(messagesSchemaOverrides);
-
-export const MessageSerializer = zodSerializer<typeof messageSchema, Message, MessageApi>(messageSchema);
+export const MessageSerializer = serializer<Message, MessageApi>((message) => ({
+  id: message.id,
+  channelUserId: message.channelUserId,
+  channelName: message.channelName,
+  userId: message.userId,
+  displayName: message.displayName,
+  emotes: message.emotes,
+  content: message.content,
+  timestamp: message.timestamp.getTime(),
+}));

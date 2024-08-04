@@ -1,4 +1,5 @@
 import { RegexFilterController } from '#database/controllers/RegexFilterController';
+import { RegexFilterSerializer } from '#database/serializers/RegexFilterSerializer';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
 import { idListFilter } from '#server/middlewares/idListFilter';
@@ -7,7 +8,7 @@ import { DeleteRegexFilterSchema, PatchRegexFilterSchema, PostRegexFilterSchema 
 import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
 import { ServerError } from '#shared/ServerError';
 import { HttpCodes } from '#shared/httpCodes';
-import { GetRegexFiltersPaginatedResponse, GetRegexFiltersResponse, RegexFilter } from '#types/api/filters';
+import { GetRegexFiltersPaginatedResponse, GetRegexFiltersResponse, RegexFilterApi } from '#types/api/filters';
 import { json } from 'body-parser';
 
 
@@ -30,7 +31,7 @@ export const getRegexFiltersView = new ExpressStack()
       } : null;
 
       res.jsonValidated({
-        data: RegexFilterController.$utils.serialize(filters),
+        data: RegexFilterSerializer(filters),
 
         ...paginationMetadata,
       });
@@ -48,7 +49,7 @@ export const postRegexFiltersView = new ExpressStack()
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PostRegexFilterSchema))
-  .use(validateResponse(RegexFilter))
+  .use(validateResponse(RegexFilterApi))
   .use(async (req, res) => {
     try {
       const filter = await RegexFilterController.create({
@@ -60,7 +61,7 @@ export const postRegexFiltersView = new ExpressStack()
         throw new Error('Create regex filter returned null');
       }
 
-      res.jsonValidated(RegexFilterController.$utils.serialize(filter));
+      res.jsonValidated(RegexFilterSerializer(filter));
     } catch (err) {
       logger.warn('Failed to create regex filter', {
         error: err,
@@ -75,7 +76,7 @@ export const patchRegexFiltersView = new ExpressStack()
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PatchRegexFilterSchema))
-  .use(validateResponse(RegexFilter))
+  .use(validateResponse(RegexFilterApi))
   .use(async (req, res) => {
     try {
       const filter = await RegexFilterController.update({
@@ -87,7 +88,7 @@ export const patchRegexFiltersView = new ExpressStack()
         throw new Error('Update regex filter returned null');
       }
 
-      res.jsonValidated(RegexFilterController.$utils.serialize(filter));
+      res.jsonValidated(RegexFilterSerializer(filter));
     } catch (err) {
       logger.warn('Failed to update regex filter', {
         error: err,

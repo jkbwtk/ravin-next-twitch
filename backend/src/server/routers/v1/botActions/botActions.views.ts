@@ -1,4 +1,5 @@
 import { BotActionController } from '#database/controllers/BotActionController';
+import { BotActionSerializer } from '#database/serializers/BotActionSerializer';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
 import { limitOffsetPagination } from '#server/middlewares/pagination';
@@ -21,7 +22,7 @@ export const getBotActionsView = new ExpressStack()
 
       if (req.pagination) {
         res.jsonValidated({
-          data: BotActionController.$utils.serialize(botActions),
+          data: BotActionSerializer(botActions),
 
           total: await BotActionController.countByUserId(req.user.id),
           limit: req.pagination.limit,
@@ -29,7 +30,7 @@ export const getBotActionsView = new ExpressStack()
         });
       } else {
         res.jsonValidated({
-          data: BotActionController.$utils.serialize(botActions),
+          data: BotActionSerializer(botActions),
         });
       }
     } catch (err) {

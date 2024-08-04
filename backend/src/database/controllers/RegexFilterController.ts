@@ -1,10 +1,8 @@
 import { db } from '#database/database';
 import { convertToControllerProxy, createBasicCRUD, SelectOptions } from '#database/utils';
-import { serializer } from '#lib/serializer';
 import { regexFiltersTable } from '#schema/schema';
 import { RegexFilter } from '#types/database/tables';
 import { and, count, eq, inArray, SQL } from 'drizzle-orm';
-import { RegexFilter as RegexFilterApi } from '#types/api/filters';
 
 
 const RegexFilterControllerMethods = {
@@ -43,21 +41,7 @@ const RegexFilterControllerMethods = {
   },
 };
 
-const RegexFilterControllerProperties = {
-  $utils: {
-    serialize: serializer<RegexFilter, RegexFilterApi>((regexFilter) => ({
-      id: regexFilter.id,
-      regex: regexFilter.regex,
-      action: regexFilter.action,
-      actionDuration: regexFilter.actionDuration,
-      reason: regexFilter.reason,
-      enabled: regexFilter.enabled,
-    })),
-  },
-};
-
 export const RegexFilterController = convertToControllerProxy(
   'RegexFilterController',
   RegexFilterControllerMethods,
-  RegexFilterControllerProperties,
 );

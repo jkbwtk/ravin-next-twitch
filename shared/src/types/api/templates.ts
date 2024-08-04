@@ -1,22 +1,29 @@
+import { createSelectSchema } from 'drizzle-zod';
 import { TemplateEnvironments } from '../database/columns';
 import { PaginatedResponse } from '../pagination';
 import { z } from 'zod';
+import { templatesTable } from 'schema/schema';
 
 
-export const Template = z.object({
-  id: z.number().int().positive(),
-  name: z.string().min(3),
-  template: z.string().min(1),
-  userId: z.string().min(1),
-  environments: z.array(TemplateEnvironments)
-    .refine((v) => Array.from(new Set(v))),
+export const TemplateApi = createSelectSchema(templatesTable, {
+  id: (schema) => schema.id.positive().int(),
+  name: (schema) => schema.name.min(3),
+  template: (schema) => schema.template.min(1),
+  userId: (schema) => schema.userId.min(1),
+  environments: () => z.array(TemplateEnvironments),
+}).pick({
+  id: true,
+  name: true,
+  template: true,
+  userId: true,
+  environments: true,
 });
 
-export type Template = z.infer<typeof Template>;
+export type TemplateApi = z.infer<typeof TemplateApi>;
 
 
 export const GetTemplatesResponse = z.object({
-  data: z.array(Template),
+  data: z.array(TemplateApi),
 });
 
 export type GetTemplatesResponse = z.infer<typeof GetTemplatesResponse>;
@@ -27,7 +34,7 @@ export const GetTemplatesPaginatedResponse = PaginatedResponse(GetTemplatesRespo
 export type GetTemplatesPaginatedResponse = z.infer<typeof GetTemplatesPaginatedResponse>;
 
 
-export const PostTemplateReqBody = Template.omit({ id: true, userId: true, environments: true });
+export const PostTemplateReqBody = TemplateApi.omit({ id: true, userId: true, environments: true });
 
 export type PostTemplateReqBody = z.infer<typeof PostTemplateReqBody>;
 
@@ -53,12 +60,12 @@ export const TestTemplateResponse = z.object({
 export type TestTemplateResponse = z.infer<typeof TestTemplateResponse>;
 
 
-export const PatchTemplateReqBody = Template.pick({ id: true }).merge(PostTemplateReqBody.partial());
+export const PatchTemplateReqBody = TemplateApi.pick({ id: true }).merge(PostTemplateReqBody.partial());
 
 export type PatchTemplateReqBody = z.infer<typeof PatchTemplateReqBody>;
 
 
-export const DeleteTemplateReqBody = Template.pick({ id: true });
+export const DeleteTemplateReqBody = TemplateApi.pick({ id: true });
 
 export type DeleteTemplateReqBody = z.infer<typeof DeleteTemplateReqBody>;
 

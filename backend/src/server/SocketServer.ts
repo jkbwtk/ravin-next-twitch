@@ -18,6 +18,12 @@ import { MessageController } from '#database/controllers/MessageController';
 import { MessageSerializer } from '#database/serializers/MessageSerializer';
 import { BehaviorProfileController } from '#database/controllers/BehaviorProfileController';
 import { BehaviorProfileSerializer } from '#database/serializers/BehaviorProfileSerializer';
+import { BotActionSerializer } from '#database/serializers/BotActionSerializer';
+import { CustomCommandSerializer } from '#database/serializers/CommandSerializer';
+import { ChannelActionSerializer } from '#database/serializers/ChannelActionSerializer';
+import { PhraseFilterSerializer } from '#database/serializers/PhrazeFilterSerializer';
+import { RegexFilterSerializer } from '#database/serializers/RegexFilterSerializer';
+import { SystemNotificationSerializer } from '#database/serializers/SystemNotificationSerializer';
 
 
 export class SocketServer {
@@ -115,12 +121,12 @@ export class SocketServer {
 
     SystemNotificationController.$signals.registerAfter('create', (notification) => {
       if (notification === null) return;
-      SocketServer.emitToUser(notification.userId, 'NEW_SYSTEM_NOTIFICATION', SystemNotificationController.$utils.serialize(notification));
+      SocketServer.emitToUser(notification.userId, 'NEW_SYSTEM_NOTIFICATION', SystemNotificationSerializer(notification));
     });
 
     SystemNotificationController.$signals.registerAfter('broadcast', (notifications) => {
       for (const notification of notifications) {
-        SocketServer.emitToUser(notification.userId, 'NEW_SYSTEM_NOTIFICATION', SystemNotificationController.$utils.serialize(notification));
+        SocketServer.emitToUser(notification.userId, 'NEW_SYSTEM_NOTIFICATION', SystemNotificationSerializer(notification));
       }
     });
 
@@ -145,12 +151,12 @@ export class SocketServer {
 
     CommandController.$signals.registerAfter('create', (command) => {
       if (command === null) return;
-      SocketServer.emitToUser(command.channelUserId, 'NEW_CUSTOM_COMMAND', CommandController.$utils.serialize(command));
+      SocketServer.emitToUser(command.channelUserId, 'NEW_CUSTOM_COMMAND', CustomCommandSerializer(command));
     });
 
     CommandController.$signals.registerAfter('update', (command) => {
       if (command === null) return;
-      SocketServer.emitToUser(command.channelUserId, 'UPD_CUSTOM_COMMAND', CommandController.$utils.serialize(command));
+      SocketServer.emitToUser(command.channelUserId, 'UPD_CUSTOM_COMMAND', CustomCommandSerializer(command));
     });
 
     CommandController.$signals.registerAfter('delete', (command) => {
@@ -160,17 +166,17 @@ export class SocketServer {
 
     BotActionController.$signals.registerAfter('create', (action) => {
       if (action === null) return;
-      SocketServer.emitToUser(action.channelUserId, 'NEW_BOT_ACTION', BotActionController.$utils.serialize(action));
+      SocketServer.emitToUser(action.channelUserId, 'NEW_BOT_ACTION', BotActionSerializer(action));
     });
 
     PhraseFilterController.$signals.registerAfter('create', (filter) => {
       if (filter === null) return;
-      SocketServer.emitToUser(filter.channelUserId, 'NEW_PHRASE_FILTER', PhraseFilterController.$utils.serialize(filter));
+      SocketServer.emitToUser(filter.channelUserId, 'NEW_PHRASE_FILTER', PhraseFilterSerializer(filter));
     });
 
     PhraseFilterController.$signals.registerAfter('update', (filter) => {
       if (filter === null) return;
-      SocketServer.emitToUser(filter.channelUserId, 'UPD_PHRASE_FILTER', PhraseFilterController.$utils.serialize(filter));
+      SocketServer.emitToUser(filter.channelUserId, 'UPD_PHRASE_FILTER', PhraseFilterSerializer(filter));
     });
 
     PhraseFilterController.$signals.registerAfter('delete', (filter) => {
@@ -180,12 +186,12 @@ export class SocketServer {
 
     RegexFilterController.$signals.registerAfter('create', (filter) => {
       if (filter === null) return;
-      SocketServer.emitToUser(filter.channelUserId, 'NEW_REGEX_FILTER', RegexFilterController.$utils.serialize(filter));
+      SocketServer.emitToUser(filter.channelUserId, 'NEW_REGEX_FILTER', RegexFilterSerializer(filter));
     });
 
     RegexFilterController.$signals.registerAfter('update', (filter) => {
       if (filter === null) return;
-      SocketServer.emitToUser(filter.channelUserId, 'UPD_REGEX_FILTER', RegexFilterController.$utils.serialize(filter));
+      SocketServer.emitToUser(filter.channelUserId, 'UPD_REGEX_FILTER', RegexFilterSerializer(filter));
     });
 
     RegexFilterController.$signals.registerAfter('delete', (filter) => {
@@ -210,12 +216,12 @@ export class SocketServer {
 
     ChannelActionController.$signals.registerAfter('create', (action) => {
       if (action === null) return;
-      SocketServer.emitToUser(action.channelUserId, 'NEW_CHANNEL_ACTION', ChannelActionController.$utils.serialize(action));
+      SocketServer.emitToUser(action.channelUserId, 'NEW_CHANNEL_ACTION', ChannelActionSerializer(action));
     });
 
     ChannelActionController.$signals.registerAfter('update', (action) => {
       if (action === null) return;
-      SocketServer.emitToUser(action.channelUserId, 'UPD_CHANNEL_ACTION', ChannelActionController.$utils.serialize(action));
+      SocketServer.emitToUser(action.channelUserId, 'UPD_CHANNEL_ACTION', ChannelActionSerializer(action));
     });
 
     ChannelActionController.$signals.registerAfter('delete', (action) => {

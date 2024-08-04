@@ -1,4 +1,3 @@
-import { Bot } from '#bot/Bot';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
 import { ServerError } from '#shared/ServerError';
@@ -12,7 +11,7 @@ import { TemplateTester } from '#bot/templates/TemplateTester';
 import { limitOffsetPagination } from '#server/middlewares/pagination';
 import { templateTesterMiddleware } from '#server/routers/v1/templates/templates.middlewares';
 import { TemplateController } from '#database/controllers/TemplateController';
-import { TemplateSerializer } from '#server/routers/v1/templates/templates.serializers';
+import { TemplateSerializer } from '#database/serializers/TemplateSerializer';
 
 
 export const getTemplatesView = new ExpressStack()

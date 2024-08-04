@@ -2,6 +2,8 @@ import { UserLevel } from './commands';
 import { PaginatedResponse } from '../pagination';
 import { z } from 'zod';
 import { Actions } from './filters';
+import { createSelectSchema } from 'drizzle-zod';
+import { botActionsTable } from '../../schema/schema';
 
 
 export enum BotActionType {
@@ -63,18 +65,23 @@ export const BotActionData = z.array(z.coerce.string()).default([]);
 export type BotActionData = z.infer<typeof BotActionData>;
 
 
-export const BotAction = z.object({
-  id: z.number().int().positive(),
-  type: BotActionTypes,
-  data: BotActionData,
-  timestamp: z.number().int(),
-});
+export const BotActionApi = createSelectSchema(botActionsTable, {
+  id: (schema) => schema.id.positive().int(),
+  type: () => BotActionTypes,
+  data: () => BotActionData,
+}).pick({
+  id: true,
+  type: true,
+  data: true,
+}).merge(z.object({
+  timestamp: z.number().nonnegative(),
+}));
 
-export type BotAction = z.infer<typeof BotAction>;
+export type BotActionApi = z.infer<typeof BotActionApi>;
 
 
 export const GetBotActionsResponse = z.object({
-  data: z.array(BotAction),
+  data: z.array(BotActionApi),
 });
 
 export type GetBotActionsResponse = z.infer<typeof GetBotActionsResponse>;

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { RegExpLiteralType } from '../regExp';
-import { CommandTimer, CustomCommand } from './commands';
-import { PhraseFilter, RegexFilter } from './filters';
+import { CommandTimerApi, CustomCommandApi } from './commands';
+import { PhraseFilterApi, RegexFilterApi } from './filters';
 import { PaginatedResponse } from '../pagination';
 import { createSelectSchema } from 'drizzle-zod';
 import { behaviorProfilesTable } from '../../schema/schema';
@@ -22,10 +22,10 @@ export const BehaviorProfileApi = createSelectSchema(behaviorProfilesTable, {
   activatorCategory: true,
   activatorTitle: true,
 }).merge(z.object({
-  commands: z.array(CustomCommand),
-  phraseFilters: z.array(PhraseFilter),
-  regexFilters: z.array(RegexFilter),
-  commandTimers: z.array(CommandTimer),
+  commands: z.array(CustomCommandApi),
+  phraseFilters: z.array(PhraseFilterApi),
+  regexFilters: z.array(RegexFilterApi),
+  commandTimers: z.array(CommandTimerApi),
 }));
 
 export type BehaviorProfileApi = z.infer<typeof BehaviorProfileApi>;

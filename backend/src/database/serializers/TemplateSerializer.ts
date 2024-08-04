@@ -1,5 +1,5 @@
 import { serializer } from '#lib/serializer';
-import { Template as TemplateApi } from '#types/api/templates';
+import { TemplateApi } from '#types/api/templates';
 import { Template } from '#types/database/tables';
 
 

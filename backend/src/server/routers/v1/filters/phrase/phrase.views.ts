@@ -1,4 +1,5 @@
 import { PhraseFilterController } from '#database/controllers/PhraseFilterController';
+import { PhraseFilterSerializer } from '#database/serializers/PhrazeFilterSerializer';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
 import { idListFilter } from '#server/middlewares/idListFilter';
@@ -7,7 +8,7 @@ import { PatchPhraseFilterSchema, PostPhraseFilterSchema } from '#server/routers
 import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
 import { ServerError } from '#shared/ServerError';
 import { HttpCodes } from '#shared/httpCodes';
-import { GetPhraseFiltersPaginatedResponse, GetPhraseFiltersResponse, PhraseFilter } from '#types/api/filters';
+import { GetPhraseFiltersPaginatedResponse, GetPhraseFiltersResponse, PhraseFilterApi } from '#types/api/filters';
 import { json } from 'body-parser';
 
 
@@ -25,7 +26,7 @@ export const getPhraseFiltersView = new ExpressStack()
 
       if (req.pagination) {
         res.jsonValidated({
-          data: PhraseFilterController.$utils.serialize(filters),
+          data: PhraseFilterSerializer(filters),
 
           total: await PhraseFilterController.countByUserId(req.user.id),
           limit: req.pagination.limit,
@@ -33,7 +34,7 @@ export const getPhraseFiltersView = new ExpressStack()
         });
       } else {
         res.jsonValidated({
-          data: PhraseFilterController.$utils.serialize(filters),
+          data: PhraseFilterSerializer(filters),
         });
       }
     } catch (err) {
@@ -50,7 +51,7 @@ export const postPhraseFiltersView = new ExpressStack()
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PostPhraseFilterSchema))
-  .use(validateResponse(PhraseFilter))
+  .use(validateResponse(PhraseFilterApi))
   .use(async (req, res) => {
     try {
       const filter = await PhraseFilterController.create({
@@ -62,7 +63,7 @@ export const postPhraseFiltersView = new ExpressStack()
         throw new Error('Create phrase filter returned null');
       }
 
-      res.jsonValidated(PhraseFilterController.$utils.serialize(filter));
+      res.jsonValidated(PhraseFilterSerializer(filter));
     } catch (err) {
       logger.warn('Failed to create phrase filter', {
         error: err,
@@ -77,7 +78,7 @@ export const patchPhraseFiltersView = new ExpressStack()
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PatchPhraseFilterSchema))
-  .use(validateResponse(PhraseFilter))
+  .use(validateResponse(PhraseFilterApi))
   .use(async (req, res) => {
     try {
       const filter = await PhraseFilterController.update({
@@ -89,7 +90,7 @@ export const patchPhraseFiltersView = new ExpressStack()
         throw new Error('Update phrase filter returned null');
       }
 
-      res.json(PhraseFilterController.$utils.serialize(filter));
+      res.json(PhraseFilterSerializer(filter));
     } catch (err) {
       logger.warn('Failed to update phrase filter', {
         error: err,

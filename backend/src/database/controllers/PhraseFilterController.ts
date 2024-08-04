@@ -1,10 +1,8 @@
 import { db } from '#database/database';
 import { convertToControllerProxy, createBasicCRUD, SelectOptions } from '#database/utils';
-import { serializer } from '#lib/serializer';
 import { phraseFiltersTable } from '#schema/schema';
 import { PhraseFilter } from '#types/database/tables';
 import { and, count, eq, inArray, SQL } from 'drizzle-orm';
-import { PhraseFilter as PhraseFilterApi } from '#types/api/filters';
 
 const PhraseFilterControllerMethods = {
   ...createBasicCRUD(phraseFiltersTable),
@@ -42,24 +40,7 @@ const PhraseFilterControllerMethods = {
   },
 };
 
-const PhraseFilterControllerProperties = {
-  $utils: {
-    serialize: serializer<PhraseFilter, PhraseFilterApi>((phraseFilter) => ({
-      id: phraseFilter.id,
-      phrase: phraseFilter.phrase,
-      caseSensitive: phraseFilter.caseSensitive,
-      ignoreWhitespace: phraseFilter.ignoreWhitespace,
-      similarity: phraseFilter.similarity,
-      action: phraseFilter.action,
-      actionDuration: phraseFilter.actionDuration,
-      reason: phraseFilter.reason,
-      enabled: phraseFilter.enabled,
-    })),
-  },
-};
-
 export const PhraseFilterController = convertToControllerProxy(
   'PhraseFilterController',
   PhraseFilterControllerMethods,
-  PhraseFilterControllerProperties,
 );

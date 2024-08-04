@@ -55,8 +55,8 @@ export const GetTopStatsResponse = z.object({
 
 export type GetTopStatsResponse = z.infer<typeof GetTopStatsResponse>;
 
-
-export const Action = z.union([
+// TODO: merge into one type similar to bot actions and use createSelectSchema
+export const ChannelActionApi = z.union([
   z.object({
     date: z.number().int().positive(),
     issuerDisplayName: z.string().min(1),
@@ -80,11 +80,11 @@ export const Action = z.union([
   }),
 ]);
 
-export type Action = z.infer<typeof Action>;
+export type ChannelActionApi = z.infer<typeof ChannelActionApi>;
 
 
 export const GetRecentActionsResponse = z.object({
-  data: z.array(Action),
+  data: z.array(ChannelActionApi),
 });
 
 export type GetRecentActionsResponse = z.infer<typeof GetRecentActionsResponse>;

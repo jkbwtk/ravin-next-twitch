@@ -5,6 +5,7 @@ import { ChannelStatsController } from '#database/controllers/ChannelStatsContro
 import { CommandController } from '#database/controllers/CommandController';
 import { MessageController } from '#database/controllers/MessageController';
 import { TemplateController } from '#database/controllers/TemplateController';
+import { CustomCommandSerializer } from '#database/serializers/CommandSerializer';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { logger } from '#lib/logger';
 import { SocketServer } from '#server/SocketServer';
@@ -125,7 +126,7 @@ export class CustomCommand implements AutoWirable {
     this.lastUsedBy = message.displayName;
 
     SocketServer.emitToUser(this.channelThread.channel.user.id, 'COMMAND_EXECUTED', {
-      command: CommandController.$utils.serialize(this.command),
+      command: CustomCommandSerializer(this.command),
       lastUsed: this.lastUsed,
       lastUsedBy: this.lastUsedBy,
     });
@@ -142,7 +143,7 @@ export class CustomCommand implements AutoWirable {
     return {
       lastUsed: this.lastUsed,
       lastUsedBy: this.lastUsedBy,
-      command: CommandController.$utils.serialize(this.command),
+      command: CustomCommandSerializer(this.command),
     };
   }
 }

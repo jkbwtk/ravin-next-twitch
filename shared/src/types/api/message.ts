@@ -19,7 +19,6 @@ export const MessageApi = createSelectSchema(messagesTable, {
   id: true,
   channelUserId: true,
   channelName: true,
-  color: true,
   userId: true,
   displayName: true,
   emotes: true,

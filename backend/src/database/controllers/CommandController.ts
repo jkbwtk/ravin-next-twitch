@@ -1,8 +1,6 @@
 import { db } from '#database/database';
 import { convertToControllerProxy, createBasicCRUD, SelectOptions } from '#database/utils';
-import { serializer } from '#lib/serializer';
 import { commandsTable } from '#schema/schema';
-import { CustomCommand } from '#types/api/commands';
 import { Command } from '#types/database/tables';
 import { and, count, eq, inArray, SQL, sql } from 'drizzle-orm';
 
@@ -72,22 +70,7 @@ const commandControllerMethods = {
   },
 };
 
-const commandControllerProperties = {
-  $utils: {
-    serialize: serializer<Command, CustomCommand>((command) => ({
-      id: command.id,
-      channelUserId: command.channelUserId,
-      command: command.command,
-      templateId: command.templateId,
-      userLevel: command.userLevel,
-      cooldown: command.cooldown,
-      enabled: command.enabled,
-    })),
-  },
-};
-
 export const CommandController = convertToControllerProxy(
   'CommandController',
   commandControllerMethods,
-  commandControllerProperties,
 );

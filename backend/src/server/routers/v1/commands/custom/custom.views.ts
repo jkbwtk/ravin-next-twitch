@@ -10,6 +10,7 @@ import { json } from 'body-parser';
 import { HttpCodes } from '#shared/httpCodes';
 import { limitOffsetPagination } from '#server/middlewares/pagination';
 import { CommandController } from '#database/controllers/CommandController';
+import { CustomCommandSerializer } from '#database/serializers/CommandSerializer';
 
 
 export const getCustomCommandsView = new ExpressStack()
@@ -26,7 +27,7 @@ export const getCustomCommandsView = new ExpressStack()
 
       if (req.pagination) {
         res.jsonValidated({
-          data: CommandController.$utils.serialize(commands),
+          data: CustomCommandSerializer(commands),
 
           total: await CommandController.countByUserId(req.user.id),
           limit: req.pagination.limit,
@@ -34,7 +35,7 @@ export const getCustomCommandsView = new ExpressStack()
         });
       } else {
         res.jsonValidated({
-          data: CommandController.$utils.serialize(commands),
+          data: CustomCommandSerializer(commands),
         });
       }
     } catch (err) {

@@ -7,6 +7,7 @@ import { GetSystemNotificationsReadResponse } from '#types/api/systemNotificatio
 import { json } from 'body-parser';
 import { HttpCodes } from '#shared/httpCodes';
 import { SystemNotificationController } from '#database/controllers/SystemNotificationController';
+import { SystemNotificationSerializer } from '#database/serializers/SystemNotificationSerializer';
 
 
 export const getNotifications = new ExpressStack()
@@ -17,7 +18,7 @@ export const getNotifications = new ExpressStack()
       const notifications = await SystemNotificationController.getByUserId(req.user.id);
 
       res.jsonValidated({
-        data: SystemNotificationController.$utils.serialize(notifications),
+        data: SystemNotificationSerializer(notifications),
       });
     } catch (err) {
       logger.error('Failed to get notifications', {
