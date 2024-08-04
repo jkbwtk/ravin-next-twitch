@@ -39,7 +39,6 @@
   "dependencies": {
     "@colors/colors": "^1.6.0",
     "@faker-js/faker": "^8.4.1",
-    "@prisma/client": "^5.16.2",
     "@rollup/plugin-alias": "^5.1.0",
     "@solidjs/router": "^0.14.1",
     "@suid/icons-material": "^0.7.0",
@@ -74,7 +73,6 @@
     "passport-custom": "^1.1.1",
     "passport-oauth2": "^1.8.0",
     "pg": "^8.12.0",
-    "prisma-json-types-generator": "^3.0.4",
     "qs": "^6.12.3",
     "reflect-metadata": "^0.2.2",
     "safe-stable-stringify": "^2.4.3",
@@ -110,7 +108,6 @@
     "eslint": "^8.57.0",
     "eslint-config-google": "^0.14.0",
     "postcss-scss": "^4.0.9",
-    "prisma": "^5.16.2",
     "sass": "^1.77.8",
     "ts-essentials": "^10.0.1",
     "ts-node-dev": "^2.0.0",

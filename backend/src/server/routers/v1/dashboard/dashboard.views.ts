@@ -1,5 +1,4 @@
 import { Bot } from '#bot/Bot';
-import { prisma } from '#database/database';
 import { Config } from '#lib/Config';
 import { logger } from '#lib/logger';
 import { getModerators } from '#lib/twitch';
@@ -58,10 +57,9 @@ export const postJoinChannelView = new ExpressStack()
       if (channel.joined) await Bot.joinChannel(channel.user.id);
       else await Bot.leaveChannel(channel.user.id);
 
-      // TODO: Create dedicated model method for this
-      await prisma.channel.update({
-        where: { id: channel.id },
-        data: { joined: channel.joined },
+      await ChannelController.update({
+        id: channel.id,
+        joined: channel.joined,
       });
 
       res.sendStatus(HttpCodes.OK);

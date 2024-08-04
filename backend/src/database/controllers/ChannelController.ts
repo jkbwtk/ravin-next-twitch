@@ -54,6 +54,19 @@ const ChannelControllerTarget = {
       return inserted.at(0) ?? null;
     });
   },
+
+  async getAllWithRelations(): Promise<ChannelWithUser[]> {
+    const query = db
+      .query.channelsTable.findMany({
+        with: {
+          user: true,
+        },
+      });
+
+    const result = await query;
+
+    return result;
+  },
 };
 
 export const ChannelController = convertToControllerProxy('ChannelController', ChannelControllerTarget);

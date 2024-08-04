@@ -1,8 +1,5 @@
 import { Redis, RedisOptions } from 'ioredis';
-import { Prisma, PrismaClient } from '@prisma/client';
-import { databaseDebug, databaseLogging } from '#shared/constants';
-import { mapOptionsToArray } from '#lib/utils';
-import { utilsExtension } from '#database/extensions/utils';
+import { databaseDebug } from '#shared/constants';
 import { Client as PostgresClient, ClientConfig as PostgresConfig } from 'pg';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from '#schema/schema';
@@ -16,16 +13,6 @@ export const redisOptions: RedisOptions = {
   password: process.env.DB_PASSWORD ?? 'DEV_PASSWD',
 };
 
-export const prismaOptions: Prisma.PrismaClientOptions = {
-  log: mapOptionsToArray({
-    query: databaseDebug,
-    info: databaseLogging || databaseDebug,
-    warn: true,
-    error: true,
-  }),
-  errorFormat: 'pretty',
-};
-
 export const postgresOptions: PostgresConfig = {
   host: process.env.DB_HOST!,
   port: parseInt(process.env.DB_PORT!, 10),
@@ -36,15 +23,9 @@ export const postgresOptions: PostgresConfig = {
 
 
 export const redis = new Redis(redisOptions);
-export const prismaBase = new PrismaClient(prismaOptions);
-
-const prismaExtended = prismaBase
-  .$extends(utilsExtension);
-
-export type ExtendedPrismaClient = typeof prismaExtended;
-
-export const prisma = prismaExtended;
 
 export const postgresClient = new PostgresClient(postgresOptions);
 
-export const db = drizzle(postgresClient, { schema: { ...schema, ...relations }, logger: logger });
+export const db = drizzle(postgresClient, { schema: { ...schema, ...relations }, logger: databaseDebug ? logger : false });
+
+export type DrizzleDatabase = typeof db;

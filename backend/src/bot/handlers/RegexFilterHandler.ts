@@ -9,9 +9,8 @@ import { banUser, deleteChatMessages } from '#lib/twitch';
 import { BotActionType } from '#types/api/botActions';
 import { UserLevel } from '#types/api/commands';
 import { Actions } from '#types/api/filters';
-import { Message } from '#types/database/tables';
+import { Message, RegexFilter } from '#types/database/tables';
 import { RegExpType } from '#types/regExp';
-import { RegexFilter } from '@prisma/client';
 import { Client } from 'tmi.js';
 
 

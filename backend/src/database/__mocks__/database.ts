@@ -1,13 +1,12 @@
+import { db as dbReal, DrizzleDatabase } from '#database/database';
 import Redis from 'ioredis';
 import { beforeEach } from 'vitest';
 import { mockDeep, mockReset } from 'vitest-mock-extended';
-import type { ExtendedPrismaClient } from '#database/database';
-
 
 beforeEach(() => {
-  mockReset(prisma);
+  mockReset(dbReal);
   mockReset(redis);
 });
 
 export const redis = mockDeep<Redis>();
-export const prisma = mockDeep<ExtendedPrismaClient>();
+export const db = mockDeep<DrizzleDatabase>();

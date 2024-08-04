@@ -1,6 +1,6 @@
-import { prisma } from '#database/database';
+import { db } from '#database/database';
 import { beforeEach, expect, test, vi } from 'vitest';
-import { prisma as mock } from '#database/__mocks__/database';
+import { db as mock } from '#database/__mocks__/database';
 import { Config } from '#lib/Config';
 import { ExtendedMap } from '#lib/ExtendedMap';
 
@@ -18,7 +18,7 @@ test('getConfig should return an empty map if there are no entries in the databa
   const result = await Config.getConfig();
 
   expect(result).toEqual(new ExtendedMap());
-  expect(prisma.config.findMany).toHaveBeenCalled();
+  expect(db.config.findMany).toHaveBeenCalled();
 });
 
 test('getConfig should return a map with the entries in the database', async () => {
@@ -40,7 +40,7 @@ test('getConfig should return a map with the entries in the database', async () 
   const result = await Config.getConfig();
 
   expect(result).toEqual(new ExtendedMap([['key1', 'value1'], ['key2', 'value2']]));
-  expect(prisma.config.findMany).toHaveBeenCalled();
+  expect(db.config.findMany).toHaveBeenCalled();
 });
 
 test('get should return the value for an existing key', async () => {
@@ -54,7 +54,7 @@ test('get should return the value for an existing key', async () => {
   const result = await Config.get('key1');
 
   expect(result).toEqual('value1');
-  expect(prisma.config.findFirst).toHaveBeenCalledWith({ where: { key: 'key1' } });
+  expect(db.config.findFirst).toHaveBeenCalledWith({ where: { key: 'key1' } });
 });
 
 test('get should return undefined for a non-existing key', async () => {
@@ -63,7 +63,7 @@ test('get should return undefined for a non-existing key', async () => {
   const result = await Config.get('key1');
 
   expect(result).toBeUndefined();
-  expect(prisma.config.findFirst).toHaveBeenCalledWith({ where: { key: 'key1' } });
+  expect(db.config.findFirst).toHaveBeenCalledWith({ where: { key: 'key1' } });
 });
 
 test('get should return the shadowed value if it exists', async () => {
@@ -79,7 +79,7 @@ test('get should return the shadowed value if it exists', async () => {
   const result = await Config.get('key1');
 
   expect(result).toEqual('shadowedValue');
-  expect(prisma.config.findFirst).not.toHaveBeenCalled();
+  expect(db.config.findFirst).not.toHaveBeenCalled();
 });
 
 test('get should return the non-shadowed value if the shadowed value does not exist', async () => {
@@ -93,7 +93,7 @@ test('get should return the non-shadowed value if the shadowed value does not ex
   const result = await Config.get('key1');
 
   expect(result).toEqual('value1');
-  expect(prisma.config.findFirst).toHaveBeenCalledWith({ where: { key: 'key1' } });
+  expect(db.config.findFirst).toHaveBeenCalledWith({ where: { key: 'key1' } });
 });
 
 test('getOrFail should return the value for an existing key', async () => {
@@ -107,14 +107,14 @@ test('getOrFail should return the value for an existing key', async () => {
   const result = await Config.getOrFail('key1');
 
   expect(result).toEqual('value1');
-  expect(prisma.config.findFirst).toHaveBeenCalledWith({ where: { key: 'key1' } });
+  expect(db.config.findFirst).toHaveBeenCalledWith({ where: { key: 'key1' } });
 });
 
 test('getOrFail should throw an error for a non-existing key', async () => {
   mock.config.findFirst.mockResolvedValue(null);
 
   await expect(Config.getOrFail('key1')).rejects.toThrow('Config key [key1] does not exist');
-  expect(prisma.config.findFirst).toHaveBeenCalledWith({ where: { key: 'key1' } });
+  expect(db.config.findFirst).toHaveBeenCalledWith({ where: { key: 'key1' } });
 });
 
 test('set should create a new entry if the key does not exist', async () => {
@@ -131,7 +131,7 @@ test('set should create a new entry if the key does not exist', async () => {
   const result = await Config.set('key1', 'value1');
 
   expect(result).toEqual(entity);
-  expect(prisma.config.upsert).toHaveBeenCalledWith({
+  expect(db.config.upsert).toHaveBeenCalledWith({
     update: { value: 'value1' },
     where: { key: 'key1' },
     create: {
@@ -155,7 +155,7 @@ test('set should update an existing entry if the key exists', async () => {
   const result = await Config.set('key1', 'value2');
 
   expect(result).toEqual(entity);
-  expect(prisma.config.upsert).toHaveBeenCalledWith({
+  expect(db.config.upsert).toHaveBeenCalledWith({
     update: { value: 'value2' },
     where: { key: 'key1' },
     create: { key: 'key1', value: 'value2' },
@@ -189,13 +189,13 @@ test('batchSet should create new entries if the keys do not exist', async () => 
   ]);
 
   expect(result).toEqual([entity1, entity2]);
-  expect(prisma.$transaction).toHaveBeenCalled();
-  expect(prisma.config.upsert).toHaveBeenCalledWith({
+  expect(db.$transaction).toHaveBeenCalled();
+  expect(db.config.upsert).toHaveBeenCalledWith({
     update: { value: 'value1' },
     where: { key: 'key1' },
     create: { key: 'key1', value: 'value1' },
   });
-  expect(prisma.config.upsert).toHaveBeenCalledWith({
+  expect(db.config.upsert).toHaveBeenCalledWith({
     update: { value: 'value2' },
     where: { key: 'key2' },
     create: { key: 'key2', value: 'value2' },
@@ -229,13 +229,13 @@ test('batchSet should update existing entries if the keys exist', async () => {
   ]);
 
   expect(result).toEqual([entity1, entity2]);
-  expect(prisma.$transaction).toHaveBeenCalled();
-  expect(prisma.config.upsert).toHaveBeenCalledWith({
+  expect(db.$transaction).toHaveBeenCalled();
+  expect(db.config.upsert).toHaveBeenCalledWith({
     update: { value: 'value2' },
     where: { key: 'key1' },
     create: { key: 'key1', value: 'value2' },
   });
-  expect(prisma.config.upsert).toHaveBeenCalledWith({
+  expect(db.config.upsert).toHaveBeenCalledWith({
     update: { value: 'value3' },
     where: { key: 'key2' },
     create: { key: 'key2', value: 'value3' },
@@ -369,5 +369,5 @@ test('delete should delete an entry for a key', async () => {
   await Config.delete('key1');
 
   expect(await Config.get('key1')).toBeUndefined();
-  expect(prisma.config.delete).toHaveBeenCalledWith({ where: { key: 'key1' } });
+  expect(db.config.delete).toHaveBeenCalledWith({ where: { key: 'key1' } });
 });

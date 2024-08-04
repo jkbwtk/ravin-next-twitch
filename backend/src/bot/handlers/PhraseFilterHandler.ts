@@ -8,8 +8,7 @@ import { banUser, deleteChatMessages } from '#lib/twitch';
 import { BotActionType } from '#types/api/botActions';
 import { UserLevel } from '#types/api/commands';
 import { Actions } from '#types/api/filters';
-import { Message } from '#types/database/tables';
-import { PhraseFilter } from '@prisma/client';
+import { Message, PhraseFilter } from '#types/database/tables';
 import { Client } from 'tmi.js';
 
 

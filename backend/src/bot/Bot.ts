@@ -5,11 +5,9 @@ import { Config } from '#lib/Config';
 import { isDevApi } from '#shared/constants';
 import Deferred from '#shared/Deferred';
 import { TwitchUserRepo } from '#lib/TwitchUserRepo';
-import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { Wirable } from '#lib/autowire';
 import { ExtendedCron } from '#lib/ExtendedCron';
-import { PhraseFilter, RegexFilter } from '@prisma/client';
 import { BotActionType } from '#types/api/botActions';
 import { CommandController } from '#database/controllers/CommandController';
 import { BotActionController } from '#database/controllers/BotActionController';
@@ -20,6 +18,7 @@ import { CommandTimerController } from '#database/controllers/CommandTImerContro
 import { ChannelActionController } from '#database/controllers/ChannelActionController';
 import { ChannelStatsController } from '#database/controllers/ChannelStatsController';
 import { MessageController } from '#database/controllers/MessageController';
+import { PhraseFilter, RegexFilter } from '#types/database/tables';
 
 
 export interface BotOptions {
@@ -131,11 +130,7 @@ export class Bot {
   }
 
   private rejoinChannels = async () => {
-    const channels = await prisma.channel.findMany({
-      include: {
-        user: true,
-      },
-    });
+    const channels = await ChannelController.getAllWithRelations();
 
     for (const channel of channels) {
       if (channel.joined && !this.client.getChannels().includes(`#${channel.user.login}`)) {
@@ -257,11 +252,7 @@ export class Bot {
       return;
     }
 
-    const channels = await prisma.channel.findMany({
-      include: {
-        user: true,
-      },
-    });
+    const channels = await ChannelController.getAllWithRelations();
 
     for (const channel of channels) {
       if (!channel.joined) continue;

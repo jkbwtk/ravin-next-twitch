@@ -14,9 +14,6 @@ importers:
       '@faker-js/faker':
         specifier: ^8.4.1
         version: 8.4.1
-      '@prisma/client':
-        specifier: ^5.16.2
-        version: 5.16.2(prisma@5.16.2)
       '@rollup/plugin-alias':
         specifier: ^5.1.0
         version: 5.1.0(rollup@4.18.1)
@@ -79,10 +76,10 @@ importers:
         version: 16.4.5
       drizzle-orm:
         specifier: ^0.32.0
-        version: 0.32.0(@prisma/client@5.16.2(prisma@5.16.2))(@types/pg@8.11.6)(pg@8.12.0)(prisma@5.16.2)
+        version: 0.32.0(@prisma/client@5.16.2)(@types/pg@8.11.6)(pg@8.12.0)
       drizzle-zod:
         specifier: ^0.5.1
-        version: 0.5.1(drizzle-orm@0.32.0(@prisma/client@5.16.2(prisma@5.16.2))(@types/pg@8.11.6)(pg@8.12.0)(prisma@5.16.2))(zod@3.23.8)
+        version: 0.5.1(drizzle-orm@0.32.0(@prisma/client@5.16.2)(@types/pg@8.11.6)(pg@8.12.0))(zod@3.23.8)
       express:
         specifier: ^4.19.2
         version: 4.19.2
@@ -119,9 +116,6 @@ importers:
       pg:
         specifier: ^8.12.0
         version: 8.12.0
-      prisma-json-types-generator:
-        specifier: ^3.0.4
-        version: 3.0.4(prisma@5.16.2)(typescript@5.5.3)
       qs:
         specifier: ^6.12.3
         version: 6.12.3
@@ -222,9 +216,6 @@ importers:
       postcss-scss:
         specifier: ^4.0.9
         version: 4.0.9(postcss@8.4.39)
-      prisma:
-        specifier: ^5.16.2
-        version: 5.16.2
       sass:
         specifier: ^1.77.8
         version: 1.77.8
@@ -875,27 +866,6 @@ packages:
     peerDependenciesMeta:
       prisma:
         optional: true
-
-  '@prisma/debug@5.16.2':
-    resolution: {integrity: sha512-ItzB4nR4O8eLzuJiuP3WwUJfoIvewMHqpGCad+64gvThcKEVOtaUza9AEJo2DPqAOa/AWkFyK54oM4WwHeew+A==}
-
-  '@prisma/debug@5.9.1':
-    resolution: {integrity: sha512-yAHFSFCg8KVoL0oRUno3m60GAjsUKYUDkQ+9BA2X2JfVR3kRVSJFc/GpQ2fSORi4pSHZR9orfM4UC9OVXIFFTA==}
-
-  '@prisma/engines-version@5.16.0-24.34ace0eb2704183d2c05b60b52fba5c43c13f303':
-    resolution: {integrity: sha512-HkT2WbfmFZ9WUPyuJHhkiADxazHg8Y4gByrTSVeb3OikP6tjQ7txtSUGu9OBOBH0C13dPKN2qqH12xKtHu/Hiw==}
-
-  '@prisma/engines@5.16.2':
-    resolution: {integrity: sha512-qUxwMtrwoG3byd4PbX6T7EjHJ8AUhzTuwniOGkh/hIznBfcE2QQnGakyEq4VnwNuttMqvh/GgPFapHQ3lCuRHg==}
-
-  '@prisma/fetch-engine@5.16.2':
-    resolution: {integrity: sha512-sq51lfHKfH2jjYSjBtMjP+AznFqOJzXpqmq6B9auWrlTJrMgZ7lPyhWUW7VU7LsQU48/TJ+DZeIz8s9bMYvcHg==}
-
-  '@prisma/generator-helper@5.9.1':
-    resolution: {integrity: sha512-WMdEUPpPYxUGruRQM6e6IVTWXFjt1hHdF/m2TO7pWxhPo7/ZeoTOF9fH8JsvVSV78DYLOQkx9osjFLXZu447Kw==}
-
-  '@prisma/get-platform@5.16.2':
-    resolution: {integrity: sha512-cXiHPgNLNyj22vLouPVNegklpRL/iX2jxTeap5GRO3DmCoVyIHmJAV1CgUMUJhHlcol9yYy7EHvsnXTDJ/PKEA==}
 
   '@rollup/plugin-alias@5.1.0':
     resolution: {integrity: sha512-lpA3RZ9PdIG7qqhEfv79tBffNaoDuukFDrmhLqg9ifv99u/ehn+lOg30x2zmhf8AQqQUZaMk/B9fZraQ6/acDQ==}
@@ -2525,19 +2495,6 @@ packages:
     resolution: {integrity: sha512-Pdlw/oPxN+aXdmM9R00JVC9WVFoCLTKJvDVLgmJ+qAffBMxsV85l/Lu7sNx4zSzPyoL2euImuEwHhOXdEgNFZQ==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
 
-  prisma-json-types-generator@3.0.4:
-    resolution: {integrity: sha512-W53OpjBdGZxCsYv7MlUX69d7TPA9lEsQbDf9ddF0J93FX5EvaIRDMexdFPe0KTxiuquGvZTDJgeNXb3gIqEhJw==}
-    engines: {node: '>=14.0'}
-    hasBin: true
-    peerDependencies:
-      prisma: ^5.1
-      typescript: ^5.1
-
-  prisma@5.16.2:
-    resolution: {integrity: sha512-rFV/xoBR2hBGGlu4LPLQd4U8WVA+tSAmYyFWGPRVfj+xg7N4kiZV4lSk38htSpF+/IuHKzlrbh4SFk8Z18cI8A==}
-    engines: {node: '>=16.13'}
-    hasBin: true
-
   proxy-addr@2.0.7:
     resolution: {integrity: sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==}
     engines: {node: '>= 0.10'}
@@ -2918,9 +2875,6 @@ packages:
 
   tsconfig@7.0.0:
     resolution: {integrity: sha512-vZXmzPrL+EmC4T/4rVlT2jNVMWCi/O4DIiSj3UHg1OE5kCKbk4mfrXc6dZksLgRM/TZlKnousKH9bbTazUWRRw==}
-
-  tslib@2.6.2:
-    resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
 
   tslib@2.6.3:
     resolution: {integrity: sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ==}
@@ -3611,36 +3565,8 @@ snapshots:
 
   '@popperjs/core@2.11.8': {}
 
-  '@prisma/client@5.16.2(prisma@5.16.2)':
-    optionalDependencies:
-      prisma: 5.16.2
-
-  '@prisma/debug@5.16.2': {}
-
-  '@prisma/debug@5.9.1': {}
-
-  '@prisma/engines-version@5.16.0-24.34ace0eb2704183d2c05b60b52fba5c43c13f303': {}
-
-  '@prisma/engines@5.16.2':
-    dependencies:
-      '@prisma/debug': 5.16.2
-      '@prisma/engines-version': 5.16.0-24.34ace0eb2704183d2c05b60b52fba5c43c13f303
-      '@prisma/fetch-engine': 5.16.2
-      '@prisma/get-platform': 5.16.2
-
-  '@prisma/fetch-engine@5.16.2':
-    dependencies:
-      '@prisma/debug': 5.16.2
-      '@prisma/engines-version': 5.16.0-24.34ace0eb2704183d2c05b60b52fba5c43c13f303
-      '@prisma/get-platform': 5.16.2
-
-  '@prisma/generator-helper@5.9.1':
-    dependencies:
-      '@prisma/debug': 5.9.1
-
-  '@prisma/get-platform@5.16.2':
-    dependencies:
-      '@prisma/debug': 5.16.2
+  '@prisma/client@5.16.2':
+    optional: true
 
   '@rollup/plugin-alias@5.1.0(rollup@4.18.1)':
     dependencies:
@@ -4414,16 +4340,15 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.32.0(@prisma/client@5.16.2(prisma@5.16.2))(@types/pg@8.11.6)(pg@8.12.0)(prisma@5.16.2):
+  drizzle-orm@0.32.0(@prisma/client@5.16.2)(@types/pg@8.11.6)(pg@8.12.0):
     optionalDependencies:
-      '@prisma/client': 5.16.2(prisma@5.16.2)
+      '@prisma/client': 5.16.2
       '@types/pg': 8.11.6
       pg: 8.12.0
-      prisma: 5.16.2
 
-  drizzle-zod@0.5.1(drizzle-orm@0.32.0(@prisma/client@5.16.2(prisma@5.16.2))(@types/pg@8.11.6)(pg@8.12.0)(prisma@5.16.2))(zod@3.23.8):
+  drizzle-zod@0.5.1(drizzle-orm@0.32.0(@prisma/client@5.16.2)(@types/pg@8.11.6)(pg@8.12.0))(zod@3.23.8):
     dependencies:
-      drizzle-orm: 0.32.0(@prisma/client@5.16.2(prisma@5.16.2))(@types/pg@8.11.6)(pg@8.12.0)(prisma@5.16.2)
+      drizzle-orm: 0.32.0(@prisma/client@5.16.2)(@types/pg@8.11.6)(pg@8.12.0)
       zod: 3.23.8
 
   dynamic-dedupe@0.3.0:
@@ -5326,17 +5251,6 @@ snapshots:
       ansi-styles: 5.2.0
       react-is: 18.3.1
 
-  prisma-json-types-generator@3.0.4(prisma@5.16.2)(typescript@5.5.3):
-    dependencies:
-      '@prisma/generator-helper': 5.9.1
-      prisma: 5.16.2
-      tslib: 2.6.2
-      typescript: 5.5.3
-
-  prisma@5.16.2:
-    dependencies:
-      '@prisma/engines': 5.16.2
-
   proxy-addr@2.0.7:
     dependencies:
       forwarded: 0.2.0
@@ -5759,8 +5673,6 @@ snapshots:
       '@types/strip-json-comments': 0.0.30
       strip-bom: 3.0.0
       strip-json-comments: 2.0.1
-
-  tslib@2.6.2: {}
 
   tslib@2.6.3: {}
 
