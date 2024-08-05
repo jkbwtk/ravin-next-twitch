@@ -1,5 +1,5 @@
 import { createSelectSchema } from 'drizzle-zod';
-import { systemNotificationsTable } from 'schema/schema';
+import { systemNotificationsTable } from '../../schema/schema';
 import { z } from 'zod';
 
 

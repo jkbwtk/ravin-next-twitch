@@ -2,7 +2,7 @@ import { createSelectSchema } from 'drizzle-zod';
 import { TemplateEnvironments } from '../database/columns';
 import { PaginatedResponse } from '../pagination';
 import { z } from 'zod';
-import { templatesTable } from 'schema/schema';
+import { templatesTable } from '../../schema/schema';
 
 
 export const TemplateApi = createSelectSchema(templatesTable, {

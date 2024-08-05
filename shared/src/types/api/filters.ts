@@ -1,7 +1,7 @@
 import { PaginatedResponse } from '../pagination';
 import { z } from 'zod';
 import { createSelectSchema } from 'drizzle-zod';
-import { phraseFiltersTable, regexFiltersTable } from 'schema/schema';
+import { phraseFiltersTable, regexFiltersTable } from '../../schema/schema';
 
 
 export enum Actions {
