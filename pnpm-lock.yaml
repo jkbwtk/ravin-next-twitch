@@ -76,10 +76,10 @@ importers:
         version: 16.4.5
       drizzle-orm:
         specifier: ^0.32.0
-        version: 0.32.0(@prisma/client@5.16.2)(@types/pg@8.11.6)(pg@8.12.0)
+        version: 0.32.0(@prisma/client@5.16.2)(@types/pg@8.11.6)(pg@8.12.0)(postgres@3.4.4)
       drizzle-zod:
         specifier: ^0.5.1
-        version: 0.5.1(drizzle-orm@0.32.0(@prisma/client@5.16.2)(@types/pg@8.11.6)(pg@8.12.0))(zod@3.23.8)
+        version: 0.5.1(drizzle-orm@0.32.0(@prisma/client@5.16.2)(@types/pg@8.11.6)(pg@8.12.0)(postgres@3.4.4))(zod@3.23.8)
       express:
         specifier: ^4.19.2
         version: 4.19.2
@@ -116,6 +116,9 @@ importers:
       pg:
         specifier: ^8.12.0
         version: 8.12.0
+      postgres:
+        specifier: ^3.4.4
+        version: 3.4.4
       qs:
         specifier: ^6.12.3
         version: 6.12.3
@@ -2482,6 +2485,10 @@ packages:
   postgres-range@1.1.4:
     resolution: {integrity: sha512-i/hbxIE9803Alj/6ytL7UHQxRvZkI9O4Sy+J3HGc4F4oo/2eQAjTSNJ0bfxyse3bH0nuVesCk+3IRLaMtG3H6w==}
 
+  postgres@3.4.4:
+    resolution: {integrity: sha512-IbyN+9KslkqcXa8AO9fxpk97PA4pzewvpi2B3Dwy9u4zpV32QicaEdgmF3eSQUzdRk7ttDHQejNgAEr4XoeH4A==}
+    engines: {node: '>=12'}
+
   prebuild-install@7.1.2:
     resolution: {integrity: sha512-UnNke3IQb6sgarcZIDU3gbMeTp/9SSU1DAIkil7PrqG1vZlBtY5msYccSKSHDqa3hNg436IXK+SNImReuA1wEQ==}
     engines: {node: '>=10'}
@@ -4340,15 +4347,16 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.32.0(@prisma/client@5.16.2)(@types/pg@8.11.6)(pg@8.12.0):
+  drizzle-orm@0.32.0(@prisma/client@5.16.2)(@types/pg@8.11.6)(pg@8.12.0)(postgres@3.4.4):
     optionalDependencies:
       '@prisma/client': 5.16.2
       '@types/pg': 8.11.6
       pg: 8.12.0
+      postgres: 3.4.4
 
-  drizzle-zod@0.5.1(drizzle-orm@0.32.0(@prisma/client@5.16.2)(@types/pg@8.11.6)(pg@8.12.0))(zod@3.23.8):
+  drizzle-zod@0.5.1(drizzle-orm@0.32.0(@prisma/client@5.16.2)(@types/pg@8.11.6)(pg@8.12.0)(postgres@3.4.4))(zod@3.23.8):
     dependencies:
-      drizzle-orm: 0.32.0(@prisma/client@5.16.2)(@types/pg@8.11.6)(pg@8.12.0)
+      drizzle-orm: 0.32.0(@prisma/client@5.16.2)(@types/pg@8.11.6)(pg@8.12.0)(postgres@3.4.4)
       zod: 3.23.8
 
   dynamic-dedupe@0.3.0:
@@ -5227,6 +5235,8 @@ snapshots:
   postgres-interval@3.0.0: {}
 
   postgres-range@1.1.4: {}
+
+  postgres@3.4.4: {}
 
   prebuild-install@7.1.2:
     dependencies:

@@ -196,7 +196,6 @@ export const createBasicCRUD = <T extends Table & { id: Column }>(table: T): Bas
 
     const result = await query;
 
-    // @ts-expect-error this should work
     return result.at(0) ?? null;
   },
 
@@ -209,7 +208,6 @@ export const createBasicCRUD = <T extends Table & { id: Column }>(table: T): Bas
 
     const result = await query;
 
-    // @ts-expect-error this should work
     return result.at(0) ?? null;
   },
 
@@ -221,7 +219,6 @@ export const createBasicCRUD = <T extends Table & { id: Column }>(table: T): Bas
 
     const result = await query;
 
-    // @ts-expect-error this should work
     return result.at(0) ?? null;
   },
 });

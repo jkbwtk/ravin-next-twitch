@@ -153,7 +153,7 @@ const MessageControllerMethods = {
 
     const result = await query;
 
-    return result.rows[0] ?? null;
+    return result.at(0) ?? null;
   },
 };
 

@@ -73,6 +73,7 @@
     "passport-custom": "^1.1.1",
     "passport-oauth2": "^1.8.0",
     "pg": "^8.12.0",
+    "postgres": "^3.4.4",
     "qs": "^6.12.3",
     "reflect-metadata": "^0.2.2",
     "safe-stable-stringify": "^2.4.3",
