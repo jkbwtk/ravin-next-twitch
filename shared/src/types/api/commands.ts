@@ -1,7 +1,7 @@
 import { createSelectSchema } from 'drizzle-zod';
 import { PaginatedResponse } from '../pagination';
 import { z } from 'zod';
-import { commandsTable, commandTimersTable } from 'schema/schema';
+import { commandsTable, commandTimersTable } from '../../schema/schema';
 
 
 export enum UserLevel {
