@@ -39,7 +39,7 @@ export const getCustomCommandsView = new ExpressStack()
         });
       }
     } catch (err) {
-      logger.warn('Failed to get custom commands', {
+      logger.error('Failed to get custom commands', {
         error: err,
         label: ['APIv1', 'commands', 'getCustomCommandView'],
       });
@@ -65,7 +65,7 @@ export const postCustomCommandsView = new ExpressStack()
 
       res.sendStatus(HttpCodes.Created);
     } catch (err) {
-      logger.warn('Failed to create custom command', {
+      logger.error('Failed to create custom command', {
         error: err,
         label: ['APIv1', 'commands', 'postCustomCommandView'],
       });
@@ -88,7 +88,7 @@ export const patchCustomCommandsView = new ExpressStack()
 
       res.sendStatus(HttpCodes.OK);
     } catch (err) {
-      logger.warn('Failed to update custom command', {
+      logger.error('Failed to update custom command', {
         error: err,
         label: ['APIv1', 'commands', 'patchCustomCommandView'],
       });
@@ -107,7 +107,7 @@ export const deleteCustomCommandsView = new ExpressStack()
 
       res.sendStatus(HttpCodes.OK);
     } catch (err) {
-      logger.warn('Failed to delete custom command', {
+      logger.error('Failed to delete custom command', {
         error: err,
         label: ['APIv1', 'commands', 'deleteCustomCommandView'],
       });
@@ -131,7 +131,7 @@ export const getCustomCommandsStatusView = new ExpressStack()
           .map((state) => state.getState()),
       });
     } catch (err) {
-      logger.warn('Failed to get custom commands status', {
+      logger.error('Failed to get custom commands status', {
         error: err,
         label: ['APIv1', 'commands', 'getCustomCommandsStatusView'],
       });

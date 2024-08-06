@@ -34,7 +34,7 @@ const updateTemplateEnvironments: Job = {
 
         logger.debug('Updated environments for template [%s]', template.id, { label: ['Job', 'updateTemplateEnvironments'] });
       } catch (err) {
-        logger.warn('Failed to update environments for template [%s]', template.id, { error: err, label: ['Job', 'updateTemplateEnvironments'] });
+        logger.error('Failed to update environments for template [%s]', template.id, { error: err, label: ['Job', 'updateTemplateEnvironments'] });
       }
     }
   },

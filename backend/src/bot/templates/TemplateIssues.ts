@@ -46,7 +46,7 @@ export class TemplateIssues extends Map<TemplateEnvironments, TemplateIssue | nu
         message: TemplateIssues.sanitizeErrorMessage(error.message),
       });
     } else {
-      logger.warn('Unknown error type', { label: ['TemplateIssues', 'setIssue'], error });
+      logger.error('Unknown error type', { label: ['TemplateIssues', 'setIssue'], error });
     }
   }
 

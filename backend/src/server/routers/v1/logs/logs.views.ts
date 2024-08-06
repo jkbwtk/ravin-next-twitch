@@ -19,7 +19,7 @@ export const getMessagesView = new ExpressStack()
         data: MessageSerializer(messages),
       });
     } catch (err) {
-      logger.warn('Failed to get messages', {
+      logger.error('Failed to get messages', {
         error: err,
         label: ['APIv1', 'logs', 'getMessagesView'],
       });

@@ -16,7 +16,7 @@ const generateSessionSecret = async () => {
   try {
     await Config.set('sessionSecret', secret);
   } catch (err) {
-    logger.warn('Failed to set session secret', { error: err, label: ['sessionMiddleware', 'generateSessionSecret'] });
+    logger.error('Failed to set session secret', { error: err, label: ['sessionMiddleware', 'generateSessionSecret'] });
   }
 
   return secret;

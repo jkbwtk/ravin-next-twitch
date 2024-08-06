@@ -36,7 +36,7 @@ export const getRegexFiltersView = new ExpressStack()
         ...paginationMetadata,
       });
     } catch (err) {
-      logger.warn('Failed to get regex filters', {
+      logger.error('Failed to get regex filters', {
         error: err,
         label: ['APIv1', 'regex', 'getRegexFiltersView'],
       });
@@ -63,7 +63,7 @@ export const postRegexFiltersView = new ExpressStack()
 
       res.jsonValidated(RegexFilterSerializer(filter));
     } catch (err) {
-      logger.warn('Failed to create regex filter', {
+      logger.error('Failed to create regex filter', {
         error: err,
         label: ['APIv1', 'regex', 'postRegexFiltersView'],
       });
@@ -90,7 +90,7 @@ export const patchRegexFiltersView = new ExpressStack()
 
       res.jsonValidated(RegexFilterSerializer(filter));
     } catch (err) {
-      logger.warn('Failed to update regex filter', {
+      logger.error('Failed to update regex filter', {
         error: err,
         label: ['APIv1', 'regex', 'patchRegexFiltersView'],
       });
@@ -111,7 +111,7 @@ export const deleteRegexFiltersView = new ExpressStack()
 
       res.sendStatus(HttpCodes.OK);
     } catch (err) {
-      logger.warn('Failed to delete regex filter', {
+      logger.error('Failed to delete regex filter', {
         error: err,
         label: ['APIv1', 'regex', 'deleteRegexFiltersView'],
       });

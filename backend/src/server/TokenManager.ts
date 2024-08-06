@@ -73,7 +73,7 @@ export class TokenManager {
         this.refreshQueue.delete(userId);
       }
 
-      logger.warn('Failed to refresh token for user [%s]', userId, { label: ['TokenManager', 'refresh'], error: err });
+      logger.error('Failed to refresh token for user [%s]', userId, { label: ['TokenManager', 'refresh'], error: err });
     }
 
     throw new Error('Failed to refresh token');

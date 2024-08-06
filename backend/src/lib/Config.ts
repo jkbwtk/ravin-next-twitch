@@ -57,7 +57,7 @@ export class Config {
         return query.value;
       }
     } catch (err) {
-      logger.warn('Failed to get config key', { error: err, label: ['Config', 'get'] });
+      logger.error('Failed to get config key', { error: err, label: ['Config', 'get'] });
     }
   }
 

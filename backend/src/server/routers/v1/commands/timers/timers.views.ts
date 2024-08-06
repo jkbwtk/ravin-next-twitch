@@ -37,7 +37,7 @@ export const getCommandTimersView = new ExpressStack()
         ...paginationMetadata,
       });
     } catch (err) {
-      logger.warn('Failed to get command timers', {
+      logger.error('Failed to get command timers', {
         error: err,
         label: ['APIv1', 'timers', 'getCommandTimersView'],
       });
@@ -65,7 +65,7 @@ export const postCommandTimersView = new ExpressStack()
 
       res.jsonValidated(CommandTimerController.$utils.serialize(timer));
     } catch (err) {
-      logger.warn('Failed to create command timer', {
+      logger.error('Failed to create command timer', {
         error: err,
         label: ['APIv1', 'timers', 'postCommandTimersView'],
       });
@@ -92,7 +92,7 @@ export const patchCommandTimersView = new ExpressStack()
 
       res.jsonValidated(CommandTimerController.$utils.serialize(timer));
     } catch (err) {
-      logger.warn('Failed to update command timer', {
+      logger.error('Failed to update command timer', {
         error: err,
         label: ['APIv1', 'timers', 'patchCommandTimersView'],
       });
@@ -117,7 +117,7 @@ export const deleteCommandTimersView = new ExpressStack()
 
       res.sendStatus(HttpCodes.OK);
     } catch (err) {
-      logger.warn('Failed to delete command timer', {
+      logger.error('Failed to delete command timer', {
         error: err,
         label: ['APIv1', 'timers', 'deleteCommandTimersView'],
       });
@@ -142,7 +142,7 @@ export const getCommandTimersStatusView = new ExpressStack()
           .map((state) => state.getState()),
       });
     } catch (err) {
-      logger.warn('Failed to get command timer status', {
+      logger.error('Failed to get command timer status', {
         error: err,
         label: ['APIv1', 'commands', 'getCommandTimersStatusView'],
       });

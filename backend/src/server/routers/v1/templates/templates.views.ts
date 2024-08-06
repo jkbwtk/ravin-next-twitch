@@ -36,7 +36,7 @@ export const getTemplatesView = new ExpressStack()
         });
       }
     } catch (err) {
-      logger.warn('Failed to get templates', {
+      logger.error('Failed to get templates', {
         error: err,
         label: ['APIv1', 'templates', 'getTemplatesView'],
       });
@@ -66,7 +66,7 @@ export const postTemplatesView = new ExpressStack()
 
       res.sendStatus(HttpCodes.Created);
     } catch (err) {
-      logger.warn('Failed to create template', {
+      logger.error('Failed to create template', {
         error: err,
         label: ['APIv1', 'template', 'postTemplatesView'],
       });
@@ -89,7 +89,7 @@ export const testTemplateView = new ExpressStack()
         data: issues.serialize(),
       });
     } catch (err) {
-      logger.warn('Failed to test template', {
+      logger.error('Failed to test template', {
         error: err,
         label: ['APIv1', 'templates', 'testTemplateView'],
       });
@@ -118,7 +118,7 @@ export const patchTemplatesView = new ExpressStack()
 
       res.sendStatus(HttpCodes.OK);
     } catch (err) {
-      logger.warn('Failed to update templates', {
+      logger.error('Failed to update templates', {
         error: err,
         label: ['APIv1', 'templates', 'patchTemplatesView'],
       });
@@ -139,7 +139,7 @@ export const deleteTemplatesView = new ExpressStack()
 
       res.sendStatus(HttpCodes.OK);
     } catch (err) {
-      logger.warn('Failed to delete templates', {
+      logger.error('Failed to delete templates', {
         error: err,
         label: ['APIv1', 'templates', 'deleteTemplatesView'],
       });

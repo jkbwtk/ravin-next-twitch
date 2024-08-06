@@ -38,7 +38,7 @@ export const getPhraseFiltersView = new ExpressStack()
         });
       }
     } catch (err) {
-      logger.warn('Failed to get phrase filters', {
+      logger.error('Failed to get phrase filters', {
         error: err,
         label: ['APIv1', 'phrase', 'getPhraseFiltersView'],
       });
@@ -65,7 +65,7 @@ export const postPhraseFiltersView = new ExpressStack()
 
       res.jsonValidated(PhraseFilterSerializer(filter));
     } catch (err) {
-      logger.warn('Failed to create phrase filter', {
+      logger.error('Failed to create phrase filter', {
         error: err,
         label: ['APIv1', 'phrase', 'postPhraseFiltersView'],
       });
@@ -92,7 +92,7 @@ export const patchPhraseFiltersView = new ExpressStack()
 
       res.json(PhraseFilterSerializer(filter));
     } catch (err) {
-      logger.warn('Failed to update phrase filter', {
+      logger.error('Failed to update phrase filter', {
         error: err,
         label: ['APIv1', 'phrase', 'patchPhraseFiltersView'],
       });
@@ -113,7 +113,7 @@ export const deletePhraseFiltersView = new ExpressStack()
 
       res.sendStatus(HttpCodes.OK);
     } catch (err) {
-      logger.warn('Failed to delete phrase filter', {
+      logger.error('Failed to delete phrase filter', {
         error: err,
         label: ['APIv1', 'phrase', 'deletePhraseFiltersView'],
       });

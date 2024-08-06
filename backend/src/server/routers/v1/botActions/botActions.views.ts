@@ -34,7 +34,7 @@ export const getBotActionsView = new ExpressStack()
         });
       }
     } catch (err) {
-      logger.warn('Failed to get bot actions', {
+      logger.error('Failed to get bot actions', {
         error: err,
         label: ['APIv1', 'botActions', 'getBotActionsView'],
       });

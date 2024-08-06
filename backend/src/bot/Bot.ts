@@ -319,7 +319,7 @@ export class Bot {
 
       return true;
     } catch (err) {
-      logger.warn('Failed to leave channel [%s]', id, { label: ['Bot', 'leaveChannel'], err });
+      logger.error('Failed to leave channel [%s]', id, { label: ['Bot', 'leaveChannel'], error: err });
       return false;
     }
   }
