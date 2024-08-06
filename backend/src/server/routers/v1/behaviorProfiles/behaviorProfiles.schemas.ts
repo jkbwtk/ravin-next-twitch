@@ -1,4 +1,4 @@
-import { DeleteBehaviorProfileReqBody, PatchBehaviorProfileReqBody, PostBehaviorProfileReqBody } from '#types/api/behaviorProfiles';
+import { PatchBehaviorProfileReqBody, PostBehaviorProfileReqBody } from '#types/api/behaviorProfiles';
 import { z } from 'zod';
 
 
@@ -20,7 +20,6 @@ export type PatchBehaviorProfileSchema = z.infer<typeof PatchBehaviorProfileSche
 
 
 export const DeleteBehaviorProfileSchema = z.object({
-  body: DeleteBehaviorProfileReqBody,
   params: z.object({
     id: z.coerce.number().int().positive(),
   }),

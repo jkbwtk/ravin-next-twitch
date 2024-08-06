@@ -78,3 +78,20 @@ export const validateResponse =
 
     return [req, temp];
   };
+
+// eslint-disable-next-line max-len
+export const queryResource = <K extends string, T extends ((id: number) => Promise<object | null>)>(queryFunction: T, key: K): Middleware<never, { validated: { params: { [K: string]: number } } }, object, { resource: NonNullable<Awaited<ReturnType<T>>> }> => async (req, res) => {
+  if (typeof req.validated.params[key] !== 'number') throw new ServerError(HttpCodes.BadRequest, `Invalid parameter :${key}`);
+
+  const instance = await queryFunction(req.validated.params[key]) as Awaited<ReturnType<T>>;
+  if (!instance) throw new ServerError(HttpCodes.NotFound, 'Not Found');
+
+  const temp = Object.assign(req, { resource: instance });
+
+  return [temp, res];
+};
+
+// eslint-disable-next-line max-len
+export const checkResourceOwnership = <K extends string>(key: K): Middleware<void, { resource: { [K: string]: unknown }, user: Exclude<Request['user'], undefined> }, object> => (req) => {
+  if (req.resource[key] !== req.user.id) throw new ServerError(HttpCodes.Forbidden, 'Forbidden');
+};

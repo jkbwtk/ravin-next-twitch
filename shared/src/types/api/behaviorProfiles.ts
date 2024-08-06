@@ -54,14 +54,9 @@ export const PostBehaviorProfileReqBody = BehaviorProfileApi.omit({ id: true, co
 export type PostBehaviorProfileReqBody = z.infer<typeof PostBehaviorProfileReqBody>;
 
 
-export const PatchBehaviorProfileReqBody = BehaviorProfileApi.pick({ id: true }).merge(PostBehaviorProfileReqBody.partial());
+export const PatchBehaviorProfileReqBody = PostBehaviorProfileReqBody.partial();
 
 export type PatchBehaviorProfileReqBody = z.infer<typeof PatchBehaviorProfileReqBody>;
-
-
-export const DeleteBehaviorProfileReqBody = BehaviorProfileApi.pick({ id: true });
-
-export type DeleteBehaviorProfileReqBody = z.infer<typeof DeleteBehaviorProfileReqBody>;
 
 
 export const BehaviorProfilesStatus = z.object({

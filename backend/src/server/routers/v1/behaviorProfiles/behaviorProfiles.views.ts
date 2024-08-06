@@ -12,7 +12,7 @@ import {
   PatchBehaviorProfileSchema,
   PostBehaviorProfileSchema,
 } from '#server/routers/v1/behaviorProfiles/behaviorProfiles.schemas';
-import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
+import { authenticated, checkResourceOwnership, queryResource, validate, validateResponse } from '#server/stackMiddlewares';
 import { ServerError } from '#shared/ServerError';
 import { HttpCodes } from '#shared/httpCodes';
 import {
@@ -135,15 +135,17 @@ export const patchBehaviorProfileView = new ExpressStack('/:id')
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PatchBehaviorProfileSchema))
+  .use(queryResource(BehaviorProfileController.getById, 'id'))
+  .use(checkResourceOwnership('channelUserId'))
   .use(validateResponse(BehaviorProfileApi))
   .use(async (req, res) => {
     try {
       const body = req.validated.body;
 
       const profile = await BehaviorProfileController.updateWithRelations({
-        ...req.validated.body,
+        id: req.resource.id,
 
-        channelUserId: req.user.id,
+        ...req.validated.body,
 
         commands: body.commands && body.commands.length > 0 ?
           await CommandController.filterOwnedList(req.user.id, body.commands) : body.commands,
@@ -174,10 +176,12 @@ export const patchBehaviorProfileView = new ExpressStack('/:id')
 export const deleteBehaviorProfileView = new ExpressStack('/:id')
   .usePreflight(authenticated)
   .use(validate(DeleteBehaviorProfileSchema))
+  .use(queryResource(BehaviorProfileController.getById, 'id'))
+  .use(checkResourceOwnership('channelUserId'))
   .use(async (req, res) => {
     try {
       const profile = await BehaviorProfileController.delete({
-        id: req.validated.params.id,
+        id: req.resource.id,
       });
 
       if (!profile) {
