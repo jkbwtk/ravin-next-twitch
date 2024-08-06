@@ -1,5 +1,5 @@
 import { db } from '#database/database';
-import { convertToControllerProxy, createBasicCRUD, SelectOptions } from '#database/utils';
+import { convertToControllerProxy, createSharedMethods, SelectOptions } from '#database/utils';
 import { definedOrFail } from '#lib/utils';
 import { messagesTable } from '#schema/schema';
 import { UserLevel } from '#types/api/commands';
@@ -75,7 +75,7 @@ const MessageControllerProperties = {
 };
 
 const MessageControllerMethods = {
-  ...createBasicCRUD(messagesTable),
+  ...createSharedMethods(messagesTable),
 
   async getByUserId(userId: string, options: SelectOptions = {}) {
     const filters: SQL[] = [

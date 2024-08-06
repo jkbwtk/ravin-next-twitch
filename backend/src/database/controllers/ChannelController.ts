@@ -1,12 +1,12 @@
 import { db } from '#database/database';
-import { convertToControllerProxy, createBasicCRUD } from '#database/utils';
+import { convertToControllerProxy, createSharedMethods } from '#database/utils';
 import { channelsTable } from '#schema/schema';
 import { Channel, ChannelUpdate, ChannelWithUser } from '#types/database/tables';
 import { eq, getTableColumns } from 'drizzle-orm';
 
 
 const ChannelControllerTarget = {
-  ...createBasicCRUD(channelsTable),
+  ...createSharedMethods(channelsTable),
 
   async updateByUserId(userId: string, channel: Omit<ChannelUpdate, 'id' | 'userId'>): Promise<Channel | null> {
     const query = db

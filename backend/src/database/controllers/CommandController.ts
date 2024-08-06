@@ -1,11 +1,12 @@
 import { db } from '#database/database';
-import { convertToControllerProxy, createBasicCRUD, SelectOptions } from '#database/utils';
+import { convertToControllerProxy, createSecurityMethods, createSharedMethods, SelectOptions } from '#database/utils';
 import { commandsTable } from '#schema/schema';
 import { Command } from '#types/database/tables';
 import { and, count, eq, inArray, SQL, sql } from 'drizzle-orm';
 
 const commandControllerMethods = {
-  ...createBasicCRUD(commandsTable),
+  ...createSharedMethods(commandsTable),
+  ...createSecurityMethods(commandsTable),
 
   async getByUserId(userId: string, options: SelectOptions = {}): Promise<Command[]> {
     const filters: SQL[] = [

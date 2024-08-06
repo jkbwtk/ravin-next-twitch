@@ -1,5 +1,5 @@
 import { db } from '#database/database';
-import { convertToControllerProxy, createBasicCRUD, SelectOptions } from '#database/utils';
+import { convertToControllerProxy, createSecurityMethods, createSharedMethods, SelectOptions } from '#database/utils';
 import {
   behaviorProfilesTable,
   behaviorProfilesToCommandsTable,
@@ -38,7 +38,8 @@ function mapRelations(profile: BehaviorProfileWithUnmappedRelations): BehaviorPr
 }
 
 const BehaviorProfileControllerMethods = {
-  ...createBasicCRUD(behaviorProfilesTable),
+  ...createSharedMethods(behaviorProfilesTable),
+  ...createSecurityMethods(behaviorProfilesTable),
 
   async getByIdWithRelations(id: number): Promise<BehaviorProfileWithRelations | null> {
     const query = db

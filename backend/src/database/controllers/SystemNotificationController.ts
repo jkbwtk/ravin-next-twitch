@@ -1,5 +1,5 @@
 import { db } from '#database/database';
-import { convertToControllerProxy, createBasicCRUD } from '#database/utils';
+import { convertToControllerProxy, createSharedMethods } from '#database/utils';
 import { systemNotificationsTable } from '#schema/schema';
 import { arrayFrom } from '#shared/utils';
 import { SystemNotification, SystemNotificationCreate } from '#types/database/tables';
@@ -7,7 +7,7 @@ import { and, eq, getTableColumns, inArray, isNull } from 'drizzle-orm';
 
 
 const SystemNotificationControllerMethods = {
-  ...createBasicCRUD(systemNotificationsTable),
+  ...createSharedMethods(systemNotificationsTable),
 
   async getByUserId(userId: string): Promise<SystemNotification[]> {
     const query = db

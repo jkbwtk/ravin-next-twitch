@@ -1,12 +1,12 @@
 import { db } from '#database/database';
-import { convertToControllerProxy, createBasicCRUD } from '#database/utils';
+import { convertToControllerProxy, createSharedMethods } from '#database/utils';
 import { tokensTable } from '#schema/schema';
 import { Token, TokenInsert } from '#types/database/tables';
 import { eq, getTableColumns } from 'drizzle-orm';
 
 
 const TokenControllerTarget = {
-  ...createBasicCRUD(tokensTable),
+  ...createSharedMethods(tokensTable),
 
   async getByUserId(userId: string): Promise<Token | null> {
     const query = db

@@ -3,7 +3,7 @@ import { logger, QueryTimerData } from '#lib/logger';
 import { idListFilterState } from '#server/middlewares/idListFilter';
 import { LimitOffsetPaginationState } from '#server/middlewares/pagination';
 import { InferCreate, InferDelete, InferUpdate } from '#types/database/utils';
-import { Column, eq, getTableColumns, Table } from 'drizzle-orm';
+import { and, Column, eq, getTableColumns, inArray, Table } from 'drizzle-orm';
 import { Awaitable } from 'vitest';
 
 
@@ -155,7 +155,7 @@ export const convertToControllerProxy = <M extends ModelControllerMethods, P ext
 };
 
 
-export type BasicCRUD<T extends Table & { id: Column }> = {
+export type SharedMethods<T extends Table & { id: Column }> = {
   getById(id: T['$inferSelect']['id']): Promise<T['$inferSelect'] | null>;
   getAll(): Promise<T['$inferSelect'][]>;
 
@@ -165,7 +165,7 @@ export type BasicCRUD<T extends Table & { id: Column }> = {
 };
 
 
-export const createBasicCRUD = <T extends Table & { id: Column }>(table: T): BasicCRUD<T> => ({
+export const createSharedMethods = <T extends Table & { id: Column }>(table: T): SharedMethods<T> => ({
   async getById(id) {
     const query = db
       .select(getTableColumns(table))
@@ -220,5 +220,26 @@ export const createBasicCRUD = <T extends Table & { id: Column }>(table: T): Bas
     const result = await query;
 
     return result.at(0) ?? null;
+  },
+
+
+});
+
+
+export type SecurityMethods<T extends Table & { id: Column, channelUserId: Column }> = {
+  filterOwnedList(userId: string, idList: number[]): Promise<T['id'][]>;
+};
+
+export const createSecurityMethods = <T extends Table & { id: Column, channelUserId: Column }>(table: T): SecurityMethods<T> => ({
+  // @ts-expect-error this should work
+  async filterOwnedList(userId, idList) {
+    const query = db
+      .select()
+      .from(table)
+      .where(and(inArray(table.id, idList), eq(table.channelUserId, userId)));
+
+    const result = await query;
+
+    return result.map((row) => row.id);
   },
 });

@@ -1,11 +1,12 @@
 import { db } from '#database/database';
-import { convertToControllerProxy, createBasicCRUD, SelectOptions } from '#database/utils';
+import { convertToControllerProxy, createSecurityMethods, createSharedMethods, SelectOptions } from '#database/utils';
 import { phraseFiltersTable } from '#schema/schema';
 import { PhraseFilter } from '#types/database/tables';
 import { and, count, eq, inArray, SQL } from 'drizzle-orm';
 
 const PhraseFilterControllerMethods = {
-  ...createBasicCRUD(phraseFiltersTable),
+  ...createSharedMethods(phraseFiltersTable),
+  ...createSecurityMethods(phraseFiltersTable),
 
   async getByUserId(userId: string, options: SelectOptions = {}): Promise<PhraseFilter[]> {
     const filters: SQL[] = [

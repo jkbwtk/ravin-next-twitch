@@ -1,12 +1,12 @@
 import { db } from '#database/database';
-import { convertToControllerProxy, createBasicCRUD } from '#database/utils';
+import { convertToControllerProxy, createSharedMethods } from '#database/utils';
 import { channelActionsTable } from '#schema/schema';
 import { ChannelAction } from '#types/database/tables';
 import { eq } from 'drizzle-orm';
 
 
 const channelActionControllerMethods = {
-  ...createBasicCRUD(channelActionsTable),
+  ...createSharedMethods(channelActionsTable),
 
   async getByUserId(userId: string): Promise<ChannelAction[]> {
     const query = db

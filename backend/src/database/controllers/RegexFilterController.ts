@@ -1,12 +1,13 @@
 import { db } from '#database/database';
-import { convertToControllerProxy, createBasicCRUD, SelectOptions } from '#database/utils';
+import { convertToControllerProxy, createSecurityMethods, createSharedMethods, SelectOptions } from '#database/utils';
 import { regexFiltersTable } from '#schema/schema';
 import { RegexFilter } from '#types/database/tables';
 import { and, count, eq, inArray, SQL } from 'drizzle-orm';
 
 
 const RegexFilterControllerMethods = {
-  ...createBasicCRUD(regexFiltersTable),
+  ...createSharedMethods(regexFiltersTable),
+  ...createSecurityMethods(regexFiltersTable),
 
   async getByUserId(userId: string, options: SelectOptions = {}): Promise<RegexFilter[]> {
     const filters: SQL[] = [

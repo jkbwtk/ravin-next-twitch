@@ -1,5 +1,5 @@
 import { db } from '#database/database';
-import { convertToControllerProxy, createBasicCRUD, SelectOptions } from '#database/utils';
+import { convertToControllerProxy, createSecurityMethods, createSharedMethods, SelectOptions } from '#database/utils';
 import { serializer } from '#lib/serializer';
 import { commandTimersTable } from '#schema/schema';
 import { CommandTimerApi } from '#types/api/commands';
@@ -8,7 +8,8 @@ import { and, count, eq, inArray, SQL } from 'drizzle-orm';
 
 
 const commandTimerControllerMethods = {
-  ...createBasicCRUD(commandTimersTable),
+  ...createSharedMethods(commandTimersTable),
+  ...createSecurityMethods(commandTimersTable),
 
   async getByUserId(userId: string, options: SelectOptions = {}): Promise<CommandTimer[]> {
     const filters: SQL[] = [

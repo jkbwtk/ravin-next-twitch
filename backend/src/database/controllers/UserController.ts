@@ -1,12 +1,12 @@
 import { eq, getTableColumns } from 'drizzle-orm';
 import { db } from '#database/database';
 import { usersTable } from '#schema/schema';
-import { convertToControllerProxy, createBasicCRUD } from '#database/utils';
+import { convertToControllerProxy, createSharedMethods } from '#database/utils';
 import { User, UserInsert } from '#types/database/tables';
 
 
 const UserControllerTarget = {
-  ...createBasicCRUD(usersTable),
+  ...createSharedMethods(usersTable),
 
   async getByLogin(login: string): Promise<User | null> {
     const query = db

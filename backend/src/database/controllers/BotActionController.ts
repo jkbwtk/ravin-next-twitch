@@ -1,5 +1,5 @@
 import { db } from '#database/database';
-import { convertToControllerProxy, createBasicCRUD, SelectOptions } from '#database/utils';
+import { convertToControllerProxy, createSharedMethods, SelectOptions } from '#database/utils';
 import { botActionsTable } from '#schema/schema';
 import { BotAction } from '#types/database/tables';
 import { and, asc, count, desc, eq, getTableColumns, inArray, SQL } from 'drizzle-orm';
@@ -7,7 +7,7 @@ import { BotActionData, BotActionType, BotActionTypeParams } from '#types/api/bo
 
 
 const BotActionControllerMethods = {
-  ...createBasicCRUD(botActionsTable),
+  ...createSharedMethods(botActionsTable),
 
   async createFromType<T extends BotActionType>(userId: string, type: T, ...data: Parameters<BotActionTypeParams[T]>): Promise<BotAction | null> {
     const query = await db
