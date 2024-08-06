@@ -227,7 +227,7 @@ export const createSharedMethods = <T extends Table & { id: Column }>(table: T):
 
 
 export type SecurityMethods<T extends Table & { id: Column, channelUserId: Column }> = {
-  filterOwnedList(userId: string, idList: number[]): Promise<T['id'][]>;
+  filterOwnedList(userId: string, idList: number[]): Promise<number[]>;
 };
 
 export const createSecurityMethods = <T extends Table & { id: Column, channelUserId: Column }>(table: T): SecurityMethods<T> => ({
