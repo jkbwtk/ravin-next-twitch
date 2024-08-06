@@ -181,8 +181,8 @@ const BehaviorProfileControllerMethods = {
     return result.map(mapRelations);
   },
 
-  createWithRelations(profile: BehaviorProfileWithRelationsCreate): Promise<BehaviorProfileWithRelations | null> {
-    return db.transaction(async (tx) => {
+  async createWithRelations(profile: BehaviorProfileWithRelationsCreate): Promise<BehaviorProfileWithRelations | null> {
+    const createdProfile = await db.transaction(async (tx) => {
       const createProfileQuery = tx
         .insert(behaviorProfilesTable)
         .values(profile)
@@ -243,14 +243,16 @@ const BehaviorProfileControllerMethods = {
 
       await Promise.all(m2mQueries);
 
-      const result = await BehaviorProfileControllerMethods.getByIdWithRelations(createdProfile.id);
-
-      return result;
+      return createdProfile;
     });
+
+    const result = await BehaviorProfileControllerMethods.getByIdWithRelations(createdProfile.id);
+
+    return result;
   },
 
   async updateWithRelations(profile: BehaviorProfileWithRelationsUpdate): Promise<BehaviorProfileWithRelations | null> {
-    return db.transaction(async (tx) => {
+    const updatedProfile = await db.transaction(async (tx) => {
       const updateProfileQuery = tx
         .update(behaviorProfilesTable)
         .set(profile)
@@ -349,10 +351,12 @@ const BehaviorProfileControllerMethods = {
 
       await Promise.all(m2mCreteQueries);
 
-      const response = await BehaviorProfileControllerMethods.getByIdWithRelations(profile.id);
-
-      return response;
+      return updatedProfile;
     });
+
+    const response = await BehaviorProfileControllerMethods.getByIdWithRelations(updatedProfile.id);
+
+    return response;
   },
 };
 
