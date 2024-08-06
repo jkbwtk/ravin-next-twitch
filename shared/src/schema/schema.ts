@@ -345,10 +345,10 @@ export const behaviorProfilesTable = pgTable(
 export const behaviorProfilesToCommandsTable = pgTable(
   'BehaviorProfilesToCommands',
   {
-    behaviorProfileId: integer('A')
+    behaviorProfileId: integer('behaviorProfileId')
       .notNull()
       .references(() => behaviorProfilesTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    commandId: integer('B')
+    commandId: integer('commandId')
       .notNull()
       .references(() => commandsTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
   },
@@ -363,10 +363,10 @@ export const behaviorProfilesToCommandsTable = pgTable(
 export const behaviorProfilesToPhraseFiltersTable = pgTable(
   'BehaviorProfilesToPhraseFilters',
   {
-    behaviorProfileId: integer('A')
+    behaviorProfileId: integer('behaviorProfileId')
       .notNull()
       .references(() => behaviorProfilesTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    phraseFilterId: integer('B')
+    phraseFilterId: integer('phraseFilterId')
       .notNull()
       .references(() => phraseFiltersTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
   },
@@ -381,10 +381,10 @@ export const behaviorProfilesToPhraseFiltersTable = pgTable(
 export const behaviorProfilesToRegexFiltersTable = pgTable(
   'BehaviorProfilesToRegexFilters',
   {
-    behaviorProfileId: integer('A')
+    behaviorProfileId: integer('behaviorProfileId')
       .notNull()
       .references(() => behaviorProfilesTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    regexFilterId: integer('B')
+    regexFilterId: integer('regexFilterId')
       .notNull()
       .references(() => regexFiltersTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
   },
@@ -399,10 +399,10 @@ export const behaviorProfilesToRegexFiltersTable = pgTable(
 export const behaviorProfilesToCommandTimersTable = pgTable(
   'BehaviorProfilesToCommandTimers',
   {
-    behaviorProfileId: integer('A')
+    behaviorProfileId: integer('behaviorProfileId')
       .notNull()
       .references(() => behaviorProfilesTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-    commandTimerId: integer('B')
+    commandTimerId: integer('commandTimerId')
       .notNull()
       .references(() => commandTimersTable.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
   },
