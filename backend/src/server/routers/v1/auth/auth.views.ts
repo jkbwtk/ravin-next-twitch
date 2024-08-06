@@ -61,7 +61,7 @@ export const postLogoutView = new ExpressStack()
       }
 
       await SystemNotificationController.create({
-        userId: user.id,
+        channelUserId: user.id,
         title: 'Logged out',
         content: 'You have been logged out of the dashboard.',
       });

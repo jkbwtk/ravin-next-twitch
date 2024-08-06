@@ -8,7 +8,7 @@ export const TemplateSerializer = serializer<Template, TemplateApi>((template) =
     id: template.id,
     name: template.name,
     template: template.template,
-    userId: template.userId,
+    channelUserId: template.channelUserId,
     environments: template.environments,
   };
 });

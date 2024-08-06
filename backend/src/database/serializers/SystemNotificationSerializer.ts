@@ -5,7 +5,7 @@ import { SystemNotification } from '#types/database/tables';
 
 export const SystemNotificationSerializer = serializer<SystemNotification, SystemNotificationApi>((notification) => ({
   id: notification.id,
-  userId: notification.userId,
+  channelUserId: notification.channelUserId,
   title: notification.title,
   content: notification.content,
   read: notification.readAt !== null,

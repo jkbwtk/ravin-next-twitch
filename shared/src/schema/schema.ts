@@ -45,7 +45,7 @@ export const channelsTable = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
-    userId: varchar('userId')
+    userId: varchar('channelUserId')
       .notNull()
       .references(() => usersTable.id, { onDelete: 'cascade' }),
   },
@@ -101,15 +101,15 @@ export const channelStatsTable = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
-    userId: varchar('userId')
+    channelUserId: varchar('channelUserId')
       .notNull()
       .references(() => usersTable.id, { onDelete: 'cascade' }),
   },
   (table) => {
     return {
       frameId_idx: index('ChannelStats_frameId_idx').using('btree', table.frameId),
-      userId_frameId_key: uniqueIndex('ChannelStats_userId_frameId_key').using('btree', table.userId, table.frameId),
-      userId_idx: index('ChannelStats_userId_idx').using('btree', table.userId),
+      userId_frameId_key: uniqueIndex('ChannelStats_userId_frameId_key').using('btree', table.channelUserId, table.frameId),
+      userId_idx: index('ChannelStats_userId_idx').using('btree', table.channelUserId),
     };
   },
 );
@@ -154,7 +154,7 @@ export const messagesTable = pgTable(
     username: varchar('username').notNull(),
     displayName: varchar('displayName').notNull(),
     color: varchar('color'),
-    userId: varchar('userId').notNull(),
+    userId: varchar('channelUserId').notNull(),
     content: varchar('content').notNull(),
     emotes: jsonb('emotes').$type<EmotesUsed>(),
     timestamp: timestamp('timestamp', { precision: 3, mode: 'date' }).notNull(),
@@ -196,7 +196,7 @@ export const tokensTable = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
-    userId: varchar('userId')
+    channelUserId: varchar('channelUserId')
       .notNull()
       .references(() => usersTable.id, { onDelete: 'cascade' }),
   },
@@ -204,8 +204,8 @@ export const tokensTable = pgTable(
     return {
       accessToken_key: uniqueIndex('Token_accessToken_key').using('btree', table.accessToken),
       refreshToken_key: uniqueIndex('Token_refreshToken_key').using('btree', table.refreshToken),
-      userId_idx: index('Token_userId_idx').using('btree', table.userId),
-      userId_key: uniqueIndex('Token_userId_key').using('btree', table.userId),
+      userId_idx: index('Token_userId_idx').using('btree', table.channelUserId),
+      userId_key: uniqueIndex('Token_userId_key').using('btree', table.channelUserId),
     };
   },
 );
@@ -247,14 +247,14 @@ export const systemNotificationsTable = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
-    userId: varchar('userId')
+    channelUserId: varchar('channelUserId')
       .notNull()
       .references(() => usersTable.id, { onDelete: 'cascade' }),
     readAt: timestamp('readAt', { precision: 3, mode: 'date' }),
   },
   (table) => {
     return {
-      userId_idx: index('SystemNotification_userId_idx').using('btree', table.userId),
+      userId_idx: index('SystemNotification_userId_idx').using('btree', table.channelUserId),
     };
   },
 );
@@ -271,15 +271,15 @@ export const templatesTable = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
-    userId: varchar('userId')
+    channelUserId: varchar('channelUserId')
       .notNull()
       .references(() => usersTable.id, { onDelete: 'cascade' }),
     environments: jsonb('environments').$type<TemplateEnvironments[]>().default([]).notNull(),
   },
   (table) => {
     return {
-      userId_name_idx: index('Template_userId_name_idx').using('btree', table.userId, table.name),
-      userId_name_key: uniqueIndex('Template_userId_name_key').using('btree', table.userId, table.name),
+      userId_name_idx: index('Template_userId_name_idx').using('btree', table.channelUserId, table.name),
+      userId_name_key: uniqueIndex('Template_userId_name_key').using('btree', table.channelUserId, table.name),
     };
   },
 );

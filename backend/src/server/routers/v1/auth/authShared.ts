@@ -23,7 +23,7 @@ const createOrUpdateToken = async (accessToken: string, refreshToken: string | n
 
   const token: TokenInsert = {
     ...oldToken,
-    userId: user.id,
+    channelUserId: user.id,
     accessToken,
     refreshToken,
   };
@@ -55,14 +55,14 @@ export const verifyCallback = async (accessToken: string, refreshToken: string |
     }
 
     if (token !== null) {
-      logger.debug('Revoking old token for user [%s]', token.userId, { label: ['auth', 'verifyCallback'] });
+      logger.debug('Revoking old token for user [%s]', token.channelUserId, { label: ['auth', 'verifyCallback'] });
       if (refreshToken !== null && !isDevApi) await revokeTokenUnsafe(user.id);
     }
 
     await createOrUpdateToken(accessToken, refreshToken, user);
 
     await SystemNotificationController.create(
-      { userId: user.id,
+      { channelUserId: user.id,
         title: 'Logged in',
         content: 'You have successfully logged in to the dashboard.',
       },

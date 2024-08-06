@@ -5,12 +5,12 @@ import { z } from 'zod';
 
 export const SystemNotificationApi = createSelectSchema(systemNotificationsTable, {
   id: (schema) => schema.id.int().positive(),
-  userId: (schema) => schema.userId.min(1),
+  channelUserId: (schema) => schema.channelUserId.min(1),
   title: (schema) => schema.title.min(1).max(64),
   content: (schema) => schema.content.min(1).max(1024),
 }).pick({
   id: true,
-  userId: true,
+  channelUserId: true,
   title: true,
   content: true,
   createdAt: true,

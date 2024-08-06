@@ -121,12 +121,12 @@ export class SocketServer {
 
     SystemNotificationController.$signals.registerAfter('create', (notification) => {
       if (notification === null) return;
-      SocketServer.emitToUser(notification.userId, 'NEW_SYSTEM_NOTIFICATION', SystemNotificationSerializer(notification));
+      SocketServer.emitToUser(notification.channelUserId, 'NEW_SYSTEM_NOTIFICATION', SystemNotificationSerializer(notification));
     });
 
     SystemNotificationController.$signals.registerAfter('broadcast', (notifications) => {
       for (const notification of notifications) {
-        SocketServer.emitToUser(notification.userId, 'NEW_SYSTEM_NOTIFICATION', SystemNotificationSerializer(notification));
+        SocketServer.emitToUser(notification.channelUserId, 'NEW_SYSTEM_NOTIFICATION', SystemNotificationSerializer(notification));
       }
     });
 
@@ -134,10 +134,10 @@ export class SocketServer {
       const aggregated: Map<string, number[]> = new Map();
 
       for (const notification of notifications) {
-        const list = aggregated.get(notification.userId);
+        const list = aggregated.get(notification.channelUserId);
 
         if (list === undefined) {
-          aggregated.set(notification.userId, [notification.id]);
+          aggregated.set(notification.channelUserId, [notification.id]);
           continue;
         }
 

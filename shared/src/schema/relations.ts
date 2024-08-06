@@ -53,7 +53,7 @@ export const channelActionsRelations = relations(channelActionsTable, ({ one }) 
 
 export const channelStatsRelations = relations(channelStatsTable, ({ one }) => ({
   user: one(usersTable, {
-    fields: [channelStatsTable.userId],
+    fields: [channelStatsTable.channelUserId],
     references: [usersTable.id],
   }),
 }));
@@ -73,7 +73,7 @@ export const commandsRelations = relations(commandsTable, ({ one, many }) => ({
 export const templatesRelations = relations(templatesTable, ({ one, many }) => ({
   commands: many(commandsTable),
   user: one(usersTable, {
-    fields: [templatesTable.userId],
+    fields: [templatesTable.channelUserId],
     references: [usersTable.id],
   }),
   commandTimers: many(commandTimersTable),
@@ -88,14 +88,14 @@ export const messagesRelations = relations(messagesTable, ({ one }) => ({
 
 export const tokensRelations = relations(tokensTable, ({ one }) => ({
   user: one(usersTable, {
-    fields: [tokensTable.userId],
+    fields: [tokensTable.channelUserId],
     references: [usersTable.id],
   }),
 }));
 
 export const systemNotificationsRelations = relations(systemNotificationsTable, ({ one }) => ({
   user: one(usersTable, {
-    fields: [systemNotificationsTable.userId],
+    fields: [systemNotificationsTable.channelUserId],
     references: [usersTable.id],
   }),
 }));

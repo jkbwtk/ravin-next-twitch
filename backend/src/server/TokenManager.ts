@@ -51,7 +51,7 @@ export class TokenManager {
 
       logger.debug('Refreshing token for user [%s]', userId, { label: ['TokenManager', 'refresh'] });
       const refreshedToken = await refreshTokenUnsafe(userId);
-      logger.debug('Token for user [%s] refreshed', refreshedToken.userId, { label: ['TokenManager', 'refresh'] });
+      logger.debug('Token for user [%s] refreshed', refreshedToken.channelUserId, { label: ['TokenManager', 'refresh'] });
 
       const createdToken = await TokenController.update(refreshedToken);
 
@@ -59,7 +59,7 @@ export class TokenManager {
         throw new Error('Failed to refresh token');
       }
 
-      logger.debug('Token for user [%s] updated', createdToken.userId, { label: ['TokenManager', 'refresh'] });
+      logger.debug('Token for user [%s] updated', createdToken.channelUserId, { label: ['TokenManager', 'refresh'] });
 
       this.refreshQueue.delete(userId);
       deferred.resolve(createdToken);

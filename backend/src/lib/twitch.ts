@@ -269,7 +269,7 @@ export async function getModeratorsUnsafe(userId: string): Promise<TwitchBriefUs
         Authorization: `Bearer ${token.accessToken}`,
       },
       params: {
-        broadcaster_id: token.userId,
+        broadcaster_id: token.channelUserId,
       },
     });
 
@@ -298,8 +298,8 @@ export async function getChattersUnsafe(userId: string, first?: number, after?: 
         Authorization: `Bearer ${token.accessToken}`,
       },
       params: {
-        broadcaster_id: token.userId,
-        moderator_id: token.userId,
+        broadcaster_id: token.channelUserId,
+        moderator_id: token.channelUserId,
         first,
         after,
       },
@@ -330,8 +330,8 @@ export async function deleteChatMessagesUnsafe(userId: string, messageId?: strin
         Authorization: `Bearer ${token.accessToken}`,
       },
       params: {
-        broadcaster_id: token.userId,
-        moderator_id: token.userId,
+        broadcaster_id: token.channelUserId,
+        moderator_id: token.channelUserId,
         message_id: messageId,
       },
     });
@@ -355,8 +355,8 @@ export async function banUserUnsafe(userId: string, targetId: string, duration?:
         Authorization: `Bearer ${token.accessToken}`,
       },
       params: {
-        broadcaster_id: token.userId,
-        moderator_id: token.userId,
+        broadcaster_id: token.channelUserId,
+        moderator_id: token.channelUserId,
       },
       data: {
         data: {
@@ -387,7 +387,7 @@ export async function getChannelInformationUnsafe(userId: string): Promise<Twitc
         Authorization: `Bearer ${token.accessToken}`,
       },
       params: {
-        broadcaster_id: token.userId,
+        broadcaster_id: token.channelUserId,
       },
     });
 
@@ -418,7 +418,7 @@ export async function getStreamsUnsafe(userId: string): Promise<TwitchStream | n
         Authorization: `Bearer ${token.accessToken}`,
       },
       params: {
-        user_id: token.userId,
+        user_id: token.channelUserId,
       },
     });
 

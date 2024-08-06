@@ -37,12 +37,12 @@ const incrementQueryBuilder = (column: keyof ChannelStat, userId: string, frameI
   return db
     .insert(channelStatsTable)
     .values({
-      userId,
+      channelUserId: userId,
       frameId,
       [column]: 1,
     })
     .onConflictDoUpdate({
-      target: [channelStatsTable.userId, channelStatsTable.frameId],
+      target: [channelStatsTable.channelUserId, channelStatsTable.frameId],
       set: {
         [column]: sql`${channelStatsTable[column]} + 1`,
       },
@@ -52,7 +52,7 @@ const incrementQueryBuilder = (column: keyof ChannelStat, userId: string, frameI
 const ChannelStatsControllerMethods = {
   async getFrame(userId: string, frameId: number): Promise<ChannelStat | null> {
     const filters: SQL[] = [
-      eq(channelStatsTable.userId, userId),
+      eq(channelStatsTable.channelUserId, userId),
       eq(channelStatsTable.frameId, frameId),
     ];
 
@@ -73,7 +73,7 @@ const ChannelStatsControllerMethods = {
       .query
       .channelStatsTable
       .findMany({
-        where: eq(channelStatsTable.userId, userId),
+        where: eq(channelStatsTable.channelUserId, userId),
         orderBy: desc(channelStatsTable.frameId),
 
         limit,
@@ -86,7 +86,7 @@ const ChannelStatsControllerMethods = {
 
   async getFramesBetween(userId: string, oldestFrameId: number, newestFrameId: number): Promise<ChannelStat[]> {
     const filters: SQL[] = [
-      eq(channelStatsTable.userId, userId),
+      eq(channelStatsTable.channelUserId, userId),
       gte(channelStatsTable.frameId, oldestFrameId),
       lte(channelStatsTable.frameId, newestFrameId),
     ];

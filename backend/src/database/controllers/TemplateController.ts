@@ -11,7 +11,7 @@ const TemplateControllerTarget = {
   async getByUserId(userId: string, options: SelectOptions = {}): Promise<Template[]> {
     const query = db
       .query.templatesTable.findMany({
-        where: eq(tokensTable.userId, userId),
+        where: eq(tokensTable.channelUserId, userId),
 
         ...options.pagination,
       });
@@ -25,7 +25,7 @@ const TemplateControllerTarget = {
     const query = db
       .select({ count: count() })
       .from(templatesTable)
-      .where(eq(tokensTable.userId, userId));
+      .where(eq(tokensTable.channelUserId, userId));
 
     const result = await query;
 

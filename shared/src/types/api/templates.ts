@@ -9,13 +9,13 @@ export const TemplateApi = createSelectSchema(templatesTable, {
   id: (schema) => schema.id.positive().int(),
   name: (schema) => schema.name.min(3),
   template: (schema) => schema.template.min(1),
-  userId: (schema) => schema.userId.min(1),
+  channelUserId: (schema) => schema.channelUserId.min(1),
   environments: () => z.array(TemplateEnvironments),
 }).pick({
   id: true,
   name: true,
   template: true,
-  userId: true,
+  channelUserId: true,
   environments: true,
 });
 
@@ -34,7 +34,7 @@ export const GetTemplatesPaginatedResponse = PaginatedResponse(GetTemplatesRespo
 export type GetTemplatesPaginatedResponse = z.infer<typeof GetTemplatesPaginatedResponse>;
 
 
-export const PostTemplateReqBody = TemplateApi.omit({ id: true, userId: true, environments: true });
+export const PostTemplateReqBody = TemplateApi.omit({ id: true, channelUserId: true, environments: true });
 
 export type PostTemplateReqBody = z.infer<typeof PostTemplateReqBody>;
 

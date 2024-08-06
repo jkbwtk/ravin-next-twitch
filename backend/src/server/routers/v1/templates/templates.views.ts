@@ -55,7 +55,7 @@ export const postTemplatesView = new ExpressStack()
       const template = await TemplateController.create({
         ...req.validated.body,
         environments: req.templateIssues?.getSupportedEnvironments(),
-        userId: req.user.id,
+        channelUserId: req.user.id,
       });
 
       if (!template) {

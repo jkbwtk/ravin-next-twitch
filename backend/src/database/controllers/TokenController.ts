@@ -11,7 +11,7 @@ const TokenControllerTarget = {
   async getByUserId(userId: string): Promise<Token | null> {
     const query = db
       .query.tokensTable.findFirst({
-        where: eq(tokensTable.userId, userId),
+        where: eq(tokensTable.channelUserId, userId),
       });
 
     const result = await query;
@@ -24,7 +24,7 @@ const TokenControllerTarget = {
       .insert(tokensTable)
       .values(token)
       .onConflictDoUpdate({
-        target: tokensTable.userId,
+        target: tokensTable.channelUserId,
         set: {
           accessToken: token.accessToken,
           refreshToken: token.refreshToken,

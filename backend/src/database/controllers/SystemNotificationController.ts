@@ -12,7 +12,7 @@ const SystemNotificationControllerMethods = {
   async getByUserId(userId: string): Promise<SystemNotification[]> {
     const query = db
       .query.systemNotificationsTable.findMany({
-        where: eq(systemNotificationsTable.userId, userId),
+        where: eq(systemNotificationsTable.channelUserId, userId),
       });
 
     const result = await query;
@@ -25,7 +25,7 @@ const SystemNotificationControllerMethods = {
       const users = await tx.query.usersTable.findMany();
 
       const notifications: SystemNotificationCreate[] = users.map((user) => ({
-        userId: user.id,
+        channelUserId: user.id,
         ...notification,
       }));
 
@@ -63,7 +63,7 @@ const SystemNotificationControllerMethods = {
       })
       .where(
         and(
-          eq(systemNotificationsTable.userId, userId),
+          eq(systemNotificationsTable.channelUserId, userId),
           isNull(systemNotificationsTable.readAt),
         ),
       )
@@ -78,7 +78,7 @@ const SystemNotificationControllerMethods = {
     const query = db
       .query.systemNotificationsTable.findMany({
         where: and(
-          eq(systemNotificationsTable.userId, userId),
+          eq(systemNotificationsTable.channelUserId, userId),
           isNull(systemNotificationsTable.readAt),
         ),
       });
