@@ -112,6 +112,10 @@ const instance = new Logger({
       level: 7,
       color: 'gray',
     },
+    logQuery: {
+      level: 8,
+      color: 'gray',
+    },
   },
   format: Logger.createFormatAssembler()
     .chain(colorStrings.bind(null, chalk.cyan))
@@ -131,6 +135,7 @@ const instance = new Logger({
         'debug',
         'time',
         'queryTime',
+        'logQuery',
       ],
     }),
     // new ConsoleOutput({
@@ -199,7 +204,7 @@ const instance = new Logger({
     message,
     [LEVEL]: level,
     [MESSAGE]: message,
-    [ARGS]: [finish - start],
+    [ARGS]: [Math.round((finish - start) * 1000) / 1000],
   });
 }).registerLevelFunction('queryTime', (callback, level, data: QueryTimerData, start: number, finish: number = performance.now()) => {
   if (level !== 'queryTime') return;
@@ -212,7 +217,19 @@ const instance = new Logger({
     data: Object.assign({}, data),
     [LEVEL]: level,
     [MESSAGE]: message,
-    [ARGS]: [finish - start],
+    [ARGS]: [Math.round((finish - start) * 1000) / 1000],
+  });
+}).registerLevelFunction('logQuery', (callback, level, query: string, params: unknown[]) => {
+  if (level !== 'logQuery') return;
+
+  const message = chalk.gray`Query: ${query.trimEnd()}`;
+
+  callback({
+    level,
+    message,
+    [LEVEL]: level,
+    [MESSAGE]: message,
+    [ARGS]: [],
   });
 });
 

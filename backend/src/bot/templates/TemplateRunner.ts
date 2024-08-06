@@ -4,18 +4,14 @@ import { Context, Isolate, Reference, Script } from 'isolated-vm';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import dayjs from 'dayjs';
-import { Template } from '#database/extensions/template';
 import { StateMap } from '#bot/templates/StateMap';
+import { Template } from '#types/database/tables';
+
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
 export type GlobalReference = Reference<Record<string | number | symbol, unknown>>;
-
-// eslint-disable-next-line @typescript-eslint/ban-types
-export type DefaultStates = 'customState' | 'counterState' | (string & {});
-
-export type StatesObject = Partial<Record<DefaultStates, unknown>>;
 
 export type TemplateRunnerOptions = {
   /**

@@ -7,6 +7,23 @@ import { mapOptionsToArray } from '#lib/utils';
 import { ExtendedCron } from '#lib/ExtendedCron';
 import passport from 'passport';
 import { getSessionMiddleware } from '#server/sessionMiddleware';
+import { SystemNotificationController } from '#database/controllers/SystemNotificationController';
+import { CommandController } from '#database/controllers/CommandController';
+import { BotActionController } from '#database/controllers/BotActionController';
+import { PhraseFilterController } from '#database/controllers/PhraseFilterController';
+import { RegexFilterController } from '#database/controllers/RegexFilterController';
+import { CommandTimerController } from '#database/controllers/CommandTImerController';
+import { ChannelActionController } from '#database/controllers/ChannelActionController';
+import { MessageController } from '#database/controllers/MessageController';
+import { MessageSerializer } from '#database/serializers/MessageSerializer';
+import { BehaviorProfileController } from '#database/controllers/BehaviorProfileController';
+import { BehaviorProfileSerializer } from '#database/serializers/BehaviorProfileSerializer';
+import { BotActionSerializer } from '#database/serializers/BotActionSerializer';
+import { CustomCommandSerializer } from '#database/serializers/CommandSerializer';
+import { ChannelActionSerializer } from '#database/serializers/ChannelActionSerializer';
+import { PhraseFilterSerializer } from '#database/serializers/PhrazeFilterSerializer';
+import { RegexFilterSerializer } from '#database/serializers/RegexFilterSerializer';
+import { SystemNotificationSerializer } from '#database/serializers/SystemNotificationSerializer';
 
 
 export class SocketServer {
@@ -19,29 +36,7 @@ export class SocketServer {
       SocketServer.instance = new SocketServer(httpServer);
       await SocketServer.instance.registerRoutes();
 
-      ExtendedCron.registerEffect('create', (self) => {
-        SocketServer.emitToRoom('admin', 'NEW_CRON_JOB', self.serialize());
-      });
-
-      ExtendedCron.registerEffect('start', (self) => {
-        SocketServer.emitToRoom('admin', 'UPD_CRON_JOB', self.serialize());
-      });
-
-      ExtendedCron.registerEffect('finish', (self) => {
-        SocketServer.emitToRoom('admin', 'UPD_CRON_JOB', self.serialize());
-      });
-
-      ExtendedCron.registerEffect('resume', (self) => {
-        SocketServer.emitToRoom('admin', 'UPD_CRON_JOB', self.serialize());
-      });
-
-      ExtendedCron.registerEffect('pause', (self) => {
-        SocketServer.emitToRoom('admin', 'UPD_CRON_JOB', self.serialize());
-      });
-
-      ExtendedCron.registerEffect('delete', (self) => {
-        SocketServer.emitToRoom('admin', 'DEL_CRON_JOB', self.creationTimestamp);
-      });
+      SocketServer.instance.registerSignalHandlers();
 
       return SocketServer.instance;
     } else {
@@ -57,7 +52,7 @@ export class SocketServer {
     return SocketServer.instance;
   }
 
-  constructor(httpServer: HTTPServer) {
+  private constructor(httpServer: HTTPServer) {
     this.io = new Server(httpServer);
   }
 
@@ -96,6 +91,162 @@ export class SocketServer {
       socket.on('disconnect', () => {
         logger.debug('User disconnected [%s]', req.user?.id ?? '', { label: 'SocketServer' });
       });
+    });
+  }
+
+  private registerSignalHandlers() {
+    ExtendedCron.registerEffect('create', (self) => {
+      SocketServer.emitToRoom('admin', 'NEW_CRON_JOB', self.serialize());
+    });
+
+    ExtendedCron.registerEffect('start', (self) => {
+      SocketServer.emitToRoom('admin', 'UPD_CRON_JOB', self.serialize());
+    });
+
+    ExtendedCron.registerEffect('finish', (self) => {
+      SocketServer.emitToRoom('admin', 'UPD_CRON_JOB', self.serialize());
+    });
+
+    ExtendedCron.registerEffect('resume', (self) => {
+      SocketServer.emitToRoom('admin', 'UPD_CRON_JOB', self.serialize());
+    });
+
+    ExtendedCron.registerEffect('pause', (self) => {
+      SocketServer.emitToRoom('admin', 'UPD_CRON_JOB', self.serialize());
+    });
+
+    ExtendedCron.registerEffect('delete', (self) => {
+      SocketServer.emitToRoom('admin', 'DEL_CRON_JOB', self.creationTimestamp);
+    });
+
+    SystemNotificationController.$signals.registerAfter('create', (notification) => {
+      if (notification === null) return;
+      SocketServer.emitToUser(notification.userId, 'NEW_SYSTEM_NOTIFICATION', SystemNotificationSerializer(notification));
+    });
+
+    SystemNotificationController.$signals.registerAfter('broadcast', (notifications) => {
+      for (const notification of notifications) {
+        SocketServer.emitToUser(notification.userId, 'NEW_SYSTEM_NOTIFICATION', SystemNotificationSerializer(notification));
+      }
+    });
+
+    SystemNotificationController.$signals.registerAfter('markAsReadById', (notifications) => {
+      const aggregated: Map<string, number[]> = new Map();
+
+      for (const notification of notifications) {
+        const list = aggregated.get(notification.userId);
+
+        if (list === undefined) {
+          aggregated.set(notification.userId, [notification.id]);
+          continue;
+        }
+
+        list.push(notification.id);
+      }
+
+      for (const [userId, ids] of aggregated) {
+        SocketServer.emitToUser(userId, 'RAD_SYSTEM_NOTIFICATION', ids);
+      }
+    });
+
+    CommandController.$signals.registerAfter('create', (command) => {
+      if (command === null) return;
+      SocketServer.emitToUser(command.channelUserId, 'NEW_CUSTOM_COMMAND', CustomCommandSerializer(command));
+    });
+
+    CommandController.$signals.registerAfter('update', (command) => {
+      if (command === null) return;
+      SocketServer.emitToUser(command.channelUserId, 'UPD_CUSTOM_COMMAND', CustomCommandSerializer(command));
+    });
+
+    CommandController.$signals.registerAfter('delete', (command) => {
+      if (command === null) return;
+      SocketServer.emitToUser(command.channelUserId, 'DEL_CUSTOM_COMMAND', command.id);
+    });
+
+    BotActionController.$signals.registerAfter('create', (action) => {
+      if (action === null) return;
+      SocketServer.emitToUser(action.channelUserId, 'NEW_BOT_ACTION', BotActionSerializer(action));
+    });
+
+    PhraseFilterController.$signals.registerAfter('create', (filter) => {
+      if (filter === null) return;
+      SocketServer.emitToUser(filter.channelUserId, 'NEW_PHRASE_FILTER', PhraseFilterSerializer(filter));
+    });
+
+    PhraseFilterController.$signals.registerAfter('update', (filter) => {
+      if (filter === null) return;
+      SocketServer.emitToUser(filter.channelUserId, 'UPD_PHRASE_FILTER', PhraseFilterSerializer(filter));
+    });
+
+    PhraseFilterController.$signals.registerAfter('delete', (filter) => {
+      if (filter === null) return;
+      SocketServer.emitToUser(filter.channelUserId, 'DEL_PHRASE_FILTER', filter.id);
+    });
+
+    RegexFilterController.$signals.registerAfter('create', (filter) => {
+      if (filter === null) return;
+      SocketServer.emitToUser(filter.channelUserId, 'NEW_REGEX_FILTER', RegexFilterSerializer(filter));
+    });
+
+    RegexFilterController.$signals.registerAfter('update', (filter) => {
+      if (filter === null) return;
+      SocketServer.emitToUser(filter.channelUserId, 'UPD_REGEX_FILTER', RegexFilterSerializer(filter));
+    });
+
+    RegexFilterController.$signals.registerAfter('delete', (filter) => {
+      if (filter === null) return;
+      SocketServer.emitToUser(filter.channelUserId, 'DEL_REGEX_FILTER', filter.id);
+    });
+
+    CommandTimerController.$signals.registerAfter('create', (timer) => {
+      if (timer === null) return;
+      SocketServer.emitToUser(timer.channelUserId, 'NEW_COMMAND_TIMER', CommandTimerController.$utils.serialize(timer));
+    });
+
+    CommandTimerController.$signals.registerAfter('update', (timer) => {
+      if (timer === null) return;
+      SocketServer.emitToUser(timer.channelUserId, 'UPD_COMMAND_TIMER', CommandTimerController.$utils.serialize(timer));
+    });
+
+    CommandTimerController.$signals.registerAfter('delete', (timer) => {
+      if (timer === null) return;
+      SocketServer.emitToUser(timer.channelUserId, 'DEL_COMMAND_TIMER', timer.id);
+    });
+
+    ChannelActionController.$signals.registerAfter('create', (action) => {
+      if (action === null) return;
+      SocketServer.emitToUser(action.channelUserId, 'NEW_CHANNEL_ACTION', ChannelActionSerializer(action));
+    });
+
+    ChannelActionController.$signals.registerAfter('update', (action) => {
+      if (action === null) return;
+      SocketServer.emitToUser(action.channelUserId, 'UPD_CHANNEL_ACTION', ChannelActionSerializer(action));
+    });
+
+    ChannelActionController.$signals.registerAfter('delete', (action) => {
+      if (action === null) return;
+      SocketServer.emitToUser(action.channelUserId, 'DEL_CHANNEL_ACTION', action.id);
+    });
+
+    MessageController.$signals.registerAfter('create', (message) => {
+      if (message === null) return;
+      SocketServer.emitToUser(message.channelUserId, 'NEW_MESSAGE', MessageSerializer(message));
+    });
+
+    BehaviorProfileController.$signals.registerAfter('createWithRelations', (profile) => {
+      if (profile === null) return;
+      SocketServer.emitToUser(profile.channelUserId, 'NEW_BEHAVIOR_PROFILE', BehaviorProfileSerializer(profile));
+    });
+
+    BehaviorProfileController.$signals.registerAfter('updateWithRelations', (profile) => {
+      if (profile === null) return;
+      SocketServer.emitToUser(profile.channelUserId, 'UPD_BEHAVIOR_PROFILE', BehaviorProfileSerializer(profile));
+    });
+
+    BehaviorProfileController.$signals.registerAfter('delete', (profile) => {
+      if (profile === null) return;
+      SocketServer.emitToUser(profile.channelUserId, 'DEL_BEHAVIOR_PROFILE', profile.id);
     });
   }
 

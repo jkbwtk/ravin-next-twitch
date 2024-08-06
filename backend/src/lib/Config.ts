@@ -1,13 +1,12 @@
 import { ExtendedMap } from '#lib/ExtendedMap';
-import { Config as ConfigEntity } from '@prisma/client';
-import { prisma } from '#database/database';
+import { Config as ConfigEntity } from '#types/database/tables';
 import { logger } from '#lib/logger';
+import { ConfigController } from '#database/controllers/ConfigController';
 
 
 export class Config {
   private static instance: Config;
 
-  private repository = prisma.config;
   public config: ExtendedMap<string, string>;
   public shadow: ExtendedMap<string, string>;
 
@@ -35,8 +34,7 @@ export class Config {
   }
 
   public static async getConfig(): Promise<ExtendedMap<string, string>> {
-    const instance = await Config.getInstance();
-    const query = await instance.repository.findMany();
+    const query = await ConfigController.getAll();
 
     return Config.queryToMap(query);
   }
@@ -53,8 +51,8 @@ export class Config {
       const value = instance.config.get(key);
       if (value !== undefined) return value;
 
-      const query = await instance.repository.findFirst({ where: { key } });
-      if (query) {
+      const query = await ConfigController.getByKey(key);
+      if (query !== null) {
         instance.config.set(query.key, query.value);
         return query.value;
       }
@@ -76,11 +74,7 @@ export class Config {
   public static async set(key: string, value: string): Promise<ConfigEntity> {
     const instance = await Config.getInstance();
 
-    const savedEntry = await instance.repository.upsert({
-      update: { value },
-      where: { key },
-      create: { key, value },
-    });
+    const savedEntry = await ConfigController.upsert({ key, value });
     instance.config.set(savedEntry.key, savedEntry.value);
 
     return savedEntry;
@@ -90,19 +84,7 @@ export class Config {
     const instance = await Config.getInstance();
     const entities = entries.map((entry) => ({ key: entry[0], value: entry[1] }));
 
-    const savedEntries = await prisma.$transaction(async (tx) => {
-      const results: ConfigEntity[] = [];
-
-      for (const entity of entities) {
-        results.push(await tx.config.upsert({
-          update: { value: entity.value },
-          where: { key: entity.key },
-          create: entity,
-        }));
-      }
-
-      return results;
-    });
+    const savedEntries = await ConfigController.bulkUpsert(entities);
 
     for (const entry of savedEntries) {
       instance.config.set(entry.key, entry.value);
@@ -152,7 +134,7 @@ export class Config {
 
   public static async delete(key: string): Promise<void> {
     const instance = await Config.getInstance();
-    await instance.repository.delete({ where: { key } });
+    await ConfigController.deleteByKey(key);
     instance.config.delete(key);
     instance.shadow.delete(key);
   }

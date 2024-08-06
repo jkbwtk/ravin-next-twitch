@@ -56,7 +56,7 @@ export const runJobs = async (trigger: JobTriggers): Promise<void> => {
       await job.run();
       logger.info('Job [%s] completed', job.name, { label: ['Jobs', 'runJobs'] });
     } catch (err) {
-      logger.warn('Failed to run job [%s]', job.name, { error: err, label: ['Jobs', 'runJobs'] });
+      logger.error('Failed to run job [%s]', job.name, { error: err, label: ['Jobs', 'runJobs'] });
     }
   }
 };

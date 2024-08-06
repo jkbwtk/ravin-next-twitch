@@ -1,6 +1,6 @@
 import MaterialSymbol from '#components/MaterialSymbol';
 import ActionElementBase from '#components/widgets/RecentActionsWidget/ActionElementBase';
-import { Action } from '#shared/types/api/dashboard';
+import { Action } from '#types/api/dashboard';
 
 import style from '#styles/widgets/RecentActionsWidget.module.scss';
 

@@ -20,7 +20,7 @@ process.on('SIGINT', async () => {
 
 const main = async () => {
   try {
-    runJobs('startup');
+    await runJobs('startup');
 
     const server = new Server();
     await server.start();

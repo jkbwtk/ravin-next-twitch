@@ -24,13 +24,11 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
+    "skipLibCheck": true,
     "strict": true,
     "rootDir": "src/",
     "baseUrl": "src",
     "paths": {
-      "#shared/*": [
-        "../../shared/src/*"
-      ],
       "#types/*": [
         "../../shared/src/types/*"
       ],
@@ -57,6 +55,9 @@
       ],
       "#locales/*": [
         "./locales/*"
+      ],
+      "#shared/*": [
+        "../../shared/src/*"
       ],
     }
   },

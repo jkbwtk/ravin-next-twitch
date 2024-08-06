@@ -3,7 +3,7 @@ import TemplateButton from '#components/TemplateButton';
 import { Match, Switch } from 'solid-js';
 import { TableType } from '#components/widgets/CommandTimersTableWidget';
 import { TableCell, TableRow } from '@suid/material';
-import { Actions, PhraseFilter as PhraseFilterType } from '#shared/types/api/filters';
+import { Actions, PhraseFilter as PhraseFilterType } from '#types/api/filters';
 import { usePhraseFilterEditor } from '#providers/PhraseFilterEditorProvider';
 
 import style from '#styles/widgets/TableWidget.module.scss';

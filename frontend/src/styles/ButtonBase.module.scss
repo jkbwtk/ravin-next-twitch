@@ -41,9 +41,9 @@
 }
 
 @mixin color($textColor, $accentColor, $activeColor, $invertedColor) {
-  @include border($accentColor);
-
   color: $textColor;
+
+  @include border($accentColor);
 
   &:hover:not(.disabled):not(.loading),
   &:active:not(.disabled):not(.loading) {

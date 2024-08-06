@@ -3,7 +3,7 @@ import InputLabeled from '#components/InputLabeled';
 import Button from '#components/Button';
 import { useNotification } from '#providers/NotificationProvider';
 import Widget from '#components/Widget';
-import { PostSystemNotificationBroadcastReqBody } from '#shared/types/api/systemNotifications';
+import { PostSystemNotificationBroadcastReqBody } from '#types/api/systemNotifications';
 import InputBase from '#components/InputBase';
 import TextArea from '#components/TextArea';
 import { useErrorHandlers } from '#providers/ErrorHandlersProvider';

@@ -1,7 +1,7 @@
 import MaterialSymbol from '#components/MaterialSymbol';
 import TemplateButton from '#components/TemplateButton';
 import { Match, Switch } from 'solid-js';
-import { CommandTimer as CommandTimerType } from '#shared/types/api/commands';
+import { CommandTimer as CommandTimerType } from '#types/api/commands';
 import { TableType } from '#components/widgets/CommandTimersTableWidget';
 import { useCommandTimerEditor } from '#providers/CommandTimerEditorProvider';
 import { TableCell, TableRow } from '@suid/material';

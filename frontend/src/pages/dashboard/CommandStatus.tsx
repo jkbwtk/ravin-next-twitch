@@ -1,7 +1,7 @@
 import DashboardInfoBar from '#components/DashboardInfoBar';
 import { CustomCommandEditorProvider } from '#providers/CustomCommandEditorProvider';
 import { batch, createResource, For, onCleanup, onMount } from 'solid-js';
-import { CustomCommand, CustomCommandState, GetCustomCommandsStatusResponse } from '#shared/types/api/commands';
+import { CustomCommand, CustomCommandState, GetCustomCommandsStatusResponse } from '#types/api/commands';
 import { useSocket } from '#providers/SocketProvider';
 import CommandStatusTile from '#components/CommandStatusTile';
 import { makeRequest } from '#lib/fetch';

@@ -1,5 +1,6 @@
 import { logger } from '#lib/logger';
-import { TemplateEnvironments, TemplateIssue } from '#shared/types/api/templates';
+import { TemplateIssue } from '#types/api/templates';
+import { TemplateEnvironments } from '#types/database/columns';
 
 
 export class TemplateIssues extends Map<TemplateEnvironments, TemplateIssue | null> {

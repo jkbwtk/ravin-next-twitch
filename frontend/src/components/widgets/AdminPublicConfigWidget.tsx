@@ -2,7 +2,7 @@ import { createResource, createSignal } from 'solid-js';
 import Button from '#components/Button';
 import { useNotification } from '#providers/NotificationProvider';
 import Widget from '#components/Widget';
-import { Config, GetConfig, PostConfigReqBody } from '#shared/types/api/auth';
+import { Config, GetConfig, PostConfigReqBody } from '#types/api/auth';
 import { makeRequest } from '#lib/fetch';
 import InputBase from '#components/InputBase';
 import InputLabeled from '#components/InputLabeled';

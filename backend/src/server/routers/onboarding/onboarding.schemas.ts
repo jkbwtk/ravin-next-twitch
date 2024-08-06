@@ -1,4 +1,4 @@
-import { PostOnboardingSchemaReqBody } from '#shared/types/api/onboarding';
+import { PostOnboardingSchemaReqBody } from '#types/api/onboarding';
 import { z } from 'zod';
 
 

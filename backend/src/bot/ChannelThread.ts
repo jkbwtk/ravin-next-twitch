@@ -1,21 +1,21 @@
 import { ExtendedMap } from '#lib/ExtendedMap';
 import ExtendedSet from '#lib/ExtendedSet';
 import { getChannelInformation, getChatters, getStreams } from '#lib/twitch';
-import { ChannelWithUser } from '#database/extensions/channel';
-import { prisma } from '#database/database';
 import { ExtendedCron } from '#lib/ExtendedCron';
 import { ChantHandler } from '#bot/handlers/ChantHandler';
 import { mergeOptions, RequiredDefaults } from '#shared/utils';
 import { CacheFIFO } from '#lib/CacheArray';
 import { CommandHandler } from '#bot/handlers/CommandHandler';
-import { MessageWithUser } from '#database/extensions/message';
 import { AutoWirable, ClassInstance, Wirable } from '#lib/autowire';
 import { CommandTimerHandler } from '#bot/handlers/CommandTimerHandler';
 import { Isolate } from 'isolated-vm';
 import { RegexFilterHandler } from '#bot/handlers/RegexFilterHandler';
 import { PhraseFilterHandler } from '#bot/handlers/PhraseFilterHandler';
-import { TwitchChannelInformation, TwitchStream } from '#shared/types/twitch';
+import { TwitchChannelInformation, TwitchStream } from '#types/twitch';
 import { SocketServer } from '#server/SocketServer';
+import { ChannelController } from '#database/controllers/ChannelController';
+import { ChannelWithUser, Message } from '#types/database/tables';
+import { logger } from '#lib/logger';
 
 
 export type ChannelThreadInformation = {
@@ -104,7 +104,7 @@ export class ChannelThread implements AutoWirable {
     this.isolate.dispose();
   }
 
-  public async handleMessage(self: boolean, message: MessageWithUser): Promise<void> {
+  public async handleMessage(self: boolean, message: Message): Promise<void> {
     await this.chantHandler.handleMessage(self, message);
     await this.commandHandler.handleMessage(self, message);
     await this.commandTimerHandler.processMessage(self, message);
@@ -246,6 +246,16 @@ export class ChannelThread implements AutoWirable {
   }
 
   public async syncChannel(): Promise<void> {
-    this.channel = await prisma.channel.getByUserIdOrFail(this.channel.userId);
+    const channel = await ChannelController.getByUserId(this.channel.userId);
+
+    if (channel === null) {
+      logger.warn('Failed to get channel for user [%s]', this.channel.userId, {
+        label: ['ChannelThread', 'syncChannel'],
+      });
+
+      return;
+    }
+
+    this.channel = channel;
   }
 }

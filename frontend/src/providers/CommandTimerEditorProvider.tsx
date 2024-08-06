@@ -6,7 +6,7 @@ import {
   DeleteCommandTimerReqBody,
   PatchCommandTimerReqBody,
   PostCommandTimerReqBody,
-} from '#shared/types/api/commands';
+} from '#types/api/commands';
 import { useNotification } from '#providers/NotificationProvider';
 import InputRange from '#components/InputRange';
 import InputBase from '#components/InputBase';
@@ -21,7 +21,7 @@ import { useTemplates } from '#providers/TemplatesProvider';
 import { SelectChangeEvent } from '@suid/material/Select';
 import { useErrorHandlers } from '#providers/ErrorHandlersProvider';
 import TemplateMenuItems from '#components/TemplateMenuItems';
-import { TemplateEnvironments } from '#shared/types/api/templates';
+import { TemplateEnvironments } from '#types/database/columns';
 
 import style from '#styles/CustomCommandsEditorProvider.module.scss';
 

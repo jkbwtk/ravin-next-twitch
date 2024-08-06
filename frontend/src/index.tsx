@@ -39,15 +39,15 @@ if (root instanceof HTMLElement) {
       <StyledEngineProvider cleanupStyles={false}>
         <ThemeProvider theme={theme}>
           <NotificationProvider>
-            <SessionProvider>
-              <SocketProvider>
-                <ConfirmationBoxProvider>
-                  <ErrorHandlersProvider>
+            <ErrorHandlersProvider>
+              <SessionProvider>
+                <SocketProvider>
+                  <ConfirmationBoxProvider>
                     <AppRouter />
-                  </ErrorHandlersProvider>
-                </ConfirmationBoxProvider>
-              </SocketProvider>
-            </SessionProvider>
+                  </ConfirmationBoxProvider>
+                </SocketProvider>
+              </SessionProvider>
+            </ErrorHandlersProvider>
           </NotificationProvider>
         </ThemeProvider>
       </StyledEngineProvider>

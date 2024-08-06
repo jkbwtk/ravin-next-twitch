@@ -1,12 +1,13 @@
-import { Token, User } from '@prisma/client';
-import { prisma } from '#database/database';
 import { VerifyCallback } from 'passport-oauth2';
 import { isDevApi } from '#shared/constants';
-import { TwitchUser } from '#shared/types/twitch';
+import { TwitchUser } from '#types/twitch';
 import { revokeTokenUnsafe } from '#lib/twitch';
 import { Config } from '#lib/Config';
-import { ChannelWithUser } from '#database/extensions/channel';
 import { logger } from '#lib/logger';
+import { TokenController } from '#database/controllers/TokenController';
+import { UserController } from '#database/controllers/UserController';
+import { Token, TokenInsert, User, UserInsert } from '#types/database/tables';
+import { SystemNotificationController } from '#database/controllers/SystemNotificationController';
 
 
 export const authScopes: string[] = [
@@ -17,49 +18,22 @@ export const authScopes: string[] = [
   'moderator:manage:banned_users',
 ];
 
-const createOrUpdateToken = async (accessToken: string, refreshToken: string | null, user: User): Promise<Token> => {
-  const oldToken = await prisma.token.getByUserId(user.id);
+const createOrUpdateToken = async (accessToken: string, refreshToken: string | null, user: User): Promise<Token | null> => {
+  const oldToken = await TokenController.getByUserId(user.id);
 
-  const newToken = {
-    id: oldToken?.id,
+  const token: TokenInsert = {
+    ...oldToken,
     userId: user.id,
     accessToken,
-    refreshToken: refreshToken,
+    refreshToken,
   };
 
-  return prisma.token.upsert({
-    create: newToken,
-    update: newToken,
-    where: {
-      userId: user.id,
-    },
-  });
+  return TokenController.upsert(token);
 };
 
-const createOrUpdateChannel = async (user: User): Promise<ChannelWithUser> => {
-  const oldChannel = await prisma.channel.getByUserId(user.id);
 
-  const newChannel = {
-    id: oldChannel?.id,
-    userId: user.id,
-  };
-
-  const updated = await prisma.channel.upsert({
-    create: newChannel,
-    update: newChannel,
-    where: {
-      userId: user.id,
-    },
-    include: {
-      user: true,
-    },
-  });
-
-  return updated as ChannelWithUser;
-};
-
-const createOrUpdateUser = async (profile: TwitchUser): Promise<User> => {
-  const newUser = {
+const createOrUpdateUser = async (profile: TwitchUser): Promise<User | null> => {
+  const user: UserInsert = {
     id: profile.id,
     login: profile.login,
     displayName: profile.display_name,
@@ -68,41 +42,35 @@ const createOrUpdateUser = async (profile: TwitchUser): Promise<User> => {
     admin: await Config.get('adminUsername') === profile.login,
   };
 
-  const createdUser = await prisma.user.upsert({
-    create: newUser,
-    update: newUser,
-    where: {
-      id: newUser.id,
-    },
-  });
-  await createOrUpdateChannel(createdUser);
-
-  return createdUser;
+  return UserController.upsert(user);
 };
 
 export const verifyCallback = async (accessToken: string, refreshToken: string | null, profile: TwitchUser, done: VerifyCallback): Promise<void> => {
   try {
-    const token = await prisma.token.getByUserId(profile.id);
+    const token = await TokenController.getByUserId(profile.id);
     const user = await createOrUpdateUser(profile);
 
+    if (user === null) {
+      throw new Error('Failed to create or update user');
+    }
+
     if (token !== null) {
-      logger.debug('Revoking old token for user [%s]', token.user.id, { label: ['auth', 'verifyCallback'] });
+      logger.debug('Revoking old token for user [%s]', token.userId, { label: ['auth', 'verifyCallback'] });
       if (refreshToken !== null && !isDevApi) await revokeTokenUnsafe(user.id);
     }
 
     await createOrUpdateToken(accessToken, refreshToken, user);
 
-    await prisma.systemNotification.createNotification(
-      user.id,
-      'Logged in',
-      'You have successfully logged in to the dashboard.',
+    await SystemNotificationController.create(
+      { userId: user.id,
+        title: 'Logged in',
+        content: 'You have successfully logged in to the dashboard.',
+      },
     );
 
-    const updatedUser = await prisma.user.getByIdOrFail(user.id);
-
-    done(null, updatedUser);
+    done(null, user);
   } catch (err) {
-    console.error(err);
+    logger.error('Failed to validate callback', { label: ['auth', 'verifyCallback'], error: err });
     done(new Error('Failed to validate callback'));
   }
 };

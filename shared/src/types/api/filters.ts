@@ -1,6 +1,7 @@
-import { RegExpLiteralType } from '../regExp';
 import { PaginatedResponse } from '../pagination';
 import { z } from 'zod';
+import { createSelectSchema } from 'drizzle-zod';
+import { phraseFiltersTable, regexFiltersTable } from '../../schema/schema';
 
 
 export enum Actions {
@@ -14,22 +15,30 @@ export const FilterActions = z.nativeEnum(Actions);
 export type FilterActions = z.infer<typeof FilterActions>;
 
 
-export const PhraseFilter = z.object({
-  id: z.number().int().positive(),
-  phrase: z.string().min(1),
-  caseSensitive: z.boolean(),
-  ignoreWhitespace: z.boolean(),
-  similarity: z.number().int().min(0).max(100),
-  action: FilterActions,
-  actionDuration: z.number().int().positive().default(10),
-  reason: z.string().optional().nullable().default(null),
-  enabled: z.boolean().default(true),
+export const PhraseFilterApi = createSelectSchema(phraseFiltersTable, {
+  id: (schema) => schema.id.int().positive(),
+  phrase: (schema) => schema.phrase.min(1),
+  similarity: (schema) => schema.similarity.int().min(0).max(100),
+  action: () => FilterActions,
+  actionDuration: (schema) => schema.actionDuration.int().positive().default(10),
+  reason: (schema) => schema.reason.optional().nullable().default(null),
+  enabled: (schema) => schema.enabled.default(true),
+}).pick({
+  id: true,
+  phrase: true,
+  caseSensitive: true,
+  ignoreWhitespace: true,
+  similarity: true,
+  action: true,
+  actionDuration: true,
+  reason: true,
+  enabled: true,
 });
 
-export type PhraseFilter = z.infer<typeof PhraseFilter>;
+export type PhraseFilterApi = z.infer<typeof PhraseFilterApi>;
 
 export const GetPhraseFiltersResponse = z.object({
-  data: z.array(PhraseFilter),
+  data: z.array(PhraseFilterApi),
 });
 
 export type GetPhraseFiltersResponse = z.infer<typeof GetPhraseFiltersResponse>;
@@ -40,35 +49,42 @@ export const GetPhraseFiltersPaginatedResponse = PaginatedResponse(GetPhraseFilt
 export type GetPhraseFiltersPaginatedResponse = z.infer<typeof GetPhraseFiltersPaginatedResponse>;
 
 
-export const PostPhraseFilterReqBody = PhraseFilter.omit({ id: true });
+export const PostPhraseFilterReqBody = PhraseFilterApi.omit({ id: true });
 
 export type PostPhraseFilterReqBody = z.infer<typeof PostPhraseFilterReqBody>;
 
 
-export const PatchPhraseFilterReqBody = PhraseFilter.pick({ id: true }).merge(PostPhraseFilterReqBody.partial());
+export const PatchPhraseFilterReqBody = PhraseFilterApi.pick({ id: true }).merge(PostPhraseFilterReqBody.partial());
 
 export type PatchPhraseFilterReqBody = z.infer<typeof PatchPhraseFilterReqBody>;
 
 
-export const DeletePhraseFilterReqBody = PhraseFilter.pick({ id: true });
+export const DeletePhraseFilterReqBody = PhraseFilterApi.pick({ id: true });
 
 export type DeletePhraseFilterReqBody = z.infer<typeof DeletePhraseFilterReqBody>;
 
 
-export const RegexFilter = z.object({
-  id: z.number().int().positive(),
-  regex: RegExpLiteralType,
-  action: FilterActions,
-  actionDuration: z.number().int().positive().default(10),
-  reason: z.string().optional().nullable().default(null),
-  enabled: z.boolean().default(true),
+export const RegexFilterApi = createSelectSchema(regexFiltersTable, {
+  id: (schema) => schema.id.int().positive(),
+  regex: (schema) => schema.regex,
+  action: () => FilterActions,
+  actionDuration: (schema) => schema.actionDuration.int().positive().default(10),
+  reason: (schema) => schema.reason.optional().nullable().default(null),
+  enabled: (schema) => schema.enabled.default(true),
+}).pick({
+  id: true,
+  regex: true,
+  action: true,
+  actionDuration: true,
+  reason: true,
+  enabled: true,
 });
 
-export type RegexFilter = z.infer<typeof RegexFilter>;
+export type RegexFilterApi = z.infer<typeof RegexFilterApi>;
 
 
 export const GetRegexFiltersResponse = z.object({
-  data: z.array(RegexFilter),
+  data: z.array(RegexFilterApi),
 });
 
 export type GetRegexFiltersResponse = z.infer<typeof GetRegexFiltersResponse>;
@@ -79,16 +95,16 @@ export const GetRegexFiltersPaginatedResponse = PaginatedResponse(GetRegexFilter
 export type GetRegexFiltersPaginatedResponse = z.infer<typeof GetRegexFiltersPaginatedResponse>;
 
 
-export const PostRegexFilterReqBody = RegexFilter.omit({ id: true });
+export const PostRegexFilterReqBody = RegexFilterApi.omit({ id: true });
 
 export type PostRegexFilterReqBody = z.infer<typeof PostRegexFilterReqBody>;
 
 
-export const PatchRegexFilterReqBody = RegexFilter.pick({ id: true }).merge(PostRegexFilterReqBody.partial());
+export const PatchRegexFilterReqBody = RegexFilterApi.pick({ id: true }).merge(PostRegexFilterReqBody.partial());
 
 export type PatchRegexFilterReqBody = z.infer<typeof PatchRegexFilterReqBody>;
 
 
-export const DeleteRegexFilterReqBody = RegexFilter.pick({ id: true });
+export const DeleteRegexFilterReqBody = RegexFilterApi.pick({ id: true });
 
 export type DeleteRegexFilterReqBody = z.infer<typeof DeleteRegexFilterReqBody>;

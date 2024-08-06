@@ -2,7 +2,7 @@ import DashboardInfoBar from '#components/DashboardInfoBar';
 import Button from '#components/Button';
 import TemplateTableWidget from '#components/widgets/TemplateTableWidget';
 import { batch, createSignal } from 'solid-js';
-import { Template } from '#shared/types/api/templates';
+import { Template } from '#types/api/templates';
 import { useNotification } from '#providers/NotificationProvider';
 import TemplateEditor from '#components/TemplateEditor';
 import { useConfirmationBox } from '#providers/ConfirmationBoxProvider';

@@ -1,14 +1,14 @@
-import { prisma } from '#database/database';
+import { RegexFilterController } from '#database/controllers/RegexFilterController';
+import { RegexFilterSerializer } from '#database/serializers/RegexFilterSerializer';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
-import { SocketServer } from '#server/SocketServer';
 import { idListFilter } from '#server/middlewares/idListFilter';
 import { limitOffsetPagination } from '#server/middlewares/pagination';
 import { DeleteRegexFilterSchema, PatchRegexFilterSchema, PostRegexFilterSchema } from '#server/routers/v1/filters/regex/regex.schemas';
 import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
 import { ServerError } from '#shared/ServerError';
 import { HttpCodes } from '#shared/httpCodes';
-import { GetRegexFiltersPaginatedResponse, GetRegexFiltersResponse, RegexFilter } from '#shared/types/api/filters';
+import { GetRegexFiltersPaginatedResponse, GetRegexFiltersResponse, RegexFilterApi } from '#types/api/filters';
 import { json } from 'body-parser';
 
 
@@ -19,23 +19,22 @@ export const getRegexFiltersView = new ExpressStack()
   .use(idListFilter())
   .use(async (req, res) => {
     try {
-      if (req.pagination) {
-        const filters = await prisma.regexFilter.getByChannelId(req.user.id, req.pagination, req.idListFilter);
+      const filters = await RegexFilterController.getByUserId(req.user.id, {
+        pagination: req.pagination,
+        idListFilter: req.idListFilter,
+      });
 
-        res.jsonValidated({
-          data: filters.map((f) => f.serialize()),
+      const paginationMetadata = req.pagination ? {
+        total: await RegexFilterController.countByUserId(req.user.id),
+        limit: req.pagination.limit,
+        offset: req.pagination.offset,
+      } : null;
 
-          total: await prisma.regexFilter.countByChannelId(req.user.id),
-          limit: req.pagination.take,
-          offset: req.pagination.skip,
-        });
-      } else {
-        const filters = await prisma.regexFilter.getByChannelId(req.user.id, req.pagination, req.idListFilter);
+      res.jsonValidated({
+        data: RegexFilterSerializer(filters),
 
-        res.jsonValidated({
-          data: filters.map((f) => f.serialize()),
-        });
-      }
+        ...paginationMetadata,
+      });
     } catch (err) {
       logger.warn('Failed to get regex filters', {
         error: err,
@@ -50,13 +49,19 @@ export const postRegexFiltersView = new ExpressStack()
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PostRegexFilterSchema))
-  .use(validateResponse(RegexFilter))
+  .use(validateResponse(RegexFilterApi))
   .use(async (req, res) => {
     try {
-      const filter = await prisma.regexFilter.createFromApi(req.user.id, req.validated.body);
-      SocketServer.emitToUser(req.user.id, 'NEW_REGEX_FILTER', filter.serialize());
+      const filter = await RegexFilterController.create({
+        ...req.validated.body,
+        channelUserId: req.user.id,
+      });
 
-      res.jsonValidated(filter.serialize());
+      if (filter === null) {
+        throw new Error('Create regex filter returned null');
+      }
+
+      res.jsonValidated(RegexFilterSerializer(filter));
     } catch (err) {
       logger.warn('Failed to create regex filter', {
         error: err,
@@ -71,13 +76,19 @@ export const patchRegexFiltersView = new ExpressStack()
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PatchRegexFilterSchema))
-  .use(validateResponse(RegexFilter))
+  .use(validateResponse(RegexFilterApi))
   .use(async (req, res) => {
     try {
-      const filter = await prisma.regexFilter.updateFromApi(req.user.id, req.validated.body);
-      SocketServer.emitToUser(req.user.id, 'UPD_REGEX_FILTER', filter.serialize());
+      const filter = await RegexFilterController.update({
+        ...req.validated.body,
+        channelUserId: req.user.id,
+      });
 
-      res.json(filter.serialize());
+      if (filter === null) {
+        throw new Error('Update regex filter returned null');
+      }
+
+      res.jsonValidated(RegexFilterSerializer(filter));
     } catch (err) {
       logger.warn('Failed to update regex filter', {
         error: err,
@@ -94,8 +105,9 @@ export const deleteRegexFiltersView = new ExpressStack()
   .use(validate(DeleteRegexFilterSchema))
   .use(async (req, res) => {
     try {
-      await prisma.regexFilter.deleteFromApi(req.user.id, req.validated.body);
-      SocketServer.emitToUser(req.user.id, 'DEL_REGEX_FILTER', req.validated.body.id);
+      await RegexFilterController.delete({
+        ...req.validated.body,
+      });
 
       res.sendStatus(HttpCodes.OK);
     } catch (err) {

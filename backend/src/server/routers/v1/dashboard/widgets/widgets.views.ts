@@ -1,6 +1,4 @@
 import { Bot } from '#bot/Bot';
-import { prisma } from '#database/database';
-import { FRAME_DURATION } from '#database/extensions/channelStats';
 import { TwitchUserRepo } from '#lib/TwitchUserRepo';
 import { logger } from '#lib/logger';
 import { getModerators } from '#lib/twitch';
@@ -13,10 +11,15 @@ import {
   GetModeratorsResponse,
   GetRecentActionsResponse,
   GetTopStatsResponse,
-} from '#shared/types/api/dashboard';
+} from '#types/api/dashboard';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { HttpCodes } from '#shared/httpCodes';
+import { CommandController } from '#database/controllers/CommandController';
+import { ChannelActionController } from '#database/controllers/ChannelActionController';
+import { ChannelStatsController, FRAME_DURATION } from '#database/controllers/ChannelStatsController';
+import { MessageController } from '#database/controllers/MessageController';
+import { ChannelActionSerializer } from '#database/serializers/ChannelActionSerializer';
 
 dayjs.extend(utc);
 
@@ -59,12 +62,12 @@ export const getTopStatsView = new ExpressStack()
   .usePreflight(authenticated)
   .use(async (req, res) => {
     try {
-      const topChatterId = await prisma.message.getTopChatter(req.user.id);
+      const topChatterId = await MessageController.getTopChatter(req.user.id);
       const topChatter = topChatterId ? await TwitchUserRepo.get(req.user.id, topChatterId ?? '') : null;
 
-      const topCommand = await prisma.command.getTopCommand(req.user.id);
+      const topCommand = await CommandController.getTopCommand(req.user.id);
 
-      const topEmote = await prisma.message.getTopEmote(req.user.id);
+      const topEmote = await MessageController.getTopEmote(req.user.id);
 
       const resp: GetTopStatsResponse = {
         data: {
@@ -95,10 +98,10 @@ export const getRecentActionsView = new ExpressStack()
   .usePreflight(authenticated)
   .use(async (req, res) => {
     try {
-      const stats = await prisma.channelAction.getByUserId(req.user.id);
+      const stats = await ChannelActionController.getByUserId(req.user.id);
 
       const resp: GetRecentActionsResponse = {
-        data: stats.map((stat) => stat.serialize()),
+        data: ChannelActionSerializer(stats),
       };
 
       res.json(resp);
@@ -116,11 +119,11 @@ export const getChatStatsView = new ExpressStack()
   .usePreflight(authenticated)
   .use(async (req, res) => {
     try {
-      const oldestFrameId = prisma.channelStats.frameIdFromDate(dayjs.utc().subtract(1, 'hour').toDate());
-      const newestFrameId = prisma.channelStats.frameIdFromDate();
+      const oldestFrameId = ChannelStatsController.$utils.frameIdFromDate(dayjs.utc().subtract(1, 'hour').toDate());
+      const newestFrameId = ChannelStatsController.$utils.frameIdFromDate();
 
-      const stats = await prisma.channelStats.getFramesBetween(req.user.id, oldestFrameId, newestFrameId);
-      const mappedStats = prisma.channelStats.mapFrames(stats);
+      const stats = await ChannelStatsController.getFramesBetween(req.user.id, oldestFrameId, newestFrameId);
+      const mappedStats = ChannelStatsController.$utils.mapFrames(stats);
 
       let messagesTotal = 0;
       let timeoutsTotal = 0;
@@ -134,7 +137,7 @@ export const getChatStatsView = new ExpressStack()
 
         if (frame === undefined) {
           frames.push({
-            timestamp: prisma.channelStats.dateFromFrameId(i).getTime(),
+            timestamp: ChannelStatsController.$utils.dateFromFrameId(i).getTime(),
             frameDuration: FRAME_DURATION,
 
             messages: 0,
@@ -145,7 +148,7 @@ export const getChatStatsView = new ExpressStack()
           });
         } else {
           frames.push({
-            timestamp: frame.getDate().getTime(),
+            timestamp: ChannelStatsController.$utils.getDate(frame).getTime(),
             frameDuration: FRAME_DURATION,
 
             messages: frame.messages,
@@ -165,8 +168,8 @@ export const getChatStatsView = new ExpressStack()
 
       const resp: GetChatStatsResponse = {
         data: {
-          dateStart: prisma.channelStats.dateFromFrameId(oldestFrameId).getTime(),
-          dateEnd: prisma.channelStats.dateFromFrameId(newestFrameId).getTime(),
+          dateStart: ChannelStatsController.$utils.dateFromFrameId(oldestFrameId).getTime(),
+          dateEnd: ChannelStatsController.$utils.dateFromFrameId(newestFrameId).getTime(),
 
           messagesTotal,
           timeoutsTotal,

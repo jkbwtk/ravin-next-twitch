@@ -1,9 +1,9 @@
 import { ChannelThread } from '#bot/ChannelThread';
 import { CustomCommand } from '#bot/handlers/CustomCommand';
-import { prisma } from '#database/database';
-import { MessageWithUser } from '#database/extensions/message';
+import { CommandController } from '#database/controllers/CommandController';
 import { ExtendedMap } from '#lib/ExtendedMap';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
+import { Message } from '#types/database/tables';
 
 
 export class CommandHandler implements AutoWirable {
@@ -19,7 +19,7 @@ export class CommandHandler implements AutoWirable {
     await this.syncCustomCommands();
   }
 
-  public async handleMessage(self: boolean, message: MessageWithUser): Promise<void> {
+  public async handleMessage(self: boolean, message: Message): Promise<void> {
     const customCommand = this.getUsedCustomCommand(message.content);
 
     if (customCommand) customCommand.execute(self, message);
@@ -33,7 +33,7 @@ export class CommandHandler implements AutoWirable {
   }
 
   public async syncCustomCommands(): Promise<void> {
-    const commands = await prisma.command.getByChannelId(this.channelThread.channel.user.id);
+    const commands = await CommandController.getByUserId(this.channelThread.channel.userId);
 
     this.customCommands.clear();
     for (const command of commands) {

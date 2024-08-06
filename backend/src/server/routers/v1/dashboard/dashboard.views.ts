@@ -1,13 +1,13 @@
 import { Bot } from '#bot/Bot';
-import { prisma } from '#database/database';
 import { Config } from '#lib/Config';
 import { logger } from '#lib/logger';
 import { getModerators } from '#lib/twitch';
 import { ExpressStack } from '#server/ExpressStack';
 import { ServerError } from '#shared/ServerError';
 import { authenticated, validateResponse } from '#server/stackMiddlewares';
-import { GetBotConnectionStatusResponse } from '#shared/types/api/dashboard';
+import { GetBotConnectionStatusResponse } from '#types/api/dashboard';
 import { HttpCodes } from '#shared/httpCodes';
+import { ChannelController } from '#database/controllers/ChannelController';
 
 
 export const getConnectionStatusView = new ExpressStack()
@@ -19,11 +19,16 @@ export const getConnectionStatusView = new ExpressStack()
         .map((mod) => mod.user_login);
 
       const botLogin = await Config.getOrFail('botLogin');
+      const channel = await ChannelController.getByUserId(req.user.id);
+
+      if (channel === null) {
+        throw Error(`Failed to get channel for user ${req.user.id}`);
+      }
 
       res.jsonValidated({
         data: {
           channel: req.user.login,
-          joined: req.user.channel.joined ?? false,
+          joined: channel.joined ?? false,
           admin: moderatorLogins.includes(botLogin) || botLogin === req.user.login,
         },
       });
@@ -41,17 +46,20 @@ export const postJoinChannelView = new ExpressStack()
   .usePreflight(authenticated)
   .use(async (req, res) => {
     try {
-      const channel = await prisma.channel.getByUserIdOrFail(req.user.id);
+      const channel = await ChannelController.getByUserId(req.user.id);
+
+      if (channel === null) {
+        throw Error(`Failed to get channel for user ${req.user.id}`);
+      }
 
       channel.joined = !channel.joined;
 
       if (channel.joined) await Bot.joinChannel(channel.user.id);
       else await Bot.leaveChannel(channel.user.id);
 
-      // TODO: Create dedicated model method for this
-      await prisma.channel.update({
-        where: { id: channel.id },
-        data: { joined: channel.joined },
+      await ChannelController.update({
+        id: channel.id,
+        joined: channel.joined,
       });
 
       res.sendStatus(HttpCodes.OK);

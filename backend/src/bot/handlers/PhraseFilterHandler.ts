@@ -1,13 +1,14 @@
 import { ChannelThread } from '#bot/ChannelThread';
-import { prisma } from '#database/database';
-import { MessageWithUser } from '#database/extensions/message';
+import { BotActionController } from '#database/controllers/BotActionController';
+import { MessageController } from '#database/controllers/MessageController';
+import { PhraseFilterController } from '#database/controllers/PhraseFilterController';
 import { ExtendedMap } from '#lib/ExtendedMap';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { banUser, deleteChatMessages } from '#lib/twitch';
-import { BotActionType } from '#shared/types/api/botActions';
-import { UserLevel } from '#shared/types/api/commands';
-import { Actions } from '#shared/types/api/filters';
-import { PhraseFilter } from '@prisma/client';
+import { BotActionType } from '#types/api/botActions';
+import { UserLevel } from '#types/api/commands';
+import { Actions } from '#types/api/filters';
+import { Message, PhraseFilter } from '#types/database/tables';
 import { Client } from 'tmi.js';
 
 
@@ -39,8 +40,10 @@ export class PhraseFilterHandler implements AutoWirable {
    * @param {MessageWithUser} message
    * @return {boolean} Returns true if message was handled.
    */
-  public async handleMessage(self: boolean, message: MessageWithUser): Promise<boolean> {
-    if (self || message.getUserLevel() > UserLevel.Moderator) return false;
+  public async handleMessage(self: boolean, message: Message): Promise<boolean> {
+    const userLevel = MessageController.$utils.getUserLevel(message);
+
+    if (self || userLevel > UserLevel.Moderator) return false;
 
     const matches = this.getMatches(message.content).toSorted((a, b) => {
       if (a.filter.action === b.filter.action) return a.filter.actionDuration - b.filter.actionDuration;
@@ -50,7 +53,7 @@ export class PhraseFilterHandler implements AutoWirable {
     const priorityMatch = matches.at(0);
     if (priorityMatch === undefined) return false;
 
-    await prisma.botAction.createAndEmit(
+    await BotActionController.createFromType(
       this.channelThread.channel.user.id,
       BotActionType.FilteredPhrase,
       priorityMatch.filter.phrase,
@@ -161,7 +164,7 @@ export class PhraseFilterHandler implements AutoWirable {
   }
 
   public async syncFilters(): Promise<void> {
-    const filters = await prisma.phraseFilter.getByChannelId(this.channelThread.channel.user.id);
+    const filters = await PhraseFilterController.getByUserId(this.channelThread.channel.user.id);
 
     this.filters.clear();
     for (const filter of filters) {

@@ -1,15 +1,16 @@
 import { ChannelThread } from '#bot/ChannelThread';
-import { prisma } from '#database/database';
-import { MessageWithUser } from '#database/extensions/message';
+import { BotActionController } from '#database/controllers/BotActionController';
+import { MessageController } from '#database/controllers/MessageController';
+import { RegexFilterController } from '#database/controllers/RegexFilterController';
 import { ExtendedMap } from '#lib/ExtendedMap';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { logger } from '#lib/logger';
 import { banUser, deleteChatMessages } from '#lib/twitch';
-import { BotActionType } from '#shared/types/api/botActions';
-import { UserLevel } from '#shared/types/api/commands';
-import { Actions } from '#shared/types/api/filters';
-import { RegExpType } from '#shared/types/regExp';
-import { RegexFilter } from '@prisma/client';
+import { BotActionType } from '#types/api/botActions';
+import { UserLevel } from '#types/api/commands';
+import { Actions } from '#types/api/filters';
+import { Message, RegexFilter } from '#types/database/tables';
+import { RegExpType } from '#types/regExp';
 import { Client } from 'tmi.js';
 
 
@@ -40,8 +41,10 @@ export class RegexFilterHandler implements AutoWirable {
    * @param {MessageWithUser} message
    * @return {boolean} Returns true if message was handled.
    */
-  public async handleMessage(self: boolean, message: MessageWithUser): Promise<boolean> {
-    if (self || message.getUserLevel() > UserLevel.Moderator) return false;
+  public async handleMessage(self: boolean, message: Message): Promise<boolean> {
+    const userLevel = MessageController.$utils.getUserLevel(message);
+
+    if (self || userLevel > UserLevel.Moderator) return false;
 
     const matches = this.getMatches(message.content).toSorted((a, b) => {
       if (a.filter.action === b.filter.action) return a.filter.actionDuration - b.filter.actionDuration;
@@ -51,7 +54,7 @@ export class RegexFilterHandler implements AutoWirable {
     const priorityMatch = matches.at(0);
     if (priorityMatch === undefined) return false;
 
-    await prisma.botAction.createAndEmit(
+    await BotActionController.createFromType(
       this.channelThread.channel.user.id,
       BotActionType.FilteredRegex,
       priorityMatch.filter.regex,
@@ -109,7 +112,7 @@ export class RegexFilterHandler implements AutoWirable {
   }
 
   public async syncFilters(): Promise<void> {
-    const filters = await prisma.regexFilter.getByChannelId(this.channelThread.channel.user.id);
+    const filters = await RegexFilterController.getByUserId(this.channelThread.channel.user.id);
 
     this.filters.clear();
     for (const filter of filters) {

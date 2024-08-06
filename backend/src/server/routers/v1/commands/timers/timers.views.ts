@@ -1,16 +1,15 @@
 import { Bot } from '#bot/Bot';
-import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
 import { ServerError } from '#shared/ServerError';
-import { SocketServer } from '#server/SocketServer';
 import { idListFilter } from '#server/middlewares/idListFilter';
 import { DeleteCommandTimerSchema, PatchCommandTimerSchema, PostCommandTimerSchema } from '#server/routers/v1/commands/timers/timers.schemas';
 import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
-import { GetCommandTimersPaginatedResponse, GetCommandTimersResponse, GetCommandTimersStatusResponse } from '#shared/types/api/commands';
+import { CommandTimerApi, GetCommandTimersPaginatedResponse, GetCommandTimersResponse, GetCommandTimersStatusResponse } from '#types/api/commands';
 import { json } from 'body-parser';
 import { HttpCodes } from '#shared/httpCodes';
 import { limitOffsetPagination } from '#server/middlewares/pagination';
+import { CommandTimerController } from '#database/controllers/CommandTImerController';
 
 
 export const getCommandTimersView = new ExpressStack()
@@ -20,23 +19,23 @@ export const getCommandTimersView = new ExpressStack()
   .use(idListFilter())
   .use(async (req, res) => {
     try {
-      if (req.pagination) {
-        const timers = await prisma.commandTimer.getByChannelId(req.user.id, req.pagination);
+      const timers = await CommandTimerController.getByUserId(req.user.id, {
+        pagination: req.pagination,
+        idListFilter: req.idListFilter,
+      });
 
-        res.jsonValidated({
-          data: timers.map((c) => c.serialize()),
+      const paginationMetadata = req.pagination ? {
+        total: await CommandTimerController.countByUserId(req.user.id),
+        limit: req.pagination.limit,
+        offset: req.pagination.offset,
+      } : null;
 
-          total: await prisma.commandTimer.countByChannelId(req.user.id),
-          limit: req.pagination.take,
-          offset: req.pagination.skip,
-        });
-      } else {
-        const commandTimers = await prisma.commandTimer.getByChannelId(req.user.id);
 
-        res.jsonValidated({
-          data: commandTimers.map((c) => c.serialize()),
-        });
-      }
+      res.jsonValidated({
+        data: CommandTimerController.$utils.serialize(timers),
+
+        ...paginationMetadata,
+      });
     } catch (err) {
       logger.warn('Failed to get command timers', {
         error: err,
@@ -51,12 +50,20 @@ export const postCommandTimersView = new ExpressStack()
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PostCommandTimerSchema))
+  .use(validateResponse(CommandTimerApi))
   .use(async (req, res) => {
     try {
-      const commandTimer = await prisma.commandTimer.createFromApi(req.user.id, req.validated.body);
-      SocketServer.emitToUser(req.user.id, 'NEW_COMMAND_TIMER', commandTimer.serialize());
+      const timer = await CommandTimerController.create({
+        ...req.validated.body,
+        channelUserId: req.user.id,
+      });
 
-      res.sendStatus(HttpCodes.Created);
+      if (timer === null) {
+        throw new Error('Create command timer returned null');
+      }
+
+
+      res.jsonValidated(CommandTimerController.$utils.serialize(timer));
     } catch (err) {
       logger.warn('Failed to create command timer', {
         error: err,
@@ -71,12 +78,19 @@ export const patchCommandTimersView = new ExpressStack()
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PatchCommandTimerSchema))
+  .use(validateResponse(CommandTimerApi))
   .use(async (req, res) => {
     try {
-      const commandTimer = await prisma.commandTimer.updateFromApi(req.validated.body);
-      SocketServer.emitToUser(req.user.id, 'UPD_COMMAND_TIMER', commandTimer.serialize());
+      const timer = await CommandTimerController.update({
+        ...req.validated.body,
+        channelUserId: req.user.id,
+      });
 
-      res.sendStatus(HttpCodes.OK);
+      if (timer === null) {
+        throw new Error('Update command timer returned null');
+      }
+
+      res.jsonValidated(CommandTimerController.$utils.serialize(timer));
     } catch (err) {
       logger.warn('Failed to update command timer', {
         error: err,
@@ -93,9 +107,13 @@ export const deleteCommandTimersView = new ExpressStack()
   .use(validate(DeleteCommandTimerSchema))
   .use(async (req, res) => {
     try {
-      await prisma.commandTimer.deleteFromApi(req.validated.body);
-      await Bot.reloadChannelCommands(req.user.id);
-      SocketServer.emitToUser(req.user.id, 'DEL_COMMAND_TIMER', req.validated.body.id);
+      const timer = await CommandTimerController.delete({
+        ...req.validated.body,
+      });
+
+      if (timer === null) {
+        throw new Error('Delete command timer returned null');
+      }
 
       res.sendStatus(HttpCodes.OK);
     } catch (err) {
@@ -114,8 +132,9 @@ export const getCommandTimersStatusView = new ExpressStack()
   .use(async (req, res) => {
     try {
       const channelThread = Bot.getChannelThread(req.user.login);
+
       if (channelThread === undefined) {
-        throw new ServerError(HttpCodes.InternalServerError, `Failed to get command timer status for user ${req.user.login}`);
+        throw new Error(`Failed to get command timer status for user ${req.user.login}`);
       }
 
       res.jsonValidated({

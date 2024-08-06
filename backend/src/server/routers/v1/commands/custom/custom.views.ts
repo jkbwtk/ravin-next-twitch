@@ -1,16 +1,16 @@
 import { Bot } from '#bot/Bot';
-import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
 import { ServerError } from '#shared/ServerError';
-import { SocketServer } from '#server/SocketServer';
 import { idListFilter } from '#server/middlewares/idListFilter';
 import { DeleteCustomCommandSchema, PatchCustomCommandSchema, PostCustomCommandSchema } from '#server/routers/v1/commands/custom/custom.schemas';
 import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
-import { GetCustomCommandsPaginatedResponse, GetCustomCommandsResponse, GetCustomCommandsStatusResponse } from '#shared/types/api/commands';
+import { GetCustomCommandsPaginatedResponse, GetCustomCommandsResponse, GetCustomCommandsStatusResponse } from '#types/api/commands';
 import { json } from 'body-parser';
 import { HttpCodes } from '#shared/httpCodes';
 import { limitOffsetPagination } from '#server/middlewares/pagination';
+import { CommandController } from '#database/controllers/CommandController';
+import { CustomCommandSerializer } from '#database/serializers/CommandSerializer';
 
 
 export const getCustomCommandsView = new ExpressStack()
@@ -20,21 +20,22 @@ export const getCustomCommandsView = new ExpressStack()
   .use(idListFilter())
   .use(async (req, res) => {
     try {
+      const commands = await CommandController.getByUserId(req.user.id, {
+        pagination: req.pagination,
+        idListFilter: req.idListFilter,
+      });
+
       if (req.pagination) {
-        const commands = await prisma.command.getByChannelId(req.user.id, req.pagination, req.idListFilter);
-
         res.jsonValidated({
-          data: commands.map((c) => c.serialize()),
+          data: CustomCommandSerializer(commands),
 
-          total: await prisma.command.countByChannelId(req.user.id),
-          limit: req.pagination.take,
-          offset: req.pagination.skip,
+          total: await CommandController.countByUserId(req.user.id),
+          limit: req.pagination.limit,
+          offset: req.pagination.offset,
         });
       } else {
-        const commands = await prisma.command.getByChannelId(req.user.id, req.pagination, req.idListFilter);
-
         res.jsonValidated({
-          data: commands.map((c) => c.serialize()),
+          data: CustomCommandSerializer(commands),
         });
       }
     } catch (err) {
@@ -53,8 +54,14 @@ export const postCustomCommandsView = new ExpressStack()
   .use(validate(PostCustomCommandSchema))
   .use(async (req, res) => {
     try {
-      const command = await prisma.command.createFromApi(req.user.id, req.validated.body);
-      SocketServer.emitToUser(req.user.id, 'NEW_CUSTOM_COMMAND', command.serialize());
+      const command = await CommandController.create({
+        ...req.validated.body,
+        channelUserId: req.user.id,
+      });
+
+      if (!command) {
+        throw new ServerError(HttpCodes.InternalServerError, 'Failed to create custom command');
+      }
 
       res.sendStatus(HttpCodes.Created);
     } catch (err) {
@@ -73,8 +80,11 @@ export const patchCustomCommandsView = new ExpressStack()
   .use(validate(PatchCustomCommandSchema))
   .use(async (req, res) => {
     try {
-      const command = await prisma.command.updateFromApi(req.validated.body);
-      SocketServer.emitToUser(req.user.id, 'UPD_CUSTOM_COMMAND', command.serialize());
+      const command = await CommandController.update(req.validated.body);
+
+      if (!command) {
+        throw new ServerError(HttpCodes.InternalServerError, 'Failed to update custom command');
+      }
 
       res.sendStatus(HttpCodes.OK);
     } catch (err) {
@@ -93,9 +103,7 @@ export const deleteCustomCommandsView = new ExpressStack()
   .use(validate(DeleteCustomCommandSchema))
   .use(async (req, res) => {
     try {
-      await prisma.command.deleteFromApi(req.validated.body);
-      await Bot.reloadChannelCommands(req.user.id);
-      SocketServer.emitToUser(req.user.id, 'DEL_CUSTOM_COMMAND', req.validated.body.id);
+      await CommandController.delete(req.validated.body);
 
       res.sendStatus(HttpCodes.OK);
     } catch (err) {

@@ -1,23 +1,10 @@
 import { Redis, RedisOptions } from 'ioredis';
-import { Prisma, PrismaClient } from '@prisma/client';
-import { channelActionExtension } from '#database/extensions/channelAction';
-import { databaseDebug, databaseLogging } from '#shared/constants';
-import { configExtension } from '#database/extensions/config';
-import { userExtension } from '#database/extensions/user';
-import { systemNotificationExtension } from '#database/extensions/systemNotification';
-import { tokenExtension } from '#database/extensions/token';
-import { channelExtension } from '#database/extensions/channel';
-import { messageExtension } from '#database/extensions/message';
-import { commandExtension } from '#database/extensions/command';
-import { channelStatsExtension } from '#database/extensions/channelStats';
-import { mapOptionsToArray } from '#lib/utils';
-import { utilsExtension } from '#database/extensions/utils';
-import { commandTimerExtension } from '#database/extensions/commandTimer';
-import { templateExtension } from '#database/extensions/template';
-import { phraseFilterExtension } from '#database/extensions/phraseFilter';
-import { regexFilterExtension } from '#database/extensions/regexFilter';
-import { botActionExtension } from '#database/extensions/botAction';
-import { behaviorProfileExtension } from '#database/extensions/behaviorProfile';
+import { databaseDebug } from '#shared/constants';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import * as schema from '#schema/schema';
+import * as relations from '#schema/relations';
+import { logger } from '#lib/logger';
+import postgres, { Options as PostgresOptions } from 'postgres';
 
 
 export const redisOptions: RedisOptions = {
@@ -26,38 +13,24 @@ export const redisOptions: RedisOptions = {
   password: process.env.DB_PASSWORD ?? 'DEV_PASSWD',
 };
 
-export const prismaOptions: Prisma.PrismaClientOptions = {
-  log: mapOptionsToArray({
-    query: databaseDebug,
-    info: databaseLogging || databaseDebug,
-    warn: true,
-    error: true,
-  }),
-  errorFormat: 'pretty',
+export const postgresOptions: PostgresOptions<{}> = {
+  host: process.env.DB_HOST!,
+  port: parseInt(process.env.DB_PORT!, 10),
+  user: process.env.DB_USER!,
+  password: process.env.DB_PASSWORD!,
+  database: process.env.DB_NAME!,
+  onnotice(notice) {
+    if (databaseDebug) {
+      logger.debug('Postgres notice %o', { notice, label: 'Postgres' });
+    }
+  },
 };
 
 
 export const redis = new Redis(redisOptions);
-export const prismaBase = new PrismaClient(prismaOptions);
 
-const prismaExtended = prismaBase
-  .$extends(utilsExtension)
-  .$extends(channelActionExtension)
-  .$extends(configExtension)
-  .$extends(userExtension)
-  .$extends(systemNotificationExtension)
-  .$extends(tokenExtension)
-  .$extends(channelExtension)
-  .$extends(messageExtension)
-  .$extends(commandExtension)
-  .$extends(channelStatsExtension)
-  .$extends(commandTimerExtension)
-  .$extends(templateExtension)
-  .$extends(phraseFilterExtension)
-  .$extends(regexFilterExtension)
-  .$extends(botActionExtension)
-  .$extends(behaviorProfileExtension);
+export const postgresClient = postgres(postgresOptions);
 
-export type ExtendedPrismaClient = typeof prismaExtended;
+export const db = drizzle(postgresClient, { schema: { ...schema, ...relations }, logger: databaseDebug ? logger : false });
 
-export const prisma = prismaExtended;
+export type DrizzleDatabase = typeof db;

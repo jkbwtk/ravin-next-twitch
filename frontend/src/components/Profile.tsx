@@ -1,6 +1,6 @@
 import { TableType } from '#components/widgets/CommandTimersTableWidget';
 import { TableCell, TableRow } from '@suid/material';
-import { BehaviorProfile } from '#shared/types/api/behaviorProfiles';
+import { BehaviorProfile } from '#types/api/behaviorProfiles';
 import MaterialSymbol from '#components/MaterialSymbol';
 import TemplateButton from '#components/TemplateButton';
 import { Match, Switch } from 'solid-js';

@@ -1,4 +1,4 @@
-import { DeleteRegexFilterReqBody, PatchRegexFilterReqBody, PostRegexFilterReqBody } from '#shared/types/api/filters';
+import { DeleteRegexFilterReqBody, PatchRegexFilterReqBody, PostRegexFilterReqBody } from '#types/api/filters';
 import { z } from 'zod';
 
 

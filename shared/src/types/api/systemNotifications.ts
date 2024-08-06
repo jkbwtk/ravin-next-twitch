@@ -1,20 +1,28 @@
+import { createSelectSchema } from 'drizzle-zod';
+import { systemNotificationsTable } from '../../schema/schema';
 import { z } from 'zod';
 
 
-export const SystemNotification = z.object({
-  id: z.number().int().positive(),
-  userId: z.string().min(1).max(64),
-  title: z.string().min(1).max(64),
-  content: z.string().min(1).max(1024),
+export const SystemNotificationApi = createSelectSchema(systemNotificationsTable, {
+  id: (schema) => schema.id.int().positive(),
+  userId: (schema) => schema.userId.min(1),
+  title: (schema) => schema.title.min(1).max(64),
+  content: (schema) => schema.content.min(1).max(1024),
+}).pick({
+  id: true,
+  userId: true,
+  title: true,
+  content: true,
+  createdAt: true,
+}).merge(z.object({
   read: z.boolean(),
-  createdAt: z.coerce.date(),
-});
+}));
 
-export type SystemNotification = z.infer<typeof SystemNotification>;
+export type SystemNotificationApi = z.infer<typeof SystemNotificationApi>;
 
 
 export const GetSystemNotificationsResponse = z.object({
-  data: z.array(SystemNotification),
+  data: z.array(SystemNotificationApi),
 });
 
 export type GetSystemNotificationsResponse = z.infer<typeof GetSystemNotificationsResponse>;
@@ -22,8 +30,8 @@ export type GetSystemNotificationsResponse = z.infer<typeof GetSystemNotificatio
 
 export const PostSystemNotificationReadReqBody = z.object({
   id: z.union([
-    SystemNotification.shape.id,
-    z.array(SystemNotification.shape.id).min(1),
+    SystemNotificationApi.shape.id,
+    z.array(SystemNotificationApi.shape.id).min(1),
   ]),
 });
 
@@ -31,13 +39,13 @@ export type PostSystemNotificationReadReqBody = z.infer<typeof PostSystemNotific
 
 
 export const GetSystemNotificationsReadResponse = z.object({
-  data: z.array(SystemNotification),
+  data: z.array(SystemNotificationApi),
 });
 
 export type GetSystemNotificationsReadResponse = z.infer<typeof GetSystemNotificationsReadResponse>;
 
 
-export const PostSystemNotificationBroadcastReqBody = SystemNotification.pick({
+export const PostSystemNotificationBroadcastReqBody = SystemNotificationApi.pick({
   title: true,
   content: true,
 });

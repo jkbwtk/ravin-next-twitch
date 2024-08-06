@@ -13,7 +13,7 @@ import { useConfirmationBox } from '#providers/ConfirmationBoxProvider';
 import { SelectChangeEvent } from '@suid/material/Select';
 import { useErrorHandlers } from '#providers/ErrorHandlersProvider';
 import InputCheckbox from '#components/InputCheckbox';
-import { Actions, DeletePhraseFilterReqBody, PatchPhraseFilterReqBody, PhraseFilter, PostPhraseFilterReqBody } from '#shared/types/api/filters';
+import { Actions, DeletePhraseFilterReqBody, PatchPhraseFilterReqBody, PhraseFilter, PostPhraseFilterReqBody } from '#types/api/filters';
 import TextArea from '#components/TextArea';
 
 import style from '#styles/CustomCommandsEditorProvider.module.scss';

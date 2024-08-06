@@ -1,12 +1,13 @@
 import { Bot } from '#bot/Bot';
-import { prisma } from '#database/database';
+import { BehaviorProfileController } from '#database/controllers/BehaviorProfileController';
+import { BehaviorProfileSerializer } from '#database/serializers/BehaviorProfileSerializer';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
 import { limitOffsetPagination } from '#server/middlewares/pagination';
 import { authenticated, validateResponse } from '#server/stackMiddlewares';
 import { ServerError } from '#shared/ServerError';
 import { HttpCodes } from '#shared/httpCodes';
-import { GetBehaviorProfilesPaginatedResponse, GetBehaviorProfilesResponse, GetBehaviorProfilesStatusResponse } from '#shared/types/api/behaviorProfiles';
+import { GetBehaviorProfilesPaginatedResponse, GetBehaviorProfilesResponse, GetBehaviorProfilesStatusResponse } from '#types/api/behaviorProfiles';
 
 
 export const getBehaviorProfilesView = new ExpressStack()
@@ -15,21 +16,21 @@ export const getBehaviorProfilesView = new ExpressStack()
   .use(limitOffsetPagination())
   .use(async (req, res) => {
     try {
+      const profiles = await BehaviorProfileController.getByUserIdWithRelations(req.user.id, {
+        pagination: req.pagination,
+      });
+
       if (req.pagination) {
-        const profiles = await prisma.behaviorProfile.getByChannelId(req.user.id, req.pagination);
-
         res.jsonValidated({
-          data: profiles.map((c) => c.serialize()),
+          data: BehaviorProfileSerializer(profiles),
 
-          total: await prisma.behaviorProfile.countByChannelId(req.user.id),
-          limit: req.pagination.take,
-          offset: req.pagination.skip,
+          total: await BehaviorProfileController.countByUserId(req.user.id),
+          limit: req.pagination.limit,
+          offset: req.pagination.offset,
         });
       } else {
-        const profiles = await prisma.behaviorProfile.getByChannelId(req.user.id);
-
         res.jsonValidated({
-          data: profiles.map((c) => c.serialize()),
+          data: BehaviorProfileSerializer(profiles),
         });
       }
     } catch (err) {

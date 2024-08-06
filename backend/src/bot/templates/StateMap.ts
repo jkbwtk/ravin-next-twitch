@@ -1,10 +1,10 @@
-import { DefaultStates, StatesObject } from '#bot/templates/TemplateRunner';
-import { prisma } from '#database/database';
-import { Template } from '@prisma/client';
+import { TemplateController } from '#database/controllers/TemplateController';
+import { TemplateApi } from '#types/api/templates';
+import { DefaultStates, StatesObject } from '#types/database/columns';
 
 
 export class StateMap extends Map<DefaultStates, unknown> {
-  public constructor(private template: Template) {
+  public constructor(private template: TemplateApi) {
     super();
   }
 
@@ -33,11 +33,18 @@ export class StateMap extends Map<DefaultStates, unknown> {
   }
 
   private async save(): Promise<void> {
-    await prisma.template.saveStates(this.template.id, this.toStatesObject());
+    const newTemplate = await TemplateController.update({
+      id: this.template.id,
+      states: this.toStatesObject(),
+    });
+
+    if (newTemplate !== null) {
+      this.template = newTemplate;
+    }
   }
 
   public async load(): Promise<void> {
-    const template = await prisma.template.getById(this.template.id);
+    const template = await TemplateController.getById(this.template.id);
 
     if (template !== null) {
       this.setStates(template.states);

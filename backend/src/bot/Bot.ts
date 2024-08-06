@@ -5,13 +5,20 @@ import { Config } from '#lib/Config';
 import { isDevApi } from '#shared/constants';
 import Deferred from '#shared/Deferred';
 import { TwitchUserRepo } from '#lib/TwitchUserRepo';
-import { prisma } from '#database/database';
 import { logger } from '#lib/logger';
 import { Wirable } from '#lib/autowire';
-import { SocketServer } from '#server/SocketServer';
 import { ExtendedCron } from '#lib/ExtendedCron';
-import { PhraseFilter, RegexFilter } from '@prisma/client';
-import { BotActionType } from '#shared/types/api/botActions';
+import { BotActionType } from '#types/api/botActions';
+import { CommandController } from '#database/controllers/CommandController';
+import { BotActionController } from '#database/controllers/BotActionController';
+import { ChannelController } from '#database/controllers/ChannelController';
+import { PhraseFilterController } from '#database/controllers/PhraseFilterController';
+import { RegexFilterController } from '#database/controllers/RegexFilterController';
+import { CommandTimerController } from '#database/controllers/CommandTImerController';
+import { ChannelActionController } from '#database/controllers/ChannelActionController';
+import { ChannelStatsController } from '#database/controllers/ChannelStatsController';
+import { MessageController } from '#database/controllers/MessageController';
+import { PhraseFilter, RegexFilter } from '#types/database/tables';
 
 
 export interface BotOptions {
@@ -39,6 +46,7 @@ export class Bot {
   private async init(): Promise<void> {
     this.client = await this.createClient();
     this.registerEventHandlers();
+    this.registerSignalHandlers();
 
     await this.client.connect();
 
@@ -122,11 +130,7 @@ export class Bot {
   }
 
   private rejoinChannels = async () => {
-    const channels = await prisma.channel.findMany({
-      include: {
-        user: true,
-      },
-    });
+    const channels = await ChannelController.getAllWithRelations();
 
     for (const channel of channels) {
       if (channel.joined && !this.client.getChannels().includes(`#${channel.user.login}`)) {
@@ -139,7 +143,14 @@ export class Bot {
     try {
       if (self) return;
 
-      const instance = await prisma.message.createFromChatUserState(channel, userstate, message);
+      const converted = MessageController.$utils.convertFromChatMessage(channel, userstate, message);
+      const instance = await MessageController.create(converted);
+
+      if (instance === null) {
+        logger.warn('Failed to create message instance', { label: ['Bot', 'handleMessage'] });
+        return;
+      }
+
       const thread = this.channels.get(channel.slice(1));
 
       if (!thread) {
@@ -147,8 +158,7 @@ export class Bot {
         return;
       }
 
-      await prisma.channelStats.incrementMessages(instance.channelUserId);
-      SocketServer.emitToUser(instance.channelUserId, 'NEW_MESSAGE', instance.serialize());
+      await ChannelStatsController.incrementMessages(instance.channelUserId);
 
       await thread.handleMessage(self, instance);
     } catch (err) {
@@ -167,9 +177,9 @@ export class Bot {
       return;
     }
 
-    await prisma.channelStats.incrementTimeouts(thread.channel.user.id);
+    await ChannelStatsController.incrementTimeouts(thread.channel.user.id);
 
-    prisma.channelAction.createAndEmit({
+    await ChannelActionController.create({
       channelUserId: thread.channel.user.id,
       issuerDisplayName: thread.channel.user.displayName,
       targetDisplayName: (await TwitchUserRepo.getByLogin(thread.channel.user.id, username))?.display_name ?? username,
@@ -187,9 +197,9 @@ export class Bot {
       return;
     }
 
-    await prisma.channelStats.incrementBans(thread.channel.user.id);
+    await ChannelStatsController.incrementBans(thread.channel.user.id);
 
-    await prisma.channelAction.createAndEmit({
+    ChannelActionController.create({
       channelUserId: thread.channel.user.id,
       issuerDisplayName: thread.channel.user.displayName,
       targetDisplayName: (await TwitchUserRepo.getByLogin(thread.channel.user.id, username))?.display_name ?? username,
@@ -209,9 +219,9 @@ export class Bot {
       return;
     }
 
-    await prisma.channelStats.incrementDeleted(thread.channel.user.id);
+    await ChannelStatsController.incrementDeleted(thread.channel.user.id);
 
-    await prisma.channelAction.createAndEmit({
+    ChannelActionController.create({
       channelUserId: thread.channel.user.id,
       issuerDisplayName: thread.channel.user.displayName,
       targetDisplayName: (await TwitchUserRepo.getByLogin(thread.channel.user.id, username))?.display_name ?? 'Chat Member',
@@ -242,11 +252,7 @@ export class Bot {
       return;
     }
 
-    const channels = await prisma.channel.findMany({
-      include: {
-        user: true,
-      },
-    });
+    const channels = await ChannelController.getAllWithRelations();
 
     for (const channel of channels) {
       if (!channel.joined) continue;
@@ -258,7 +264,11 @@ export class Bot {
   public static async joinChannel(id: string): Promise<boolean> {
     try {
       const instance = await Bot.getInstance();
-      const channel = await prisma.channel.getByUserIdOrFail(id);
+      const channel = await ChannelController.getByUserId(id);
+
+      if (channel === null) {
+        throw new Error(`Channel [${id}] not found`);
+      }
 
       if (instance.client.getChannels().includes(`#${channel.user.login}`)) {
         if (instance.channels.has(channel.user.login)) return true;
@@ -274,7 +284,7 @@ export class Bot {
       logger.debug('Joining channel [%s]', channel.user.login, { label: ['Bot', 'joinChannel'] });
       await Bot.waitForConnection();
       await instance.client.join(channel.user.login);
-      await prisma.botAction.createAndEmit(id, BotActionType.ChannelJoined, channel.user.displayName);
+      await BotActionController.createFromType(id, BotActionType.ChannelJoined, channel.user.displayName);
       logger.debug('Joined channel [%s]', channel.user.login, { label: ['Bot', 'joinChannel'] });
 
       return true;
@@ -287,7 +297,11 @@ export class Bot {
   public static async leaveChannel(id: string): Promise<boolean> {
     try {
       const instance = await Bot.getInstance();
-      const channel = await prisma.channel.getByUserIdOrFail(id);
+      const channel = await ChannelController.getByUserId(id);
+
+      if (channel === null) {
+        throw new Error(`Channel [${id}] not found`);
+      }
 
       if (!instance.client.getChannels().includes(`#${channel.user.login}`)) {
         if (!instance.channels.has(channel.user.login)) return true;
@@ -300,7 +314,7 @@ export class Bot {
       instance.channels.get(channel.user.login)?.destroy();
       instance.channels.delete(channel.user.login);
       await instance.client.part(channel.user.login);
-      await prisma.botAction.createAndEmit(id, BotActionType.ChannelLeft, channel.user.displayName);
+      await BotActionController.createFromType(id, BotActionType.ChannelLeft, channel.user.displayName);
       logger.debug('Left channel [%s]', channel.user.login, { label: ['Bot', 'leaveChannel'] });
 
       return true;
@@ -318,7 +332,13 @@ export class Bot {
   }
 
   public static async reloadChannelCommands(channelId: string): Promise<void> {
-    const channel = await prisma.channel.getByUserIdOrFail(channelId);
+    const channel = await ChannelController.getByUserId(channelId);
+
+    if (channel === null) {
+      logger.warn('Channel [%s] not found', channelId, { label: ['Bot', 'reloadChannelCommands'] });
+      return;
+    }
+
     const channelThread = Bot.getChannelThread(channel.user.login);
 
     if (!channelThread) {
@@ -330,7 +350,13 @@ export class Bot {
   }
 
   public static async reloadChannelChannel(channelId: string): Promise<void> {
-    const channel = await prisma.channel.getByUserIdOrFail(channelId);
+    const channel = await ChannelController.getByUserId(channelId);
+
+    if (channel === null) {
+      logger.warn('Channel [%s] not found', channelId, { label: ['Bot', 'reloadChannelChannel'] });
+      return;
+    }
+
     const channelThread = Bot.getChannelThread(channel.user.login);
 
     if (!channelThread) {
@@ -342,7 +368,13 @@ export class Bot {
   }
 
   public static async reloadChannelCommandTimers(channelId: string): Promise<void> {
-    const channel = await prisma.channel.getByUserIdOrFail(channelId);
+    const channel = await ChannelController.getByUserId(channelId);
+
+    if (channel === null) {
+      logger.warn('Channel [%s] not found', channelId, { label: ['Bot', 'reloadChannelCommandTimers'] });
+      return;
+    }
+
     const channelThread = Bot.getChannelThread(channel.user.login);
 
     if (!channelThread) {
@@ -354,7 +386,13 @@ export class Bot {
   }
 
   public static async updateChannelPhraseFilter(channelId: string, filter: PhraseFilter): Promise<void> {
-    const channel = await prisma.channel.getByUserIdOrFail(channelId);
+    const channel = await ChannelController.getByUserId(channelId);
+
+    if (channel === null) {
+      logger.warn('Channel [%s] not found', channelId, { label: ['Bot', 'updateChannelPhraseFilter'] });
+      return;
+    }
+
     const channelThread = Bot.getChannelThread(channel.user.login);
 
     if (!channelThread) {
@@ -366,7 +404,13 @@ export class Bot {
   }
 
   public static async updateChannelRegexFilter(channelId: string, filter: RegexFilter): Promise<void> {
-    const channel = await prisma.channel.getByUserIdOrFail(channelId);
+    const channel = await ChannelController.getByUserId(channelId);
+
+    if (channel === null) {
+      logger.warn('Channel [%s] not found', channelId, { label: ['Bot', 'updateChannelRegexFilter'] });
+      return;
+    }
+
     const channelThread = Bot.getChannelThread(channel.user.login);
 
     if (!channelThread) {
@@ -378,7 +422,13 @@ export class Bot {
   }
 
   public static async deleteChannelPhraseFilter(channelId: string, filterId: number): Promise<void> {
-    const channel = await prisma.channel.getByUserIdOrFail(channelId);
+    const channel = await ChannelController.getByUserId(channelId);
+
+    if (channel === null) {
+      logger.warn('Channel [%s] not found', channelId, { label: ['Bot', 'deleteChannelPhraseFilter'] });
+      return;
+    }
+
     const channelThread = Bot.getChannelThread(channel.user.login);
 
     if (!channelThread) {
@@ -390,7 +440,13 @@ export class Bot {
   }
 
   public static async deleteChannelRegexFilter(channelId: string, filterId: number): Promise<void> {
-    const channel = await prisma.channel.getByUserIdOrFail(channelId);
+    const channel = await ChannelController.getByUserId(channelId);
+
+    if (channel === null) {
+      logger.warn('Channel [%s] not found', channelId, { label: ['Bot', 'deleteChannelRegexFilter'] });
+      return;
+    }
+
     const channelThread = Bot.getChannelThread(channel.user.login);
 
     if (!channelThread) {
@@ -399,6 +455,80 @@ export class Bot {
     }
 
     channelThread.regexFilterHandler.deleteFilter(filterId);
+  }
+
+  private registerSignalHandlers(): void {
+    CommandController.$signals.registerAfter('create', async (result) => {
+      if (result === null) return;
+
+      await Bot.reloadChannelCommands(result.channelUserId);
+    });
+
+    CommandController.$signals.registerAfter('update', async (result) => {
+      if (result === null) return;
+
+      await Bot.reloadChannelCommands(result.channelUserId);
+    });
+
+    CommandController.$signals.registerAfter('delete', async (result) => {
+      if (result === null) return;
+
+      await Bot.reloadChannelCommands(result.channelUserId);
+    });
+
+    PhraseFilterController.$signals.registerAfter('create', async (result) => {
+      if (result === null) return;
+
+      await Bot.updateChannelPhraseFilter(result.channelUserId, result);
+    });
+
+    PhraseFilterController.$signals.registerAfter('update', async (result) => {
+      if (result === null) return;
+
+      await Bot.updateChannelPhraseFilter(result.channelUserId, result);
+    });
+
+    PhraseFilterController.$signals.registerAfter('delete', async (result) => {
+      if (result === null) return;
+
+      await Bot.deleteChannelPhraseFilter(result.channelUserId, result.id);
+    });
+
+    RegexFilterController.$signals.registerAfter('create', async (result) => {
+      if (result === null) return;
+
+      await Bot.updateChannelRegexFilter(result.channelUserId, result);
+    });
+
+    RegexFilterController.$signals.registerAfter('update', async (result) => {
+      if (result === null) return;
+
+      await Bot.updateChannelRegexFilter(result.channelUserId, result);
+    });
+
+    RegexFilterController.$signals.registerAfter('delete', async (result) => {
+      if (result === null) return;
+
+      await Bot.deleteChannelRegexFilter(result.channelUserId, result.id);
+    });
+
+    CommandTimerController.$signals.registerAfter('create', async (result) => {
+      if (result === null) return;
+
+      await Bot.reloadChannelCommandTimers(result.channelUserId);
+    });
+
+    CommandTimerController.$signals.registerAfter('update', async (result) => {
+      if (result === null) return;
+
+      await Bot.reloadChannelCommandTimers(result.channelUserId);
+    });
+
+    CommandTimerController.$signals.registerAfter('delete', async (result) => {
+      if (result === null) return;
+
+      await Bot.reloadChannelCommandTimers(result.channelUserId);
+    });
   }
 
   public async destroy(): Promise<void> {

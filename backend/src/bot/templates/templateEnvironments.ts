@@ -1,4 +1,4 @@
-import { TemplateEnvironments } from '#shared/types/api/templates';
+import { TemplateEnvironments } from '#types/database/columns';
 import { Context } from 'isolated-vm';
 
 

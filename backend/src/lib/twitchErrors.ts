@@ -1,5 +1,4 @@
 import { Tokens } from '#types/twitch';
-import { ErrorObject } from 'ajv';
 
 
 export class NoTokensFile extends Error {
@@ -13,17 +12,6 @@ export class InvalidTokensSyntax extends Error {
   constructor(message?: string, options?: ErrorOptions) {
     super(message, options);
     this.name = 'InvalidTokensSyntax';
-  }
-}
-
-export class InvalidTokensFormat extends Error {
-  public validatorError;
-
-  constructor(validatorError?: ErrorObject<string, Record<string, Tokens>, unknown>[] | null | undefined, message?: string, options?: ErrorOptions) {
-    super(message, options);
-    this.name = 'InvalidTokensFormat';
-
-    this.validatorError = validatorError;
   }
 }
 

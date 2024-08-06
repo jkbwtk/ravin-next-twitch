@@ -1,4 +1,4 @@
-import { DeleteCommandTimerReqBody, PatchCommandTimerReqBody, PostCommandTimerReqBody } from '#shared/types/api/commands';
+import { DeleteCommandTimerReqBody, PatchCommandTimerReqBody, PostCommandTimerReqBody } from '#types/api/commands';
 import Cron from 'croner';
 import { z } from 'zod';
 

@@ -19,8 +19,8 @@ export const defaultLimitOffsetPaginationOptions: RequiredDefaults<LimitOffsetPa
 };
 
 export type LimitOffsetPaginationState = {
-  take: number,
-  skip: number
+  limit: number,
+  offset: number
 } | null;
 
 
@@ -41,8 +41,8 @@ never,
     const validated = stateValidator.safeParse(req.query);
 
     const pagination = validated.success ? {
-      take: validated.data[mergedOptions.limitQueryParameter]!,
-      skip: validated.data[mergedOptions.offsetQueryParameter]!,
+      limit: validated.data[mergedOptions.limitQueryParameter]!,
+      offset: validated.data[mergedOptions.offsetQueryParameter]!,
     } : null;
 
     const temp = Object.assign(req, {

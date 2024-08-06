@@ -1,23 +1,23 @@
-import { prisma } from '#database/database';
-import { TokenWithUserAndChannel } from '#database/extensions/token';
 import Deferred from '#shared/Deferred';
 import { ExtendedCron } from '#lib/ExtendedCron';
 import { ExtendedMap } from '#lib/ExtendedMap';
 import { logger } from '#lib/logger';
 import { refreshTokenUnsafe, validateTokenUnsafe } from '#lib/twitch';
 import { isDevApi } from '#shared/constants';
+import { TokenController } from '#database/controllers/TokenController';
+import { UserController } from '#database/controllers/UserController';
+import { Token } from '#types/database/tables';
 
 
 export class TokenManager {
   private static instance: TokenManager;
 
-  private repository = prisma.token;
   private refreshJob = new ExtendedCron('? * * * *', {
     name: 'TokenManager:refreshTokens',
     paused: true,
   }, TokenManager.processAll);
 
-  private refreshQueue: ExtendedMap<string, Deferred<TokenWithUserAndChannel>> = new ExtendedMap();
+  private refreshQueue: ExtendedMap<string, Deferred<Token>> = new ExtendedMap();
 
   public static getInstance(): TokenManager {
     if (!TokenManager.instance) {
@@ -27,11 +27,16 @@ export class TokenManager {
     return TokenManager.instance;
   }
 
-  private async _refresh(userId: string): Promise<TokenWithUserAndChannel> {
+  private async _refresh(userId: string): Promise<Token> {
     try {
       if (isDevApi) {
-        const token = await prisma.token.getByUserIdOrFail(userId);
+        const token = await TokenController.getByUserId(userId);
         logger.info('Skipping token refresh because dev api is enabled', { label: ['TokenManager', 'refresh'] });
+
+        if (token === null) {
+          throw new Error('Failed to refresh token');
+        }
+
         return token;
       }
 
@@ -41,29 +46,19 @@ export class TokenManager {
         return request.promise;
       }
 
-      const deferred = new Deferred<TokenWithUserAndChannel>();
+      const deferred = new Deferred<Token>();
       this.refreshQueue.set(userId, deferred);
 
       logger.debug('Refreshing token for user [%s]', userId, { label: ['TokenManager', 'refresh'] });
       const refreshedToken = await refreshTokenUnsafe(userId);
       logger.debug('Token for user [%s] refreshed', refreshedToken.userId, { label: ['TokenManager', 'refresh'] });
 
-      const createdToken = await this.repository.update({
-        where: {
-          id: refreshedToken.id,
-        },
-        data: {
-          accessToken: refreshedToken.accessToken,
-          refreshToken: refreshedToken.refreshToken,
-        },
-        include: {
-          user: {
-            include: {
-              channel: true,
-            },
-          },
-        },
-      });
+      const createdToken = await TokenController.update(refreshedToken);
+
+      if (createdToken === null) {
+        throw new Error('Failed to refresh token');
+      }
+
       logger.debug('Token for user [%s] updated', createdToken.userId, { label: ['TokenManager', 'refresh'] });
 
       this.refreshQueue.delete(userId);
@@ -91,29 +86,19 @@ export class TokenManager {
     }
 
     logger.info('Beginning token processing...', { label: ['TokenManager', 'processAll'] });
-    const users = await prisma.user.findMany({
-      // where: {
-      //   token: {
-      //     refreshToken: {
-      //       not: null,
-      //     },
-      //   },
-      // },
-      select: {
-        id: true,
-      },
-    });
-    logger.debug('Found [%o] tokens', users.length, { label: ['TokenManager', 'processAll'] });
+    const userIds = await UserController.getAllIds();
 
-    for (let user of users) {
-      await this._processPartial(user.id);
+    logger.debug('Found [%o] tokens', userIds.length, { label: ['TokenManager', 'processAll'] });
+
+    for (let id of userIds) {
+      await this._processPartial(id);
     }
   };
 
   private async _processPartial(userId: string): Promise<void> {
     try {
       logger.debug('Processing token for user [%s]', userId, { label: ['TokenManager', 'processPartial'] });
-      const token = await this.repository.getByUserId(userId);
+      const token = await TokenController.getByUserId(userId);
 
       if (token === null) {
         logger.warn('Failed to fetch token for user [%s]', userId, { label: ['TokenManager', 'processPartial'] });
@@ -137,7 +122,7 @@ export class TokenManager {
     }
   }
 
-  public static async refresh(userId: string): Promise<TokenWithUserAndChannel> {
+  public static async refresh(userId: string): Promise<Token> {
     const instance = TokenManager.getInstance();
 
     return instance._refresh(userId);

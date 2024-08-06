@@ -2,7 +2,7 @@ import MaterialSymbol from '#components/MaterialSymbol';
 import TemplateButton from '#components/TemplateButton';
 import { translateUserLevel, useCustomCommandEditor } from '#providers/CustomCommandEditorProvider';
 import { Match, Switch } from 'solid-js';
-import { CustomCommand } from '#shared/types/api/commands';
+import { CustomCommand } from '#types/api/commands';
 import { TableType } from '#components/widgets/CommandTableWidget';
 import TableRow from '@suid/material/TableRow/TableRow';
 import TableCell from '@suid/material/TableCell/TableCell';

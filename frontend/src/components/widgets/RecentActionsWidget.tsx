@@ -28,11 +28,11 @@ const RecentActionsBase: Component<{ actions: InitializedResourceReturn<Action[]
   };
 
   onMount(() => {
-    socket.client.on('NEW_RECENT_ACTION', pushAction);
+    socket.client.on('NEW_CHANNEL_ACTION', pushAction);
   });
 
   onCleanup(() => {
-    socket.client.off('NEW_RECENT_ACTION', pushAction);
+    socket.client.off('NEW_CHANNEL_ACTION', pushAction);
   });
 
   return (

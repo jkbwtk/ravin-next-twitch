@@ -1,7 +1,7 @@
 import { Dictionary } from '#locales/Dictionary';
 import { userLevels } from '#locales/en-us/commands';
 import { actions } from '#locales/en-us/filters';
-import { BotActionType } from '#shared/types/api/botActions';
+import { BotActionType } from '#types/api/botActions';
 import { JSX } from 'solid-js';
 
 

@@ -2,11 +2,11 @@ import { useNotification } from '#providers/NotificationProvider';
 import { batch, createContext, createSignal, onMount, ParentComponent, Show, useContext } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { FrontendUser, GetSession, Session } from '#types/api/auth';
-import { GetSystemNotificationsResponse, SystemNotification } from '#shared/types/api/systemNotifications';
+import { GetSystemNotificationsResponse, SystemNotification } from '#types/api/systemNotifications';
 import DotSpinner from '#components/DotSpinner';
 import { makeRequest } from '#lib/fetch';
 import { isDev } from 'solid-js/web';
-import { Config } from '#shared/types/api/auth';
+import { Config } from '#types/api/auth';
 import { defaultConfigValues } from '#shared/config';
 import { useErrorHandlers } from '#providers/ErrorHandlersProvider';
 

@@ -1,6 +1,6 @@
 
 import { timeFromNow } from '#shared/timeUtils';
-import { Action } from '#shared/types/api/dashboard';
+import { Action } from '#types/api/dashboard';
 
 import style from '#styles/widgets/RecentActionsWidget.module.scss';
 

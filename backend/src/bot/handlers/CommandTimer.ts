@@ -1,20 +1,21 @@
 import { ChannelThread } from '#bot/ChannelThread';
 import { TemplateRunner } from '#bot/templates/TemplateRunner';
-import { prisma } from '#database/database';
-import { CommandTimerWithUser } from '#database/extensions/commandTimer';
-import { MessageWithUser } from '#database/extensions/message';
-import { Template } from '#database/extensions/template';
+import { BotActionController } from '#database/controllers/BotActionController';
+import { CommandTimerController } from '#database/controllers/CommandTImerController';
+import { MessageController } from '#database/controllers/MessageController';
+import { TemplateController } from '#database/controllers/TemplateController';
 import { ExtendedCron } from '#lib/ExtendedCron';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { logger } from '#lib/logger';
 import { SocketServer } from '#server/SocketServer';
-import { BotActionType } from '#shared/types/api/botActions';
-import { CommandTimerState, UserLevel } from '#shared/types/api/commands';
+import { BotActionType } from '#types/api/botActions';
+import { CommandTimerState, UserLevel } from '#types/api/commands';
+import { CommandTimer, Message } from '#types/database/tables';
 import { Isolate } from 'isolated-vm';
 import { Client } from 'tmi.js';
 
 
-export class CommandTimer implements AutoWirable {
+export class CommandTimerInstance implements AutoWirable {
   private messageCounter = 0;
   private lastUsed = 0;
   private lastUsedBy?: string;
@@ -24,16 +25,15 @@ export class CommandTimer implements AutoWirable {
   private client: Client;
   private channelThread: ChannelThread;
 
-  private templateRunner: TemplateRunner;
+  private isolate: Isolate;
 
-  constructor(public __parent: ClassInstance, private timer: CommandTimerWithUser) {
+  constructor(public __parent: ClassInstance, private timer: CommandTimer) {
     this.client = wire(this, Client);
     this.channelThread = wire(this, ChannelThread);
 
     this.job = this.createJob();
 
-    const isolate = wire(this, Isolate);
-    this.templateRunner = new TemplateRunner(isolate, this.timer.template as Template);
+    this.isolate = wire(this, Isolate);
   }
 
   private createJob(): ExtendedCron {
@@ -46,7 +46,7 @@ export class CommandTimer implements AutoWirable {
     if (this.messageCounter < this.timer.lines) {
       self.pause('Not enough messages');
 
-      await prisma.botAction.createAndEmit(
+      await BotActionController.createFromType(
         this.channelThread.channel.user.id,
         BotActionType.CommandTimerFailedLines,
         this.timer.name,
@@ -58,7 +58,7 @@ export class CommandTimer implements AutoWirable {
 
     await this.execute();
 
-    await prisma.botAction.createAndEmit(
+    await BotActionController.createFromType(
       this.channelThread.channel.user.id,
       BotActionType.CommandTimerExecuted,
       this.timer.name,
@@ -68,17 +68,40 @@ export class CommandTimer implements AutoWirable {
     this.messageCounter = 0;
   };
 
+  private async createTemplateRunner(): Promise<TemplateRunner> {
+    const template = await TemplateController.getById(this.timer.templateId);
+
+    if (template === null) {
+      logger.warn('Failed to find template for command timer %s in #%s', this.timer.name, this.channelThread.channel.user.login, {
+        label: ['CommandTimer', 'createTemplateRunner'],
+      });
+
+      await BotActionController.createFromType(
+        this.channelThread.channel.user.id,
+        BotActionType.CommandTimerFailedError,
+        this.timer.name,
+        'Failed to find template',
+      );
+
+      throw new Error('Failed to find template');
+    }
+
+    return new TemplateRunner(this.isolate, template);
+  }
+
   public async execute(): Promise<void> {
-    const response = await this.templateRunner.run({
+    const templateRunner = await this.createTemplateRunner();
+
+    const response = await templateRunner.run({
       channel: this.channelThread.channel.user.displayName,
     });
 
     if (response === null) {
-      logger.warn('Failed to execute template for command timer %s in #%s', this.timer.name, this.timer.user.login, {
+      logger.warn('Failed to execute template for command timer %s in #%s', this.timer.name, this.channelThread.channel.user.login, {
         label: ['CommandTimer', 'execute'],
       });
 
-      await prisma.botAction.createAndEmit(
+      await BotActionController.createFromType(
         this.channelThread.channel.user.id,
         BotActionType.CommandTimerFailedError,
         this.timer.name,
@@ -93,13 +116,15 @@ export class CommandTimer implements AutoWirable {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  public async processMessage(self: boolean, message: MessageWithUser): Promise<void> {
+  public async processMessage(self: boolean, message: Message): Promise<void> {
     if (self) return;
+
+    const userLevel = MessageController.$utils.getUserLevel(message);
 
     if (
       message.content.toLowerCase() === this.timer.alias.toLowerCase() &&
       (Date.now() - this.lastUsed >= this.timer.cooldown * 1000 ||
-      message.getUserLevel() >= UserLevel.Moderator)
+      userLevel >= UserLevel.Moderator)
     ) {
       this.lastUsed = Date.now();
       this.lastUsedBy = message.displayName ?? 'Chat Member';
@@ -107,7 +132,7 @@ export class CommandTimer implements AutoWirable {
 
       await this.execute();
 
-      await prisma.botAction.createAndEmit(
+      await BotActionController.createFromType(
         this.channelThread.channel.user.id,
         BotActionType.CommandTimerExecutedCommand,
         this.timer.name,
@@ -139,7 +164,7 @@ export class CommandTimer implements AutoWirable {
       nextRun: jobStatus.nextRun,
       status: jobStatus.isRunning ? 'running' : 'paused',
       pausedReason: jobStatus.pausedReason,
-      timer: this.timer.serialize(),
+      timer: CommandTimerController.$utils.serialize(this.timer),
     };
   }
 }

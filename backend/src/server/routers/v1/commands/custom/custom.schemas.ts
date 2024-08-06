@@ -1,4 +1,4 @@
-import { DeleteCustomCommandReqBody, PatchCustomCommandReqBody, PostCustomCommandReqBody } from '#shared/types/api/commands';
+import { DeleteCustomCommandReqBody, PatchCustomCommandReqBody, PostCustomCommandReqBody } from '#types/api/commands';
 import { z } from 'zod';
 
 

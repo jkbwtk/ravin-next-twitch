@@ -1,7 +1,7 @@
 import { createResource, createSignal, ErrorBoundary, For, onCleanup, onMount, Suspense } from 'solid-js';
 import FetchFallback from '#components/FetchFallback';
 import Widget from '#components/Widget';
-import { GetScheduledJobsResponse, ScheduledJob } from '#shared/types/api/admin';
+import { GetScheduledJobsResponse, ScheduledJob } from '#types/api/admin';
 import { useSocket } from '#providers/SocketProvider';
 import ScheduledCronJob from '#components/ScheduledCronJob';
 import { makeRequest } from '#lib/fetch';
