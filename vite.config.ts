@@ -9,10 +9,18 @@ import {
 } from './shared/src/constants';
 import { cwd } from 'process';
 import suidPlugin from '@suid/vite-plugin';
+import checker from 'vite-plugin-checker';
 
 
 export default defineConfig({
-  plugins: [solidPlugin(), alias(), suidPlugin()],
+  plugins: [solidPlugin(), alias(), suidPlugin(), checker({
+    enableBuild: false,
+    overlay: false,
+
+    typescript: {
+      root: frontendDevelopmentPath,
+    },
+  })],
 
   root: frontendDevelopmentPath,
 
