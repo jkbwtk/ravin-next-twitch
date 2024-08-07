@@ -79,7 +79,7 @@ export const patchCommandTimersView = new ExpressStack('/:id')
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PatchCommandTimerSchema))
-  .use(queryResource(CommandTimerController.getById, 'id'))
+  .use(queryResource(CommandTimerController, 'id'))
   .use(checkResourceOwnership('channelUserId'))
   .use(validateResponse(CommandTimerApi))
   .use(async (req, res) => {
@@ -109,7 +109,7 @@ export const deleteCommandTimersView = new ExpressStack('/:id')
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(DeleteCommandTimerSchema))
-  .use(queryResource(CommandTimerController.getById, 'id'))
+  .use(queryResource(CommandTimerController, 'id'))
   .use(checkResourceOwnership('channelUserId'))
   .use(async (req, res) => {
     try {

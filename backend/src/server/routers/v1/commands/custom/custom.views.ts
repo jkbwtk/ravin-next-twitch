@@ -57,6 +57,7 @@ export const postCustomCommandsView = new ExpressStack()
     try {
       const command = await CommandController.create({
         ...req.validated.body,
+
         channelUserId: req.user.id,
       });
 
@@ -79,7 +80,7 @@ export const patchCustomCommandsView = new ExpressStack('/:id')
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PatchCustomCommandSchema))
-  .use(queryResource(CommandController.getById, 'id'))
+  .use(queryResource(CommandController, 'id'))
   .use(checkResourceOwnership('channelUserId'))
   .use(validateResponse(CustomCommandApi))
   .use(async (req, res) => {
@@ -109,7 +110,7 @@ export const deleteCustomCommandsView = new ExpressStack()
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(DeleteCustomCommandSchema))
-  .use(queryResource(CommandController.getById, 'id'))
+  .use(queryResource(CommandController, 'id'))
   .use(checkResourceOwnership('channelUserId'))
   .use(async (req, res) => {
     try {

@@ -78,7 +78,7 @@ export const patchPhraseFiltersView = new ExpressStack('/:id')
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PatchPhraseFilterSchema))
-  .use(queryResource(PhraseFilterController.getById, 'id'))
+  .use(queryResource(PhraseFilterController, 'id'))
   .use(checkResourceOwnership('channelUserId'))
   .use(validateResponse(PhraseFilterApi))
   .use(async (req, res) => {
@@ -108,7 +108,7 @@ export const deletePhraseFiltersView = new ExpressStack('/:id')
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PatchPhraseFilterSchema))
-  .use(queryResource(PhraseFilterController.getById, 'id'))
+  .use(queryResource(PhraseFilterController, 'id'))
   .use(checkResourceOwnership('channelUserId'))
   .use(async (req, res) => {
     try {

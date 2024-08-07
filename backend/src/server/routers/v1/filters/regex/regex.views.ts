@@ -76,7 +76,7 @@ export const patchRegexFiltersView = new ExpressStack('/:id')
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PatchRegexFilterSchema))
-  .use(queryResource(RegexFilterController.getById, 'id'))
+  .use(queryResource(RegexFilterController, 'id'))
   .use(checkResourceOwnership('channelUserId'))
   .use(validateResponse(RegexFilterApi))
   .use(async (req, res) => {
@@ -106,7 +106,7 @@ export const deleteRegexFiltersView = new ExpressStack('/:id')
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(DeleteRegexFilterSchema))
-  .use(queryResource(RegexFilterController.getById, 'id'))
+  .use(queryResource(RegexFilterController, 'id'))
   .use(checkResourceOwnership('channelUserId'))
   .use(async (req, res) => {
     try {

@@ -135,7 +135,7 @@ export const patchBehaviorProfileView = new ExpressStack('/:id')
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PatchBehaviorProfileSchema))
-  .use(queryResource(BehaviorProfileController.getById, 'id'))
+  .use(queryResource(BehaviorProfileController, 'id'))
   .use(checkResourceOwnership('channelUserId'))
   .use(validateResponse(BehaviorProfileApi))
   .use(async (req, res) => {
@@ -176,7 +176,7 @@ export const patchBehaviorProfileView = new ExpressStack('/:id')
 export const deleteBehaviorProfileView = new ExpressStack('/:id')
   .usePreflight(authenticated)
   .use(validate(DeleteBehaviorProfileSchema))
-  .use(queryResource(BehaviorProfileController.getById, 'id'))
+  .use(queryResource(BehaviorProfileController, 'id'))
   .use(checkResourceOwnership('channelUserId'))
   .use(async (req, res) => {
     try {

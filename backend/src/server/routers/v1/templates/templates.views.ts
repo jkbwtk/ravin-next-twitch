@@ -101,7 +101,7 @@ export const patchTemplatesView = new ExpressStack('/:id')
   .useNative(json())
   .use(validate(PatchTemplateSchema))
   .use(templateTesterMiddleware)
-  .use(queryResource(TemplateController.getById, 'id'))
+  .use(queryResource(TemplateController, 'id'))
   .use(checkResourceOwnership('channelUserId'))
   .use(validateResponse(TemplateApi))
   .use(async (req, res) => {
@@ -133,7 +133,7 @@ export const deleteTemplatesView = new ExpressStack('/:id')
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(DeleteTemplateSchema))
-  .use(queryResource(TemplateController.getById, 'id'))
+  .use(queryResource(TemplateController, 'id'))
   .use(checkResourceOwnership('channelUserId'))
   .use(async (req, res) => {
     try {

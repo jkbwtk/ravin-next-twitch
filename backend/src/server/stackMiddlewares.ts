@@ -79,11 +79,15 @@ export const validateResponse =
     return [req, temp];
   };
 
-// eslint-disable-next-line max-len
-export const queryResource = <K extends string, T extends ((id: number) => Promise<object | null>)>(queryFunction: T, key: K): Middleware<never, { validated: { params: { [K: string]: number } } }, object, { resource: NonNullable<Awaited<ReturnType<T>>> }> => async (req, res) => {
-  if (typeof req.validated.params[key] !== 'number') throw new ServerError(HttpCodes.BadRequest, `Invalid parameter :${key}`);
+type ControllerWithGetById = {
+  getById: (id: number) => Promise<object | null>;
+};
 
-  const instance = await queryFunction(req.validated.params[key]) as Awaited<ReturnType<T>>;
+// eslint-disable-next-line max-len
+export const queryResource = <K extends string, T extends ControllerWithGetById>(controller: T, parameter: K): Middleware<never, { validated: { params: { [K: string]: number } } }, object, { resource: NonNullable<Awaited<ReturnType<T['getById']>>> }> => async (req, res) => {
+  if (typeof req.validated.params[parameter] !== 'number') throw new ServerError(HttpCodes.BadRequest, `Invalid parameter :${parameter}`);
+
+  const instance = await controller.getById(req.validated.params[parameter]) as Awaited<ReturnType<T['getById']>>;
   if (!instance) throw new ServerError(HttpCodes.NotFound, 'Not Found');
 
   const temp = Object.assign(req, { resource: instance });
