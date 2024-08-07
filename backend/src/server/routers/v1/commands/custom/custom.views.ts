@@ -4,13 +4,14 @@ import { ExpressStack } from '#server/ExpressStack';
 import { ServerError } from '#shared/ServerError';
 import { idListFilter } from '#server/middlewares/idListFilter';
 import { DeleteCustomCommandSchema, PatchCustomCommandSchema, PostCustomCommandSchema } from '#server/routers/v1/commands/custom/custom.schemas';
-import { authenticated, checkResourceOwnership, queryResource, validate, validateResponse } from '#server/stackMiddlewares';
+import { authenticated, checkRelationOwnership, checkResourceOwnership, queryResource, validate, validateResponse } from '#server/stackMiddlewares';
 import { CustomCommandApi, GetCustomCommandsPaginatedResponse, GetCustomCommandsResponse, GetCustomCommandsStatusResponse } from '#types/api/commands';
 import { json } from 'body-parser';
 import { HttpCodes } from '#shared/httpCodes';
 import { limitOffsetPagination } from '#server/middlewares/pagination';
 import { CommandController } from '#database/controllers/CommandController';
 import { CustomCommandSerializer } from '#database/serializers/CommandSerializer';
+import { TemplateController } from '#database/controllers/TemplateController';
 
 
 export const getCustomCommandsView = new ExpressStack()
@@ -52,6 +53,9 @@ export const postCustomCommandsView = new ExpressStack()
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PostCustomCommandSchema))
+  .use(checkRelationOwnership([
+    [TemplateController, 'templateId'],
+  ]))
   .use(validateResponse(CustomCommandApi))
   .use(async (req, res) => {
     try {
@@ -82,6 +86,9 @@ export const patchCustomCommandsView = new ExpressStack('/:id')
   .use(validate(PatchCustomCommandSchema))
   .use(queryResource(CommandController, 'id'))
   .use(checkResourceOwnership('channelUserId'))
+  .use(checkRelationOwnership([
+    [TemplateController, 'templateId'],
+  ]))
   .use(validateResponse(CustomCommandApi))
   .use(async (req, res) => {
     try {

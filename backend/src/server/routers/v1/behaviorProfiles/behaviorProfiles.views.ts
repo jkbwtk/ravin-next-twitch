@@ -12,7 +12,7 @@ import {
   PatchBehaviorProfileSchema,
   PostBehaviorProfileSchema,
 } from '#server/routers/v1/behaviorProfiles/behaviorProfiles.schemas';
-import { authenticated, checkResourceOwnership, queryResource, validate, validateResponse } from '#server/stackMiddlewares';
+import { authenticated, checkRelationOwnership, checkResourceOwnership, queryResource, validate, validateResponse } from '#server/stackMiddlewares';
 import { ServerError } from '#shared/ServerError';
 import { HttpCodes } from '#shared/httpCodes';
 import {
@@ -95,24 +95,19 @@ export const postBehaviorProfileView = new ExpressStack()
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PostBehaviorProfileSchema))
+  .use(checkRelationOwnership([
+    [CommandController, 'commands'],
+    [PhraseFilterController, 'phraseFilters'],
+    [RegexFilterController, 'regexFilters'],
+    [CommandController, 'commandTimers'],
+  ]))
   .use(validateResponse(BehaviorProfileApi))
   .use(async (req, res) => {
     try {
-      const body = req.validated.body;
-
       const profile = await BehaviorProfileController.createWithRelations({
         ...req.validated.body,
 
         channelUserId: req.user.id,
-
-        commands: body.commands.length > 0 ?
-          await CommandController.filterOwnedList(req.user.id, body.commands) : [],
-        phraseFilters: body.phraseFilters.length > 0 ?
-          await PhraseFilterController.filterOwnedList(req.user.id, body.phraseFilters) : [],
-        regexFilters: body.regexFilters.length > 0 ?
-          await RegexFilterController.filterOwnedList(req.user.id, body.regexFilters) : [],
-        commandTimers: body.commandTimers.length > 0 ?
-          await CommandController.filterOwnedList(req.user.id, body.commandTimers) : [],
       });
 
       if (!profile) {
@@ -137,24 +132,19 @@ export const patchBehaviorProfileView = new ExpressStack('/:id')
   .use(validate(PatchBehaviorProfileSchema))
   .use(queryResource(BehaviorProfileController, 'id'))
   .use(checkResourceOwnership('channelUserId'))
+  .use(checkRelationOwnership([
+    [CommandController, 'commands'],
+    [PhraseFilterController, 'phraseFilters'],
+    [RegexFilterController, 'regexFilters'],
+    [CommandController, 'commandTimers'],
+  ]))
   .use(validateResponse(BehaviorProfileApi))
   .use(async (req, res) => {
     try {
-      const body = req.validated.body;
-
       const profile = await BehaviorProfileController.updateWithRelations({
         ...req.validated.body,
 
         id: req.resource.id,
-
-        commands: body.commands && body.commands.length > 0 ?
-          await CommandController.filterOwnedList(req.user.id, body.commands) : body.commands,
-        phraseFilters: body.phraseFilters && body.phraseFilters.length > 0 ?
-          await PhraseFilterController.filterOwnedList(req.user.id, body.phraseFilters) : body.phraseFilters,
-        regexFilters: body.regexFilters && body.regexFilters.length > 0 ?
-          await RegexFilterController.filterOwnedList(req.user.id, body.regexFilters) : body.regexFilters,
-        commandTimers: body.commandTimers && body.commandTimers.length > 0 ?
-          await CommandController.filterOwnedList(req.user.id, body.commandTimers) : body.commandTimers,
       });
 
       if (!profile) {

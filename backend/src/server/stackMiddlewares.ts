@@ -4,6 +4,7 @@ import { ServerError } from '#shared/ServerError';
 import { AnyZodObject, z, ZodError, ZodObject, ZodTypeAny } from 'zod';
 import { isDevMode } from '#shared/constants';
 import { HttpCodes } from '#shared/httpCodes';
+import { arrayFrom } from '#shared/utils';
 
 
 export const authenticated: Middleware<never, object, object, {
@@ -79,6 +80,7 @@ export const validateResponse =
     return [req, temp];
   };
 
+
 type ControllerWithGetById = {
   getById: (id: number) => Promise<object | null>;
 };
@@ -95,7 +97,25 @@ export const queryResource = <K extends string, T extends ControllerWithGetById>
   return [temp, res];
 };
 
+
 // eslint-disable-next-line max-len
 export const checkResourceOwnership = <K extends string>(key: K): Middleware<void, { resource: { [K: string]: unknown }, user: Exclude<Request['user'], undefined> }, object> => (req) => {
   if (req.resource[key] !== req.user.id) throw new ServerError(HttpCodes.Forbidden, 'Forbidden');
+};
+
+
+type ControllerWithFilterOwnedList = {
+  filterOwnedList: (userId: string, idList: number[]) => Promise<number[]>;
+};
+
+// eslint-disable-next-line max-len
+export const checkRelationOwnership = (relations: [ControllerWithFilterOwnedList, string][]): Middleware<void, { validated: { body: { [key: string]: unknown } }, user: Exclude<Request['user'], undefined> }, object> => async (req) => {
+  for (const [controller, key] of relations) {
+    if (key in req.validated.body === false) continue;
+
+    const relatedIds = arrayFrom(req.validated.body[key]) as number[];
+    const filteredList = await controller.filterOwnedList(req.user.id, relatedIds);
+
+    if (filteredList.length !== relatedIds.length) throw new ServerError(HttpCodes.BadRequest, `Invalid relation provided for: ${key}`);
+  }
 };

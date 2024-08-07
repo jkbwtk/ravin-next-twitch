@@ -1,5 +1,5 @@
 import { db } from '#database/database';
-import { convertToControllerProxy, createSharedMethods, SelectOptions } from '#database/utils';
+import { convertToControllerProxy, createSecurityMethods, createSharedMethods, SelectOptions } from '#database/utils';
 import { templatesTable, tokensTable } from '#schema/schema';
 import { Template } from '#types/database/tables';
 import { count, eq } from 'drizzle-orm';
@@ -7,6 +7,7 @@ import { count, eq } from 'drizzle-orm';
 
 const TemplateControllerTarget = {
   ...createSharedMethods(templatesTable),
+  ...createSecurityMethods(templatesTable),
 
   async getByUserId(userId: string, options: SelectOptions = {}): Promise<Template[]> {
     const query = db

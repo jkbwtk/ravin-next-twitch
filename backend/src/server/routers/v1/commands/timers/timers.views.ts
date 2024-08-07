@@ -4,13 +4,14 @@ import { ExpressStack } from '#server/ExpressStack';
 import { ServerError } from '#shared/ServerError';
 import { idListFilter } from '#server/middlewares/idListFilter';
 import { DeleteCommandTimerSchema, PatchCommandTimerSchema, PostCommandTimerSchema } from '#server/routers/v1/commands/timers/timers.schemas';
-import { authenticated, checkResourceOwnership, queryResource, validate, validateResponse } from '#server/stackMiddlewares';
+import { authenticated, checkRelationOwnership, checkResourceOwnership, queryResource, validate, validateResponse } from '#server/stackMiddlewares';
 import { CommandTimerApi, GetCommandTimersPaginatedResponse, GetCommandTimersResponse, GetCommandTimersStatusResponse } from '#types/api/commands';
 import { json } from 'body-parser';
 import { HttpCodes } from '#shared/httpCodes';
 import { limitOffsetPagination } from '#server/middlewares/pagination';
 import { CommandTimerController } from '#database/controllers/CommandTImerController';
 import { CommandTimerSerializer } from '#database/serializers/CommandTImerSerializer';
+import { TemplateController } from '#database/controllers/TemplateController';
 
 
 export const getCommandTimersView = new ExpressStack()
@@ -51,6 +52,9 @@ export const postCommandTimersView = new ExpressStack()
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PostCommandTimerSchema))
+  .use(checkRelationOwnership([
+    [TemplateController, 'templateId'],
+  ]))
   .use(validateResponse(CommandTimerApi))
   .use(async (req, res) => {
     try {
@@ -81,6 +85,9 @@ export const patchCommandTimersView = new ExpressStack('/:id')
   .use(validate(PatchCommandTimerSchema))
   .use(queryResource(CommandTimerController, 'id'))
   .use(checkResourceOwnership('channelUserId'))
+  .use(checkRelationOwnership([
+    [TemplateController, 'templateId'],
+  ]))
   .use(validateResponse(CommandTimerApi))
   .use(async (req, res) => {
     try {
