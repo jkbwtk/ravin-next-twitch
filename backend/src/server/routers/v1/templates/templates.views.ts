@@ -1,11 +1,10 @@
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
 import { ServerError } from '#shared/ServerError';
-import { SocketServer } from '#server/SocketServer';
-import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
+import { authenticated, checkResourceOwnership, queryResource, validate, validateResponse } from '#server/stackMiddlewares';
 import { json } from 'body-parser';
 import { HttpCodes } from '#shared/httpCodes';
-import { GetTemplatesPaginatedResponse, GetTemplatesResponse, TestTemplateResponse } from '#types/api/templates';
+import { GetTemplatesPaginatedResponse, GetTemplatesResponse, TemplateApi, TestTemplateResponse } from '#types/api/templates';
 import { DeleteTemplateSchema, PatchTemplateSchema, PostTemplateSchema, TestTemplateSchema } from '#server/routers/v1/templates/templates.schemas';
 import { TemplateTester } from '#bot/templates/TemplateTester';
 import { limitOffsetPagination } from '#server/middlewares/pagination';
@@ -50,6 +49,7 @@ export const postTemplatesView = new ExpressStack()
   .useNative(json())
   .use(validate(PostTemplateSchema))
   .use(templateTesterMiddleware)
+  .use(validateResponse(TemplateApi))
   .use(async (req, res) => {
     try {
       const template = await TemplateController.create({
@@ -62,9 +62,7 @@ export const postTemplatesView = new ExpressStack()
         throw new Error('Failed to create template');
       }
 
-      SocketServer.emitToUser(req.user.id, 'NEW_TEMPLATE', TemplateSerializer(template));
-
-      res.sendStatus(HttpCodes.Created);
+      res.jsonValidated(TemplateSerializer(template));
     } catch (err) {
       logger.error('Failed to create template', {
         error: err,
@@ -98,25 +96,29 @@ export const testTemplateView = new ExpressStack()
     }
   });
 
-export const patchTemplatesView = new ExpressStack()
+export const patchTemplatesView = new ExpressStack('/:id')
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PatchTemplateSchema))
   .use(templateTesterMiddleware)
+  .use(queryResource(TemplateController.getById, 'id'))
+  .use(checkResourceOwnership('channelUserId'))
+  .use(validateResponse(TemplateApi))
   .use(async (req, res) => {
     try {
       const template = await TemplateController.update({
         ...req.validated.body,
+
         environments: req.templateIssues?.getSupportedEnvironments(),
+
+        id: req.resource.id,
       });
 
       if (!template) {
         throw new Error('Failed to update template');
       }
 
-      SocketServer.emitToUser(req.user.id, 'UPD_TEMPLATE', TemplateSerializer(template));
-
-      res.sendStatus(HttpCodes.OK);
+      res.jsonValidated(TemplateSerializer(template));
     } catch (err) {
       logger.error('Failed to update templates', {
         error: err,
@@ -127,17 +129,23 @@ export const patchTemplatesView = new ExpressStack()
     }
   });
 
-export const deleteTemplatesView = new ExpressStack()
+export const deleteTemplatesView = new ExpressStack('/:id')
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(DeleteTemplateSchema))
+  .use(queryResource(TemplateController.getById, 'id'))
+  .use(checkResourceOwnership('channelUserId'))
   .use(async (req, res) => {
     try {
-      await TemplateController.delete(req.validated.body);
+      const template = await TemplateController.delete({
+        id: req.resource.id,
+      });
 
-      SocketServer.emitToUser(req.user.id, 'DEL_TEMPLATE', req.validated.body.id);
+      if (!template) {
+        throw new Error('Failed to delete template');
+      }
 
-      res.sendStatus(HttpCodes.OK);
+      res.sendStatus(HttpCodes.NoContent);
     } catch (err) {
       logger.error('Failed to delete templates', {
         error: err,

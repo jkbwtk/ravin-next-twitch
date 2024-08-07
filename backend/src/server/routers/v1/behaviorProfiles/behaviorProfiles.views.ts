@@ -143,9 +143,9 @@ export const patchBehaviorProfileView = new ExpressStack('/:id')
       const body = req.validated.body;
 
       const profile = await BehaviorProfileController.updateWithRelations({
-        id: req.resource.id,
-
         ...req.validated.body,
+
+        id: req.resource.id,
 
         commands: body.commands && body.commands.length > 0 ?
           await CommandController.filterOwnedList(req.user.id, body.commands) : body.commands,

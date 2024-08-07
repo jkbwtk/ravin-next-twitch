@@ -15,9 +15,9 @@ export const createTimersRouter = (): Router => {
 
   timersRouter.post('/', ...postCommandTimersView.unwrap());
 
-  timersRouter.patch('/', ...patchCommandTimersView.unwrap());
+  timersRouter.patch(patchCommandTimersView.url, ...patchCommandTimersView.unwrap());
 
-  timersRouter.delete('/', ...deleteCommandTimersView.unwrap());
+  timersRouter.delete(deleteCommandTimersView.url, ...deleteCommandTimersView.unwrap());
 
   timersRouter.get('/status', ...getCommandTimersStatusView.unwrap());
 

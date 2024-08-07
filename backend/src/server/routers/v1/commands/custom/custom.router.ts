@@ -15,9 +15,9 @@ export const createCustomRouter = (): Router => {
 
   customRouter.post('/', ...postCustomCommandsView.unwrap());
 
-  customRouter.patch('/', ...patchCustomCommandsView.unwrap());
+  customRouter.patch(patchCustomCommandsView.url, ...patchCustomCommandsView.unwrap());
 
-  customRouter.delete('/', ...deleteCustomCommandsView.unwrap());
+  customRouter.delete(deleteCustomCommandsView.url, ...deleteCustomCommandsView.unwrap());
 
   customRouter.get('/status', ...getCustomCommandsStatusView.unwrap());
 

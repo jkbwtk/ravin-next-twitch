@@ -1,8 +1,6 @@
 import { db } from '#database/database';
 import { convertToControllerProxy, createSecurityMethods, createSharedMethods, SelectOptions } from '#database/utils';
-import { serializer } from '#lib/serializer';
 import { commandTimersTable } from '#schema/schema';
-import { CommandTimerApi } from '#types/api/commands';
 import { CommandTimer } from '#types/database/tables';
 import { and, count, eq, inArray, SQL } from 'drizzle-orm';
 
@@ -46,25 +44,8 @@ const commandTimerControllerMethods = {
   },
 };
 
-const commandTimerControllerProperties = {
-  $utils: {
-    serialize: serializer<CommandTimer, CommandTimerApi>((timer) => ({
-      id: timer.id,
-      channelUserId: timer.channelUserId,
-      name: timer.name,
-      alias: timer.alias,
-      cooldown: timer.cooldown,
-      templateId: timer.templateId,
-      cron: timer.cron,
-      enabled: timer.enabled,
-      lines: timer.lines,
-    })),
-  },
-};
-
 
 export const CommandTimerController = convertToControllerProxy(
   'CommandTimerController',
   commandTimerControllerMethods,
-  commandTimerControllerProperties,
 );

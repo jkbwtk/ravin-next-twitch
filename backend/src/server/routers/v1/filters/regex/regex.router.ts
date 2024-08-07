@@ -9,9 +9,9 @@ export const createRegexRouter = (): Router => {
 
   regexRouter.post('/', ...postRegexFiltersView.unwrap());
 
-  regexRouter.patch('/', ...patchRegexFiltersView.unwrap());
+  regexRouter.patch(patchRegexFiltersView.url, ...patchRegexFiltersView.unwrap());
 
-  regexRouter.delete('/', ...deleteRegexFiltersView.unwrap());
+  regexRouter.delete(deleteRegexFiltersView.url, ...deleteRegexFiltersView.unwrap());
 
   return regexRouter;
 };

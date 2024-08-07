@@ -54,14 +54,9 @@ export const PostPhraseFilterReqBody = PhraseFilterApi.omit({ id: true });
 export type PostPhraseFilterReqBody = z.infer<typeof PostPhraseFilterReqBody>;
 
 
-export const PatchPhraseFilterReqBody = PhraseFilterApi.pick({ id: true }).merge(PostPhraseFilterReqBody.partial());
+export const PatchPhraseFilterReqBody = PostPhraseFilterReqBody.partial();
 
 export type PatchPhraseFilterReqBody = z.infer<typeof PatchPhraseFilterReqBody>;
-
-
-export const DeletePhraseFilterReqBody = PhraseFilterApi.pick({ id: true });
-
-export type DeletePhraseFilterReqBody = z.infer<typeof DeletePhraseFilterReqBody>;
 
 
 export const RegexFilterApi = createSelectSchema(regexFiltersTable, {
@@ -100,11 +95,7 @@ export const PostRegexFilterReqBody = RegexFilterApi.omit({ id: true });
 export type PostRegexFilterReqBody = z.infer<typeof PostRegexFilterReqBody>;
 
 
-export const PatchRegexFilterReqBody = RegexFilterApi.pick({ id: true }).merge(PostRegexFilterReqBody.partial());
+export const PatchRegexFilterReqBody = PostRegexFilterReqBody.partial();
 
 export type PatchRegexFilterReqBody = z.infer<typeof PatchRegexFilterReqBody>;
 
-
-export const DeleteRegexFilterReqBody = RegexFilterApi.pick({ id: true });
-
-export type DeleteRegexFilterReqBody = z.infer<typeof DeleteRegexFilterReqBody>;

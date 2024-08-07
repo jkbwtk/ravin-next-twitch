@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DeleteTemplateReqBody, PatchTemplateReqBody, PostTemplateReqBody, TestTemplateReqBody } from '#types/api/templates';
+import { PatchTemplateReqBody, PostTemplateReqBody, TestTemplateReqBody } from '#types/api/templates';
 
 
 export const PostTemplateSchema = z.object({
@@ -16,12 +16,17 @@ export type TestTemplateRequestSchema = z.infer<typeof TestTemplateSchema>;
 
 export const PatchTemplateSchema = z.object({
   body: PatchTemplateReqBody,
+  params: z.object({
+    id: z.coerce.number().int().positive(),
+  }),
 });
 
 export type PatchTemplateRequestSchema = z.infer<typeof PatchTemplateSchema>;
 
 export const DeleteTemplateSchema = z.object({
-  body: DeleteTemplateReqBody,
+  params: z.object({
+    id: z.coerce.number().int().positive(),
+  }),
 });
 
 export type DeleteTemplateRequestSchema = z.infer<typeof DeleteTemplateSchema>;

@@ -1,4 +1,4 @@
-import { DeletePhraseFilterReqBody, PatchPhraseFilterReqBody, PostPhraseFilterReqBody } from '#types/api/filters';
+import { PatchPhraseFilterReqBody, PostPhraseFilterReqBody } from '#types/api/filters';
 import { z } from 'zod';
 
 
@@ -11,13 +11,18 @@ export type PostPhraseFilterSchema = z.infer<typeof PostPhraseFilterSchema>;
 
 export const PatchPhraseFilterSchema = z.object({
   body: PatchPhraseFilterReqBody,
+  params: z.object({
+    id: z.coerce.number().int().positive(),
+  }),
 });
 
 export type PatchPhraseFilterSchema = z.infer<typeof PatchPhraseFilterSchema>;
 
 
 export const DeletePhraseFilterSchema = z.object({
-  body: DeletePhraseFilterReqBody,
+  params: z.object({
+    id: z.coerce.number().int().positive(),
+  }),
 });
 
 export type DeletePhraseFilterSchema = z.infer<typeof DeletePhraseFilterSchema>;

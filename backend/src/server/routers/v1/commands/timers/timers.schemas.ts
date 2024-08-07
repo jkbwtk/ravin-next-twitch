@@ -1,4 +1,4 @@
-import { DeleteCommandTimerReqBody, PatchCommandTimerReqBody, PostCommandTimerReqBody } from '#types/api/commands';
+import { PatchCommandTimerReqBody, PostCommandTimerReqBody } from '#types/api/commands';
 import Cron from 'croner';
 import { z } from 'zod';
 
@@ -35,13 +35,18 @@ export type PostCommandTimerSchema = z.infer<typeof PostCommandTimerSchema>;
 
 export const PatchCommandTimerSchema = z.object({
   body: PatchCommandTimerReqBody.merge(CommandTimerCronValidatorMixin.partial()),
+  params: z.object({
+    id: z.coerce.number().int().positive(),
+  }),
 });
 
 export type PatchCommandTimerSchema = z.infer<typeof PatchCommandTimerSchema>;
 
 
 export const DeleteCommandTimerSchema = z.object({
-  body: DeleteCommandTimerReqBody,
+  params: z.object({
+    id: z.coerce.number().int().positive(),
+  }),
 });
 
 export type DeleteCommandTimerSchema = z.infer<typeof DeleteCommandTimerSchema>;

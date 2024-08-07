@@ -1,9 +1,9 @@
 import { ChannelThread } from '#bot/ChannelThread';
 import { TemplateRunner } from '#bot/templates/TemplateRunner';
 import { BotActionController } from '#database/controllers/BotActionController';
-import { CommandTimerController } from '#database/controllers/CommandTImerController';
 import { MessageController } from '#database/controllers/MessageController';
 import { TemplateController } from '#database/controllers/TemplateController';
+import { CommandTimerSerializer } from '#database/serializers/CommandTImerSerializer';
 import { ExtendedCron } from '#lib/ExtendedCron';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
 import { logger } from '#lib/logger';
@@ -164,7 +164,7 @@ export class CommandTimerInstance implements AutoWirable {
       nextRun: jobStatus.nextRun,
       status: jobStatus.isRunning ? 'running' : 'paused',
       pausedReason: jobStatus.pausedReason,
-      timer: CommandTimerController.$utils.serialize(this.timer),
+      timer: CommandTimerSerializer(this.timer),
     };
   }
 }

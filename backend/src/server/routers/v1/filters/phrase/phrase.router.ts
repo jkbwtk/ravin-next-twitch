@@ -9,9 +9,9 @@ export const createPhraseRouter = (): Router => {
 
   phraseRouter.post('/', ...postPhraseFiltersView.unwrap());
 
-  phraseRouter.patch('/', ...patchPhraseFiltersView.unwrap());
+  phraseRouter.patch(patchPhraseFiltersView.url, ...patchPhraseFiltersView.unwrap());
 
-  phraseRouter.delete('/', ...deletePhraseFiltersView.unwrap());
+  phraseRouter.delete(deletePhraseFiltersView.url, ...deletePhraseFiltersView.unwrap());
 
   return phraseRouter;
 };

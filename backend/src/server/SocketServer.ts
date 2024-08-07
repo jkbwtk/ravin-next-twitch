@@ -24,6 +24,9 @@ import { ChannelActionSerializer } from '#database/serializers/ChannelActionSeri
 import { PhraseFilterSerializer } from '#database/serializers/PhrazeFilterSerializer';
 import { RegexFilterSerializer } from '#database/serializers/RegexFilterSerializer';
 import { SystemNotificationSerializer } from '#database/serializers/SystemNotificationSerializer';
+import { CommandTimerSerializer } from '#database/serializers/CommandTImerSerializer';
+import { TemplateController } from '#database/controllers/TemplateController';
+import { TemplateSerializer } from '#database/serializers/TemplateSerializer';
 
 
 export class SocketServer {
@@ -201,12 +204,12 @@ export class SocketServer {
 
     CommandTimerController.$signals.registerAfter('create', (timer) => {
       if (timer === null) return;
-      SocketServer.emitToUser(timer.channelUserId, 'NEW_COMMAND_TIMER', CommandTimerController.$utils.serialize(timer));
+      SocketServer.emitToUser(timer.channelUserId, 'NEW_COMMAND_TIMER', CommandTimerSerializer(timer));
     });
 
     CommandTimerController.$signals.registerAfter('update', (timer) => {
       if (timer === null) return;
-      SocketServer.emitToUser(timer.channelUserId, 'UPD_COMMAND_TIMER', CommandTimerController.$utils.serialize(timer));
+      SocketServer.emitToUser(timer.channelUserId, 'UPD_COMMAND_TIMER', CommandTimerSerializer(timer));
     });
 
     CommandTimerController.$signals.registerAfter('delete', (timer) => {
@@ -247,6 +250,21 @@ export class SocketServer {
     BehaviorProfileController.$signals.registerAfter('delete', (profile) => {
       if (profile === null) return;
       SocketServer.emitToUser(profile.channelUserId, 'DEL_BEHAVIOR_PROFILE', profile.id);
+    });
+
+    TemplateController.$signals.registerAfter('create', (template) => {
+      if (template === null) return;
+      SocketServer.emitToUser(template.channelUserId, 'NEW_TEMPLATE', TemplateSerializer(template));
+    });
+
+    TemplateController.$signals.registerAfter('update', (template) => {
+      if (template === null) return;
+      SocketServer.emitToUser(template.channelUserId, 'UPD_TEMPLATE', TemplateSerializer(template));
+    });
+
+    TemplateController.$signals.registerAfter('delete', (template) => {
+      if (template === null) return;
+      SocketServer.emitToUser(template.channelUserId, 'DEL_TEMPLATE', template.id);
     });
   }
 

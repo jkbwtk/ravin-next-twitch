@@ -1,4 +1,4 @@
-import { DeleteCustomCommandReqBody, PatchCustomCommandReqBody, PostCustomCommandReqBody } from '#types/api/commands';
+import { PatchCustomCommandReqBody, PostCustomCommandReqBody } from '#types/api/commands';
 import { z } from 'zod';
 
 
@@ -11,11 +11,16 @@ export type PostCustomCommandSchema = z.infer<typeof PostCustomCommandSchema>;
 
 export const PatchCustomCommandSchema = z.object({
   body: PatchCustomCommandReqBody,
+  params: z.object({
+    id: z.coerce.number().int().positive(),
+  }),
 });
 
 
 export const DeleteCustomCommandSchema = z.object({
-  body: DeleteCustomCommandReqBody,
+  params: z.object({
+    id: z.coerce.number().int().positive(),
+  }),
 });
 
 export type DeleteCustomCommandSchema = z.infer<typeof DeleteCustomCommandSchema>;

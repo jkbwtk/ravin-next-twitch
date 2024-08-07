@@ -58,14 +58,9 @@ export const PostCustomCommandReqBody = CustomCommandApi.omit({ id: true, channe
 export type PostCustomCommandReqBody = z.infer<typeof PostCustomCommandReqBody>;
 
 
-export const PatchCustomCommandReqBody = CustomCommandApi.pick({ id: true }).merge(PostCustomCommandReqBody.partial());
+export const PatchCustomCommandReqBody = PostCustomCommandReqBody.partial();
 
 export type PatchCustomCommandReqBody = z.infer<typeof PatchCustomCommandReqBody>;
-
-
-export const DeleteCustomCommandReqBody = CustomCommandApi.pick({ id: true });
-
-export type DeleteCustomCommandReqBody = z.infer<typeof DeleteCustomCommandReqBody>;
 
 
 export const CustomCommandState = z.object({
@@ -124,14 +119,9 @@ export const PostCommandTimerReqBody = CommandTimerApi.omit({ id: true, channelU
 export type PostCommandTimerReqBody = z.infer<typeof PostCommandTimerReqBody>;
 
 
-export const PatchCommandTimerReqBody = CommandTimerApi.pick({ id: true }).merge(PostCommandTimerReqBody.partial());
+export const PatchCommandTimerReqBody = PostCommandTimerReqBody.partial();
 
 export type PatchCommandTimerReqBody = z.infer<typeof PatchCommandTimerReqBody>;
-
-
-export const DeleteCommandTimerReqBody = CommandTimerApi.pick({ id: true });
-
-export type DeleteCommandTimerReqBody = z.infer<typeof DeleteCommandTimerReqBody>;
 
 
 export const CommandTimerState = z.object({

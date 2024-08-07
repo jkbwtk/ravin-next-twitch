@@ -5,7 +5,7 @@ import { ExpressStack } from '#server/ExpressStack';
 import { idListFilter } from '#server/middlewares/idListFilter';
 import { limitOffsetPagination } from '#server/middlewares/pagination';
 import { PatchPhraseFilterSchema, PostPhraseFilterSchema } from '#server/routers/v1/filters/phrase/phrase.schemas';
-import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
+import { authenticated, checkResourceOwnership, queryResource, validate, validateResponse } from '#server/stackMiddlewares';
 import { ServerError } from '#shared/ServerError';
 import { HttpCodes } from '#shared/httpCodes';
 import { GetPhraseFiltersPaginatedResponse, GetPhraseFiltersResponse, PhraseFilterApi } from '#types/api/filters';
@@ -74,16 +74,19 @@ export const postPhraseFiltersView = new ExpressStack()
     }
   });
 
-export const patchPhraseFiltersView = new ExpressStack()
+export const patchPhraseFiltersView = new ExpressStack('/:id')
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PatchPhraseFilterSchema))
+  .use(queryResource(PhraseFilterController.getById, 'id'))
+  .use(checkResourceOwnership('channelUserId'))
   .use(validateResponse(PhraseFilterApi))
   .use(async (req, res) => {
     try {
       const filter = await PhraseFilterController.update({
         ...req.validated.body,
-        channelUserId: req.user.id,
+
+        id: req.resource.id,
       });
 
       if (filter === null) {
@@ -101,17 +104,23 @@ export const patchPhraseFiltersView = new ExpressStack()
     }
   });
 
-export const deletePhraseFiltersView = new ExpressStack()
+export const deletePhraseFiltersView = new ExpressStack('/:id')
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PatchPhraseFilterSchema))
+  .use(queryResource(PhraseFilterController.getById, 'id'))
+  .use(checkResourceOwnership('channelUserId'))
   .use(async (req, res) => {
     try {
-      await PhraseFilterController.delete({
-        ...req.validated.body,
+      const filter = await PhraseFilterController.delete({
+        id: req.resource.id,
       });
 
-      res.sendStatus(HttpCodes.OK);
+      if (!filter) {
+        throw new ServerError(HttpCodes.InternalServerError, 'Failed to delete phrase filter');
+      }
+
+      res.sendStatus(HttpCodes.NoContent);
     } catch (err) {
       logger.error('Failed to delete phrase filter', {
         error: err,

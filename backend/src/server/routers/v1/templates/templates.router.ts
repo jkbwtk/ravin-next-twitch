@@ -17,9 +17,9 @@ export const createTemplatesRouter = (): Router => {
 
   templatesRouter.post('/test', ...testTemplateView.unwrap());
 
-  templatesRouter.patch('/', ...patchTemplatesView.unwrap());
+  templatesRouter.patch(patchTemplatesView.url, ...patchTemplatesView.unwrap());
 
-  templatesRouter.delete('/', ...deleteTemplatesView.unwrap());
+  templatesRouter.delete(deleteTemplatesView.url, ...deleteTemplatesView.unwrap());
 
   return templatesRouter;
 };

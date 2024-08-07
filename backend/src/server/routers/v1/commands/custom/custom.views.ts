@@ -4,8 +4,8 @@ import { ExpressStack } from '#server/ExpressStack';
 import { ServerError } from '#shared/ServerError';
 import { idListFilter } from '#server/middlewares/idListFilter';
 import { DeleteCustomCommandSchema, PatchCustomCommandSchema, PostCustomCommandSchema } from '#server/routers/v1/commands/custom/custom.schemas';
-import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
-import { GetCustomCommandsPaginatedResponse, GetCustomCommandsResponse, GetCustomCommandsStatusResponse } from '#types/api/commands';
+import { authenticated, checkResourceOwnership, queryResource, validate, validateResponse } from '#server/stackMiddlewares';
+import { CustomCommandApi, GetCustomCommandsPaginatedResponse, GetCustomCommandsResponse, GetCustomCommandsStatusResponse } from '#types/api/commands';
 import { json } from 'body-parser';
 import { HttpCodes } from '#shared/httpCodes';
 import { limitOffsetPagination } from '#server/middlewares/pagination';
@@ -52,6 +52,7 @@ export const postCustomCommandsView = new ExpressStack()
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PostCustomCommandSchema))
+  .use(validateResponse(CustomCommandApi))
   .use(async (req, res) => {
     try {
       const command = await CommandController.create({
@@ -63,7 +64,7 @@ export const postCustomCommandsView = new ExpressStack()
         throw new ServerError(HttpCodes.InternalServerError, 'Failed to create custom command');
       }
 
-      res.sendStatus(HttpCodes.Created);
+      res.jsonValidated(CustomCommandSerializer(command));
     } catch (err) {
       logger.error('Failed to create custom command', {
         error: err,
@@ -74,19 +75,26 @@ export const postCustomCommandsView = new ExpressStack()
     }
   });
 
-export const patchCustomCommandsView = new ExpressStack()
+export const patchCustomCommandsView = new ExpressStack('/:id')
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PatchCustomCommandSchema))
+  .use(queryResource(CommandController.getById, 'id'))
+  .use(checkResourceOwnership('channelUserId'))
+  .use(validateResponse(CustomCommandApi))
   .use(async (req, res) => {
     try {
-      const command = await CommandController.update(req.validated.body);
+      const command = await CommandController.update({
+        ...req.validated.body,
+
+        id: req.resource.id,
+      });
 
       if (!command) {
         throw new ServerError(HttpCodes.InternalServerError, 'Failed to update custom command');
       }
 
-      res.sendStatus(HttpCodes.OK);
+      res.jsonValidated(CustomCommandSerializer(command));
     } catch (err) {
       logger.error('Failed to update custom command', {
         error: err,
@@ -101,11 +109,19 @@ export const deleteCustomCommandsView = new ExpressStack()
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(DeleteCustomCommandSchema))
+  .use(queryResource(CommandController.getById, 'id'))
+  .use(checkResourceOwnership('channelUserId'))
   .use(async (req, res) => {
     try {
-      await CommandController.delete(req.validated.body);
+      const command = await CommandController.delete({
+        id: req.resource.id,
+      });
 
-      res.sendStatus(HttpCodes.OK);
+      if (!command) {
+        throw new ServerError(HttpCodes.InternalServerError, 'Failed to delete custom command');
+      }
+
+      res.sendStatus(HttpCodes.NoContent);
     } catch (err) {
       logger.error('Failed to delete custom command', {
         error: err,

@@ -39,6 +39,11 @@ export const PostTemplateReqBody = TemplateApi.omit({ id: true, channelUserId: t
 export type PostTemplateReqBody = z.infer<typeof PostTemplateReqBody>;
 
 
+export const PatchTemplateReqBody = PostTemplateReqBody.partial();
+
+export type PatchTemplateReqBody = z.infer<typeof PatchTemplateReqBody>;
+
+
 export const TestTemplateReqBody = z.object({
   template: z.string(),
 });
@@ -58,14 +63,3 @@ export const TestTemplateResponse = z.object({
 });
 
 export type TestTemplateResponse = z.infer<typeof TestTemplateResponse>;
-
-
-export const PatchTemplateReqBody = TemplateApi.pick({ id: true }).merge(PostTemplateReqBody.partial());
-
-export type PatchTemplateReqBody = z.infer<typeof PatchTemplateReqBody>;
-
-
-export const DeleteTemplateReqBody = TemplateApi.pick({ id: true });
-
-export type DeleteTemplateReqBody = z.infer<typeof DeleteTemplateReqBody>;
-

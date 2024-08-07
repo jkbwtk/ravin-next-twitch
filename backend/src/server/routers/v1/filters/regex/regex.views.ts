@@ -5,7 +5,7 @@ import { ExpressStack } from '#server/ExpressStack';
 import { idListFilter } from '#server/middlewares/idListFilter';
 import { limitOffsetPagination } from '#server/middlewares/pagination';
 import { DeleteRegexFilterSchema, PatchRegexFilterSchema, PostRegexFilterSchema } from '#server/routers/v1/filters/regex/regex.schemas';
-import { authenticated, validate, validateResponse } from '#server/stackMiddlewares';
+import { authenticated, checkResourceOwnership, queryResource, validate, validateResponse } from '#server/stackMiddlewares';
 import { ServerError } from '#shared/ServerError';
 import { HttpCodes } from '#shared/httpCodes';
 import { GetRegexFiltersPaginatedResponse, GetRegexFiltersResponse, RegexFilterApi } from '#types/api/filters';
@@ -72,16 +72,19 @@ export const postRegexFiltersView = new ExpressStack()
     }
   });
 
-export const patchRegexFiltersView = new ExpressStack()
+export const patchRegexFiltersView = new ExpressStack('/:id')
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(PatchRegexFilterSchema))
+  .use(queryResource(RegexFilterController.getById, 'id'))
+  .use(checkResourceOwnership('channelUserId'))
   .use(validateResponse(RegexFilterApi))
   .use(async (req, res) => {
     try {
       const filter = await RegexFilterController.update({
         ...req.validated.body,
-        channelUserId: req.user.id,
+
+        id: req.resource.id,
       });
 
       if (filter === null) {
@@ -99,15 +102,21 @@ export const patchRegexFiltersView = new ExpressStack()
     }
   });
 
-export const deleteRegexFiltersView = new ExpressStack()
+export const deleteRegexFiltersView = new ExpressStack('/:id')
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(DeleteRegexFilterSchema))
+  .use(queryResource(RegexFilterController.getById, 'id'))
+  .use(checkResourceOwnership('channelUserId'))
   .use(async (req, res) => {
     try {
-      await RegexFilterController.delete({
-        ...req.validated.body,
+      const filter = await RegexFilterController.delete({
+        id: req.resource.id,
       });
+
+      if (filter === null) {
+        throw new Error('Delete regex filter returned null');
+      }
 
       res.sendStatus(HttpCodes.OK);
     } catch (err) {
