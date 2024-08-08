@@ -2,6 +2,7 @@ import { PaginatedResponse } from '../pagination';
 import { z } from 'zod';
 import { createSelectSchema } from 'drizzle-zod';
 import { phraseFiltersTable, regexFiltersTable } from '../../schema/schema';
+import { RegExpLiteralType } from '../../types/regExp';
 
 
 export enum Actions {
@@ -61,7 +62,7 @@ export type PatchPhraseFilterReqBody = z.infer<typeof PatchPhraseFilterReqBody>;
 
 export const RegexFilterApi = createSelectSchema(regexFiltersTable, {
   id: (schema) => schema.id.int().positive(),
-  regex: (schema) => schema.regex,
+  regex: () => RegExpLiteralType,
   action: () => FilterActions,
   actionDuration: (schema) => schema.actionDuration.int().positive().default(10),
   reason: (schema) => schema.reason.optional().nullable().default(null),
