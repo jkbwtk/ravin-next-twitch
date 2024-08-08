@@ -154,7 +154,7 @@ export const messagesTable = pgTable(
     username: varchar('username').notNull(),
     displayName: varchar('displayName').notNull(),
     color: varchar('color'),
-    userId: varchar('channelUserId').notNull(),
+    userId: varchar('userId').notNull(),
     content: varchar('content').notNull(),
     emotes: jsonb('emotes').$type<EmotesUsed>(),
     timestamp: timestamp('timestamp', { precision: 3, mode: 'date' }).notNull(),

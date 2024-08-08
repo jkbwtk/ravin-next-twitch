@@ -1,0 +1,2165 @@
+{
+  "id": "8309baef-4295-49db-9dd4-b9a8309f9998",
+  "prevId": "0d517150-2889-45bc-ad67-9e11713ad0b2",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.BehaviorProfiles": {
+      "name": "BehaviorProfiles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "char(32)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "enabled": {
+          "name": "enabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "activatorCategory": {
+          "name": "activatorCategory",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "activatorTitle": {
+          "name": "activatorTitle",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "channelUserId": {
+          "name": "channelUserId",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "BehaviorProfile_channelUserId_idx": {
+          "name": "BehaviorProfile_channelUserId_idx",
+          "columns": [
+            {
+              "expression": "channelUserId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "BehaviorProfile_channelUserId_name_key": {
+          "name": "BehaviorProfile_channelUserId_name_key",
+          "columns": [
+            {
+              "expression": "channelUserId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "BehaviorProfiles_channelUserId_Users_id_fk": {
+          "name": "BehaviorProfiles_channelUserId_Users_id_fk",
+          "tableFrom": "BehaviorProfiles",
+          "tableTo": "Users",
+          "columnsFrom": [
+            "channelUserId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.BehaviorProfilesToCommandTimers": {
+      "name": "BehaviorProfilesToCommandTimers",
+      "schema": "",
+      "columns": {
+        "behaviorProfileId": {
+          "name": "behaviorProfileId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "commandTimerId": {
+          "name": "commandTimerId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "_BehaviorProfileToCommandTimer_AB_unique": {
+          "name": "_BehaviorProfileToCommandTimer_AB_unique",
+          "columns": [
+            {
+              "expression": "behaviorProfileId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "commandTimerId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "BehaviorProfilesToCommandTimers_commandTimerId_index": {
+          "name": "BehaviorProfilesToCommandTimers_commandTimerId_index",
+          "columns": [
+            {
+              "expression": "commandTimerId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "BehaviorProfilesToCommandTimers_behaviorProfileId_BehaviorProfiles_id_fk": {
+          "name": "BehaviorProfilesToCommandTimers_behaviorProfileId_BehaviorProfiles_id_fk",
+          "tableFrom": "BehaviorProfilesToCommandTimers",
+          "tableTo": "BehaviorProfiles",
+          "columnsFrom": [
+            "behaviorProfileId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "BehaviorProfilesToCommandTimers_commandTimerId_CommandTimers_id_fk": {
+          "name": "BehaviorProfilesToCommandTimers_commandTimerId_CommandTimers_id_fk",
+          "tableFrom": "BehaviorProfilesToCommandTimers",
+          "tableTo": "CommandTimers",
+          "columnsFrom": [
+            "commandTimerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.BehaviorProfilesToCommands": {
+      "name": "BehaviorProfilesToCommands",
+      "schema": "",
+      "columns": {
+        "behaviorProfileId": {
+          "name": "behaviorProfileId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "commandId": {
+          "name": "commandId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "_BehaviorProfileToCommand_AB_unique": {
+          "name": "_BehaviorProfileToCommand_AB_unique",
+          "columns": [
+            {
+              "expression": "behaviorProfileId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "commandId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "BehaviorProfilesToCommands_commandId_index": {
+          "name": "BehaviorProfilesToCommands_commandId_index",
+          "columns": [
+            {
+              "expression": "commandId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "BehaviorProfilesToCommands_behaviorProfileId_BehaviorProfiles_id_fk": {
+          "name": "BehaviorProfilesToCommands_behaviorProfileId_BehaviorProfiles_id_fk",
+          "tableFrom": "BehaviorProfilesToCommands",
+          "tableTo": "BehaviorProfiles",
+          "columnsFrom": [
+            "behaviorProfileId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "BehaviorProfilesToCommands_commandId_Commands_id_fk": {
+          "name": "BehaviorProfilesToCommands_commandId_Commands_id_fk",
+          "tableFrom": "BehaviorProfilesToCommands",
+          "tableTo": "Commands",
+          "columnsFrom": [
+            "commandId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.BehaviorProfilesToPhraseFilters": {
+      "name": "BehaviorProfilesToPhraseFilters",
+      "schema": "",
+      "columns": {
+        "behaviorProfileId": {
+          "name": "behaviorProfileId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "phraseFilterId": {
+          "name": "phraseFilterId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "_BehaviorProfileToPhraseFilter_AB_unique": {
+          "name": "_BehaviorProfileToPhraseFilter_AB_unique",
+          "columns": [
+            {
+              "expression": "behaviorProfileId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "phraseFilterId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "BehaviorProfilesToPhraseFilters_phraseFilterId_index": {
+          "name": "BehaviorProfilesToPhraseFilters_phraseFilterId_index",
+          "columns": [
+            {
+              "expression": "phraseFilterId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "BehaviorProfilesToPhraseFilters_behaviorProfileId_BehaviorProfiles_id_fk": {
+          "name": "BehaviorProfilesToPhraseFilters_behaviorProfileId_BehaviorProfiles_id_fk",
+          "tableFrom": "BehaviorProfilesToPhraseFilters",
+          "tableTo": "BehaviorProfiles",
+          "columnsFrom": [
+            "behaviorProfileId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "BehaviorProfilesToPhraseFilters_phraseFilterId_PhraseFilters_id_fk": {
+          "name": "BehaviorProfilesToPhraseFilters_phraseFilterId_PhraseFilters_id_fk",
+          "tableFrom": "BehaviorProfilesToPhraseFilters",
+          "tableTo": "PhraseFilters",
+          "columnsFrom": [
+            "phraseFilterId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.BehaviorProfilesToRegexFilters": {
+      "name": "BehaviorProfilesToRegexFilters",
+      "schema": "",
+      "columns": {
+        "behaviorProfileId": {
+          "name": "behaviorProfileId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "regexFilterId": {
+          "name": "regexFilterId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "_BehaviorProfileToRegexFilter_AB_unique": {
+          "name": "_BehaviorProfileToRegexFilter_AB_unique",
+          "columns": [
+            {
+              "expression": "behaviorProfileId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "regexFilterId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "BehaviorProfilesToRegexFilters_regexFilterId_index": {
+          "name": "BehaviorProfilesToRegexFilters_regexFilterId_index",
+          "columns": [
+            {
+              "expression": "regexFilterId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "BehaviorProfilesToRegexFilters_behaviorProfileId_BehaviorProfiles_id_fk": {
+          "name": "BehaviorProfilesToRegexFilters_behaviorProfileId_BehaviorProfiles_id_fk",
+          "tableFrom": "BehaviorProfilesToRegexFilters",
+          "tableTo": "BehaviorProfiles",
+          "columnsFrom": [
+            "behaviorProfileId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        },
+        "BehaviorProfilesToRegexFilters_regexFilterId_RegexFilters_id_fk": {
+          "name": "BehaviorProfilesToRegexFilters_regexFilterId_RegexFilters_id_fk",
+          "tableFrom": "BehaviorProfilesToRegexFilters",
+          "tableTo": "RegexFilters",
+          "columnsFrom": [
+            "regexFilterId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.BotActions": {
+      "name": "BotActions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "data": {
+          "name": "data",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::json"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "channelUserId": {
+          "name": "channelUserId",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": -1
+        }
+      },
+      "indexes": {
+        "BotAction_channelUserId_idx": {
+          "name": "BotAction_channelUserId_idx",
+          "columns": [
+            {
+              "expression": "channelUserId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "BotActions_channelUserId_Users_id_fk": {
+          "name": "BotActions_channelUserId_Users_id_fk",
+          "tableFrom": "BotActions",
+          "tableTo": "Users",
+          "columnsFrom": [
+            "channelUserId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.ChannelActions": {
+      "name": "ChannelActions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "issuerDisplayName": {
+          "name": "issuerDisplayName",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "targetDisplayName": {
+          "name": "targetDisplayName",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "ChannelActionType",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data": {
+          "name": "data",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "channelUserId": {
+          "name": "channelUserId",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "ChannelAction_channelUserId_idx": {
+          "name": "ChannelAction_channelUserId_idx",
+          "columns": [
+            {
+              "expression": "channelUserId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ChannelAction_issuerDisplayName_idx": {
+          "name": "ChannelAction_issuerDisplayName_idx",
+          "columns": [
+            {
+              "expression": "issuerDisplayName",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ChannelAction_targetDisplayName_idx": {
+          "name": "ChannelAction_targetDisplayName_idx",
+          "columns": [
+            {
+              "expression": "targetDisplayName",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ChannelAction_type_idx": {
+          "name": "ChannelAction_type_idx",
+          "columns": [
+            {
+              "expression": "type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "ChannelActions_channelUserId_Users_id_fk": {
+          "name": "ChannelActions_channelUserId_Users_id_fk",
+          "tableFrom": "ChannelActions",
+          "tableTo": "Users",
+          "columnsFrom": [
+            "channelUserId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.ChannelStats": {
+      "name": "ChannelStats",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "frameId": {
+          "name": "frameId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "messages": {
+          "name": "messages",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "timeouts": {
+          "name": "timeouts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "bans": {
+          "name": "bans",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "deleted": {
+          "name": "deleted",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "commands": {
+          "name": "commands",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "frameDuration": {
+          "name": "frameDuration",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 60000
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "channelUserId": {
+          "name": "channelUserId",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "ChannelStats_frameId_idx": {
+          "name": "ChannelStats_frameId_idx",
+          "columns": [
+            {
+              "expression": "frameId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ChannelStats_userId_frameId_key": {
+          "name": "ChannelStats_userId_frameId_key",
+          "columns": [
+            {
+              "expression": "channelUserId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "frameId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "ChannelStats_userId_idx": {
+          "name": "ChannelStats_userId_idx",
+          "columns": [
+            {
+              "expression": "channelUserId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "ChannelStats_channelUserId_Users_id_fk": {
+          "name": "ChannelStats_channelUserId_Users_id_fk",
+          "tableFrom": "ChannelStats",
+          "tableTo": "Users",
+          "columnsFrom": [
+            "channelUserId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.Channels": {
+      "name": "Channels",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "joined": {
+          "name": "joined",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "chantingSettings": {
+          "name": "chantingSettings",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{\"enabled\":false,\"interval\":60,\"length\":3}'::json"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "channelUserId": {
+          "name": "channelUserId",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "Channel_userId_idx": {
+          "name": "Channel_userId_idx",
+          "columns": [
+            {
+              "expression": "channelUserId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "Channel_userId_key": {
+          "name": "Channel_userId_key",
+          "columns": [
+            {
+              "expression": "channelUserId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "Channels_channelUserId_Users_id_fk": {
+          "name": "Channels_channelUserId_Users_id_fk",
+          "tableFrom": "Channels",
+          "tableTo": "Users",
+          "columnsFrom": [
+            "channelUserId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.CommandTimers": {
+      "name": "CommandTimers",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "alias": {
+          "name": "alias",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cooldown": {
+          "name": "cooldown",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 60
+        },
+        "cron": {
+          "name": "cron",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "enabled": {
+          "name": "enabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "lines": {
+          "name": "lines",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "channelUserId": {
+          "name": "channelUserId",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "templateId": {
+          "name": "templateId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "CommandTimer_channelUserId_alias_key": {
+          "name": "CommandTimer_channelUserId_alias_key",
+          "columns": [
+            {
+              "expression": "channelUserId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "alias",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "CommandTimer_channelUserId_idx": {
+          "name": "CommandTimer_channelUserId_idx",
+          "columns": [
+            {
+              "expression": "channelUserId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "CommandTimer_channelUserId_name_key": {
+          "name": "CommandTimer_channelUserId_name_key",
+          "columns": [
+            {
+              "expression": "channelUserId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "CommandTimers_channelUserId_Users_id_fk": {
+          "name": "CommandTimers_channelUserId_Users_id_fk",
+          "tableFrom": "CommandTimers",
+          "tableTo": "Users",
+          "columnsFrom": [
+            "channelUserId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "CommandTimers_templateId_Templates_id_fk": {
+          "name": "CommandTimers_templateId_Templates_id_fk",
+          "tableFrom": "CommandTimers",
+          "tableTo": "Templates",
+          "columnsFrom": [
+            "templateId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.Commands": {
+      "name": "Commands",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "command": {
+          "name": "command",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "userLevel": {
+          "name": "userLevel",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "cooldown": {
+          "name": "cooldown",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 10
+        },
+        "enabled": {
+          "name": "enabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "usage": {
+          "name": "usage",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "channelUserId": {
+          "name": "channelUserId",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "templateId": {
+          "name": "templateId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "Command_channelUserId_command_key": {
+          "name": "Command_channelUserId_command_key",
+          "columns": [
+            {
+              "expression": "channelUserId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "command",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "Command_channelUserId_idx": {
+          "name": "Command_channelUserId_idx",
+          "columns": [
+            {
+              "expression": "channelUserId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "Commands_channelUserId_Users_id_fk": {
+          "name": "Commands_channelUserId_Users_id_fk",
+          "tableFrom": "Commands",
+          "tableTo": "Users",
+          "columnsFrom": [
+            "channelUserId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "Commands_templateId_Templates_id_fk": {
+          "name": "Commands_templateId_Templates_id_fk",
+          "tableFrom": "Commands",
+          "tableTo": "Templates",
+          "columnsFrom": [
+            "templateId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.Config": {
+      "name": "Config",
+      "schema": "",
+      "columns": {
+        "key": {
+          "name": "key",
+          "type": "varchar(32)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.Messages": {
+      "name": "Messages",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "uuid": {
+          "name": "uuid",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "channelName": {
+          "name": "channelName",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "username": {
+          "name": "username",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "displayName": {
+          "name": "displayName",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "color": {
+          "name": "color",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "userId": {
+          "name": "userId",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "content": {
+          "name": "content",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "emotes": {
+          "name": "emotes",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "badgeInfo": {
+          "name": "badgeInfo",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "badges": {
+          "name": "badges",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "flags": {
+          "name": "flags",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "messageType": {
+          "name": "messageType",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "firstMessage": {
+          "name": "firstMessage",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "mod": {
+          "name": "mod",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "subscriber": {
+          "name": "subscriber",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "channelUserId": {
+          "name": "channelUserId",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "Message_channelName_idx": {
+          "name": "Message_channelName_idx",
+          "columns": [
+            {
+              "expression": "channelName",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "Message_channelUserId_idx": {
+          "name": "Message_channelUserId_idx",
+          "columns": [
+            {
+              "expression": "channelUserId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "Message_userId_idx": {
+          "name": "Message_userId_idx",
+          "columns": [
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "Message_username_idx": {
+          "name": "Message_username_idx",
+          "columns": [
+            {
+              "expression": "username",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "Message_uuid_idx": {
+          "name": "Message_uuid_idx",
+          "columns": [
+            {
+              "expression": "uuid",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "Messages_channelUserId_Users_id_fk": {
+          "name": "Messages_channelUserId_Users_id_fk",
+          "tableFrom": "Messages",
+          "tableTo": "Users",
+          "columnsFrom": [
+            "channelUserId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.PhraseFilters": {
+      "name": "PhraseFilters",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "phrase": {
+          "name": "phrase",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "caseSensitive": {
+          "name": "caseSensitive",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "similarity": {
+          "name": "similarity",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "action": {
+          "name": "action",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "actionDuration": {
+          "name": "actionDuration",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 10
+        },
+        "enabled": {
+          "name": "enabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "ignoreWhitespace": {
+          "name": "ignoreWhitespace",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "channelUserId": {
+          "name": "channelUserId",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "PhraseFilter_channelUserId_idx": {
+          "name": "PhraseFilter_channelUserId_idx",
+          "columns": [
+            {
+              "expression": "channelUserId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "PhraseFilters_channelUserId_Users_id_fk": {
+          "name": "PhraseFilters_channelUserId_Users_id_fk",
+          "tableFrom": "PhraseFilters",
+          "tableTo": "Users",
+          "columnsFrom": [
+            "channelUserId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.RegexFilters": {
+      "name": "RegexFilters",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "regex": {
+          "name": "regex",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "action": {
+          "name": "action",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "reason": {
+          "name": "reason",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "actionDuration": {
+          "name": "actionDuration",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 10
+        },
+        "enabled": {
+          "name": "enabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "channelUserId": {
+          "name": "channelUserId",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "RegexFilter_channelUserId_idx": {
+          "name": "RegexFilter_channelUserId_idx",
+          "columns": [
+            {
+              "expression": "channelUserId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "RegexFilters_channelUserId_Users_id_fk": {
+          "name": "RegexFilters_channelUserId_Users_id_fk",
+          "tableFrom": "RegexFilters",
+          "tableTo": "Users",
+          "columnsFrom": [
+            "channelUserId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.SystemNotifications": {
+      "name": "SystemNotifications",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "content": {
+          "name": "content",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "channelUserId": {
+          "name": "channelUserId",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "readAt": {
+          "name": "readAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "SystemNotification_userId_idx": {
+          "name": "SystemNotification_userId_idx",
+          "columns": [
+            {
+              "expression": "channelUserId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "SystemNotifications_channelUserId_Users_id_fk": {
+          "name": "SystemNotifications_channelUserId_Users_id_fk",
+          "tableFrom": "SystemNotifications",
+          "tableTo": "Users",
+          "columnsFrom": [
+            "channelUserId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.Templates": {
+      "name": "Templates",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "template": {
+          "name": "template",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "states": {
+          "name": "states",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "channelUserId": {
+          "name": "channelUserId",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "environments": {
+          "name": "environments",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        }
+      },
+      "indexes": {
+        "Template_userId_name_idx": {
+          "name": "Template_userId_name_idx",
+          "columns": [
+            {
+              "expression": "channelUserId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "Template_userId_name_key": {
+          "name": "Template_userId_name_key",
+          "columns": [
+            {
+              "expression": "channelUserId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "Templates_channelUserId_Users_id_fk": {
+          "name": "Templates_channelUserId_Users_id_fk",
+          "tableFrom": "Templates",
+          "tableTo": "Users",
+          "columnsFrom": [
+            "channelUserId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.Tokens": {
+      "name": "Tokens",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "accessToken": {
+          "name": "accessToken",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "refreshToken": {
+          "name": "refreshToken",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "channelUserId": {
+          "name": "channelUserId",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "Token_accessToken_key": {
+          "name": "Token_accessToken_key",
+          "columns": [
+            {
+              "expression": "accessToken",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "Token_refreshToken_key": {
+          "name": "Token_refreshToken_key",
+          "columns": [
+            {
+              "expression": "refreshToken",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "Token_userId_idx": {
+          "name": "Token_userId_idx",
+          "columns": [
+            {
+              "expression": "channelUserId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "Token_userId_key": {
+          "name": "Token_userId_key",
+          "columns": [
+            {
+              "expression": "channelUserId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "Tokens_channelUserId_Users_id_fk": {
+          "name": "Tokens_channelUserId_Users_id_fk",
+          "tableFrom": "Tokens",
+          "tableTo": "Users",
+          "columnsFrom": [
+            "channelUserId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.Users": {
+      "name": "Users",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "varchar",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "login": {
+          "name": "login",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "displayName": {
+          "name": "displayName",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "profileImageUrl": {
+          "name": "profileImageUrl",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "timestamp (3)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "admin": {
+          "name": "admin",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        }
+      },
+      "indexes": {
+        "User_displayName_key": {
+          "name": "User_displayName_key",
+          "columns": [
+            {
+              "expression": "displayName",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "User_login_idx": {
+          "name": "User_login_idx",
+          "columns": [
+            {
+              "expression": "login",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "User_login_key": {
+          "name": "User_login_key",
+          "columns": [
+            {
+              "expression": "login",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    }
+  },
+  "enums": {
+    "public.ChannelActionType": {
+      "name": "ChannelActionType",
+      "schema": "public",
+      "values": [
+        "ban",
+        "timeout",
+        "delete"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
