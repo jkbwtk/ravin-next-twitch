@@ -1,11 +1,11 @@
 
 import { timeFromNow } from '#shared/timeUtils';
-import { Action } from '#types/api/dashboard';
+import { ChannelActionApi } from '#types/api/dashboard';
 
 import style from '#styles/widgets/RecentActionsWidget.module.scss';
 
 
-export type ActionElementInfoProps = Pick<Action, 'date' | 'issuerDisplayName'>;
+export type ActionElementInfoProps = Pick<ChannelActionApi, 'date' | 'issuerDisplayName'>;
 
 const ActionElementBase: Component<ActionElementInfoProps> = ({ date, issuerDisplayName }) => {
   return (

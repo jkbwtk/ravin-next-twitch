@@ -1,13 +1,13 @@
 import { TableType } from '#components/widgets/CommandTimersTableWidget';
 import { TableCell, TableRow } from '@suid/material';
-import { BotAction as BotActionType } from '#types/api/botActions';
+import { BotActionApi } from '#types/api/botActions';
 import { botActions, botActionsDescriptions } from '#locales/en-us/botActions';
 
 import style from '#styles/widgets/TableWidget.module.scss';
 
 
 export type BotActionProps = {
-  log: BotActionType;
+  log: BotActionApi;
   tableType: TableType;
 };
 

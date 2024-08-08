@@ -2,17 +2,17 @@ import MaterialSymbol from '#components/MaterialSymbol';
 import TemplateButton from '#components/TemplateButton';
 import { translateUserLevel, useCustomCommandEditor } from '#providers/CustomCommandEditorProvider';
 import { Match, Switch } from 'solid-js';
-import { CustomCommand } from '#types/api/commands';
+import { CustomCommandApi } from '#types/api/commands';
 import { TableType } from '#components/widgets/CommandTableWidget';
 import TableRow from '@suid/material/TableRow/TableRow';
 import TableCell from '@suid/material/TableCell/TableCell';
+import { useTemplates } from '#providers/TemplatesProvider';
 
 import style from '#styles/widgets/TableWidget.module.scss';
-import { useTemplates } from '#providers/TemplatesProvider';
 
 
 export type CommandProps = {
-  command: CustomCommand;
+  command: CustomCommandApi;
   tableType: TableType;
 };
 
@@ -21,8 +21,7 @@ const Command: Component<CommandProps> = (props) => {
   const [, { getTemplateById }] = useTemplates();
 
   const toggleEnabled = () => {
-    updateCommand({
-      id: props.command.id,
+    updateCommand(props.command.id, {
       enabled: !props.command.enabled,
     });
   };

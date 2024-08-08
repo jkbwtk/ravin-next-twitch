@@ -8,7 +8,7 @@ import ErrorFallback from '#components/ErrorFallback';
 import Paginator from '#components/Paginator';
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@suid/material';
 import FetchFallback from '#components/FetchFallback';
-import { GetPhraseFiltersPaginatedResponse, PhraseFilter as PhraseFilterType } from '#types/api/filters';
+import { GetPhraseFiltersPaginatedResponse, PhraseFilterApi } from '#types/api/filters';
 import PhraseFilter from '#components/PhraseFilter';
 
 import style from '#styles/widgets/TableWidget.module.scss';
@@ -51,7 +51,7 @@ const PhraseFiltersTable: Component = () => {
     refetchFilters();
   };
 
-  const updateFilter = (filter: PhraseFilterType) => {
+  const updateFilter = (filter: PhraseFilterApi) => {
     setFilters((filters) => ({ ...filters, data: filters.data.map((f) => f.id === filter.id ? filter : f) }));
   };
 

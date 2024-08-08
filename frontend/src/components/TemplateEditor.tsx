@@ -6,7 +6,7 @@ import Modal from '#components/Modal';
 import TextArea from '#components/TextArea';
 import { makeRequest } from '#lib/fetch';
 import { useNotification } from '#providers/NotificationProvider';
-import { PatchTemplateReqBody, PostTemplateReqBody, Template, TestTemplateResponse } from '#types/api/templates';
+import { PatchTemplateReqBody, PostTemplateReqBody, TemplateApi, TestTemplateResponse } from '#types/api/templates';
 import { createResource, createSignal, ErrorBoundary, Index, Show } from 'solid-js';
 import { Debounce } from '#shared/Debounce';
 import Stack from '@suid/material/Stack/Stack';
@@ -23,7 +23,7 @@ import style from '#styles/TemplateEditor.module.scss';
 
 export type TemplateEditorProps = {
   open: boolean;
-  template?: Template | null;
+  template?: TemplateApi | null;
   onClose: () => void;
 };
 
@@ -89,8 +89,8 @@ const TemplateEditorBase: Component<TemplateEditorProps> = (props) => {
     return response.ok;
   };
 
-  const updateTemplate = async (template: PatchTemplateReqBody): Promise<boolean> => {
-    const response = await updateProviderTemplate(template);
+  const updateTemplate = async (id: number, template: PatchTemplateReqBody): Promise<boolean> => {
+    const response = await updateProviderTemplate(id, template);
 
     if (!response.ok) {
       popupApiError(response, {
@@ -113,8 +113,7 @@ const TemplateEditorBase: Component<TemplateEditorProps> = (props) => {
     let ok = true;
 
     if (props.template) {
-      ok = await updateTemplate({
-        id: props.template.id,
+      ok = await updateTemplate(props.template.id, {
         name: name.value,
         template: templateField.value,
       });

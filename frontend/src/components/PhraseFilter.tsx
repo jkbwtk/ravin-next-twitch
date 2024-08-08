@@ -3,14 +3,14 @@ import TemplateButton from '#components/TemplateButton';
 import { Match, Switch } from 'solid-js';
 import { TableType } from '#components/widgets/CommandTimersTableWidget';
 import { TableCell, TableRow } from '@suid/material';
-import { Actions, PhraseFilter as PhraseFilterType } from '#types/api/filters';
+import { Actions, PhraseFilterApi } from '#types/api/filters';
 import { usePhraseFilterEditor } from '#providers/PhraseFilterEditorProvider';
 
 import style from '#styles/widgets/TableWidget.module.scss';
 
 
 export type PhraseFilterProps = {
-  filter: PhraseFilterType;
+  filter: PhraseFilterApi;
   tableType: TableType;
 };
 
@@ -18,22 +18,20 @@ const PhraseFilter: Component<PhraseFilterProps> = (props) => {
   const [, { open, updateFilter, removeFilter }] = usePhraseFilterEditor();
 
   const toggleEnabled = () => {
-    updateFilter({
-      id: props.filter.id,
+    updateFilter(props.filter.id, {
+
       enabled: !props.filter.enabled,
     });
   };
 
   const toggleCaseSensitive = () => {
-    updateFilter({
-      id: props.filter.id,
+    updateFilter(props.filter.id, {
       caseSensitive: !props.filter.caseSensitive,
     });
   };
 
   const toggleIgnoreWhitespace = () => {
-    updateFilter({
-      id: props.filter.id,
+    updateFilter(props.filter.id, {
       ignoreWhitespace: !props.filter.ignoreWhitespace,
     });
   };

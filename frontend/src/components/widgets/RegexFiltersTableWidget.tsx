@@ -8,7 +8,7 @@ import ErrorFallback from '#components/ErrorFallback';
 import Paginator from '#components/Paginator';
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@suid/material';
 import FetchFallback from '#components/FetchFallback';
-import { GetRegexFiltersPaginatedResponse, RegexFilter as RegexFilterType } from '#types/api/filters';
+import { GetRegexFiltersPaginatedResponse, RegexFilterApi } from '#types/api/filters';
 import RegexFilter from '#components/RegexFilter';
 
 import style from '#styles/widgets/TableWidget.module.scss';
@@ -51,7 +51,7 @@ const RegexFiltersTable: Component = () => {
     refetchFilters();
   };
 
-  const updateFilter = (filter: RegexFilterType) => {
+  const updateFilter = (filter: RegexFilterApi) => {
     setFilters((filters) => ({ ...filters, data: filters.data.map((f) => f.id === filter.id ? filter : f) }));
   };
 

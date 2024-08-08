@@ -9,7 +9,7 @@ import Paper from '@suid/material/Paper/Paper';
 import TableRow from '@suid/material/TableRow/TableRow';
 import TableCell from '@suid/material/TableCell/TableCell';
 import TableBody from '@suid/material/TableBody/TableBody';
-import { Template as TemplateType } from '#types/api/templates';
+import { TemplateApi } from '#types/api/templates';
 import Template from '#components/Template';
 import Paginator from '#components/Paginator';
 import { useSession } from '#providers/SessionProvider';
@@ -19,8 +19,8 @@ import style from '#styles/widgets/TableWidget.module.scss';
 
 
 export interface TemplateTableProps {
-  openEditor: (template: TemplateType | null) => void;
-  deleteTemplate: (template: TemplateType) => void;
+  openEditor: (template: TemplateApi | null) => void;
+  deleteTemplate: (template: TemplateApi) => void;
 }
 
 const TemplateTableWidget: Component<TemplateTableProps> = (props) => {

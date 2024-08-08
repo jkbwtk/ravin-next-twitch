@@ -1,12 +1,12 @@
 import MaterialSymbol from '#components/MaterialSymbol';
 import ActionElementBase from '#components/widgets/RecentActionsWidget/ActionElementBase';
-import { Action } from '#types/api/dashboard';
+import { ChannelActionApi } from '#types/api/dashboard';
 import { timeDuration } from '#shared/timeUtils';
 
 import style from '#styles/widgets/RecentActionsWidget.module.scss';
 
 
-const ActionTimeout: Component<Action & { type: 'timeout' }> = (props) => {
+const ActionTimeout: Component<ChannelActionApi & { type: 'timeout' }> = (props) => {
   return (
     <div class={style.entry}>
       <MaterialSymbol symbol='schedule' color='primary' size='big' />

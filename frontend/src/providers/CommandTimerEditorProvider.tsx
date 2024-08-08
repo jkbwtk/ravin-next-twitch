@@ -1,9 +1,8 @@
 import { batch, createContext, createSignal, useContext } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import {
-  CommandTimer,
-  CustomCommand,
-  DeleteCommandTimerReqBody,
+  CommandTimerApi,
+  CustomCommandApi,
   PatchCommandTimerReqBody,
   PostCommandTimerReqBody,
 } from '#types/api/commands';
@@ -28,17 +27,17 @@ import style from '#styles/CustomCommandsEditorProvider.module.scss';
 
 export type CommandTimerEditorContextState = {
   open: boolean;
-  timer: Partial<CommandTimer>;
+  timer: Partial<CommandTimerApi>;
 };
 
 export type CommandTimerEditorContextValue = [
   state: CommandTimerEditorContextState,
   actions: {
-    open: (command?: Partial<CommandTimer>) => void;
+    open: (command?: Partial<CommandTimerApi>) => void;
     close: () => void;
 
-    updateTimer: (timer: PatchCommandTimerReqBody) => void;
-    removeTimer: (timer: CommandTimer) => void;
+    updateTimer: (id: number, timer: PatchCommandTimerReqBody) => void;
+    removeTimer: (timer: CommandTimerApi) => void;
   }
 ];
 
@@ -78,7 +77,7 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
   const [templateId, setTemplateId] = createSignal(-1);
 
 
-  const open = (timer?: Partial<CustomCommand>) => {
+  const open = (timer?: Partial<CustomCommandApi>) => {
     batch(() => {
       setState({
         open: true,
@@ -115,8 +114,8 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
     return response.ok;
   };
 
-  const updateTimer = async (command: PatchCommandTimerReqBody): Promise<boolean> => {
-    const response = await fetch(`/api/v1/commands/timers`, {
+  const updateTimer = async (id: number, command: PatchCommandTimerReqBody): Promise<boolean> => {
+    const response = await fetch(`/api/v1/commands/timers/${id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -134,13 +133,12 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
     return response.ok;
   };
 
-  const deleteTimer = async (timer: DeleteCommandTimerReqBody): Promise<boolean> => {
-    const response = await fetch(`/api/v1/commands/timers`, {
+  const deleteTimer = async (id: number): Promise<boolean> => {
+    const response = await fetch(`/api/v1/commands/timers/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(timer),
     });
 
     if (!response.ok) {
@@ -153,7 +151,7 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
     return response.ok;
   };
 
-  const removeTimer = async (timer: CommandTimer): Promise<boolean> => {
+  const removeTimer = async (timer: CommandTimerApi): Promise<boolean> => {
     const confirmed = await openConfirmationBox({
       title: `Delete ${timer.name}`,
       message: 'Are you sure you want to delete this timer?',
@@ -162,9 +160,7 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
 
     if (!confirmed) return false;
 
-    const ok = await deleteTimer({
-      id: timer.id,
-    });
+    const ok = await deleteTimer(timer.id);
 
     if (ok) {
       addNotification({
@@ -195,8 +191,7 @@ export const CommandTimerEditorProvider: ParentComponent = (props) => {
 
 
     const ok = state.timer.id ?
-      await updateTimer({
-        id: state.timer.id,
+      await updateTimer(state.timer.id, {
         name: name.value,
         alias: alias.value,
         // cooldown: parseInt(cooldown.value),

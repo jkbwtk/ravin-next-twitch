@@ -113,7 +113,7 @@ export const patchCustomCommandsView = new ExpressStack('/:id')
     }
   });
 
-export const deleteCustomCommandsView = new ExpressStack()
+export const deleteCustomCommandsView = new ExpressStack('/:id')
   .usePreflight(authenticated)
   .useNative(json())
   .use(validate(DeleteCustomCommandSchema))

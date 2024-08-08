@@ -8,7 +8,7 @@ import ErrorFallback from '#components/ErrorFallback';
 import Paginator from '#components/Paginator';
 import { Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@suid/material';
 import FetchFallback from '#components/FetchFallback';
-import { BehaviorProfile, GetBehaviorProfilesPaginatedResponse } from '#types/api/behaviorProfiles';
+import { BehaviorProfileApi, GetBehaviorProfilesPaginatedResponse } from '#types/api/behaviorProfiles';
 import Profile from '#components/Profile';
 
 import style from '#styles/widgets/TableWidget.module.scss';
@@ -51,7 +51,7 @@ const ProfilesTableWidget: Component = () => {
     refetchProfiles();
   };
 
-  const updateFilter = (profile: BehaviorProfile) => {
+  const updateFilter = (profile: BehaviorProfileApi) => {
     setProfiles((filters) => ({ ...filters, data: filters.data.map((f) => f.id === profile.id ? profile : f) }));
   };
 

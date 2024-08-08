@@ -5,6 +5,8 @@ import { z } from 'zod';
 import { templatesTable } from '../../schema/schema';
 
 
+export { TemplateEnvironments };
+
 export const TemplateApi = createSelectSchema(templatesTable, {
   id: (schema) => schema.id.positive().int(),
   name: (schema) => schema.name.min(3),

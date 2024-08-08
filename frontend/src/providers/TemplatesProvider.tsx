@@ -1,24 +1,24 @@
 import { makeRequest } from '#lib/fetch';
 import { useSocket } from '#providers/SocketProvider';
-import { DeleteTemplateReqBody, GetTemplatesResponse, PatchTemplateReqBody, PostTemplateReqBody, Template } from '#types/api/templates';
+import { GetTemplatesResponse, PatchTemplateReqBody, PostTemplateReqBody, TemplateApi } from '#types/api/templates';
 import { createContext, createMemo, createResource, InitializedResource, onCleanup, onMount, useContext } from 'solid-js';
 
 
 export type TemplatesContextValue = [
-  templates: InitializedResource<Template[]>,
+  templates: InitializedResource<TemplateApi[]>,
   actions: {
     refetchTemplates: () => void;
 
-    getTemplateById: (templateId: number) => Template | undefined;
+    getTemplateById: (templateId: number) => TemplateApi | undefined;
 
     addTemplate: (template: PostTemplateReqBody) => Promise<Response>;
-    updateTemplate: (template: PatchTemplateReqBody) => Promise<Response>;
-    deleteTemplate: (template: DeleteTemplateReqBody) => Promise<Response>;
+    updateTemplate: (id: number, template: PatchTemplateReqBody) => Promise<Response>;
+    deleteTemplate: (id: number) => Promise<Response>;
   }
 ];
 
 const TemplatesContext = createContext<TemplatesContextValue>([
-  null as unknown as InitializedResource<Template[]>,
+  null as unknown as InitializedResource<TemplateApi[]>,
   {
     refetchTemplates: () => {
       throw Error('TemplatesContext: fetchTemplates() called before provider');
@@ -62,7 +62,7 @@ export const TemplatesProvider: ParentComponent = (props) => {
   });
 
 
-  const getTemplateById = (templateId: number): Template | undefined => {
+  const getTemplateById = (templateId: number): TemplateApi | undefined => {
     return mappedTemplates().get(templateId);
   };
 
@@ -79,8 +79,8 @@ export const TemplatesProvider: ParentComponent = (props) => {
     return response;
   };
 
-  const updateTemplate = async (template: PatchTemplateReqBody): Promise<Response> => {
-    const response = await fetch(`/api/v1/templates`, {
+  const updateTemplate = async (id: number, template: PatchTemplateReqBody): Promise<Response> => {
+    const response = await fetch(`/api/v1/templates/${id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -92,13 +92,12 @@ export const TemplatesProvider: ParentComponent = (props) => {
     return response;
   };
 
-  const deleteTemplate = async (template: DeleteTemplateReqBody): Promise<Response> => {
-    const response = await fetch(`/api/v1/templates`, {
+  const deleteTemplate = async (id: number): Promise<Response> => {
+    const response = await fetch(`/api/v1/templates/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(template),
     });
 
 
@@ -106,11 +105,11 @@ export const TemplatesProvider: ParentComponent = (props) => {
   };
 
 
-  const handleCreateTemplate = (template: Template) => {
+  const handleCreateTemplate = (template: TemplateApi) => {
     setTemplates((templates) => ([...templates, template]));
   };
 
-  const handleUpdateTemplate = (template: Template) => {
+  const handleUpdateTemplate = (template: TemplateApi) => {
     setTemplates((templates) => templates.map((c) => c.id === template.id ? template : c));
   };
 

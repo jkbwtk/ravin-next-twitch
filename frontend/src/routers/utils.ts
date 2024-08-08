@@ -1,6 +1,6 @@
 import Redirect from '#pages/Redirect';
 import { useSession } from '#providers/SessionProvider';
-import { RouteDefinition, RouteLoadFunc } from '@solidjs/router';
+import { RouteDefinition, RoutePreloadFunc } from '@solidjs/router';
 import { lazy } from 'solid-js';
 
 
@@ -70,13 +70,13 @@ export const checkPermissions = <T extends ExtendedRouteDefinition<string, any>>
   });
 };
 
-const routeLoader = (route: ExtendedRouteDefinition): RouteLoadFunc => (args) => {
-  if (!route.metadata) return route.load?.(args);
-  if (route.load === undefined) return { metadata: route.metadata };
+const routeLoader = (route: ExtendedRouteDefinition): RoutePreloadFunc => (args) => {
+  if (!route.metadata) return route.preload?.(args);
+  if (route.preload === undefined) return { metadata: route.metadata };
 
   return {
     metadata: route.metadata,
-    ...(route.load?.(args)),
+    ...(route.preload?.(args)),
   };
 };
 
@@ -99,7 +99,7 @@ export const exportRoutes = <T extends ExtendedRouteDefinition<string, any>>(rou
       ...route,
       children,
       component: route.component ?? (hasAuxRoutes(route) ? undefined : lazy(() => import('#pages/dashboard/FeatureNotAvailable'))),
-      load: routeLoader(route),
+      preload: routeLoader(route),
     });
   }
 

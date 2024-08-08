@@ -1,6 +1,6 @@
 import { createMemo, createResource, ErrorBoundary, For, InitializedResourceReturn, onCleanup, onMount, Suspense } from 'solid-js';
 import Widget from '#components/Widget';
-import { Action, GetRecentActionsResponse } from '#types/api/dashboard';
+import { ChannelActionApi, GetRecentActionsResponse } from '#types/api/dashboard';
 import ActionSwitch from '#components/widgets/RecentActionsWidget/ActionSwitch';
 import FetchFallback from '#components/FetchFallback';
 import { useSocket } from '#providers/SocketProvider';
@@ -10,20 +10,20 @@ import ErrorFallback from '#components/ErrorFallback';
 import style from '#styles/widgets/RecentActionsWidget.module.scss';
 
 
-const fetchRecentActions = async (): Promise<Action[]> => {
+const fetchRecentActions = async (): Promise<ChannelActionApi[]> => {
   const { data } = await makeRequest('/api/v1/dashboard/widgets/recent-actions', { schema: GetRecentActionsResponse });
 
   return data;
 };
 
-const RecentActionsBase: Component<{ actions: InitializedResourceReturn<Action[]> }> = (props) => {
+const RecentActionsBase: Component<{ actions: InitializedResourceReturn<ChannelActionApi[]> }> = (props) => {
   const [actions, { mutate: mutateActions }] = props.actions;
   const [socket] = useSocket();
 
 
   const sortedActions = createMemo(() => actions().sort((a, b) => b.date - a.date));
 
-  const pushAction = (action: Action) => {
+  const pushAction = (action: ChannelActionApi) => {
     mutateActions((actions) => [...actions, action]);
   };
 

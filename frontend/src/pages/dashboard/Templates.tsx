@@ -2,7 +2,7 @@ import DashboardInfoBar from '#components/DashboardInfoBar';
 import Button from '#components/Button';
 import TemplateTableWidget from '#components/widgets/TemplateTableWidget';
 import { batch, createSignal } from 'solid-js';
-import { Template } from '#types/api/templates';
+import { TemplateApi } from '#types/api/templates';
 import { useNotification } from '#providers/NotificationProvider';
 import TemplateEditor from '#components/TemplateEditor';
 import { useConfirmationBox } from '#providers/ConfirmationBoxProvider';
@@ -15,12 +15,12 @@ import style from '#styles/dashboard/Templates.module.scss';
 const Templates: RouteComponent = (props) => {
   const [editorOpen, setEditorOpen] = createSignal(false);
   const { open: openConfirmationBox } = useConfirmationBox();
-  const [template, setTemplate] = createSignal<Template | null>(null);
+  const [template, setTemplate] = createSignal<TemplateApi | null>(null);
   const [, { addNotification }] = useNotification();
   const [, { deleteTemplate: deleteProviderTemplate }] = useTemplates();
   const { popupApiError } = useErrorHandlers();
 
-  const deleteTemplate = async (template: Template) => {
+  const deleteTemplate = async (template: TemplateApi) => {
     openConfirmationBox({
       title: `Delete ${template.name}`,
       message: 'Are you sure you want to delete this template?',
@@ -28,9 +28,7 @@ const Templates: RouteComponent = (props) => {
     }).then(async (confirmed) => {
       if (!confirmed) return;
 
-      const response = await deleteProviderTemplate({
-        id: template.id,
-      });
+      const response = await deleteProviderTemplate(template.id);
 
       if (response.ok) {
         addNotification({
@@ -49,7 +47,7 @@ const Templates: RouteComponent = (props) => {
   };
 
 
-  const openEditor = (template: Template | null = null) => {
+  const openEditor = (template: TemplateApi | null = null) => {
     batch(() => {
       setTemplate(template);
       setEditorOpen(true);

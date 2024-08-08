@@ -1,5 +1,5 @@
 import { batch, createEffect, createResource, createSignal, ErrorBoundary, For, onCleanup, onMount, Suspense } from 'solid-js';
-import { CustomCommand, GetCustomCommandsPaginatedResponse } from '#types/api/commands';
+import { CustomCommandApi, GetCustomCommandsPaginatedResponse } from '#types/api/commands';
 import { useSocket } from '#providers/SocketProvider';
 import { makeRequest } from '#lib/fetch';
 import Command from '#components/Command';
@@ -57,7 +57,7 @@ const CommandTable: Component = () => {
     refetchCommands();
   };
 
-  const updateCommand = (command: CustomCommand) => {
+  const updateCommand = (command: CustomCommandApi) => {
     setCommands((commands) => ({ ...commands, data: commands.data.map((c) => c.id === command.id ? command : c) }));
   };
 

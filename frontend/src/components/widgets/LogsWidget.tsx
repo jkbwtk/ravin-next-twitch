@@ -1,7 +1,7 @@
 import { createResource, ErrorBoundary, For, onCleanup, onMount, Suspense } from 'solid-js';
 import { useSocket } from '#providers/SocketProvider';
 import Widget from '#components/Widget';
-import { GetMessagesResponse, Message as MessagePublic } from '#types/api/logs';
+import { GetMessagesResponse, MessageApi } from '#types/api/message';
 import { makeRequest } from '#lib/fetch';
 
 import style from '#styles/widgets/LogsWidget.module.scss';
@@ -10,7 +10,7 @@ import FetchFallback from '#components/FetchFallback';
 
 
 export type MessageProps = {
-  message: MessagePublic;
+  message: MessageApi;
 };
 
 const fetchMessages = async () => {
@@ -27,7 +27,7 @@ const LogsWidget: Component = () => {
 
   let tableRef = document.createElement('table');
 
-  const createMessage = (message: MessagePublic) => {
+  const createMessage = (message: MessageApi) => {
     setMessages((m) => [message, ...m.slice(0, 999)]);
   };
 

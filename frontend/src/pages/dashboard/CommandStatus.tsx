@@ -1,7 +1,7 @@
 import DashboardInfoBar from '#components/DashboardInfoBar';
 import { CustomCommandEditorProvider } from '#providers/CustomCommandEditorProvider';
 import { batch, createResource, For, onCleanup, onMount } from 'solid-js';
-import { CustomCommand, CustomCommandState, GetCustomCommandsStatusResponse } from '#types/api/commands';
+import { CustomCommandApi, CustomCommandState, GetCustomCommandsStatusResponse } from '#types/api/commands';
 import { useSocket } from '#providers/SocketProvider';
 import CommandStatusTile from '#components/CommandStatusTile';
 import { makeRequest } from '#lib/fetch';
@@ -25,7 +25,7 @@ const CommandStatus: RouteComponent = (props) => {
     initialValue: [],
   });
 
-  const createCommand = (command: CustomCommand) => {
+  const createCommand = (command: CustomCommandApi) => {
     batch(() => {
       setStatuses((s) => s.map((ss) => ({
         command: ss.command,
@@ -40,7 +40,7 @@ const CommandStatus: RouteComponent = (props) => {
     });
   };
 
-  const updateCommand = (command: CustomCommand) => {
+  const updateCommand = (command: CustomCommandApi) => {
     setStatuses((s) => s.map((c) => ({
       command: c.command.id === command.id ? command : c.command,
       lastUsed: 0,

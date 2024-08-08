@@ -8,6 +8,7 @@ export const SystemNotificationApi = createSelectSchema(systemNotificationsTable
   channelUserId: (schema) => schema.channelUserId.min(1),
   title: (schema) => schema.title.min(1).max(64),
   content: (schema) => schema.content.min(1).max(1024),
+  createdAt: () => z.coerce.date(),
 }).pick({
   id: true,
   channelUserId: true,

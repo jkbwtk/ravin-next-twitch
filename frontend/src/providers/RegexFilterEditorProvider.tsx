@@ -12,7 +12,7 @@ import Modal from '#components/Modal';
 import { useConfirmationBox } from '#providers/ConfirmationBoxProvider';
 import { SelectChangeEvent } from '@suid/material/Select';
 import { useErrorHandlers } from '#providers/ErrorHandlersProvider';
-import { Actions, DeleteRegexFilterReqBody, PatchRegexFilterReqBody, PostRegexFilterReqBody, RegexFilter } from '#types/api/filters';
+import { Actions, PatchRegexFilterReqBody, PostRegexFilterReqBody, RegexFilterApi } from '#types/api/filters';
 import TextArea from '#components/TextArea';
 import Input from '#components/Input';
 import { RegExpType } from '#types/regExp';
@@ -22,17 +22,17 @@ import style from '#styles/CustomCommandsEditorProvider.module.scss';
 
 export type RegexFilterEditorContextState = {
   open: boolean;
-  filter: Partial<RegexFilter>;
+  filter: Partial<RegexFilterApi>;
 };
 
 export type RegexFilterEditorContextValue = [
   state: RegexFilterEditorContextState,
   actions: {
-    open: (command?: Partial<RegexFilter>) => void;
+    open: (filter?: Partial<RegexFilterApi>) => void;
     close: () => void;
 
-    updateFilter: (timer: PatchRegexFilterReqBody) => void;
-    removeFilter: (timer: RegexFilter) => void;
+    updateFilter: (id: number, filter: PatchRegexFilterReqBody) => void;
+    removeFilter: (filter: RegexFilterApi) => void;
   }
 ];
 
@@ -69,7 +69,7 @@ export const RegexFilterEditorProvider: ParentComponent = (props) => {
 
   const [actionId, setActionId] = createSignal(Actions.Delete);
 
-  const open = (filter?: Partial<RegexFilter>) => {
+  const open = (filter?: Partial<RegexFilterApi>) => {
     batch(() => {
       setState({
         open: true,
@@ -106,8 +106,8 @@ export const RegexFilterEditorProvider: ParentComponent = (props) => {
     return response.ok;
   };
 
-  const updateFilter = async (filter: PatchRegexFilterReqBody): Promise<boolean> => {
-    const response = await fetch(`/api/v1/filters/regex`, {
+  const updateFilter = async (id: number, filter: PatchRegexFilterReqBody): Promise<boolean> => {
+    const response = await fetch(`/api/v1/filters/regex/${id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -125,13 +125,12 @@ export const RegexFilterEditorProvider: ParentComponent = (props) => {
     return response.ok;
   };
 
-  const deleteFilter = async (filter: DeleteRegexFilterReqBody): Promise<boolean> => {
-    const response = await fetch(`/api/v1/filters/regex`, {
+  const deleteFilter = async (id: number): Promise<boolean> => {
+    const response = await fetch(`/api/v1/filters/regex/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(filter),
     });
 
     if (!response.ok) {
@@ -144,7 +143,7 @@ export const RegexFilterEditorProvider: ParentComponent = (props) => {
     return response.ok;
   };
 
-  const removeFilter = async (filter: RegexFilter): Promise<boolean> => {
+  const removeFilter = async (filter: RegexFilterApi): Promise<boolean> => {
     const confirmed = await openConfirmationBox({
       title: 'Delete regex filter',
       message: 'Are you sure you want to delete this regex filter?',
@@ -153,9 +152,7 @@ export const RegexFilterEditorProvider: ParentComponent = (props) => {
 
     if (!confirmed) return false;
 
-    const ok = await deleteFilter({
-      id: filter.id,
-    });
+    const ok = await deleteFilter(filter.id);
 
     if (ok) {
       addNotification({
@@ -186,8 +183,7 @@ export const RegexFilterEditorProvider: ParentComponent = (props) => {
 
 
     const ok = state.filter.id ?
-      await updateFilter({
-        id: state.filter.id,
+      await updateFilter(state.filter.id, {
         regex: `/${regexPattern.value}/${regexFlags.value}`,
         action: parseInt(action.value),
         actionDuration: parseInt(actionDuration.value),

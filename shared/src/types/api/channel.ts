@@ -2,6 +2,8 @@ import { ChantingSettings } from '../database/columns';
 import { z } from 'zod';
 
 
+export { ChantingSettings };
+
 export const GetChantingSettingsResponse = z.object({
   data: ChantingSettings,
 });

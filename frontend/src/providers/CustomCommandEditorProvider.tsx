@@ -1,8 +1,7 @@
 import { batch, createContext, createSignal, For, useContext } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import {
-  CustomCommand,
-  DeleteCustomCommandReqBody,
+  CustomCommandApi,
   PatchCustomCommandReqBody,
   PostCustomCommandReqBody,
   UserLevel,
@@ -33,17 +32,17 @@ export const translateUserLevel = (userLevel: UserLevel): keyof typeof UserLevel
 
 export type CustomCommandEditorContextState = {
   open: boolean;
-  command: Partial<CustomCommand>;
+  command: Partial<CustomCommandApi>;
 };
 
 export type CustomCommandEditorContextValue = [
   state: CustomCommandEditorContextState,
   actions: {
-    open: (command?: Partial<CustomCommand>) => void;
+    open: (command?: Partial<CustomCommandApi>) => void;
     close: () => void;
 
-    updateCommand: (command: PatchCustomCommandReqBody) => void;
-    removeCommand: (command: CustomCommand) => void;
+    updateCommand: (id: number, command: PatchCustomCommandReqBody) => void;
+    removeCommand: (command: CustomCommandApi) => void;
   }
 ];
 
@@ -84,7 +83,7 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
   const [userLevel, setUserLevel] = createSignal(state.command.userLevel ?? UserLevel['Everyone']);
 
 
-  const open = (command?: Partial<CustomCommand>) => {
+  const open = (command?: Partial<CustomCommandApi>) => {
     batch(() => {
       setState({
         open: true,
@@ -121,8 +120,8 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
     return response.ok;
   };
 
-  const updateCommand = async (command: PatchCustomCommandReqBody): Promise<boolean> => {
-    const response = await fetch(`/api/v1/commands/custom`, {
+  const updateCommand = async (id: number, command: PatchCustomCommandReqBody): Promise<boolean> => {
+    const response = await fetch(`/api/v1/commands/custom/${id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -140,13 +139,12 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
     return response.ok;
   };
 
-  const deleteCommand = async (command: DeleteCustomCommandReqBody): Promise<boolean> => {
-    const response = await fetch(`/api/v1/commands/custom`, {
+  const deleteCommand = async (id: number): Promise<boolean> => {
+    const response = await fetch(`/api/v1/commands/custom/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(command),
     });
 
     if (!response.ok) {
@@ -159,7 +157,7 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
     return response.ok;
   };
 
-  const removeCommand = async (command: CustomCommand): Promise<boolean> => {
+  const removeCommand = async (command: CustomCommandApi): Promise<boolean> => {
     const confirmed = await openConfirmationBox({
       title: `Delete ${command.command}`,
       message: 'Are you sure you want to delete this command?',
@@ -168,7 +166,7 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
 
     if (!confirmed) return false;
 
-    const ok = await deleteCommand({ id: command.id });
+    const ok = await deleteCommand(command.id);
 
     if (ok) {
       addNotification({
@@ -199,8 +197,7 @@ export const CustomCommandEditorProvider: ParentComponent = (props) => {
     const cooldown = ev.target.elements.namedItem('cooldown') as HTMLInputElement;
 
     if (state.command.id) {
-      await updateCommand({
-        id: state.command.id,
+      await updateCommand(state.command.id, {
         command: command.value,
         templateId: template(),
         cooldown: parseInt(cooldown.value),

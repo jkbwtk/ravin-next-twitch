@@ -1,17 +1,17 @@
 import MaterialSymbol from '#components/MaterialSymbol';
 import TemplateButton from '#components/TemplateButton';
 import { Match, Switch } from 'solid-js';
-import { CommandTimer as CommandTimerType } from '#types/api/commands';
+import { CommandTimerApi } from '#types/api/commands';
 import { TableType } from '#components/widgets/CommandTimersTableWidget';
 import { useCommandTimerEditor } from '#providers/CommandTimerEditorProvider';
 import { TableCell, TableRow } from '@suid/material';
+import { useTemplates } from '#providers/TemplatesProvider';
 
 import style from '#styles/widgets/TableWidget.module.scss';
-import { useTemplates } from '#providers/TemplatesProvider';
 
 
 export type CommandTimerProps = {
-  timer: CommandTimerType;
+  timer: CommandTimerApi;
   tableType: TableType;
 };
 
@@ -20,8 +20,7 @@ const CommandTimer: Component<CommandTimerProps> = (props) => {
   const [, { getTemplateById }] = useTemplates();
 
   const toggleEnabled = () => {
-    updateTimer({
-      id: props.timer.id,
+    updateTimer(props.timer.id, {
       enabled: !props.timer.enabled,
     });
   };

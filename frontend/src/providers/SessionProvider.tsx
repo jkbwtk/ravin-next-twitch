@@ -2,7 +2,7 @@ import { useNotification } from '#providers/NotificationProvider';
 import { batch, createContext, createSignal, onMount, ParentComponent, Show, useContext } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { FrontendUser, GetSession, Session } from '#types/api/auth';
-import { GetSystemNotificationsResponse, SystemNotification } from '#types/api/systemNotifications';
+import { GetSystemNotificationsResponse, SystemNotificationApi } from '#types/api/systemNotifications';
 import DotSpinner from '#components/DotSpinner';
 import { makeRequest } from '#lib/fetch';
 import { isDev } from 'solid-js/web';
@@ -16,8 +16,8 @@ import style from '#styles/SessionProvider.module.scss';
 export type SessionContextState = {
   user: FrontendUser | null;
   config: Config;
-  notifications: SystemNotification[];
-  unreadNotifications: SystemNotification[];
+  notifications: SystemNotificationApi[];
+  unreadNotifications: SystemNotificationApi[];
 };
 
 export type SessionContextValue = [
@@ -29,10 +29,10 @@ export type SessionContextValue = [
 
     isAuthenticated: () => boolean;
 
-    fetchSystemNotifications: () => Promise<SystemNotification[] | null>
-    markNotificationAsRead: (notification: SystemNotification) => Promise<void>;
+    fetchSystemNotifications: () => Promise<SystemNotificationApi[] | null>
+    markNotificationAsRead: (notification: SystemNotificationApi) => Promise<void>;
     markAllNotificationsAsRead: () => Promise<void>;
-    pushNotification: (notification: SystemNotification) => void;
+    pushNotification: (notification: SystemNotificationApi) => void;
     setNotificationsAsRead: (notificationIds: number[]) => void;
   }
 ];
@@ -143,7 +143,7 @@ export const SessionProvider: ParentComponent = (props) => {
     }
   };
 
-  const fetchSystemNotifications = async (): Promise<SystemNotification[]> => {
+  const fetchSystemNotifications = async (): Promise<SystemNotificationApi[]> => {
     try {
       const { data } = await makeRequest('/api/v1/notifications', { schema: GetSystemNotificationsResponse, cache: 'no-store' });
       const unread = data.filter((notification) => !notification.read);
@@ -173,7 +173,7 @@ export const SessionProvider: ParentComponent = (props) => {
     }
   };
 
-  const markNotificationAsRead = async (notification: SystemNotification) => {
+  const markNotificationAsRead = async (notification: SystemNotificationApi) => {
     const response = await fetch(`/api/v1/notifications/read`, {
       method: 'POST',
       headers: {
@@ -210,7 +210,7 @@ export const SessionProvider: ParentComponent = (props) => {
     }
   };
 
-  const pushNotification = (notification: SystemNotification) => {
+  const pushNotification = (notification: SystemNotificationApi) => {
     batch(() => {
       setState('notifications', (prev) => [...prev, notification]);
 

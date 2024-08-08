@@ -2,7 +2,7 @@ import MaterialSymbol from '#components/MaterialSymbol';
 import TemplateButton from '#components/TemplateButton';
 import TableRow from '@suid/material/TableRow/TableRow';
 import TableCell from '@suid/material/TableCell/TableCell';
-import { Template as TemplateType } from '#types/api/templates';
+import { TemplateApi } from '#types/api/templates';
 import HighlightedCode from '#components/HighlightedCode';
 import { For } from 'solid-js';
 import Pill from '#components/Pill';
@@ -12,9 +12,9 @@ import style from '#styles/widgets/TableWidget.module.scss';
 
 
 export type TemplateProps = {
-  template: TemplateType;
-  openEditor: (template: TemplateType | null) => void;
-  deleteTemplate: (template: TemplateType) => void;
+  template: TemplateApi;
+  openEditor: (template: TemplateApi | null) => void;
+  deleteTemplate: (template: TemplateApi) => void;
 };
 
 

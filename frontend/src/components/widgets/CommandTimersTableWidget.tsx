@@ -1,5 +1,5 @@
 import { batch, createEffect, createResource, createSignal, ErrorBoundary, For, onCleanup, onMount, Suspense } from 'solid-js';
-import { CommandTimer as CommandTimerType, GetCommandTimersPaginatedResponse } from '#types/api/commands';
+import { CommandTimerApi, GetCommandTimersPaginatedResponse } from '#types/api/commands';
 import { useSocket } from '#providers/SocketProvider';
 import Widget from '#components/Widget';
 import CommandTimer from '#components/CommandTimer';
@@ -51,7 +51,7 @@ const CommandTimersTable: Component = () => {
     refetchTimers();
   };
 
-  const updateCommand = (timer: CommandTimerType) => {
+  const updateCommand = (timer: CommandTimerApi) => {
     setTimers((timers) => ({ ...timers, data: timers.data.map((c) => c.id === timer.id ? timer : c) }));
   };
 

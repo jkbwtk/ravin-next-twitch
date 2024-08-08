@@ -3,7 +3,7 @@ import TemplateButton from '#components/TemplateButton';
 import { Match, Switch } from 'solid-js';
 import { TableType } from '#components/widgets/CommandTimersTableWidget';
 import { TableCell, TableRow } from '@suid/material';
-import { Actions, RegexFilter as RegexFilterType } from '#types/api/filters';
+import { Actions, RegexFilterApi } from '#types/api/filters';
 import HighlightedCode from '#components/HighlightedCode';
 import { useRegexFilterEditor } from '#providers/RegexFilterEditorProvider';
 
@@ -11,7 +11,7 @@ import style from '#styles/widgets/TableWidget.module.scss';
 
 
 export type RegexFilterProps = {
-  filter: RegexFilterType;
+  filter: RegexFilterApi;
   tableType: TableType;
 };
 
@@ -19,8 +19,7 @@ const RegexFilter: Component<RegexFilterProps> = (props) => {
   const [, { open, updateFilter, removeFilter }] = useRegexFilterEditor();
 
   const toggleEnabled = () => {
-    updateFilter({
-      id: props.filter.id,
+    updateFilter(props.filter.id, {
       enabled: !props.filter.enabled,
     });
   };

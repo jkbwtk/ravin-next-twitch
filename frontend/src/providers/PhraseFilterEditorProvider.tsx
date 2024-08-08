@@ -13,7 +13,7 @@ import { useConfirmationBox } from '#providers/ConfirmationBoxProvider';
 import { SelectChangeEvent } from '@suid/material/Select';
 import { useErrorHandlers } from '#providers/ErrorHandlersProvider';
 import InputCheckbox from '#components/InputCheckbox';
-import { Actions, DeletePhraseFilterReqBody, PatchPhraseFilterReqBody, PhraseFilter, PostPhraseFilterReqBody } from '#types/api/filters';
+import { Actions, PatchPhraseFilterReqBody, PhraseFilterApi, PostPhraseFilterReqBody } from '#types/api/filters';
 import TextArea from '#components/TextArea';
 
 import style from '#styles/CustomCommandsEditorProvider.module.scss';
@@ -21,17 +21,17 @@ import style from '#styles/CustomCommandsEditorProvider.module.scss';
 
 export type PhraseFilterEditorContextState = {
   open: boolean;
-  filter: Partial<PhraseFilter>;
+  filter: Partial<PhraseFilterApi>;
 };
 
 export type PhraseFilterEditorContextValue = [
   state: PhraseFilterEditorContextState,
   actions: {
-    open: (command?: Partial<PhraseFilter>) => void;
+    open: (command?: Partial<PhraseFilterApi>) => void;
     close: () => void;
 
-    updateFilter: (timer: PatchPhraseFilterReqBody) => void;
-    removeFilter: (timer: PhraseFilter) => void;
+    updateFilter: (id: number, timer: PatchPhraseFilterReqBody) => void;
+    removeFilter: (timer: PhraseFilterApi) => void;
   }
 ];
 
@@ -68,7 +68,7 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
 
   const [actionId, setActionId] = createSignal(Actions.Delete);
 
-  const open = (filter?: Partial<PhraseFilter>) => {
+  const open = (filter?: Partial<PhraseFilterApi>) => {
     batch(() => {
       setState({
         open: true,
@@ -105,8 +105,8 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
     return response.ok;
   };
 
-  const updateFilter = async (filter: PatchPhraseFilterReqBody): Promise<boolean> => {
-    const response = await fetch(`/api/v1/filters/phrase`, {
+  const updateFilter = async (id: number, filter: PatchPhraseFilterReqBody): Promise<boolean> => {
+    const response = await fetch(`/api/v1/filters/phrase/${id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -124,13 +124,12 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
     return response.ok;
   };
 
-  const deleteFilter = async (filter: DeletePhraseFilterReqBody): Promise<boolean> => {
-    const response = await fetch(`/api/v1/filters/phrase`, {
+  const deleteFilter = async (id: number): Promise<boolean> => {
+    const response = await fetch(`/api/v1/filters/phrase/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(filter),
     });
 
     if (!response.ok) {
@@ -143,7 +142,7 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
     return response.ok;
   };
 
-  const removeFilter = async (filter: PhraseFilter): Promise<boolean> => {
+  const removeFilter = async (filter: PhraseFilterApi): Promise<boolean> => {
     const confirmed = await openConfirmationBox({
       title: 'Delete phrase filter',
       message: 'Are you sure you want to delete this phrase filter?',
@@ -152,9 +151,7 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
 
     if (!confirmed) return false;
 
-    const ok = await deleteFilter({
-      id: filter.id,
-    });
+    const ok = await deleteFilter(filter.id);
 
     if (ok) {
       addNotification({
@@ -187,8 +184,7 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
 
 
     const ok = state.filter.id ?
-      await updateFilter({
-        id: state.filter.id,
+      await updateFilter(state.filter.id, {
         phrase: phrase.value,
         caseSensitive: caseSensitive.checked,
         ignoreWhitespace: ignoreWhitespace.checked,

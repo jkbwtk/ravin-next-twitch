@@ -1,6 +1,6 @@
 import { TableType } from '#components/widgets/CommandTimersTableWidget';
 import { TableCell, TableRow } from '@suid/material';
-import { BehaviorProfile } from '#types/api/behaviorProfiles';
+import { BehaviorProfileApi } from '#types/api/behaviorProfiles';
 import MaterialSymbol from '#components/MaterialSymbol';
 import TemplateButton from '#components/TemplateButton';
 import { Match, Switch } from 'solid-js';
@@ -10,7 +10,7 @@ import style from '#styles/widgets/TableWidget.module.scss';
 
 
 export type ProfileProps = {
-  profile: BehaviorProfile;
+  profile: BehaviorProfileApi;
   tableType: TableType;
 };
 
@@ -19,11 +19,17 @@ const Profile: Component<ProfileProps> = (props) => {
     console.log('toggleEnabled');
   };
 
-  const activate = (profile: BehaviorProfile) => { };
+  const activate = (profile: BehaviorProfileApi) => {
+    console.log(profile);
+  };
 
-  const open = (profile: BehaviorProfile) => { };
+  const open = (profile: BehaviorProfileApi) => {
+    console.log(profile);
+  };
 
-  const removeCommand = (profile: BehaviorProfile) => { };
+  const removeCommand = (profile: BehaviorProfileApi) => {
+    console.log(profile);
+  };
 
   return (
     <TableRow>

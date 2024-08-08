@@ -1,5 +1,5 @@
 import MaterialSymbol from '#components/MaterialSymbol';
-import { Template, TemplateEnvironments } from '#types/api/templates';
+import { TemplateApi, TemplateEnvironments } from '#types/api/templates';
 import { MenuItem } from '@suid/material';
 import { For, Show } from 'solid-js';
 
@@ -7,12 +7,12 @@ import style from '#styles/TemplateMenuItems.module.scss';
 
 
 export type TemplateMenuItemsProps = {
-  templates: Template[];
+  templates: TemplateApi[];
   compatibleEnvironment: TemplateEnvironments;
 };
 
 const TemplateMenuItems: Component<TemplateMenuItemsProps> = (props) => {
-  const isCompatible = (template: Template) => template.environments.includes(props.compatibleEnvironment);
+  const isCompatible = (template: TemplateApi) => template.environments.includes(props.compatibleEnvironment);
 
   const sortedTemplates = () => props.templates.toSorted((a, b) => {
     if (isCompatible(a) && !isCompatible(b)) {

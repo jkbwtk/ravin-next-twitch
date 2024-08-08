@@ -1,11 +1,11 @@
 import MaterialSymbol from '#components/MaterialSymbol';
 import ActionElementBase from '#components/widgets/RecentActionsWidget/ActionElementBase';
-import { Action } from '#types/api/dashboard';
+import { ChannelActionApi } from '#types/api/dashboard';
 
 import style from '#styles/widgets/RecentActionsWidget.module.scss';
 
 
-const ActionBan: Component<Action & { type: 'ban' }> = (props) => {
+const ActionBan: Component<ChannelActionApi & { type: 'ban' }> = (props) => {
   return (
     <div class={style.entry}>
       <MaterialSymbol symbol='dangerous' color='primary' size='big' />
