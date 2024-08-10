@@ -151,7 +151,7 @@ export class Bot {
         return;
       }
 
-      const thread = this.channels.get(channel.slice(1));
+      const thread = this.channels.get(converted.channelUserId);
 
       if (!thread) {
         logger.warn('Channel thread for [%s] not found', channel, { label: ['Bot', 'handleMessage'] });
@@ -171,7 +171,7 @@ export class Bot {
       label: ['Bot', 'handleTimeout'],
     });
 
-    const thread = this.channels.get(channel.slice(1));
+    const thread = this.channels.get(userstate['room-id']!);
     if (!thread) {
       logger.warn('Channel thread for [%s] not found', channel, { label: ['Bot', 'handleTimeout'] });
       return;
@@ -191,7 +191,7 @@ export class Bot {
   private handleBan = async (channel: string, username: string, reason: string, userstate: BanUserstate) => {
     logger.debug('<%s> [%s] has been banned: [%s]', channel, username, reason, { label: ['Bot', 'handleBan'] });
 
-    const thread = this.channels.get(channel.slice(1));
+    const thread = this.channels.get(userstate['room-id']!);
     if (!thread) {
       logger.warn('Channel thread for [%s] not found', channel, { label: ['Bot', 'handleBan'] });
       return;
@@ -213,7 +213,8 @@ export class Bot {
       label: ['Bot', 'handleDelete'],
     });
 
-    const thread = this.channels.get(channel.slice(1));
+    // @ts-expect-error error in tmi types
+    const thread = this.channels.get(userstate['room-id']);
     if (!thread) {
       logger.warn('Channel thread for [%s] not found', channel, { label: ['Bot', 'handleDelete'] });
       return;
@@ -261,17 +262,17 @@ export class Bot {
     }
   }
 
-  public static async joinChannel(id: string): Promise<boolean> {
+  public static async joinChannel(channelUserId: string): Promise<boolean> {
     try {
       const instance = await Bot.getInstance();
-      const channel = await ChannelController.getByUserId(id);
+      const channel = await ChannelController.getByUserId(channelUserId);
 
       if (channel === null) {
-        throw new Error(`Channel [${id}] not found`);
+        throw new Error(`Channel [${channelUserId}] not found`);
       }
 
       if (instance.client.getChannels().includes(`#${channel.user.login}`)) {
-        if (instance.channels.has(channel.user.login)) return true;
+        if (instance.channels.has(channel.userId)) return true;
         else {
           logger.debug('Channel [%s] already joined, but not in channels map', channel.user.login, { label: ['Bot', 'joinChannel'] });
         }
@@ -279,117 +280,96 @@ export class Bot {
 
       const channelThread = new ChannelThread(instance, channel, {});
       await channelThread.init();
-      instance.channels.set(channel.user.login, channelThread);
+      instance.channels.set(channelUserId, channelThread);
 
       logger.debug('Joining channel [%s]', channel.user.login, { label: ['Bot', 'joinChannel'] });
       await Bot.waitForConnection();
       await instance.client.join(channel.user.login);
-      await BotActionController.createFromType(id, BotActionType.ChannelJoined, channel.user.displayName);
+      await BotActionController.createFromType(channelUserId, BotActionType.ChannelJoined, channel.user.displayName);
       logger.debug('Joined channel [%s]', channel.user.login, { label: ['Bot', 'joinChannel'] });
 
       return true;
     } catch (err) {
-      logger.error('Failed to join channel [%s]', id, { label: ['Bot', 'joinChannel'], error: err });
+      logger.error('Failed to join channel [%s]', channelUserId, { label: ['Bot', 'joinChannel'], error: err });
       return false;
     }
   }
 
-  public static async leaveChannel(id: string): Promise<boolean> {
+  public static async leaveChannel(channelUserId: string): Promise<boolean> {
     try {
       const instance = await Bot.getInstance();
-      const channel = await ChannelController.getByUserId(id);
+      const channel = await ChannelController.getByUserId(channelUserId);
 
       if (channel === null) {
-        throw new Error(`Channel [${id}] not found`);
+        throw new Error(`Channel [${channelUserId}] not found`);
       }
 
       if (!instance.client.getChannels().includes(`#${channel.user.login}`)) {
-        if (!instance.channels.has(channel.user.login)) return true;
+        if (!instance.channels.has(channelUserId)) return true;
         else {
           logger.debug('Channel [%s] already left, but still in channels map', channel.user.login, { label: ['Bot', 'leaveChannel'] });
         }
       }
 
       logger.debug('Leaving channel [%s]', channel.user.login, { label: ['Bot', 'leaveChannel'] });
-      instance.channels.get(channel.user.login)?.destroy();
-      instance.channels.delete(channel.user.login);
+      instance.channels.get(channelUserId)?.destroy();
+      instance.channels.delete(channelUserId);
       await instance.client.part(channel.user.login);
-      await BotActionController.createFromType(id, BotActionType.ChannelLeft, channel.user.displayName);
+      await BotActionController.createFromType(channelUserId, BotActionType.ChannelLeft, channel.user.displayName);
       logger.debug('Left channel [%s]', channel.user.login, { label: ['Bot', 'leaveChannel'] });
 
       return true;
     } catch (err) {
-      logger.error('Failed to leave channel [%s]', id, { label: ['Bot', 'leaveChannel'], error: err });
+      logger.error('Failed to leave channel [%s]', channelUserId, { label: ['Bot', 'leaveChannel'], error: err });
       return false;
     }
   }
 
-  public static getChannelThread(username: string): ChannelThread | undefined {
+  public static getChannelThread(channelUserId: string): ChannelThread | undefined {
     const instance = Bot.instance;
     if (!instance) return undefined;
 
-    return instance.channels.get(username);
+    return instance.channels.get(channelUserId);
   }
 
-  public static async reloadChannelCommands(channelId: string): Promise<void> {
-    const channel = await ChannelController.getByUserId(channelId);
-
-    if (channel === null) {
-      logger.warn('Channel [%s] not found', channelId, { label: ['Bot', 'reloadChannelCommands'] });
-      return;
-    }
-
-    const channelThread = Bot.getChannelThread(channel.user.login);
+  public static async reloadChannelCommands(channelUserId: string): Promise<void> {
+    const channelThread = Bot.getChannelThread(channelUserId);
 
     if (!channelThread) {
-      logger.warn('Channel thread for [%s] not found', channel.user.login, { label: ['Bot', 'reloadChannelCommands'] });
+      logger.warn('Channel thread [%s] not found', channelUserId, { label: ['Bot', 'reloadChannelCommands'] });
       return;
     }
 
     await channelThread.commandHandler.syncCustomCommands();
   }
 
-  public static async reloadChannelChannel(channelId: string): Promise<void> {
-    const channel = await ChannelController.getByUserId(channelId);
-
-    if (channel === null) {
-      logger.warn('Channel [%s] not found', channelId, { label: ['Bot', 'reloadChannelChannel'] });
-      return;
-    }
-
-    const channelThread = Bot.getChannelThread(channel.user.login);
+  public static async reloadChannelChannel(channelUserId: string): Promise<void> {
+    const channelThread = Bot.getChannelThread(channelUserId);
 
     if (!channelThread) {
-      logger.warn('Channel thread for [%s] not found', channel.user.login, { label: ['Bot', 'reloadChannelChannel'] });
+      logger.warn('Channel thread [%s] not found', channelUserId, { label: ['Bot', 'reloadChannelChannel'] });
       return;
     }
 
     await channelThread.syncChannel();
   }
 
-  public static async reloadChannelCommandTimers(channelId: string): Promise<void> {
-    const channel = await ChannelController.getByUserId(channelId);
-
-    if (channel === null) {
-      logger.warn('Channel [%s] not found', channelId, { label: ['Bot', 'reloadChannelCommandTimers'] });
-      return;
-    }
-
-    const channelThread = Bot.getChannelThread(channel.user.login);
+  public static async reloadChannelCommandTimers(channelUserId: string): Promise<void> {
+    const channelThread = Bot.getChannelThread(channelUserId);
 
     if (!channelThread) {
-      logger.warn('Channel thread for [%s] not found', channel.user.login, { label: ['Bot', 'reloadChannelCommandTimers'] });
+      logger.warn('Channel thread for [%s] not found', channelUserId, { label: ['Bot', 'reloadChannelCommandTimers'] });
       return;
     }
 
     await channelThread.commandTimerHandler.syncCommandTimers();
   }
 
-  public static async updateChannelPhraseFilter(channelId: string, filter: PhraseFilter): Promise<void> {
-    const channel = await ChannelController.getByUserId(channelId);
+  public static async updateChannelPhraseFilter(channelUserId: string, filter: PhraseFilter): Promise<void> {
+    const channel = await ChannelController.getByUserId(channelUserId);
 
     if (channel === null) {
-      logger.warn('Channel [%s] not found', channelId, { label: ['Bot', 'updateChannelPhraseFilter'] });
+      logger.warn('Channel [%s] not found', channelUserId, { label: ['Bot', 'updateChannelPhraseFilter'] });
       return;
     }
 
@@ -403,11 +383,11 @@ export class Bot {
     channelThread.phraseFilterHandler.updateFilter(filter);
   }
 
-  public static async updateChannelRegexFilter(channelId: string, filter: RegexFilter): Promise<void> {
-    const channel = await ChannelController.getByUserId(channelId);
+  public static async updateChannelRegexFilter(channelUserId: string, filter: RegexFilter): Promise<void> {
+    const channel = await ChannelController.getByUserId(channelUserId);
 
     if (channel === null) {
-      logger.warn('Channel [%s] not found', channelId, { label: ['Bot', 'updateChannelRegexFilter'] });
+      logger.warn('Channel [%s] not found', channelUserId, { label: ['Bot', 'updateChannelRegexFilter'] });
       return;
     }
 
@@ -421,11 +401,11 @@ export class Bot {
     channelThread.regexFilterHandler.updateFilter(filter);
   }
 
-  public static async deleteChannelPhraseFilter(channelId: string, filterId: number): Promise<void> {
-    const channel = await ChannelController.getByUserId(channelId);
+  public static async deleteChannelPhraseFilter(channelUserId: string, filterId: number): Promise<void> {
+    const channel = await ChannelController.getByUserId(channelUserId);
 
     if (channel === null) {
-      logger.warn('Channel [%s] not found', channelId, { label: ['Bot', 'deleteChannelPhraseFilter'] });
+      logger.warn('Channel [%s] not found', channelUserId, { label: ['Bot', 'deleteChannelPhraseFilter'] });
       return;
     }
 
@@ -439,11 +419,11 @@ export class Bot {
     channelThread.phraseFilterHandler.deleteFilter(filterId);
   }
 
-  public static async deleteChannelRegexFilter(channelId: string, filterId: number): Promise<void> {
-    const channel = await ChannelController.getByUserId(channelId);
+  public static async deleteChannelRegexFilter(channelUserId: string, filterId: number): Promise<void> {
+    const channel = await ChannelController.getByUserId(channelUserId);
 
     if (channel === null) {
-      logger.warn('Channel [%s] not found', channelId, { label: ['Bot', 'deleteChannelRegexFilter'] });
+      logger.warn('Channel [%s] not found', channelUserId, { label: ['Bot', 'deleteChannelRegexFilter'] });
       return;
     }
 
