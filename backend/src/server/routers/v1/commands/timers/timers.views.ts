@@ -144,7 +144,7 @@ export const getCommandTimersStatusView = new ExpressStack()
   .use(validateResponse(GetCommandTimersStatusResponse))
   .use(async (req, res) => {
     try {
-      const channelThread = Bot.getChannelThread(req.user.login);
+      const channelThread = Bot.getChannelThread(req.user.id);
 
       if (channelThread === undefined) {
         throw new Error(`Failed to get command timer status for user ${req.user.login}`);

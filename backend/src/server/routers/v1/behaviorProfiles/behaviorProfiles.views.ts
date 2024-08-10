@@ -29,7 +29,7 @@ export const getBehaviorProfilesStatus = new ExpressStack()
   .use(validateResponse(GetBehaviorProfilesStatusResponse))
   .use(async (req, res) => {
     try {
-      const channelThread = Bot.getChannelThread(req.user.login);
+      const channelThread = Bot.getChannelThread(req.user.id);
 
       if (!channelThread) {
         throw new ServerError(HttpCodes.BadRequest, 'Channel thread not found');

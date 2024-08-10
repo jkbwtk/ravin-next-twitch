@@ -145,7 +145,7 @@ export const getCustomCommandsStatusView = new ExpressStack()
   .use(validateResponse(GetCustomCommandsStatusResponse))
   .use(async (req, res) => {
     try {
-      const channelThread = Bot.getChannelThread(req.user.login);
+      const channelThread = Bot.getChannelThread(req.user.id);
       if (channelThread === undefined) {
         throw new ServerError(HttpCodes.InternalServerError, `Channel thread for user ${req.user.login} not found`);
       }

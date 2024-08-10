@@ -28,7 +28,7 @@ export const getModeratorsView = new ExpressStack()
   .usePreflight(authenticated)
   .use(async (req, res) => {
     try {
-      const channelThread = Bot.getChannelThread(req.user.login);
+      const channelThread = Bot.getChannelThread(req.user.id);
       if (channelThread === undefined) {
         res.json({ data: [] });
         return;
