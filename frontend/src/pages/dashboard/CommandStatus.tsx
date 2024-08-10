@@ -26,38 +26,32 @@ const CommandStatus: RouteComponent = (props) => {
   });
 
   const createCommand = (command: CustomCommandApi) => {
-    batch(() => {
-      setStatuses((s) => s.map((ss) => ({
-        command: ss.command,
-        lastUsed: 0,
-        lastUsedBy: undefined,
-      })));
-
-      setStatuses((s) => [...s, {
-        command: command,
-        lastUsed: 0,
-      }]);
-    });
+    setStatuses((s) => [...s, {
+      command: command,
+      lastUsed: 0,
+    }]);
   };
 
   const updateCommand = (command: CustomCommandApi) => {
-    setStatuses((s) => s.map((c) => ({
-      command: c.command.id === command.id ? command : c.command,
-      lastUsed: 0,
-      lastUsedBy: undefined,
-    })));
+    if (command.enabled === false) {
+      return removeCommand(command.id);
+    }
+    const exists = statuses().find((s) => s.command.id === command.id);
+
+    if (!exists) {
+      return createCommand(command);
+    }
+
+    setStatuses((s) =>
+      s.map((c) => ({
+        command: c.command.id === command.id ? command : c.command,
+        lastUsed: c.command.id === command.id ? 0 : c.lastUsed,
+        lastUsedBy: c.command.id === command.id ? undefined : c.lastUsedBy,
+      })));
   };
 
   const removeCommand = (commandId: number) => {
-    batch(() => {
-      setStatuses((s) => s.map((ss) => ({
-        command: ss.command,
-        lastUsed: 0,
-        lastUsedBy: undefined,
-      })));
-
-      setStatuses((s) => s.filter((c) => c.command.id !== commandId));
-    });
+    setStatuses((s) => s.filter((c) => c.command.id !== commandId));
   };
 
   const executeCommand = (status: CustomCommandState) => {
