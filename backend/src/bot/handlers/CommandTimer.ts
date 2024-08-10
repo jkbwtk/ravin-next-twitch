@@ -27,7 +27,7 @@ export class CommandTimerInstance implements AutoWirable {
 
   private isolate: Isolate;
 
-  constructor(public __parent: ClassInstance, private timer: CommandTimer) {
+  constructor(public __parent: ClassInstance, public readonly timer: CommandTimer) {
     this.client = wire(this, Client);
     this.channelThread = wire(this, ChannelThread);
 

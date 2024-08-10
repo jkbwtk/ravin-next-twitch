@@ -31,7 +31,15 @@ export class PhraseFilterHandler implements AutoWirable {
   }
 
   public async init(): Promise<void> {
-    await this.syncFilters();
+    await this.loadAll();
+
+    this.registerSignalHandlers();
+  }
+
+  public destroy(): void {
+    this.unregisterSignalHandlers();
+
+    this.removeAll();
   }
 
   /**
@@ -163,20 +171,48 @@ export class PhraseFilterHandler implements AutoWirable {
     return 100 * Math.max(0, filter.length - length) / filter.length;
   }
 
-  public async syncFilters(): Promise<void> {
+  public add = (filter: PhraseFilter | null): void => {
+    if (filter === null) return;
+    this.filters.set(filter.id, filter);
+  };
+
+  public remove = (filter: PhraseFilter | null): void => {
+    if (filter === null) return;
+    this.filters.delete(filter.id);
+  };
+
+  public update = (filter: PhraseFilter | null): void => {
+    if (filter === null) return;
+
+    this.remove(filter);
+    this.add(filter);
+  };
+
+  public removeAll(): void {
+    this.filters.clear();
+  }
+
+  public async loadAll(): Promise<void> {
     const filters = await PhraseFilterController.getByUserId(this.channelThread.channel.user.id);
 
-    this.filters.clear();
-    for (const filter of filters) {
-      this.filters.set(filter.id, filter);
-    }
+    this.removeAll();
+    filters.forEach((filter) => this.add(filter));
   }
 
-  updateFilter(filter: PhraseFilter): void {
-    this.filters.set(filter.id, filter);
+  public loadList(filters: PhraseFilter[]): void {
+    this.removeAll();
+    filters.forEach((filter) => this.add(filter));
   }
 
-  deleteFilter(filterId: number): void {
-    this.filters.delete(filterId);
+  private registerSignalHandlers(): void {
+    PhraseFilterController.$signals.registerAfter('create', this.add);
+    PhraseFilterController.$signals.registerAfter('update', this.remove);
+    PhraseFilterController.$signals.registerAfter('delete', this.remove);
+  }
+
+  private unregisterSignalHandlers(): void {
+    PhraseFilterController.$signals.unregisterAfter('create', this.add);
+    PhraseFilterController.$signals.unregisterAfter('update', this.remove);
+    PhraseFilterController.$signals.unregisterAfter('delete', this.remove);
   }
 }

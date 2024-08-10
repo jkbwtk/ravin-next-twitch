@@ -93,10 +93,17 @@ export class ChannelThread implements AutoWirable {
     await this.commandTimerHandler.init();
     await this.phraseFilterHandler.init();
     await this.regexFilterHandler.init();
+
+    this.registerSignalHandlers();
   }
 
   public destroy(): void {
+    this.unregisterSignalHandlers();
+
+    this.commandHandler.destroy();
     this.commandTimerHandler.destroy();
+    this.phraseFilterHandler.destroy();
+    this.regexFilterHandler.destroy();
 
     this.jobs.forEach((job) => job.stop());
     this.jobs.clear();
@@ -257,5 +264,13 @@ export class ChannelThread implements AutoWirable {
     }
 
     this.channel = channel;
+  }
+
+  private registerSignalHandlers(): void {
+    ChannelController.$signals.registerAfter('update', this.syncChannel);
+  }
+
+  private unregisterSignalHandlers(): void {
+    ChannelController.$signals.unregisterAfter('update', this.syncChannel);
   }
 }

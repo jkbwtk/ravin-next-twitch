@@ -25,7 +25,7 @@ export class CustomCommand implements AutoWirable {
   private lastUsed = 0;
   private lastUsedBy?: string;
 
-  constructor(public __parent: ClassInstance, private command: Command) {
+  constructor(public __parent: ClassInstance, public readonly command: Command) {
     this.client = wire(this, Client);
     this.channelThread = wire(this, ChannelThread);
 

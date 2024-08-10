@@ -3,7 +3,7 @@ import { CommandTimerInstance } from '#bot/handlers/CommandTimer';
 import { CommandTimerController } from '#database/controllers/CommandTImerController';
 import { ExtendedMap } from '#lib/ExtendedMap';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
-import { Message } from '#types/database/tables';
+import { CommandTimer, Message } from '#types/database/tables';
 
 
 export class CommandTimerHandler implements AutoWirable {
@@ -16,11 +16,15 @@ export class CommandTimerHandler implements AutoWirable {
   }
 
   public async init(): Promise<void> {
-    await this.syncCommandTimers();
+    await this.loadAll();
+
+    this.registerSignalHandlers();
   }
 
   public destroy(): void {
-    this.clearCommandTimers();
+    this.unregisterSignalHandlers();
+
+    this.removeAll();
   }
 
   public async processMessage(self: boolean, message: Message): Promise<void> {
@@ -29,22 +33,57 @@ export class CommandTimerHandler implements AutoWirable {
     }
   }
 
-  public async syncCommandTimers(): Promise<void> {
-    const timers = await CommandTimerController.getByUserId(this.channelThread.channel.user.id);
+  public add = (timer: CommandTimer | null): void => {
+    if (timer === null) return;
+    if (timer.enabled === false) return;
 
-    this.clearCommandTimers();
-    for (const timer of timers) {
-      if (timer.enabled === false) continue;
+    this.commandTimers.set(timer.name, new CommandTimerInstance(this, timer));
+  };
 
-      this.commandTimers.set(timer.name, new CommandTimerInstance(this, timer));
-    }
-  }
+  public remove = (timer: CommandTimer | null): void => {
+    if (timer === null) return;
 
-  public clearCommandTimers(): void {
-    for (const commandTimer of this.commandTimers.values()) {
+    const commandTimer = this.commandTimers.get(timer.name);
+
+    if (commandTimer) {
       commandTimer.destroy();
     }
 
-    this.commandTimers.clear();
+    this.commandTimers.delete(timer.name);
+  };
+
+  public update = (timer: CommandTimer | null): void => {
+    if (timer === null) return;
+
+    this.remove(timer);
+    this.add(timer);
+  };
+
+  public removeAll(): void {
+    this.commandTimers.forEach((commandTimer) => this.remove(commandTimer.timer));
+  }
+
+  public async loadAll(): Promise<void> {
+    const timers = await CommandTimerController.getByUserId(this.channelThread.channel.user.id);
+
+    this.removeAll();
+    timers.forEach((timer) => this.add(timer));
+  }
+
+  public loadList(timers: CommandTimer[]): void {
+    this.removeAll();
+    timers.forEach((timer) => this.add(timer));
+  }
+
+  private registerSignalHandlers(): void {
+    CommandTimerController.$signals.registerAfter('create', this.add);
+    CommandTimerController.$signals.registerAfter('update', this.update);
+    CommandTimerController.$signals.registerAfter('delete', this.remove);
+  }
+
+  private unregisterSignalHandlers(): void {
+    CommandTimerController.$signals.unregisterAfter('create', this.add);
+    CommandTimerController.$signals.unregisterAfter('update', this.update);
+    CommandTimerController.$signals.unregisterAfter('delete', this.remove);
   }
 }

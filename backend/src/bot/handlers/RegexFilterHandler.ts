@@ -32,7 +32,15 @@ export class RegexFilterHandler implements AutoWirable {
   }
 
   public async init(): Promise<void> {
-    await this.syncFilters();
+    await this.loadAll();
+
+    this.registerSignalHandlers();
+  }
+
+  public destroy(): void {
+    this.unregisterSignalHandlers();
+
+    this.removeAll();
   }
 
   /**
@@ -111,20 +119,48 @@ export class RegexFilterHandler implements AutoWirable {
     return { filter, match: match[0] };
   }
 
-  public async syncFilters(): Promise<void> {
+  public add = (filter: RegexFilter | null): void => {
+    if (filter === null) return;
+    this.filters.set(filter.id, filter);
+  };
+
+  public remove = (filter: RegexFilter | null): void => {
+    if (filter === null) return;
+    this.filters.delete(filter.id);
+  };
+
+  public update = (filter: RegexFilter | null): void => {
+    if (filter === null) return;
+
+    this.remove(filter);
+    this.add(filter);
+  };
+
+  public removeAll(): void {
+    this.filters.clear();
+  }
+
+  public async loadAll(): Promise<void> {
     const filters = await RegexFilterController.getByUserId(this.channelThread.channel.user.id);
 
-    this.filters.clear();
-    for (const filter of filters) {
-      this.filters.set(filter.id, filter);
-    }
+    this.removeAll();
+    filters.forEach((filter) => this.add(filter));
   }
 
-  public updateFilter(filter: RegexFilter): void {
-    this.filters.set(filter.id, filter);
+  public loadList(filters: RegexFilter[]): void {
+    this.removeAll();
+    filters.forEach((filter) => this.add(filter));
   }
 
-  public deleteFilter(filterId: number): void {
-    this.filters.delete(filterId);
+  private registerSignalHandlers(): void {
+    RegexFilterController.$signals.registerAfter('create', this.add);
+    RegexFilterController.$signals.registerAfter('update', this.remove);
+    RegexFilterController.$signals.registerAfter('delete', this.remove);
+  }
+
+  private unregisterSignalHandlers(): void {
+    RegexFilterController.$signals.unregisterAfter('create', this.add);
+    RegexFilterController.$signals.unregisterAfter('update', this.remove);
+    RegexFilterController.$signals.unregisterAfter('delete', this.remove);
   }
 }
