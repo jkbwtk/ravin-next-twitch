@@ -67,12 +67,12 @@ export class CommandTimerHandler implements AutoWirable {
     const timers = await CommandTimerController.getByUserId(this.channelThread.channel.user.id);
 
     this.removeAll();
-    timers.forEach((timer) => this.add(timer));
+    timers.forEach(this.add);
   }
 
   public loadList(timers: CommandTimer[]): void {
     this.removeAll();
-    timers.forEach((timer) => this.add(timer));
+    timers.forEach(this.add);
   }
 
   private registerSignalHandlers(): void {

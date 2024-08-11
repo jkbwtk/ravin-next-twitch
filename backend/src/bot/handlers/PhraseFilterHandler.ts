@@ -196,12 +196,12 @@ export class PhraseFilterHandler implements AutoWirable {
     const filters = await PhraseFilterController.getByUserId(this.channelThread.channel.user.id);
 
     this.removeAll();
-    filters.forEach((filter) => this.add(filter));
+    filters.forEach(this.add);
   }
 
   public loadList(filters: PhraseFilter[]): void {
     this.removeAll();
-    filters.forEach((filter) => this.add(filter));
+    filters.forEach(this.add);
   }
 
   private registerSignalHandlers(): void {

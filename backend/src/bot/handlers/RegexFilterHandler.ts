@@ -144,12 +144,12 @@ export class RegexFilterHandler implements AutoWirable {
     const filters = await RegexFilterController.getByUserId(this.channelThread.channel.user.id);
 
     this.removeAll();
-    filters.forEach((filter) => this.add(filter));
+    filters.forEach(this.add);
   }
 
   public loadList(filters: RegexFilter[]): void {
     this.removeAll();
-    filters.forEach((filter) => this.add(filter));
+    filters.forEach(this.add);
   }
 
   private registerSignalHandlers(): void {

@@ -1,6 +1,6 @@
 import DashboardInfoBar from '#components/DashboardInfoBar';
 import { CustomCommandEditorProvider } from '#providers/CustomCommandEditorProvider';
-import { batch, createResource, For, onCleanup, onMount } from 'solid-js';
+import { createResource, For, onCleanup, onMount } from 'solid-js';
 import { CustomCommandApi, CustomCommandState, GetCustomCommandsStatusResponse } from '#types/api/commands';
 import { useSocket } from '#providers/SocketProvider';
 import CommandStatusTile from '#components/CommandStatusTile';

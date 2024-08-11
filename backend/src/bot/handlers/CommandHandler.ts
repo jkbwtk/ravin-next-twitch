@@ -67,12 +67,12 @@ export class CommandHandler implements AutoWirable {
     const commands = await CommandController.getByUserId(this.channelThread.channel.userId);
 
     this.removeAll();
-    commands.forEach((command) => this.add(command));
+    commands.forEach(this.add);
   }
 
   public loadList(commands: Command[]): void {
     this.removeAll();
-    commands.forEach((command) => this.add(command));
+    commands.forEach(this.add);
   }
 
   private registerSignalHandlers(): void {
