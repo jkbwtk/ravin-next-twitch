@@ -5,6 +5,7 @@ import MaterialSymbol from '#components/MaterialSymbol';
 import TemplateButton from '#components/TemplateButton';
 import { Match, Switch } from 'solid-js';
 import HighlightedCode from '#components/HighlightedCode';
+import { useBehaviorProfilesEditor } from '#providers/BehaviorProfilesEditorProvider';
 
 import style from '#styles/widgets/TableWidget.module.scss';
 
@@ -15,8 +16,10 @@ export type ProfileProps = {
 };
 
 const Profile: Component<ProfileProps> = (props) => {
-  const toggleEnabled = () => {
-    console.log('toggleEnabled');
+  const [, { updateProfile }] = useBehaviorProfilesEditor();
+
+  const toggleEnabled = async () => {
+    await updateProfile(props.profile.id, { enabled: !props.profile.enabled });
   };
 
   const activate = (profile: BehaviorProfileApi) => {
