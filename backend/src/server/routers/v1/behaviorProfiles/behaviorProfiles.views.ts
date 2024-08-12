@@ -40,11 +40,7 @@ export const getBehaviorProfilesStatus = new ExpressStack()
       }
 
       res.jsonValidated({
-        data: {
-          channelInformation: channelThread.channelInformation,
-          streamStatus: channelThread.streamStatus,
-          activeProfiles: [],
-        },
+        data: await channelThread.getBehaviorProfilesStatus(),
       });
     } catch (err) {
       logger.error('Failed to get status of behavior profiles', {

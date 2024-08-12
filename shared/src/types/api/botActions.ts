@@ -28,6 +28,10 @@ export enum BotActionType {
   CommandTimerExecutedCommand = 401,
   CommandTimerFailedError = 402,
   CommandTimerFailedLines = 403,
+
+  BehaviorProfileActivatedCategory = 500,
+  BehaviorProfileActivatedTitle = 501,
+  BehaviorProfileDeactivated = 502,
 };
 
 
@@ -58,6 +62,10 @@ export type BotActionTypeParams = {
   [BotActionType.CommandTimerExecutedCommand]: (timer: string, lines: number, userDisplayName: string) => void;
   [BotActionType.CommandTimerFailedError]: (timer: string, error: string) => void;
   [BotActionType.CommandTimerFailedLines]: (timer: string, lines: number) => void;
+
+  [BotActionType.BehaviorProfileActivatedCategory]: (profile: string, category: string) => void;
+  [BotActionType.BehaviorProfileActivatedTitle]: (profile: string, title: string) => void;
+  [BotActionType.BehaviorProfileDeactivated]: (profile: string) => void;
 };
 
 export const BotActionData = z.array(z.coerce.string()).default([]);

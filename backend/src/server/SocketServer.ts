@@ -167,7 +167,8 @@ export class SocketServer {
       SocketServer.emitToUser(command.channelUserId, 'DEL_CUSTOM_COMMAND', command.id);
     });
 
-    BotActionController.$signals.registerAfter('create', (action) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    BotActionController.$signals.registerAfter('createFromType', (action, ...args) => {
       if (action === null) return;
       SocketServer.emitToUser(action.channelUserId, 'NEW_BOT_ACTION', BotActionSerializer(action));
     });

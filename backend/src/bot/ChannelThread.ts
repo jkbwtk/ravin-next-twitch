@@ -16,6 +16,10 @@ import { SocketServer } from '#server/SocketServer';
 import { ChannelController } from '#database/controllers/ChannelController';
 import { ChannelWithUser, Message } from '#types/database/tables';
 import { logger } from '#lib/logger';
+import { BehaviorProfilesHandler } from '#bot/handlers/BehaviorProfilesHandler';
+import { BehaviorProfilesStatus } from '#types/api/behaviorProfiles';
+import { BehaviorProfileController } from '#database/controllers/BehaviorProfileController';
+import { BehaviorProfileSerializer } from '#database/serializers/BehaviorProfileSerializer';
 
 
 export type ChannelThreadInformation = {
@@ -53,6 +57,7 @@ export class ChannelThread implements AutoWirable {
   public commandTimerHandler: CommandTimerHandler;
   public phraseFilterHandler: PhraseFilterHandler;
   public regexFilterHandler: RegexFilterHandler;
+  @Wirable() public behaviorProfilesHandler: BehaviorProfilesHandler;
 
   @Wirable() private isolate: Isolate;
 
@@ -76,6 +81,7 @@ export class ChannelThread implements AutoWirable {
     this.commandTimerHandler = new CommandTimerHandler(this);
     this.phraseFilterHandler = new PhraseFilterHandler(this);
     this.regexFilterHandler = new RegexFilterHandler(this);
+    this.behaviorProfilesHandler = new BehaviorProfilesHandler(this);
 
     this.isolate = new Isolate({ memoryLimit: 32 });
 
@@ -93,6 +99,7 @@ export class ChannelThread implements AutoWirable {
     await this.commandTimerHandler.init();
     await this.phraseFilterHandler.init();
     await this.regexFilterHandler.init();
+    await this.behaviorProfilesHandler.init();
 
     this.registerSignalHandlers();
   }
@@ -104,6 +111,7 @@ export class ChannelThread implements AutoWirable {
     this.commandTimerHandler.destroy();
     this.phraseFilterHandler.destroy();
     this.regexFilterHandler.destroy();
+    this.behaviorProfilesHandler.destroy();
 
     this.jobs.forEach((job) => job.stop());
     this.jobs.clear();
@@ -139,16 +147,21 @@ export class ChannelThread implements AutoWirable {
       };
     }
 
+    if (this.channelInformation !== null) {
+      await this.behaviorProfilesHandler.handleChannelInformation(this.channelInformation);
+    }
+
     if (
       oldInfo?.title !== this.channelInformation?.title ||
       oldInfo?.game_id !== this.channelInformation?.game_id
     ) {
-      SocketServer.emitToUser(this.channel.userId, 'UPD_BEHAVIOR_PROFILE_STATUS');
+      SocketServer.emitToUser(this.channel.userId, 'UPD_BEHAVIOR_PROFILE_STATUS', await this.getBehaviorProfilesStatus());
     }
   };
 
   public async handleStreamStatus(stream: TwitchStream | null): Promise<void> {
     const oldStream = structuredClone(this.streamStatus);
+    const oldInfo = structuredClone(this.channelInformation);
 
     this.streamStatus = stream === null ? null : {
       id: stream.id,
@@ -159,13 +172,47 @@ export class ChannelThread implements AutoWirable {
       is_mature: stream.is_mature,
     };
 
+    if (stream && this.channelInformation) {
+      this.channelInformation = {
+        ...this.channelInformation,
+        title: stream.title,
+        game_name: stream.game_name,
+        game_id: stream.game_id,
+        tags: stream.tags,
+      };
+
+      this.behaviorProfilesHandler.handleChannelInformation(this.channelInformation);
+    }
+
+    if (this.streamStatus !== null) {
+      this.behaviorProfilesHandler.handleStreamStatus(this.streamStatus);
+    }
+
     if (
       oldStream?.viewer_count !== this.streamStatus?.viewer_count ||
       oldStream?.thumbnail_url !== this.streamStatus?.thumbnail_url ||
-      oldStream?.id !== this.streamStatus?.id
+      oldStream?.id !== this.streamStatus?.id ||
+      oldInfo?.title !== this.channelInformation?.title ||
+      oldInfo?.game_id !== this.channelInformation?.game_id
     ) {
-      SocketServer.emitToUser(this.channel.userId, 'UPD_BEHAVIOR_PROFILE_STATUS');
+      SocketServer.emitToUser(this.channel.userId, 'UPD_BEHAVIOR_PROFILE_STATUS', await this.getBehaviorProfilesStatus());
     }
+  }
+
+  public async getBehaviorProfilesStatus(): Promise<BehaviorProfilesStatus> {
+    const activatedProfiles = await BehaviorProfileController.getByUserIdWithRelations(this.channel.userId, {
+      idListFilter: {
+        id: {
+          in: this.behaviorProfilesHandler.getActiveProfiles().map((profile) => profile.id),
+        },
+      },
+    });
+
+    return {
+      channelInformation: this.channelInformation,
+      streamStatus: this.streamStatus,
+      activeProfiles: BehaviorProfileSerializer(activatedProfiles),
+    };
   }
 
   public updateConfig(options: ChannelThreadOptions): void {

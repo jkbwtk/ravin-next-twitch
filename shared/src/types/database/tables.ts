@@ -152,6 +152,13 @@ export type BehaviorProfileWithRelations = BehaviorProfile & {
   commandTimers: CommandTimer[];
 };
 
+export type BehaviorProfileWithRelatedIds = BehaviorProfile & {
+  commandIds: number[];
+  phraseFilterIds: number[];
+  regexFilterIds: number[];
+  commandTimerIds: number[];
+};
+
 export type BehaviorProfileInsert = StripUtilityRows<typeof behaviorProfilesTable.$inferInsert>;
 
 export type BehaviorProfileCreate = InferCreate<BehaviorProfileInsert>;

@@ -6,8 +6,10 @@ import { and, asc, count, desc, eq, getTableColumns, inArray, SQL } from 'drizzl
 import { BotActionData, BotActionType, BotActionTypeParams } from '#types/api/botActions';
 
 
+const sharedMethods = createSharedMethods(botActionsTable);
+
 const BotActionControllerMethods = {
-  ...createSharedMethods(botActionsTable),
+  ...sharedMethods as Omit<typeof sharedMethods, 'create'>,
 
   async createFromType<T extends BotActionType>(userId: string, type: T, ...data: Parameters<BotActionTypeParams[T]>): Promise<BotAction | null> {
     const query = await db

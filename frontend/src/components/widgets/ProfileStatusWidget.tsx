@@ -20,7 +20,7 @@ const fetchProfilesStatus = async (): Promise<BehaviorProfilesStatus> => {
 const ProfileStatusWidget: Component = () => {
   const [socket] = useSocket();
 
-  const [status, { refetch: refetchStats }] = createResource(fetchProfilesStatus, {
+  const [status, { refetch: refetchStatus, mutate: mutateStatus }] = createResource(fetchProfilesStatus, {
     initialValue: {
       channelInformation: null,
       streamStatus: null,
@@ -28,8 +28,12 @@ const ProfileStatusWidget: Component = () => {
     },
   });
 
-  const updateStatus = () => {
-    refetchStats();
+  const updateStatus = (newStatus: BehaviorProfilesStatus) => {
+    mutateStatus({
+      channelInformation: newStatus.channelInformation,
+      streamStatus: newStatus.streamStatus,
+      activeProfiles: newStatus.activeProfiles,
+    });
   };
 
   onMount(() => {
@@ -43,13 +47,13 @@ const ProfileStatusWidget: Component = () => {
   return (
     <Widget
       title='Status'
-      refresh={refetchStats}
+      refresh={refetchStatus}
       loading={status.state === 'refreshing'}
       class={style.container}
       containerClass={style.outerContainer}
     >
       <ErrorBoundary fallback={
-        <ErrorFallback class={style.fallback} refresh={refetchStats} loading={status.state === 'refreshing'}>
+        <ErrorFallback class={style.fallback} refresh={refetchStatus} loading={status.state === 'refreshing'}>
           Failed to load status of behavior profiles
         </ErrorFallback>
       }>

@@ -6,7 +6,7 @@ import { ScheduledJob } from 'types/api/admin';
 import { TemplateApi } from 'types/api/templates';
 import { PhraseFilterApi, RegexFilterApi } from 'types/api/filters';
 import { BotActionApi } from 'types/api/botActions';
-import { BehaviorProfileApi } from 'types/api/behaviorProfiles';
+import { BehaviorProfileApi, BehaviorProfilesStatus } from 'types/api/behaviorProfiles';
 
 
 export type ServerToClientEvents = {
@@ -55,7 +55,7 @@ export type ServerToClientEvents = {
   UPD_BEHAVIOR_PROFILE: (profile: BehaviorProfileApi) => void;
   DEL_BEHAVIOR_PROFILE: (profileId: number) => void;
 
-  UPD_BEHAVIOR_PROFILE_STATUS: () => void;
+  UPD_BEHAVIOR_PROFILE_STATUS: (status: BehaviorProfilesStatus) => void;
 };
 
 export type ClientToServerEvents = {

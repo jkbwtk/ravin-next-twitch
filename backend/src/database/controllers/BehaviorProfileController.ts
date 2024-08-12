@@ -9,6 +9,7 @@ import {
 } from '#schema/schema';
 import {
   BehaviorProfile,
+  BehaviorProfileWithRelatedIds,
   BehaviorProfileWithRelations,
   BehaviorProfileWithRelationsCreate,
   BehaviorProfileWithRelationsUpdate,
@@ -37,8 +38,10 @@ function mapRelations(profile: BehaviorProfileWithUnmappedRelations): BehaviorPr
   };
 }
 
+const sharedMethods = createSharedMethods(behaviorProfilesTable);
+
 const BehaviorProfileControllerMethods = {
-  ...createSharedMethods(behaviorProfilesTable),
+  ...sharedMethods as Omit<typeof sharedMethods, 'create' | 'update'>,
   ...createSecurityMethods(behaviorProfilesTable),
 
   async getByIdWithRelations(id: number): Promise<BehaviorProfileWithRelations | null> {
@@ -360,4 +363,18 @@ const BehaviorProfileControllerMethods = {
   },
 };
 
-export const BehaviorProfileController = convertToControllerProxy('BehaviorProfile', BehaviorProfileControllerMethods);
+const BehaviorProfileProperties = {
+  $utils: {
+    mapToRelatedIds(profile: BehaviorProfileWithRelations): BehaviorProfileWithRelatedIds {
+      return {
+        ...profile,
+        commandIds: profile.commands.map((command) => command.id),
+        phraseFilterIds: profile.phraseFilters.map((phraseFilter) => phraseFilter.id),
+        regexFilterIds: profile.regexFilters.map((regexFilter) => regexFilter.id),
+        commandTimerIds: profile.commandTimers.map((commandTimer) => commandTimer.id),
+      };
+    },
+  },
+};
+
+export const BehaviorProfileController = convertToControllerProxy('BehaviorProfile', BehaviorProfileControllerMethods, BehaviorProfileProperties);

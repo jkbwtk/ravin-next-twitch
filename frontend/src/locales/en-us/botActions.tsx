@@ -29,6 +29,10 @@ export const botActions = new Dictionary<BotActionType, string>(
     [BotActionType.CommandTimerExecutedCommand]: 'Command Timer Executed Command',
     [BotActionType.CommandTimerFailedError]: 'Command Timer Failed Error',
     [BotActionType.CommandTimerFailedLines]: 'Command Timer Failed Lines',
+
+    [BotActionType.BehaviorProfileActivatedCategory]: 'Behavior Profile Activated (Category)',
+    [BotActionType.BehaviorProfileActivatedTitle]: 'Behavior Profile Activated (Title)',
+    [BotActionType.BehaviorProfileDeactivated]: 'Behavior Profile Deactivated',
   });
 
 
@@ -117,6 +121,22 @@ export const botActionsDescriptions = new Dictionary<BotActionType, BotActionsDe
     [BotActionType.CommandTimerFailedLines]: (data) => (
       <span>
       Command timer <code>{data.at(0)}</code> failed due to insufficient lines between messages. Current lines count: <code>{data.at(1)}</code>
+      </span>
+    ),
+
+    [BotActionType.BehaviorProfileActivatedCategory]: (data) => (
+      <span>
+        Behavior profile <code>{data.at(0)}</code> activated. Matched category  <code>{data.at(1)}</code>
+      </span>
+    ),
+    [BotActionType.BehaviorProfileActivatedTitle]: (data) => (
+      <span>
+      Behavior profile <code>{data.at(0)}</code> activated. Matched title  <code>{data.at(1)}</code>
+      </span>
+    ),
+    [BotActionType.BehaviorProfileDeactivated]: (data) => (
+      <span>
+        Behavior profile <code>{data.at(0)}</code> deactivated.
       </span>
     ),
   });
