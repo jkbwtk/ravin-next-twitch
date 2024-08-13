@@ -47,8 +47,8 @@ export class ChannelInformationService implements AutoWirable {
 
       SocketServer.emitToUser(
         this.channelThread.channel.userId,
-        'UPD_BEHAVIOR_PROFILE_STATUS',
-        await this.channelThread.getBehaviorProfilesStatus(),
+        'UPD_CHANNEL_INFO',
+        this.channelInformation(),
       );
     }
   };
@@ -63,8 +63,8 @@ export class ChannelInformationService implements AutoWirable {
 
       SocketServer.emitToUser(
         this.channelThread.channel.userId,
-        'UPD_BEHAVIOR_PROFILE_STATUS',
-        await this.channelThread.getBehaviorProfilesStatus(),
+        'UPD_CHANNEL_STREAM_STATUS',
+        this.streamStatus(),
       );
     }
   }

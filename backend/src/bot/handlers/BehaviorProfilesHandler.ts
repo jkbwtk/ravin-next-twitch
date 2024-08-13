@@ -42,6 +42,20 @@ export class BehaviorProfilesHandler implements AutoWirable {
     this.removeAll();
   }
 
+  public getActiveProfiles(): BehaviorProfileWithRelatedIds[] {
+    return Array.from(this.activeProfiles.values());
+  }
+
+  public async getActiveProfilesWithRelations(): Promise<BehaviorProfileWithRelations[]> {
+    return await BehaviorProfileController.getByUserIdWithRelations(this.channelThread.channel.userId, {
+      idListFilter: {
+        id: {
+          in: this.getActiveProfiles().map((profile) => profile.id),
+        },
+      },
+    });
+  }
+
   public handleChannelInformation = async (info: ChannelThreadInformation | null): Promise<void> => {
     if (info === null) return;
 
@@ -106,17 +120,13 @@ export class BehaviorProfilesHandler implements AutoWirable {
 
       SocketServer.emitToUser(
         this.channelThread.channel.userId,
-        'UPD_BEHAVIOR_PROFILE_STATUS',
-        await this.channelThread.getBehaviorProfilesStatus(),
+        'UPD_BEHAVIOR_PROFILE_ACTIVE_PROFILES',
+        await this.getActiveProfilesWithRelations(),
       );
     }
 
     this.activeProfiles = activeProfiles;
   };
-
-  public getActiveProfiles(): BehaviorProfileWithRelatedIds[] {
-    return Array.from(this.activeProfiles.values());
-  }
 
   public add = (profile: BehaviorProfileWithRelations | null): void => {
     if (profile === null) return;

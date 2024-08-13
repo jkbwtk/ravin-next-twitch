@@ -6,7 +6,8 @@ import { ScheduledJob } from 'types/api/admin';
 import { TemplateApi } from 'types/api/templates';
 import { PhraseFilterApi, RegexFilterApi } from 'types/api/filters';
 import { BotActionApi } from 'types/api/botActions';
-import { BehaviorProfileApi, BehaviorProfilesStatus } from 'types/api/behaviorProfiles';
+import { BehaviorProfileApi } from 'types/api/behaviorProfiles';
+import { ChannelThreadInformation, ChannelThreadStreamStatus } from 'types/bot/channelThread';
 
 
 export type ServerToClientEvents = {
@@ -55,7 +56,10 @@ export type ServerToClientEvents = {
   UPD_BEHAVIOR_PROFILE: (profile: BehaviorProfileApi) => void;
   DEL_BEHAVIOR_PROFILE: (profileId: number) => void;
 
-  UPD_BEHAVIOR_PROFILE_STATUS: (status: BehaviorProfilesStatus) => void;
+  UPD_BEHAVIOR_PROFILE_ACTIVE_PROFILES: (profiles: BehaviorProfileApi[]) => void;
+
+  UPD_CHANNEL_INFO: (info: ChannelThreadInformation | null) => void;
+  UPD_CHANNEL_STREAM_STATUS: (status: ChannelThreadStreamStatus | null) => void;
 };
 
 export type ClientToServerEvents = {

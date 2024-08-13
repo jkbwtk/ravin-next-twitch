@@ -113,18 +113,10 @@ export class ChannelThread implements AutoWirable {
   }
 
   public async getBehaviorProfilesStatus(): Promise<BehaviorProfilesStatus> {
-    const activatedProfiles = await BehaviorProfileController.getByUserIdWithRelations(this.channel.userId, {
-      idListFilter: {
-        id: {
-          in: this.behaviorProfilesHandler.getActiveProfiles().map((profile) => profile.id),
-        },
-      },
-    });
-
     return {
       channelInformation: this.channelInformationService.channelInformation(),
       streamStatus: this.channelInformationService.streamStatus(),
-      activeProfiles: BehaviorProfileSerializer(activatedProfiles),
+      activeProfiles: BehaviorProfileSerializer(await this.behaviorProfilesHandler.getActiveProfilesWithRelations()),
     };
   }
 

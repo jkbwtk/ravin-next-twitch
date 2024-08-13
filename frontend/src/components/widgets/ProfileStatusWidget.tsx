@@ -2,11 +2,12 @@ import { createResource, ErrorBoundary, For, Match, onCleanup, onMount, Suspense
 import Widget from '#components/Widget';
 import { makeRequest } from '#lib/fetch';
 import ErrorFallback from '#components/ErrorFallback';
-import { BehaviorProfilesStatus, GetBehaviorProfilesStatusResponse } from '#types/api/behaviorProfiles';
+import { BehaviorProfileApi, BehaviorProfilesStatus, GetBehaviorProfilesStatusResponse } from '#types/api/behaviorProfiles';
 import Pill from '#components/Pill';
 import { useSocket } from '#providers/SocketProvider';
 import { timeDiff } from '#shared/timeUtils';
 import MaterialSymbol from '#components/MaterialSymbol';
+import { ChannelThreadInformation, ChannelThreadStreamStatus } from '#types/bot/channelThread';
 
 import style from '#styles/widgets/ProfileStatusWidget.module.scss';
 
@@ -28,20 +29,37 @@ const ProfileStatusWidget: Component = () => {
     },
   });
 
-  const updateStatus = (newStatus: BehaviorProfilesStatus) => {
-    mutateStatus({
-      channelInformation: newStatus.channelInformation,
-      streamStatus: newStatus.streamStatus,
-      activeProfiles: newStatus.activeProfiles,
-    });
+  const updateChannelInfo = (channelInformation: ChannelThreadInformation | null) => {
+    mutateStatus((oldStatus) => ({
+      ...oldStatus,
+      channelInformation,
+    }));
+  };
+
+  const updateStreamStatus = (streamStatus: ChannelThreadStreamStatus| null) => {
+    mutateStatus((oldStatus) => ({
+      ...oldStatus,
+      streamStatus,
+    }));
+  };
+
+  const updateActiveProfiles = (activeProfiles: BehaviorProfileApi[]) => {
+    mutateStatus((oldStatus) => ({
+      ...oldStatus,
+      activeProfiles,
+    }));
   };
 
   onMount(() => {
-    socket.client.on('UPD_BEHAVIOR_PROFILE_STATUS', updateStatus);
+    socket.client.on('UPD_CHANNEL_INFO', updateChannelInfo);
+    socket.client.on('UPD_CHANNEL_STREAM_STATUS', updateStreamStatus);
+    socket.client.on('UPD_BEHAVIOR_PROFILE_ACTIVE_PROFILES', updateActiveProfiles);
   });
 
   onCleanup(() => {
-    socket.client.off('UPD_BEHAVIOR_PROFILE_STATUS', updateStatus);
+    socket.client.off('UPD_CHANNEL_INFO', updateChannelInfo);
+    socket.client.off('UPD_CHANNEL_STREAM_STATUS', updateStreamStatus);
+    socket.client.off('UPD_BEHAVIOR_PROFILE_ACTIVE_PROFILES', updateActiveProfiles);
   });
 
   return (
