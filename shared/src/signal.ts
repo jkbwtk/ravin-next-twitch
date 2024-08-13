@@ -5,7 +5,7 @@ export type Subscription = {
 export type Signal<T> = {
   (): T,
   get: () => T,
-  set: (value: T) => void,
+  set: (value: T | ((oldValue: T) => T)) => void,
   reset: () => void,
   subscribe: (listener: (value: T) => void) => Subscription,
 };
@@ -24,8 +24,8 @@ export const basicSignal = <T>(defaultValue: T): Signal<T> => {
     return value;
   };
 
-  signal.set = (newValue: T) => {
-    value = newValue;
+  signal.set = (newValue: T | ((oldValue: T) => T)) => {
+    value = newValue instanceof Function ? newValue(signal.get()) : newValue;
 
     for (const listener of listeners) {
       listener(value);
