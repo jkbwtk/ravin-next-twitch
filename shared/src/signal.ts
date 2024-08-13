@@ -1,10 +1,13 @@
+export type Subscription = {
+  unsubscribe: () => void,
+};
+
 export type Signal<T> = {
   (): T,
   get: () => T,
   set: (value: T) => void,
   reset: () => void,
-  subscribe: (listener: (value: T) => void) => void,
-  unsubscribe: (listener: (value: T) => void) => void,
+  subscribe: (listener: (value: T) => void) => Subscription,
 };
 
 export type SignalListener<T> = (value: T) => void;
@@ -35,10 +38,12 @@ export const basicSignal = <T>(defaultValue: T): Signal<T> => {
 
   signal.subscribe = (listener: (value: T) => void) => {
     listeners.add(listener);
-  };
 
-  signal.unsubscribe = (listener: (value: T) => void) => {
-    listeners.delete(listener);
+    return {
+      unsubscribe: () => {
+        listeners.delete(listener);
+      },
+    };
   };
 
   return signal;
