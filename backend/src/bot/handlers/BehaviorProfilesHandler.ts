@@ -1,8 +1,12 @@
-import { ChannelThread, ChannelThreadInformation, ChannelThreadStreamStatus } from '#bot/ChannelThread';
+import { ChannelThread } from '#bot/ChannelThread';
+import { ChannelInformationService } from '#bot/handlers/ChannelInformationService';
 import { BehaviorProfileController } from '#database/controllers/BehaviorProfileController';
 import { BotActionController } from '#database/controllers/BotActionController';
 import { AutoWirable, ClassInstance, wire } from '#lib/autowire';
+import { SocketServer } from '#server/SocketServer';
+import { Subscription } from '#shared/signal';
 import { BotActionType } from '#types/api/botActions';
+import { ChannelThreadInformation } from '#types/bot/channelThread';
 import { BehaviorProfile, BehaviorProfileWithRelatedIds, BehaviorProfileWithRelations } from '#types/database/tables';
 import { RegExpType } from '#types/regExp';
 
@@ -13,9 +17,15 @@ export class BehaviorProfilesHandler implements AutoWirable {
   private activeProfiles = new Map<number, BehaviorProfileWithRelatedIds>();
 
   private channelThread: ChannelThread;
+  private channelInformationService: ChannelInformationService;
+
+  private channelInformationSubscription: Subscription;
 
   constructor(public __parent: ClassInstance) {
     this.channelThread = wire(this, ChannelThread);
+    this.channelInformationService = wire(this, ChannelInformationService);
+
+    this.channelInformationSubscription = this.channelInformationService.channelInformation.subscribe(this.handleChannelInformation);
   }
 
   public async init(): Promise<void> {
@@ -27,11 +37,17 @@ export class BehaviorProfilesHandler implements AutoWirable {
   public destroy(): void {
     this.unregisterSignalHandlers();
 
+    this.channelInformationSubscription.unsubscribe();
+
     this.removeAll();
   }
 
-  public async handleChannelInformation(info: ChannelThreadInformation): Promise<void> {
+  public handleChannelInformation = async (info: ChannelThreadInformation | null): Promise<void> => {
+    if (info === null) return;
+
     const activeProfiles = new Map<number, BehaviorProfileWithRelatedIds>();
+
+    let changed = false;
 
     for (const profile of this.behaviorProfiles.values()) {
       if (profile.activatorTitle !== null) {
@@ -41,6 +57,8 @@ export class BehaviorProfilesHandler implements AutoWirable {
           activeProfiles.set(profile.id, profile);
 
           if (!this.activeProfiles.has(profile.id)) {
+            changed = true;
+
             await BotActionController.createFromType(
               this.channelThread.channel.userId,
               BotActionType.BehaviorProfileActivatedTitle,
@@ -54,15 +72,17 @@ export class BehaviorProfilesHandler implements AutoWirable {
       if (profile.activatorCategory !== null) {
         const activator = RegExpType.parse(profile.activatorCategory);
 
-        if (activator.test(info.game_name)) {
+        if (activator.test(info.gameName)) {
           activeProfiles.set(profile.id, profile);
 
           if (!this.activeProfiles.has(profile.id)) {
+            changed = true;
+
             await BotActionController.createFromType(
               this.channelThread.channel.userId,
               BotActionType.BehaviorProfileActivatedCategory,
               profile.name,
-              info.game_name,
+              info.gameName,
             );
           }
         }
@@ -71,6 +91,8 @@ export class BehaviorProfilesHandler implements AutoWirable {
 
     for (const [profileId, profile] of this.activeProfiles.entries()) {
       if (!activeProfiles.has(profileId)) {
+        changed = true;
+
         await BotActionController.createFromType(
           this.channelThread.channel.userId,
           BotActionType.BehaviorProfileDeactivated,
@@ -79,10 +101,18 @@ export class BehaviorProfilesHandler implements AutoWirable {
       }
     }
 
-    this.activeProfiles = activeProfiles;
-  }
+    if (changed) {
+      this.activeProfiles = activeProfiles;
 
-  public handleStreamStatus(stream: ChannelThreadStreamStatus): void {}
+      SocketServer.emitToUser(
+        this.channelThread.channel.userId,
+        'UPD_BEHAVIOR_PROFILE_STATUS',
+        await this.channelThread.getBehaviorProfilesStatus(),
+      );
+    }
+
+    this.activeProfiles = activeProfiles;
+  };
 
   public getActiveProfiles(): BehaviorProfileWithRelatedIds[] {
     return Array.from(this.activeProfiles.values());
@@ -93,11 +123,16 @@ export class BehaviorProfilesHandler implements AutoWirable {
     if (profile.enabled === false) return;
 
     this.behaviorProfiles.set(profile.id, BehaviorProfileController.$utils.mapToRelatedIds(profile));
+
+    this.handleChannelInformation(this.channelInformationService.channelInformation());
   };
 
   public remove = (profile: BehaviorProfile | null): void => {
     if (profile === null) return;
+
     this.behaviorProfiles.delete(profile.id);
+
+    this.handleChannelInformation(this.channelInformationService.channelInformation());
   };
 
   public update = (profile: BehaviorProfileWithRelations | null): void => {

@@ -35,8 +35,8 @@ export const getBehaviorProfilesStatus = new ExpressStack()
         throw new ServerError(HttpCodes.BadRequest, 'Channel thread not found');
       }
 
-      if (channelThread.channelInformation === null) {
-        await channelThread.syncChannelInformation();
+      if (channelThread.channelInformationService.channelInformation() === null) {
+        await channelThread.channelInformationService.syncChannelInformation();
       }
 
       res.jsonValidated({

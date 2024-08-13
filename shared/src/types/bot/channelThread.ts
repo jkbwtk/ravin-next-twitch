@@ -5,7 +5,7 @@ export const ChannelThreadInformation = z.object({
   title: z.string().min(1).max(255),
   gameName: z.string().min(1).max(255),
   gameId: z.string().min(1).max(255),
-  delay: z.number().positive(),
+  delay: z.number().nonnegative(),
   tags: z.array(z.string().min(1).max(255)),
 });
 
