@@ -2,7 +2,7 @@ import { logger } from '#lib/logger';
 import { sleep } from '#lib/utils';
 import { ExpressStack } from '#server/ExpressStack';
 import { requireDevMode, waitUntilReady } from '#server/stackMiddlewares';
-import { basicSignal } from '#shared/utils';
+import { basicSignal } from '#shared/signal';
 
 
 export const getTestView = new ExpressStack()

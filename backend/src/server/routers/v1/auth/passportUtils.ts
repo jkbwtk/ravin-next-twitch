@@ -3,7 +3,7 @@ import { logger } from '#lib/logger';
 import { createDevAuthStrategy } from '#server/routers/v1/auth/authDev';
 import { createProdAuthStrategy } from '#server/routers/v1/auth/authProd';
 import { isDevApi, isDevMode } from '#shared/constants';
-import { basicSignal } from '#shared/utils';
+import { basicSignal } from '#shared/signal';
 import passport from 'passport';
 
 
