@@ -63,7 +63,7 @@ const ProfileStatusWidget: Component = () => {
             <span class={style.value}>{status().channelInformation?.title}</span>
 
             <span class={style.name}>Game:</span>
-            <span class={style.value}>{status().channelInformation?.game_name}</span>
+            <span class={style.value}>{status().channelInformation?.gameName}</span>
 
             <span class={style.name}>Tags:</span>
             <span class={style.valueContainer}>
@@ -91,14 +91,14 @@ const ProfileStatusWidget: Component = () => {
             <span class={style.name}>Viewers:</span>
             <span class={style.value}>
               <code>
-                {status().streamStatus?.viewer_count ?? 0}
+                {status().streamStatus?.viewerCount ?? 0}
               </code>
             </span>
 
             <span class={style.name}>Duration:</span>
             <span class={style.value}>
               <code>
-                {timeDiff(status().streamStatus?.started_at, false)}
+                {timeDiff(status().streamStatus?.startedAt, false)}
               </code>
             </span>
           </div>

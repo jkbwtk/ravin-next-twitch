@@ -5,6 +5,7 @@ import { PhraseFilterApi, RegexFilterApi } from './filters';
 import { PaginatedResponse } from '../pagination';
 import { createSelectSchema } from 'drizzle-zod';
 import { behaviorProfilesTable } from '../../schema/schema';
+import { ChannelThreadInformation, ChannelThreadStreamStatus } from '../bot/channelThread';
 
 
 export const BehaviorProfileApi = createSelectSchema(behaviorProfilesTable, {
@@ -60,18 +61,8 @@ export type PatchBehaviorProfileReqBody = z.infer<typeof PatchBehaviorProfileReq
 
 
 export const BehaviorProfilesStatus = z.object({
-  channelInformation: z.object({
-    title: z.string().min(1).max(255),
-    game_name: z.string().min(1).max(255),
-    game_id: z.string().min(1).max(255),
-    tags: z.array(z.string().min(1).max(255)),
-  }).nullable().optional().default(null),
-  streamStatus: z.object({
-    viewer_count: z.number().int().positive(),
-    started_at: z.string().min(1).max(255),
-    language: z.string().min(1).max(255),
-    thumbnail_url: z.string().min(1).max(255),
-  }).nullable().optional().default(null),
+  channelInformation: ChannelThreadInformation.nullable().default(null),
+  streamStatus: ChannelThreadStreamStatus.nullable().default(null),
   activeProfiles: z.array(BehaviorProfileApi),
 });
 

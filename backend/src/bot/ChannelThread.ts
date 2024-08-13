@@ -20,26 +20,7 @@ import { BehaviorProfilesHandler } from '#bot/handlers/BehaviorProfilesHandler';
 import { BehaviorProfilesStatus } from '#types/api/behaviorProfiles';
 import { BehaviorProfileController } from '#database/controllers/BehaviorProfileController';
 import { BehaviorProfileSerializer } from '#database/serializers/BehaviorProfileSerializer';
-
-
-export type ChannelThreadInformation = {
-  game_id: string;
-  game_name: string;
-  title: string;
-  delay: number;
-  tags: string[];
-  content_classification_labels: string[];
-  is_branded_content: boolean;
-};
-
-export type ChannelThreadStreamStatus = {
-  id: string;
-  viewer_count: number;
-  started_at: string;
-  language: string;
-  thumbnail_url: string;
-  is_mature: boolean;
-};
+import { ChannelThreadInformation, ChannelThreadStreamStatus } from '#types/bot/channelThread';
 
 export type ChannelThreadOptions = {
   messageCacheSize?: number;
@@ -134,26 +115,26 @@ export class ChannelThread implements AutoWirable {
 
   public async handleChannelInformation(info: TwitchChannelInformation | null): Promise<void> {
     const oldInfo = structuredClone(this.channelInformation);
+    let profilesChanged = false;
 
     if (info !== null) {
       this.channelInformation = {
-        game_id: info.game_id,
-        game_name: info.game_name,
+        gameId: info.game_id,
+        gameName: info.game_name,
         title: info.title,
         delay: info.delay,
         tags: info.tags,
-        content_classification_labels: info.content_classification_labels,
-        is_branded_content: info.is_branded_content,
       };
     }
 
     if (this.channelInformation !== null) {
-      await this.behaviorProfilesHandler.handleChannelInformation(this.channelInformation);
+      profilesChanged = await this.behaviorProfilesHandler.handleChannelInformation(this.channelInformation);
     }
 
     if (
+      profilesChanged ||
       oldInfo?.title !== this.channelInformation?.title ||
-      oldInfo?.game_id !== this.channelInformation?.game_id
+      oldInfo?.gameId !== this.channelInformation?.gameId
     ) {
       SocketServer.emitToUser(this.channel.userId, 'UPD_BEHAVIOR_PROFILE_STATUS', await this.getBehaviorProfilesStatus());
     }
@@ -162,38 +143,40 @@ export class ChannelThread implements AutoWirable {
   public async handleStreamStatus(stream: TwitchStream | null): Promise<void> {
     const oldStream = structuredClone(this.streamStatus);
     const oldInfo = structuredClone(this.channelInformation);
+    let profilesChanged = false;
 
     this.streamStatus = stream === null ? null : {
       id: stream.id,
-      viewer_count: stream.viewer_count,
-      started_at: stream.started_at,
+      viewerCount: stream.viewer_count,
+      startedAt: new Date(stream.started_at),
       language: stream.language,
-      thumbnail_url: stream.thumbnail_url,
-      is_mature: stream.is_mature,
+      thumbnailUrl: stream.thumbnail_url,
+      isMature: stream.is_mature,
     };
 
     if (stream && this.channelInformation) {
       this.channelInformation = {
         ...this.channelInformation,
         title: stream.title,
-        game_name: stream.game_name,
-        game_id: stream.game_id,
+        gameName: stream.game_name,
+        gameId: stream.game_id,
         tags: stream.tags,
       };
 
-      this.behaviorProfilesHandler.handleChannelInformation(this.channelInformation);
+      profilesChanged = await this.behaviorProfilesHandler.handleChannelInformation(this.channelInformation);
     }
 
     if (this.streamStatus !== null) {
-      this.behaviorProfilesHandler.handleStreamStatus(this.streamStatus);
+      profilesChanged = profilesChanged ? profilesChanged : await this.behaviorProfilesHandler.handleStreamStatus(this.streamStatus);
     }
 
     if (
-      oldStream?.viewer_count !== this.streamStatus?.viewer_count ||
-      oldStream?.thumbnail_url !== this.streamStatus?.thumbnail_url ||
+      profilesChanged ||
+      oldStream?.viewerCount !== this.streamStatus?.viewerCount ||
+      oldStream?.thumbnailUrl !== this.streamStatus?.thumbnailUrl ||
       oldStream?.id !== this.streamStatus?.id ||
       oldInfo?.title !== this.channelInformation?.title ||
-      oldInfo?.game_id !== this.channelInformation?.game_id
+      oldInfo?.gameId !== this.channelInformation?.gameId
     ) {
       SocketServer.emitToUser(this.channel.userId, 'UPD_BEHAVIOR_PROFILE_STATUS', await this.getBehaviorProfilesStatus());
     }
@@ -268,6 +251,7 @@ export class ChannelThread implements AutoWirable {
     await this.handleStreamStatus(stream);
 
     if (this.channelInformation !== null && stream !== null) {
+      // @ts-expect-error unused parameters
       await this.handleChannelInformation({
         ...this.channelInformation,
 
