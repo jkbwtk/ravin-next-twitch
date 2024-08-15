@@ -4,7 +4,6 @@ import { FileOutput } from '#lib/logger/outputs/FileOutput';
 import { ARGS, LEVEL, MESSAGE, TransformableEntry } from '#lib/logger/types';
 import chalk from 'chalk';
 import { duration } from 'dayjs';
-import { string } from 'zod';
 
 
 export type HTTPLogEntry = {
@@ -142,46 +141,46 @@ const instance = new Logger({
     //   format: fileJsonFormat,
     //   level: Infinity,
     // }),
-    // new FileOutput({
-    //   format: fileJsonFormat,
-    //   level: Infinity,
-    //   filename: 'combined_json.log',
-    //   directory: 'logs',
-    //   rotationFormat: FileOutput.rotateDate,
-    //   maxAge: duration({ days: 7 }),
-    // }),
-    // new FileOutput({
-    //   format: fileJsonFormat,
-    //   level: [
-    //     'error',
-    //     'warn',
-    //   ],
-    //   filename: 'important_json.log',
-    //   directory: 'logs',
-    //   rotationFormat: FileOutput.rotateDate,
-    // }),
-    // new FileOutput({
-    //   format: prettyFormat
-    //     .copy()
-    //     .chain(Logger.removeColors),
-    //   level: [
-    //     'error',
-    //     'warn',
-    //   ],
-    //   filename: 'important_human.log',
-    //   directory: 'logs',
-    //   rotationFormat: FileOutput.rotateDate,
-    // }),
-    // new FileOutput({
-    //   format: prettyFormat
-    //     .copy()
-    //     .chain(Logger.removeColors),
-    //   level: Infinity,
-    //   filename: 'combined_human.log',
-    //   directory: 'logs',
-    //   rotationFormat: FileOutput.rotateDate,
-    //   maxFiles: 5,
-    // }),
+    new FileOutput({
+      format: fileJsonFormat,
+      level: Infinity,
+      filename: 'combined_json.log',
+      directory: 'logs',
+      rotationFormat: FileOutput.rotateDate,
+      maxAge: duration({ days: 7 }),
+    }),
+    new FileOutput({
+      format: fileJsonFormat,
+      level: [
+        'error',
+        'warn',
+      ],
+      filename: 'important_json.log',
+      directory: 'logs',
+      rotationFormat: FileOutput.rotateDate,
+    }),
+    new FileOutput({
+      format: prettyFormat
+        .copy()
+        .chain(Logger.removeColors),
+      level: [
+        'error',
+        'warn',
+      ],
+      filename: 'important_human.log',
+      directory: 'logs',
+      rotationFormat: FileOutput.rotateDate,
+    }),
+    new FileOutput({
+      format: prettyFormat
+        .copy()
+        .chain(Logger.removeColors),
+      level: Infinity,
+      filename: 'combined_human.log',
+      directory: 'logs',
+      rotationFormat: FileOutput.rotateDate,
+      maxFiles: 5,
+    }),
   ],
 }).registerLevelFunction('http', (callback, level, request: HTTPLogEntry) => {
   if (level !== 'http') return;
@@ -233,5 +232,5 @@ const instance = new Logger({
   });
 });
 
-
+export const loggerInstance = instance;
 export const logger = instance.logFunctions;

@@ -93,6 +93,12 @@ export class Logger<
     this.logFunctions = this.createDefaultLogFunctions();
   }
 
+  public async dispose(): Promise<void> {
+    for (const output of this.options.outputs) {
+      await output.close();
+    }
+  }
+
   private mergeOptions(options: T | undefined): LoggerOptions {
     if (options === undefined) return Logger.defaultOptions;
 

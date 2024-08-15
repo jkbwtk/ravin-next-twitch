@@ -73,7 +73,7 @@ export class FileOutput extends LoggerOutput {
     this.write(result);
   }
 
-  public close(): Promise<void> {
+  public async close(): Promise<void> {
     if (this.openFile === null) return Promise.resolve();
 
     return this.openFile.handle.close();
@@ -93,7 +93,7 @@ export class FileOutput extends LoggerOutput {
   }
 
   private async getFiles(): Promise<{ dirent: Dirent, path: string }[]> {
-    const files = await readdirSync(this.options.directory, { withFileTypes: true });
+    const files = readdirSync(this.options.directory, { withFileTypes: true });
 
     return files.filter((file) =>
       file.isFile() &&

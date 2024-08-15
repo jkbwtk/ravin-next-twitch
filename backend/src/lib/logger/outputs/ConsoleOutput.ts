@@ -20,7 +20,7 @@ export class ConsoleOutput extends LoggerOutput {
     console.log(result);
   }
 
-  public close(): void {
+  public async close(): Promise<void> {
     // Nothing to do here
   }
 }

@@ -8,7 +8,7 @@ export abstract class LoggerOutput {
     throw new Error('Method not implemented.');
   }
 
-  public close(): void {
+  public async close(): Promise<void> {
     throw new Error('Method not implemented.');
   }
 
