@@ -124,12 +124,10 @@ const ProfileStatusWidget: Component = () => {
           <div class={style.profileInfo}>
             <span class={style.name}>Active Profiles:</span>
 
-            <div class={style.profiles}>
+            <div class={style.valueContainer}>
               <For each={status().activeProfiles}>
                 {(profile) => (
-                  <div class={style.profile}>
-                    <span class={style.name}>{profile.name}</span>
-                  </div>
+                  <Pill content={profile.name} />
                 )}
               </For>
             </div>

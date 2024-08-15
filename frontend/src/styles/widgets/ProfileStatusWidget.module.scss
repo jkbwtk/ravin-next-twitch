@@ -28,6 +28,13 @@
 
   column-gap: 0.5rem;
   row-gap: 0.5rem;
+
+  .value-container {
+    height: 3.2rem;
+    overflow-y: auto;
+
+    scrollbar-gutter: stable;
+  }
 }
 
 .stream-info {
@@ -51,11 +58,19 @@
 .profile-info {
   display: grid;
   grid-template-columns: min-content 1fr;
+  grid-template-rows: 100%;
 
   column-gap: 0.5rem;
   row-gap: 0.5rem;
 
   align-content: start;
+
+  .value-container {
+    height: 8rem;
+    overflow-y: auto;
+
+    scrollbar-gutter: stable;
+  }
 }
 
 .name {
