@@ -68,6 +68,7 @@ export const RegexFilterEditorProvider: ParentComponent = (props) => {
   const { popupApiError } = useErrorHandlers();
 
   const [actionId, setActionId] = createSignal(Actions.Delete);
+  const convertedRegex = createMemo(() => RegExpType.safeParse(state.filter.regex ?? '').data);
 
   const open = (filter?: Partial<RegexFilterApi>) => {
     batch(() => {
@@ -216,11 +217,6 @@ export const RegexFilterEditorProvider: ParentComponent = (props) => {
     }
   };
 
-  const convertedRegex = createMemo(() => RegExpType.safeParse(state.filter.regex ?? '').data);
-
-  createEffect(() => {
-    console.log(state.filter.regex, convertedRegex());
-  });
 
   return (
     <RegexFilterEditorContext.Provider
@@ -320,7 +316,7 @@ export const RegexFilterEditorProvider: ParentComponent = (props) => {
                 name='reason'
                 minLength={0}
                 maxLength={1024}
-                placeholder='This is a command response.'
+                placeholder='Spam filtering'
                 value={state.filter.reason ?? ''}
                 class={style.textarea}
               />

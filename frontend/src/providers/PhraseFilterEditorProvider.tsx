@@ -355,7 +355,7 @@ export const PhraseFilterEditorProvider: ParentComponent = (props) => {
                 name='reason'
                 minLength={0}
                 maxLength={1024}
-                placeholder='This is a command response.'
+                placeholder='Spam filtering'
                 value={state.filter.reason ?? ''}
                 class={style.textarea}
               />
