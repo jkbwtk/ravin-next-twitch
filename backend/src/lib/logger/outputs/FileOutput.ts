@@ -1,10 +1,10 @@
 import { LoggerOutput } from '#lib/logger/outputs/LoggerOutput';
 import { LoggerOptions, OutputOptions, TransformableEntry } from '#lib/logger/types';
 import { getFormattedTime } from '#lib/timeLib';
-import { Dirent, existsSync, mkdirSync, readdirSync, statSync, unlinkSync } from 'fs';
+import { Dirent, existsSync, mkdirSync, readdirSync, unlinkSync } from 'fs';
 import { FileHandle, open } from 'fs/promises';
 import path from 'path';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import duration, { Duration } from 'dayjs/plugin/duration';
 import { mergeOptions, RequiredDefaults } from '#shared/utils';
@@ -13,14 +13,33 @@ import { mergeOptions, RequiredDefaults } from '#shared/utils';
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
 
-type FileOutputOptions = OutputOptions & {
+interface RotationFormat {
+  generate(): string;
+  getDate(filename: string): Dayjs | null;
+}
+
+type FileOutputOptions = OutputOptions & ({
   directory?: string;
   filename: string;
-  rotationFormat?: (() => string) | false;
+  rotationFormat?: false;
+  maxAge?: false;
+  maxFiles?: false;
+  cleanupInterval?: Duration;
+} | {
+  directory?: string;
+  filename: string;
+  rotationFormat?: RotationFormat;
   maxAge?: Duration | false;
+  maxFiles?: false;
+  cleanupInterval?: Duration;
+} | {
+  directory?: string;
+  filename: string;
+  rotationFormat?: RotationFormat;
+  maxAge?: false;
   maxFiles?: number | false;
   cleanupInterval?: Duration;
-};
+});
 
 type OpenFile = {
   handle: FileHandle;
@@ -51,6 +70,19 @@ export class FileOutput extends LoggerOutput {
 
   protected options: Required<FileOutputOptions>;
 
+  public static basicRotationFormat: RotationFormat = {
+    generate: (): string => {
+      return `_${getFormattedTime('YY-MM-DD')}`;
+    },
+    getDate: (filename: string): Dayjs | null => {
+      const match = filename.match(/_(\d{4}-\d{2}-\d{2})/);
+
+      if (match === null) return null;
+
+      return dayjs(match[1], 'YY-MM-DD');
+    },
+  };
+
   constructor(options: FileOutputOptions) {
     super();
     this.options = mergeOptions(options, FileOutput.defaultOptions);
@@ -59,6 +91,13 @@ export class FileOutput extends LoggerOutput {
     this.basename = path.basename(this.options.filename, this.extension);
 
     this.createDirectory();
+
+    if (this.options.rotationFormat === false && (
+      this.options.maxAge !== false ||
+      this.options.maxFiles !== false
+    )) {
+      throw new Error('Cannot set maxAge or maxFiles without a rotationFormat');
+    }
   }
 
 
@@ -82,7 +121,7 @@ export class FileOutput extends LoggerOutput {
   private getFilePath(): string {
     const fullName = [
       this.basename,
-      this.options.rotationFormat ? this.options.rotationFormat() : '',
+      this.options.rotationFormat ? this.options.rotationFormat.generate() : '',
       this.extension,
     ].join('');
 
@@ -105,10 +144,6 @@ export class FileOutput extends LoggerOutput {
     }));
   }
 
-  public static rotateDate(): string {
-    return `_${getFormattedTime('YY-MM-DD')}`;
-  }
-
   private createDirectory(): void {
     const dir = this.options.directory;
 
@@ -119,10 +154,11 @@ export class FileOutput extends LoggerOutput {
 
   private async openOrCreateFile(): Promise<OpenFile> {
     const path = this.getFilePath();
+    const handle = await open(path, 'a');
 
     return {
-      path: path,
-      handle: await open(path, 'a'),
+      path,
+      handle,
     };
   }
 
@@ -138,20 +174,24 @@ export class FileOutput extends LoggerOutput {
   }
 
   private async runCleanup(): Promise<void> {
+    const rotationFormat = this.options.rotationFormat;
+    if (rotationFormat === false) return;
+
     const files = await this.getFiles();
     const details = files
       .map((file) => ({
         ...file,
-        stats: statSync(file.path),
+        date: rotationFormat.getDate(file.dirent.name),
       }))
-      .sort((a, b) => a.stats.birthtimeMs - b.stats.birthtimeMs);
+      .filter((file) => file.date !== null || file.path === this.openFile?.path)
+      .sort((a, b) => a.date?.diff(b.date) ?? 0) as { dirent: Dirent, path: string, date: Dayjs }[];
 
 
     if (this.options.maxAge !== false) {
       const cutoff = dayjs().subtract(this.options.maxAge);
 
       for (const detail of details) {
-        if (dayjs(detail.stats.birthtime).isBefore(cutoff)) {
+        if (detail.date.isBefore(cutoff)) {
           unlinkSync(detail.path);
         }
       }

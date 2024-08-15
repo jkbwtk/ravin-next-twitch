@@ -146,8 +146,18 @@ const instance = new Logger({
       level: Infinity,
       filename: 'combined_json.log',
       directory: 'logs',
-      rotationFormat: FileOutput.rotateDate,
+      rotationFormat: FileOutput.basicRotationFormat,
       maxAge: duration({ days: 7 }),
+    }),
+    new FileOutput({
+      format: prettyFormat
+        .copy()
+        .chain(Logger.removeColors),
+      level: Infinity,
+      filename: 'combined_human.log',
+      directory: 'logs',
+      rotationFormat: FileOutput.basicRotationFormat,
+      maxFiles: 3,
     }),
     new FileOutput({
       format: fileJsonFormat,
@@ -156,8 +166,9 @@ const instance = new Logger({
         'warn',
       ],
       filename: 'important_json.log',
-      directory: 'logs',
-      rotationFormat: FileOutput.rotateDate,
+      directory: 'logs/important',
+      rotationFormat: FileOutput.basicRotationFormat,
+      maxAge: duration({ days: 14 }),
     }),
     new FileOutput({
       format: prettyFormat
@@ -168,18 +179,9 @@ const instance = new Logger({
         'warn',
       ],
       filename: 'important_human.log',
-      directory: 'logs',
-      rotationFormat: FileOutput.rotateDate,
-    }),
-    new FileOutput({
-      format: prettyFormat
-        .copy()
-        .chain(Logger.removeColors),
-      level: Infinity,
-      filename: 'combined_human.log',
-      directory: 'logs',
-      rotationFormat: FileOutput.rotateDate,
-      maxFiles: 5,
+      directory: 'logs/important',
+      rotationFormat: FileOutput.basicRotationFormat,
+      maxAge: duration({ days: 14 }),
     }),
   ],
 }).registerLevelFunction('http', (callback, level, request: HTTPLogEntry) => {
