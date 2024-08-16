@@ -16,7 +16,7 @@ import InputCheckbox from '#components/InputCheckbox';
 import { Actions, PatchPhraseFilterReqBody, PhraseFilterApi, PostPhraseFilterReqBody } from '#types/api/filters';
 import TextArea from '#components/TextArea';
 
-import style from '#styles/CustomCommandsEditorProvider.module.scss';
+import style from '#styles/EditorProvider.module.scss';
 
 
 export type PhraseFilterEditorContextState = {

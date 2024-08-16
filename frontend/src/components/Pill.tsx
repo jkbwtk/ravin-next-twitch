@@ -1,5 +1,6 @@
-import style from '#styles/Pill.module.scss';
 import { JSX, Show } from 'solid-js';
+
+import style from '#styles/Pill.module.scss';
 
 
 export type PillProps = {

@@ -16,7 +16,7 @@ export type ProfileProps = {
 };
 
 const Profile: Component<ProfileProps> = (props) => {
-  const [, { updateProfile, open }] = useBehaviorProfilesEditor();
+  const [, { updateProfile, open, removeProfile }] = useBehaviorProfilesEditor();
 
   const toggleEnabled = async () => {
     await updateProfile(props.profile.id, { enabled: !props.profile.enabled });
@@ -26,9 +26,6 @@ const Profile: Component<ProfileProps> = (props) => {
     await updateProfile(props.profile.id, { manuallyActivated: !props.profile.manuallyActivated });
   };
 
-  const removeCommand = (profile: BehaviorProfileApi) => {
-    console.log(profile);
-  };
 
   return (
     <TableRow>
@@ -78,7 +75,7 @@ const Profile: Component<ProfileProps> = (props) => {
             <MaterialSymbol symbol='edit' color='yellow' size='alt' interactive class={style.commandButton} />
           </TemplateButton>
 
-          <TemplateButton onClick={() => removeCommand(props.profile) }>
+          <TemplateButton onClick={() => removeProfile(props.profile) }>
             <MaterialSymbol symbol='delete' color='red' size='alt' interactive class={style.commandButton} />
           </TemplateButton>
         </div>

@@ -25,7 +25,7 @@ import { userLevels } from '#locales/en-us/commands';
 import TemplateMenuItems from '#components/TemplateMenuItems';
 import { TemplateEnvironments } from '#types/database/columns';
 
-import style from '#styles/CustomCommandsEditorProvider.module.scss';
+import style from '#styles/EditorProvider.module.scss';
 
 
 export const translateUserLevel = (userLevel: UserLevel): keyof typeof UserLevel => UserLevel[userLevel] as keyof typeof UserLevel;

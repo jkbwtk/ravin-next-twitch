@@ -22,7 +22,7 @@ import { useErrorHandlers } from '#providers/ErrorHandlersProvider';
 import TemplateMenuItems from '#components/TemplateMenuItems';
 import { TemplateEnvironments } from '#types/database/columns';
 
-import style from '#styles/CustomCommandsEditorProvider.module.scss';
+import style from '#styles/EditorProvider.module.scss';
 
 
 export type CommandTimerEditorContextState = {

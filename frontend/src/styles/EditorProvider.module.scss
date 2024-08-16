@@ -23,6 +23,23 @@
     gap: 1rem;
     width: 100%;
 
+    .label {
+      color: $textBrightColor;
+      font-size: $smallFontSize;
+
+      margin-left: 1.5rem;
+      box-sizing: border-box;
+
+      user-select: none;
+    }
+
+    .pill-container {
+      display: flex;
+      gap: 0.4rem;
+
+      flex-wrap: wrap;
+    }
+
     .description {
       font-size: $smallFontSize;
 
@@ -53,4 +70,13 @@
 
     gap: 1rem;
   }
+}
+
+.empty-list {
+  font-size: $smallFontSize;
+  margin-left: 1.5rem;
+
+  height: 3.2rem;
+
+  user-select: none;
 }

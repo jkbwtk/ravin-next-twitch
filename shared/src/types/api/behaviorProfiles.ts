@@ -75,3 +75,28 @@ export const GetBehaviorProfilesStatusResponse = z.object({
 });
 
 export type GetBehaviorProfilesStatusResponse = z.infer<typeof GetBehaviorProfilesStatusResponse>;
+
+
+export const SimpleRelatedItem = z.object({
+  id: z.number().int().positive(),
+  name: z.string(),
+});
+
+export type SimpleRelatedItem = z.infer<typeof SimpleRelatedItem>;
+
+
+export const AvailableRelatedItemsApi = z.object({
+  commands: z.array(SimpleRelatedItem),
+  phraseFilters: z.array(SimpleRelatedItem),
+  regexFilters: z.array(SimpleRelatedItem),
+  commandTimers: z.array(SimpleRelatedItem),
+});
+
+export type AvailableRelatedItemsApi = z.infer<typeof AvailableRelatedItemsApi>;
+
+
+export const GetAvailableRelatedItemsResponse = z.object({
+  data: AvailableRelatedItemsApi,
+});
+
+export type GetAvailableRelatedItemsResponse = z.infer<typeof GetAvailableRelatedItemsResponse>;

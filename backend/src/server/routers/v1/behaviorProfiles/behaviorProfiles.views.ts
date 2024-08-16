@@ -1,9 +1,10 @@
 import { Bot } from '#bot/Bot';
 import { BehaviorProfileController } from '#database/controllers/BehaviorProfileController';
 import { CommandController } from '#database/controllers/CommandController';
+import { CommandTimerController } from '#database/controllers/CommandTImerController';
 import { PhraseFilterController } from '#database/controllers/PhraseFilterController';
 import { RegexFilterController } from '#database/controllers/RegexFilterController';
-import { BehaviorProfileSerializer } from '#database/serializers/BehaviorProfileSerializer';
+import { AvailableRelatedItemsSerializer, BehaviorProfileSerializer } from '#database/serializers/BehaviorProfileSerializer';
 import { logger } from '#lib/logger';
 import { ExpressStack } from '#server/ExpressStack';
 import { limitOffsetPagination } from '#server/middlewares/pagination';
@@ -17,6 +18,7 @@ import { ServerError } from '#shared/ServerError';
 import { HttpCodes } from '#shared/httpCodes';
 import {
   BehaviorProfileApi,
+  GetAvailableRelatedItemsResponse,
   GetBehaviorProfilesPaginatedResponse,
   GetBehaviorProfilesResponse,
   GetBehaviorProfilesStatusResponse,
@@ -95,7 +97,7 @@ export const postBehaviorProfileView = new ExpressStack()
     [CommandController, 'commands'],
     [PhraseFilterController, 'phraseFilters'],
     [RegexFilterController, 'regexFilters'],
-    [CommandController, 'commandTimers'],
+    [CommandTimerController, 'commandTimers'],
   ]))
   .use(validateResponse(BehaviorProfileApi))
   .use(async (req, res) => {
@@ -132,7 +134,7 @@ export const patchBehaviorProfileView = new ExpressStack('/:id')
     [CommandController, 'commands'],
     [PhraseFilterController, 'phraseFilters'],
     [RegexFilterController, 'regexFilters'],
-    [CommandController, 'commandTimers'],
+    [CommandTimerController, 'commandTimers'],
   ]))
   .use(validateResponse(BehaviorProfileApi))
   .use(async (req, res) => {
@@ -182,5 +184,29 @@ export const deleteBehaviorProfileView = new ExpressStack('/:id')
       });
 
       throw new ServerError(HttpCodes.InternalServerError, 'Failed to delete behavior profile');
+    }
+  });
+
+
+export const getAvailableRelatedItemsView = new ExpressStack()
+  .usePreflight(authenticated)
+  .use(validateResponse(GetAvailableRelatedItemsResponse))
+  .use(async (req, res) => {
+    try {
+      res.jsonValidated({
+        data: AvailableRelatedItemsSerializer({
+          commands: await CommandController.getByUserId(req.user.id),
+          phraseFilters: await PhraseFilterController.getByUserId(req.user.id),
+          regexFilters: await RegexFilterController.getByUserId(req.user.id),
+          commandTimers: await CommandTimerController.getByUserId(req.user.id),
+        }),
+      });
+    } catch (err) {
+      logger.error('Failed to get available related items', {
+        error: err,
+        label: ['APIv1', 'behaviorProfiles', 'getAvailableRelatedItems'],
+      });
+
+      throw new ServerError(HttpCodes.InternalServerError, 'Failed to get available related items');
     }
   });

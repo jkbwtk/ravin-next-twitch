@@ -17,7 +17,7 @@ import TextArea from '#components/TextArea';
 import Input from '#components/Input';
 import { RegExpType } from '#types/regExp';
 
-import style from '#styles/CustomCommandsEditorProvider.module.scss';
+import style from '#styles/EditorProvider.module.scss';
 
 
 export type RegexFilterEditorContextState = {

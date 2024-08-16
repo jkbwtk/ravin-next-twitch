@@ -1,5 +1,6 @@
 import {
   deleteBehaviorProfileView,
+  getAvailableRelatedItemsView,
   getBehaviorProfilesStatus,
   getBehaviorProfilesView,
   patchBehaviorProfileView,
@@ -20,6 +21,8 @@ export const createBehaviorProfilesRouter = (): Router => {
   behaviorProfilesRouter.patch(patchBehaviorProfileView.url, ...patchBehaviorProfileView.unwrap());
 
   behaviorProfilesRouter.delete(deleteBehaviorProfileView.url, ...deleteBehaviorProfileView.unwrap());
+
+  behaviorProfilesRouter.get('/available-items', ...getAvailableRelatedItemsView.unwrap());
 
   return behaviorProfilesRouter;
 };

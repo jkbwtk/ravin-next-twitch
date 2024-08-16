@@ -1,0 +1,53 @@
+@use 'app' as *;
+@use 'EditorProvider.module.scss';
+
+
+.modal {
+  width: max-content !important;
+}
+
+.form-container {
+  display: grid;
+  grid-template-columns: 50rem 40rem;
+
+  overflow-y: auto;
+}
+
+.related-item-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: min-content;
+
+  height: min-content;
+  box-sizing: border-box;
+
+  gap: 2rem;
+
+  padding: 2rem;
+
+  .group {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: min-content;
+
+    gap: 1rem;
+
+    .label {
+      color: $textBrightColor;
+      font-size: $smallFontSize;
+
+      margin-left: 1.5rem;
+      box-sizing: border-box;
+
+      user-select: none;
+    }
+
+    .items {
+      display: flex;
+      flex-wrap: wrap;
+
+      gap: 0.4rem;
+
+    }
+  }
+}

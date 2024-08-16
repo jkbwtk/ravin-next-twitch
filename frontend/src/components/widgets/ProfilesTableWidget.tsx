@@ -47,15 +47,15 @@ const ProfilesTableWidget: Component = () => {
 
   let tableRef = document.createElement('table');
 
-  const createAction = () => {
+  const createProfile = () => {
     refetchProfiles();
   };
 
-  const updateFilter = (profile: BehaviorProfileApi) => {
+  const updateProfile = (profile: BehaviorProfileApi) => {
     setProfiles((filters) => ({ ...filters, data: filters.data.map((f) => f.id === profile.id ? profile : f) }));
   };
 
-  const removeFilter = (profileId: number) => {
+  const removeProfile = (profileId: number) => {
     batch(() => {
       setProfiles((profiles) => ({ ...profiles, data: profiles.data.filter((filter) => filter.id !== profileId), total: profiles.total - 1 }));
 
@@ -75,18 +75,18 @@ const ProfilesTableWidget: Component = () => {
   };
 
   onMount(() => {
-    socket.client.on('NEW_BEHAVIOR_PROFILE', createAction);
-    socket.client.on('UPD_BEHAVIOR_PROFILE', updateFilter);
-    socket.client.on('DEL_BEHAVIOR_PROFILE', removeFilter);
+    socket.client.on('NEW_BEHAVIOR_PROFILE', createProfile);
+    socket.client.on('UPD_BEHAVIOR_PROFILE', updateProfile);
+    socket.client.on('DEL_BEHAVIOR_PROFILE', removeProfile);
 
     window.addEventListener('resize', handleResize);
     handleResize();
   });
 
   onCleanup(() => {
-    socket.client.off('NEW_BEHAVIOR_PROFILE', createAction);
-    socket.client.off('UPD_BEHAVIOR_PROFILE', updateFilter);
-    socket.client.off('DEL_BEHAVIOR_PROFILE', removeFilter);
+    socket.client.off('NEW_BEHAVIOR_PROFILE', createProfile);
+    socket.client.off('UPD_BEHAVIOR_PROFILE', updateProfile);
+    socket.client.off('DEL_BEHAVIOR_PROFILE', removeProfile);
 
     window.removeEventListener('resize', handleResize);
   });
