@@ -140,8 +140,6 @@ export class BehaviorProfilesHandler implements AutoWirable {
     }
 
     this.activeProfiles = activeProfiles;
-
-    console.log(Array.from(this.activeProfiles.values()).map((profile) => profile.name));
   };
 
   private checkOwnership = (profile: BehaviorProfile): boolean => {

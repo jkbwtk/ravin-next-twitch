@@ -171,18 +171,25 @@ export class PhraseFilterHandler implements AutoWirable {
     return 100 * Math.max(0, filter.length - length) / filter.length;
   }
 
+  private checkOwnership(filter: PhraseFilter): boolean {
+    return filter.channelUserId === this.channelThread.channel.user.id;
+  }
+
   public add = (filter: PhraseFilter | null): void => {
     if (filter === null) return;
+    if (this.checkOwnership(filter) === false) return;
     this.filters.set(filter.id, filter);
   };
 
   public remove = (filter: PhraseFilter | null): void => {
     if (filter === null) return;
+    if (this.checkOwnership(filter) === false) return;
     this.filters.delete(filter.id);
   };
 
   public update = (filter: PhraseFilter | null): void => {
     if (filter === null) return;
+    if (this.checkOwnership(filter) === false) return;
 
     this.remove(filter);
     this.add(filter);

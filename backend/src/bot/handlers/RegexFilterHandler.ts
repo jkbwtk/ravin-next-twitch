@@ -119,18 +119,25 @@ export class RegexFilterHandler implements AutoWirable {
     return { filter, match: match[0] };
   }
 
+  private checkOwnership(filter: RegexFilter): boolean {
+    return filter.channelUserId === this.channelThread.channel.user.id;
+  }
+
   public add = (filter: RegexFilter | null): void => {
     if (filter === null) return;
+    if (this.checkOwnership(filter) === false) return;
     this.filters.set(filter.id, filter);
   };
 
   public remove = (filter: RegexFilter | null): void => {
     if (filter === null) return;
+    if (this.checkOwnership(filter) === false) return;
     this.filters.delete(filter.id);
   };
 
   public update = (filter: RegexFilter | null): void => {
     if (filter === null) return;
+    if (this.checkOwnership(filter) === false) return;
 
     this.remove(filter);
     this.add(filter);

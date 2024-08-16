@@ -40,8 +40,13 @@ export class CommandHandler implements AutoWirable {
     return this.customCommands.get(commandName) ?? null;
   }
 
+  private checkOwnership = (command: Command): boolean => {
+    return command.channelUserId === this.channelThread.channel.userId;
+  };
+
   public add = (command: Command | null): void => {
     if (command === null) return;
+    if (this.checkOwnership(command) === false) return;
     if (command.enabled === false) return;
 
     this.customCommands.set(command.command, new CustomCommand(this, command));
@@ -49,11 +54,14 @@ export class CommandHandler implements AutoWirable {
 
   public remove = (command: Command | null): void => {
     if (command === null) return;
+    if (this.checkOwnership(command) === false) return;
+
     this.customCommands.delete(command.command);
   };
 
   public update = (command: Command | null): void => {
     if (command === null) return;
+    if (this.checkOwnership(command) === false) return;
 
     this.remove(command);
     this.add(command);

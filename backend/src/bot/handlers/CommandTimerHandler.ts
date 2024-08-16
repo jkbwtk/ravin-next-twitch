@@ -33,8 +33,13 @@ export class CommandTimerHandler implements AutoWirable {
     }
   }
 
+  private checkOwnership(timer: CommandTimer): boolean {
+    return timer.channelUserId === this.channelThread.channel.user.id;
+  }
+
   public add = (timer: CommandTimer | null): void => {
     if (timer === null) return;
+    if (this.checkOwnership(timer) === false) return;
     if (timer.enabled === false) return;
 
     this.commandTimers.set(timer.name, new CommandTimerInstance(this, timer));
@@ -42,6 +47,7 @@ export class CommandTimerHandler implements AutoWirable {
 
   public remove = (timer: CommandTimer | null): void => {
     if (timer === null) return;
+    if (this.checkOwnership(timer) === false) return;
 
     const commandTimer = this.commandTimers.get(timer.name);
 
@@ -54,6 +60,7 @@ export class CommandTimerHandler implements AutoWirable {
 
   public update = (timer: CommandTimer | null): void => {
     if (timer === null) return;
+    if (this.checkOwnership(timer) === false) return;
 
     this.remove(timer);
     this.add(timer);
