@@ -15,6 +15,7 @@ export const BehaviorProfileApi = createSelectSchema(behaviorProfilesTable, {
   description: (schema) => schema.description.min(3).max(255).optional().nullable().default(null),
   activatorCategory: () => RegExpLiteralType.optional().nullable().default(null),
   activatorTitle: () => RegExpLiteralType.optional().nullable().default(null),
+  manuallyActivated: (schema) => schema.manuallyActivated.default(false),
 }).pick({
   id: true,
   name: true,
@@ -22,6 +23,7 @@ export const BehaviorProfileApi = createSelectSchema(behaviorProfilesTable, {
   description: true,
   activatorCategory: true,
   activatorTitle: true,
+  manuallyActivated: true,
 }).merge(z.object({
   commands: z.array(CustomCommandApi),
   phraseFilters: z.array(PhraseFilterApi),

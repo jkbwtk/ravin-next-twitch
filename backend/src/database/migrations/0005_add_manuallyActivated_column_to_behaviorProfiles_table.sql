@@ -1,0 +1,1 @@
+ALTER TABLE "BehaviorProfiles" ADD COLUMN "manuallyActivated" boolean DEFAULT false NOT NULL;

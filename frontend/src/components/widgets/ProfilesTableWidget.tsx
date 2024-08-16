@@ -124,6 +124,7 @@ const ProfilesTableWidget: Component = () => {
                   }}>
                     Description
                   </TableCell>
+                  <TableCell align='center' class={style.minWidthColumn}>Forced</TableCell>
                   <TableCell align='center' class={style.minWidthColumn}>Enabled</TableCell>
                   <TableCell align='center' class={style.minWidthColumn}>Actions</TableCell>
                 </TableRow>

@@ -16,18 +16,14 @@ export type ProfileProps = {
 };
 
 const Profile: Component<ProfileProps> = (props) => {
-  const [, { updateProfile }] = useBehaviorProfilesEditor();
+  const [, { updateProfile, open }] = useBehaviorProfilesEditor();
 
   const toggleEnabled = async () => {
     await updateProfile(props.profile.id, { enabled: !props.profile.enabled });
   };
 
-  const activate = (profile: BehaviorProfileApi) => {
-    console.log(profile);
-  };
-
-  const open = (profile: BehaviorProfileApi) => {
-    console.log(profile);
+  const toggleActivation = async () => {
+    await updateProfile(props.profile.id, { manuallyActivated: !props.profile.manuallyActivated });
   };
 
   const removeCommand = (profile: BehaviorProfileApi) => {
@@ -49,6 +45,21 @@ const Profile: Component<ProfileProps> = (props) => {
 
       <TableCell align='center' class={style.minWidthColumn}>
         <div>
+          <TemplateButton onClick={toggleActivation}>
+            <Switch>
+              <Match when={props.profile.manuallyActivated}>
+                <MaterialSymbol symbol='check' color='green' interactive />
+              </Match>
+              <Match when={!props.profile.manuallyActivated}>
+                <MaterialSymbol symbol='close' color='gray' interactive />
+              </Match>
+            </Switch>
+          </TemplateButton>
+        </div>
+      </TableCell>
+
+      <TableCell align='center' class={style.minWidthColumn}>
+        <div>
           <TemplateButton onClick={toggleEnabled}>
             <Switch>
               <Match when={props.profile.enabled}>
@@ -63,10 +74,6 @@ const Profile: Component<ProfileProps> = (props) => {
       </TableCell>
       <TableCell align='center'>
         <div class={style.actionsContainer}>
-          <TemplateButton onClick={() => activate(props.profile)}>
-            <MaterialSymbol symbol='adjust' color='blue' size='alt' interactive class={style.commandButton} />
-          </TemplateButton>
-
           <TemplateButton onClick={() => open(props.profile)}>
             <MaterialSymbol symbol='edit' color='yellow' size='alt' interactive class={style.commandButton} />
           </TemplateButton>

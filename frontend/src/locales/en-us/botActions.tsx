@@ -33,6 +33,7 @@ export const botActions = new Dictionary<BotActionType, string>(
     [BotActionType.BehaviorProfileActivatedCategory]: 'Behavior Profile Activated (Category)',
     [BotActionType.BehaviorProfileActivatedTitle]: 'Behavior Profile Activated (Title)',
     [BotActionType.BehaviorProfileDeactivated]: 'Behavior Profile Deactivated',
+    [BotActionType.BehaviorProfileActivatedManual]: 'Behavior Profile Activated (Manual)',
   });
 
 
@@ -137,6 +138,11 @@ export const botActionsDescriptions = new Dictionary<BotActionType, BotActionsDe
     [BotActionType.BehaviorProfileDeactivated]: (data) => (
       <span>
         Behavior profile <code>{data.at(0)}</code> deactivated.
+      </span>
+    ),
+    [BotActionType.BehaviorProfileActivatedManual]: (data) => (
+      <span>
+      Behavior profile <code>{data.at(0)}</code> activated manually
       </span>
     ),
   });

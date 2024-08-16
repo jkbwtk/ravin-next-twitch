@@ -32,6 +32,7 @@ export enum BotActionType {
   BehaviorProfileActivatedCategory = 500,
   BehaviorProfileActivatedTitle = 501,
   BehaviorProfileDeactivated = 502,
+  BehaviorProfileActivatedManual = 503,
 };
 
 
@@ -66,6 +67,7 @@ export type BotActionTypeParams = {
   [BotActionType.BehaviorProfileActivatedCategory]: (profile: string, category: string) => void;
   [BotActionType.BehaviorProfileActivatedTitle]: (profile: string, title: string) => void;
   [BotActionType.BehaviorProfileDeactivated]: (profile: string) => void;
+  [BotActionType.BehaviorProfileActivatedManual]: (profile: string) => void;
 };
 
 export const BotActionData = z.array(z.coerce.string()).default([]);

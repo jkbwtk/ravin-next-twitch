@@ -56,7 +56,7 @@ export class BehaviorProfilesHandler implements AutoWirable {
     });
   }
 
-  public handleChannelInformation = async (info: ChannelThreadInformation | null): Promise<void> => {
+  public handleChannelInformation = async (info: ChannelThreadInformation | null = this.channelInformationService.channelInformation()): Promise<void> => {
     if (info === null) return;
 
     const activeProfiles = new Map<number, BehaviorProfileWithRelatedIds>();
@@ -101,6 +101,20 @@ export class BehaviorProfilesHandler implements AutoWirable {
           }
         }
       }
+
+      if (profile.manuallyActivated === true) {
+        activeProfiles.set(profile.id, profile);
+
+        if (!this.activeProfiles.has(profile.id)) {
+          changed = true;
+
+          await BotActionController.createFromType(
+            this.channelThread.channel.userId,
+            BotActionType.BehaviorProfileActivatedManual,
+            profile.name,
+          );
+        }
+      }
     }
 
     for (const [profileId, profile] of this.activeProfiles.entries()) {
@@ -126,46 +140,73 @@ export class BehaviorProfilesHandler implements AutoWirable {
     }
 
     this.activeProfiles = activeProfiles;
+
+    console.log(Array.from(this.activeProfiles.values()).map((profile) => profile.name));
   };
 
-  public add = (profile: BehaviorProfileWithRelations | null): void => {
+  private checkOwnership = (profile: BehaviorProfile): boolean => {
+    return profile.channelUserId === this.channelThread.channel.userId;
+  };
+
+  private _add = (profile: BehaviorProfileWithRelations | null): void => {
     if (profile === null) return;
+    if (this.checkOwnership(profile) === false) return;
     if (profile.enabled === false) return;
 
     this.behaviorProfiles.set(profile.id, BehaviorProfileController.$utils.mapToRelatedIds(profile));
+  };
 
-    this.handleChannelInformation(this.channelInformationService.channelInformation());
+  public add = (profile: BehaviorProfileWithRelations | null): void => {
+    this._add(profile);
+    this.handleChannelInformation();
+  };
+
+  private _remove = (profile: BehaviorProfile | null): void => {
+    if (profile === null) return;
+    if (this.checkOwnership(profile) === false) return;
+
+    this.behaviorProfiles.delete(profile.id);
   };
 
   public remove = (profile: BehaviorProfile | null): void => {
-    if (profile === null) return;
-
-    this.behaviorProfiles.delete(profile.id);
-
-    this.handleChannelInformation(this.channelInformationService.channelInformation());
+    this._remove(profile);
+    this.handleChannelInformation();
   };
 
   public update = (profile: BehaviorProfileWithRelations | null): void => {
     if (profile === null) return;
+    if (this.checkOwnership(profile) === false) return;
 
-    this.remove(profile);
-    this.add(profile);
+    this._remove(profile);
+    this._add(profile);
+
+    this.handleChannelInformation();
   };
 
-  public removeAll(): void {
+  private _removeAll(): void {
     this.behaviorProfiles.clear();
+    this.activeProfiles.clear();
+  }
+
+  public removeAll(): void {
+    this._removeAll();
+    this.handleChannelInformation();
   }
 
   public async loadAll(): Promise<void> {
     const profiles = await BehaviorProfileController.getByUserIdWithRelations(this.channelThread.channel.userId);
 
-    this.removeAll();
-    profiles.forEach(this.add);
+    this._removeAll();
+    profiles.forEach(this._add);
+
+    this.handleChannelInformation();
   }
 
   public loadList(profiles: BehaviorProfileWithRelations[]): void {
-    this.removeAll();
-    profiles.forEach(this.add);
+    this._removeAll();
+    profiles.forEach(this._add);
+
+    this.handleChannelInformation();
   }
 
   private registerSignalHandlers(): void {

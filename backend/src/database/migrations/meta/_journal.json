@@ -36,6 +36,13 @@
       "when": 1723150479036,
       "tag": "0004_fix_duplicated_channelUserId_column",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1723754057527,
+      "tag": "0005_add_manuallyActivated_column_to_behaviorProfiles_table",
+      "breakpoints": true
     }
   ]
 }

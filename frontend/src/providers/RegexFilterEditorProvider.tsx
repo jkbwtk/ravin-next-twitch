@@ -1,4 +1,4 @@
-import { batch, createContext, createEffect, createMemo, createSignal, useContext } from 'solid-js';
+import { batch, createContext, createMemo, createSignal, useContext } from 'solid-js';
 import { createStore } from 'solid-js/store';
 import { useNotification } from '#providers/NotificationProvider';
 import InputRange from '#components/InputRange';

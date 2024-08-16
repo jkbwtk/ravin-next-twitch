@@ -325,6 +325,7 @@ export const behaviorProfilesTable = pgTable(
     description: text('description'),
     activatorCategory: text('activatorCategory'),
     activatorTitle: text('activatorTitle'),
+    manuallyActivated: boolean('manuallyActivated').default(false).notNull(),
     createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { precision: 3, mode: 'date' })
       .defaultNow()

@@ -9,16 +9,11 @@ import { logger } from '#lib/logger';
 import { Wirable } from '#lib/autowire';
 import { ExtendedCron } from '#lib/ExtendedCron';
 import { BotActionType } from '#types/api/botActions';
-import { CommandController } from '#database/controllers/CommandController';
 import { BotActionController } from '#database/controllers/BotActionController';
 import { ChannelController } from '#database/controllers/ChannelController';
-import { PhraseFilterController } from '#database/controllers/PhraseFilterController';
-import { RegexFilterController } from '#database/controllers/RegexFilterController';
-import { CommandTimerController } from '#database/controllers/CommandTImerController';
 import { ChannelActionController } from '#database/controllers/ChannelActionController';
 import { ChannelStatsController } from '#database/controllers/ChannelStatsController';
 import { MessageController } from '#database/controllers/MessageController';
-import { PhraseFilter, RegexFilter } from '#types/database/tables';
 
 
 export interface BotOptions {

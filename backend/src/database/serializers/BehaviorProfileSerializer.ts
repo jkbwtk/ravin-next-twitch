@@ -14,6 +14,7 @@ export const BehaviorProfileSerializer = serializer<BehaviorProfileWithRelations
   enabled: profile.enabled,
   activatorCategory: profile.activatorCategory,
   activatorTitle: profile.activatorTitle,
+  manuallyActivated: profile.manuallyActivated,
   commands: CustomCommandSerializer(profile.commands),
   phraseFilters: PhraseFilterSerializer(profile.phraseFilters),
   regexFilters: RegexFilterSerializer(profile.regexFilters),
