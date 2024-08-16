@@ -149,16 +149,16 @@ const instance = new Logger({
       rotationFormat: FileOutput.basicRotationFormat,
       maxAge: duration({ days: 7 }),
     }),
-    new FileOutput({
-      format: prettyFormat
-        .copy()
-        .chain(Logger.removeColors),
-      level: Infinity,
-      filename: 'combined_human.log',
-      directory: 'logs',
-      rotationFormat: FileOutput.basicRotationFormat,
-      maxFiles: 3,
-    }),
+    // new FileOutput({
+    //   format: prettyFormat
+    //     .copy()
+    //     .chain(Logger.removeColors),
+    //   level: Infinity,
+    //   filename: 'combined_human.log',
+    //   directory: 'logs',
+    //   rotationFormat: FileOutput.basicRotationFormat,
+    //   maxFiles: 3,
+    // }),
     new FileOutput({
       format: fileJsonFormat,
       level: [

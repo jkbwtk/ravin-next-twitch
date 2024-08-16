@@ -1,8 +1,7 @@
 import { LoggerOutput } from '#lib/logger/outputs/LoggerOutput';
 import { LoggerOptions, OutputOptions, TransformableEntry } from '#lib/logger/types';
 import { getFormattedTime } from '#lib/timeLib';
-import { Dirent, existsSync, mkdirSync, readdirSync, unlinkSync } from 'fs';
-import { FileHandle, open } from 'fs/promises';
+import { closeSync, Dirent, existsSync, mkdirSync, openSync, readdirSync, unlinkSync, writeFileSync } from 'fs';
 import path from 'path';
 import dayjs, { Dayjs } from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -42,13 +41,8 @@ type FileOutputOptions = OutputOptions & ({
 });
 
 type OpenFile = {
-  handle: FileHandle;
+  fileDescriptor: number;
   path: string;
-};
-
-type WriteResult = {
-  bytesWritten: number;
-  buffer: string | Uint8Array;
 };
 
 export class FileOutput extends LoggerOutput {
@@ -113,9 +107,7 @@ export class FileOutput extends LoggerOutput {
   }
 
   public async close(): Promise<void> {
-    if (this.openFile === null) return Promise.resolve();
-
-    return this.openFile.handle.close();
+    this.closeFile();
   }
 
   private getFilePath(): string {
@@ -131,7 +123,7 @@ export class FileOutput extends LoggerOutput {
     );
   }
 
-  private async getFiles(): Promise<{ dirent: Dirent, path: string }[]> {
+  private getFiles(): { dirent: Dirent, path: string }[] {
     const files = readdirSync(this.options.directory, { withFileTypes: true });
 
     return files.filter((file) =>
@@ -152,14 +144,21 @@ export class FileOutput extends LoggerOutput {
     mkdirSync(dir, { recursive: true });
   }
 
-  private async openOrCreateFile(): Promise<OpenFile> {
+  private openOrCreateFile(): OpenFile {
     const path = this.getFilePath();
-    const handle = await open(path, 'a');
+    const handle = openSync(path, 'a');
 
     return {
       path,
-      handle,
+      fileDescriptor: handle,
     };
+  }
+
+  private closeFile(): void {
+    if (this.openFile === null) return;
+
+    closeSync(this.openFile.fileDescriptor);
+    this.openFile = null;
   }
 
   private async periodicCleanup(): Promise<void> {
@@ -173,11 +172,11 @@ export class FileOutput extends LoggerOutput {
     }
   }
 
-  private async runCleanup(): Promise<void> {
+  private runCleanup(): void {
     const rotationFormat = this.options.rotationFormat;
     if (rotationFormat === false) return;
 
-    const files = await this.getFiles();
+    const files = this.getFiles();
     const details = files
       .map((file) => ({
         ...file,
@@ -208,22 +207,22 @@ export class FileOutput extends LoggerOutput {
     }
   }
 
-  private async write(message: string): Promise<WriteResult> {
+  private write(message: string): void {
     const newFilePath = this.getFilePath();
 
     if (this.openFile === null) {
-      this.openFile = await this.openOrCreateFile();
+      this.openFile = this.openOrCreateFile();
     }
 
     if (newFilePath !== this.openFile.path) {
-      await this.openFile.handle.close();
-      this.openFile = await this.openOrCreateFile();
+      this.closeFile();
+      this.openFile = this.openOrCreateFile();
     }
 
-    await this.periodicCleanup();
+    this.periodicCleanup();
 
     const buffer = Buffer.from(message + '\n');
 
-    return this.openFile.handle.write(buffer);
+    writeFileSync(this.openFile.fileDescriptor, buffer);
   }
 }
