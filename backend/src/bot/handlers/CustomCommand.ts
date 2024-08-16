@@ -1,4 +1,5 @@
 import { ChannelThread } from '#bot/ChannelThread';
+import { BehaviorProfilesHandler } from '#bot/handlers/BehaviorProfilesHandler';
 import { TemplateRunner } from '#bot/templates/TemplateRunner';
 import { BotActionController } from '#database/controllers/BotActionController';
 import { ChannelStatsController } from '#database/controllers/ChannelStatsController';
@@ -19,6 +20,7 @@ import { Client } from 'tmi.js';
 export class CustomCommand implements AutoWirable {
   private client: Client;
   private channelThread: ChannelThread;
+  private profilesHandler: BehaviorProfilesHandler;
 
   private isolate: Isolate;
 
@@ -28,6 +30,7 @@ export class CustomCommand implements AutoWirable {
   constructor(public __parent: ClassInstance, public readonly command: Command) {
     this.client = wire(this, Client);
     this.channelThread = wire(this, ChannelThread);
+    this.profilesHandler = wire(this, BehaviorProfilesHandler);
 
     this.isolate = wire(this, Isolate);
   }
@@ -57,6 +60,7 @@ export class CustomCommand implements AutoWirable {
 
   public async execute(self: boolean, message: Message): Promise<void> {
     if (self) return;
+    if (this.profilesHandler.isResourceActive(this.command.id, 'commandIds') === false) return;
 
     if (!this.command.enabled) {
       await BotActionController.createFromType(

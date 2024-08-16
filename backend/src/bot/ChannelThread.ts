@@ -16,9 +16,9 @@ import { ChannelWithUser, Message } from '#types/database/tables';
 import { logger } from '#lib/logger';
 import { BehaviorProfilesHandler } from '#bot/handlers/BehaviorProfilesHandler';
 import { BehaviorProfilesStatus } from '#types/api/behaviorProfiles';
-import { BehaviorProfileController } from '#database/controllers/BehaviorProfileController';
 import { BehaviorProfileSerializer } from '#database/serializers/BehaviorProfileSerializer';
 import { ChannelInformationService } from '#bot/handlers/ChannelInformationService';
+
 
 export type ChannelThreadOptions = {
   messageCacheSize?: number;

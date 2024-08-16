@@ -11,6 +11,8 @@ import { BehaviorProfile, BehaviorProfileWithRelatedIds, BehaviorProfileWithRela
 import { RegExpType } from '#types/regExp';
 
 
+type ResourceType = 'commandIds' | 'phraseFilterIds' | 'regexFilterIds' | 'commandTimerIds';
+
 export class BehaviorProfilesHandler implements AutoWirable {
   public behaviorProfiles = new Map<number, BehaviorProfileWithRelatedIds>();
 
@@ -54,6 +56,16 @@ export class BehaviorProfilesHandler implements AutoWirable {
         },
       },
     });
+  }
+
+  public isResourceActive(id: number, type: ResourceType): boolean {
+    if (this.activeProfiles.size === 0) return true;
+
+    for (const profile of this.activeProfiles.values()) {
+      if (profile[type].includes(id)) return true;
+    }
+
+    return false;
   }
 
   public handleChannelInformation = async (info: ChannelThreadInformation | null = this.channelInformationService.channelInformation()): Promise<void> => {

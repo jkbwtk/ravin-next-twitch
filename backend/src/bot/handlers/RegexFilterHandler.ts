@@ -1,4 +1,5 @@
 import { ChannelThread } from '#bot/ChannelThread';
+import { BehaviorProfilesHandler } from '#bot/handlers/BehaviorProfilesHandler';
 import { BotActionController } from '#database/controllers/BotActionController';
 import { MessageController } from '#database/controllers/MessageController';
 import { RegexFilterController } from '#database/controllers/RegexFilterController';
@@ -23,12 +24,14 @@ export class RegexFilterHandler implements AutoWirable {
   private client: Client;
 
   private channelThread: ChannelThread;
+  private profilesHandler: BehaviorProfilesHandler;
 
   public filters: ExtendedMap<number, RegexFilter> = new ExtendedMap();
 
   constructor(public __parent: ClassInstance) {
     this.client = wire(this, Client);
     this.channelThread = wire(this, ChannelThread);
+    this.profilesHandler = wire(this, BehaviorProfilesHandler);
   }
 
   public async init(): Promise<void> {
@@ -93,6 +96,8 @@ export class RegexFilterHandler implements AutoWirable {
 
     for (const filter of this.filters.values()) {
       if (!filter.enabled) continue;
+      if (this.profilesHandler.isResourceActive(filter.id, 'phraseFilterIds') === false) continue;
+
       const match = this.matchRegex(message, filter);
 
       if (match) matches.push(match);

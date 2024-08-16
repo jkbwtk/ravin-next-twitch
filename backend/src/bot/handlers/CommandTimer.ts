@@ -1,4 +1,5 @@
 import { ChannelThread } from '#bot/ChannelThread';
+import { BehaviorProfilesHandler } from '#bot/handlers/BehaviorProfilesHandler';
 import { TemplateRunner } from '#bot/templates/TemplateRunner';
 import { BotActionController } from '#database/controllers/BotActionController';
 import { MessageController } from '#database/controllers/MessageController';
@@ -24,12 +25,14 @@ export class CommandTimerInstance implements AutoWirable {
 
   private client: Client;
   private channelThread: ChannelThread;
+  private profilesHandler: BehaviorProfilesHandler;
 
   private isolate: Isolate;
 
   constructor(public __parent: ClassInstance, public readonly timer: CommandTimer) {
     this.client = wire(this, Client);
     this.channelThread = wire(this, ChannelThread);
+    this.profilesHandler = wire(this, BehaviorProfilesHandler);
 
     this.job = this.createJob();
 
@@ -43,6 +46,8 @@ export class CommandTimerInstance implements AutoWirable {
   }
 
   private processTimer = async (self: ExtendedCron): Promise<void> => {
+    if (this.profilesHandler.isResourceActive(this.timer.id, 'commandTimerIds') === false) return;
+
     if (this.messageCounter < this.timer.lines) {
       self.pause('Not enough messages');
 
@@ -118,6 +123,7 @@ export class CommandTimerInstance implements AutoWirable {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public async processMessage(self: boolean, message: Message): Promise<void> {
     if (self) return;
+    if (this.profilesHandler.isResourceActive(this.timer.id, 'commandTimerIds') === false) return;
 
     const userLevel = MessageController.$utils.getUserLevel(message);
 
