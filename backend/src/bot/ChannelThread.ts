@@ -55,13 +55,13 @@ export class ChannelThread implements AutoWirable {
     this.messages = new CacheFIFO(this.options.messageCacheSize);
 
     this.channelInformationService = new ChannelInformationService(this);
+    this.behaviorProfilesHandler = new BehaviorProfilesHandler(this);
 
     this.chantHandler = new ChantHandler(this);
     this.commandHandler = new CommandHandler(this);
     this.commandTimerHandler = new CommandTimerHandler(this);
     this.phraseFilterHandler = new PhraseFilterHandler(this);
     this.regexFilterHandler = new RegexFilterHandler(this);
-    this.behaviorProfilesHandler = new BehaviorProfilesHandler(this);
 
     this.isolate = new Isolate({ memoryLimit: 32 });
 
