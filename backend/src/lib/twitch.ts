@@ -14,13 +14,16 @@ import {
   BanUsers,
   GetChatters,
   GetTwitchChannelInformation,
+  GetTwitchChatSettings,
   GetTwitchModerators,
   GetTwitchStreams,
   GetTwitchUsers,
   GetUsersOptions,
+  PatchTwitchChatSettings,
   RefreshAccessToken,
   TwitchBriefUser,
   TwitchChannelInformation,
+  TwitchChatSettings,
   TwitchStream,
   TwitchUser,
 } from '#types/twitch';
@@ -431,3 +434,55 @@ export async function getStreamsUnsafe(userId: string): Promise<TwitchStream | n
 }
 
 export const getStreams: CloneFunction<typeof getStreamsUnsafe> = async (...args) => requestGuardian({}, getStreamsUnsafe, ...args);
+
+
+export async function getChatSettingsUnsafe(userId: string): Promise<TwitchChatSettings> {
+  try {
+    const token = await getTokenOrThrow(userId);
+
+    const response = await twitch.request<GetTwitchChatSettings>({
+      method: 'GET',
+      url: 'chat/settings',
+      headers: {
+        'Client-ID': await Config.getOrFail('twitchClientId'),
+        Authorization: `Bearer ${token.accessToken}`,
+      },
+      params: {
+        broadcaster_id: token.channelUserId,
+      },
+    });
+
+    return response.data.data[0];
+  } catch (error) {
+    throw errorConverter(error);
+  }
+}
+
+export const getChatSettings: CloneFunction<typeof getChatSettingsUnsafe> = async (...args) => requestGuardian({}, getChatSettingsUnsafe, ...args);
+
+
+export async function updateChatSettingsUnsafe(userId: string, settings: Partial<PatchTwitchChatSettings>): Promise<TwitchChatSettings> {
+  try {
+    const token = await getTokenOrThrow(userId);
+
+    const response = await twitch.request<GetTwitchChatSettings>({
+      method: 'PATCH',
+      url: 'chat/settings',
+      headers: {
+        'Client-ID': await Config.getOrFail('twitchClientId'),
+        Authorization: `Bearer ${token.accessToken}`,
+      },
+      params: {
+        broadcaster_id: token.channelUserId,
+        moderator_id: token.channelUserId,
+      },
+      data: settings,
+    });
+
+    return response.data.data[0];
+  } catch (error) {
+    throw errorConverter(error);
+  }
+}
+
+export const updateChatSettings: CloneFunction<typeof updateChatSettingsUnsafe> = async (...args) => requestGuardian({}, updateChatSettingsUnsafe, ...args);

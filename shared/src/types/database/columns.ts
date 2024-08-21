@@ -10,6 +10,28 @@ export const ChantingSettings = z.object({
 export type ChantingSettings = z.infer<typeof ChantingSettings>;
 
 
+export const ChatSettings = z.object({
+  emoteMode: z.boolean().default(false),
+  followerMode: z.boolean().default(false),
+  followerModeDuration: z.number().min(0).max(129600).default(0),
+  slowMode: z.boolean().default(false),
+  slowModeWaitTime: z.number().min(3).max(120).default(30),
+  subscriberMode: z.boolean().default(false),
+  uniqueChatMode: z.boolean().default(false),
+});
+
+export type ChatSettings = z.infer<typeof ChatSettings>;
+
+
+export const OfflineChatSettings = z.object({
+  enabled: z.boolean(),
+  liveSettings: ChatSettings,
+  offlineSettings: ChatSettings,
+});
+
+export type OfflineChatSettings = z.infer<typeof OfflineChatSettings>;
+
+
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type DefaultStates = 'customState' | 'counterState' | (string & {});
 

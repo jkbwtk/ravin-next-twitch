@@ -357,3 +357,9 @@ export type GetTwitchStreams = {
     cursor: string;
   };
 };
+
+export interface GetTwitchChatSettings {
+  data: [TwitchChatSettings]
+}
+
+export type PatchTwitchChatSettings = Partial<Omit<TwitchChatSettings, 'broadcaster_id'>>;

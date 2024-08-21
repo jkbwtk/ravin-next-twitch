@@ -16,7 +16,7 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
-import { BotActionData, ChantingSettings, EmotesUsed, StatesObject, TemplateEnvironments } from '../types/database/columns';
+import { BotActionData, ChantingSettings, EmotesUsed, OfflineChatSettings, StatesObject, TemplateEnvironments } from '../types/database/columns';
 import { BadgeInfo, Badges, ChatUserstate } from 'tmi.js';
 
 
@@ -40,6 +40,27 @@ export const channelsTable = pgTable(
     id: serial('id').primaryKey().notNull(),
     joined: boolean('joined').default(false).notNull(),
     chantingSettings: json('chantingSettings').$type<ChantingSettings>().default({ enabled: false, interval: 60, length: 3 }).notNull(),
+    offlineChatSettings: json('offlineChatSettings').$type<OfflineChatSettings>().default({
+      enabled: false,
+      liveSettings: {
+        emoteMode: false,
+        followerMode: false,
+        followerModeDuration: 0,
+        slowMode: false,
+        slowModeWaitTime: 30,
+        subscriberMode: false,
+        uniqueChatMode: false,
+      },
+      offlineSettings: {
+        emoteMode: false,
+        followerMode: false,
+        followerModeDuration: 0,
+        slowMode: false,
+        slowModeWaitTime: 30,
+        subscriberMode: false,
+        uniqueChatMode: false,
+      },
+    }).notNull(),
     createdAt: timestamp('createdAt', { precision: 3, mode: 'date' }).defaultNow().notNull(),
     updatedAt: timestamp('updatedAt', { precision: 3, mode: 'date' })
       .defaultNow()

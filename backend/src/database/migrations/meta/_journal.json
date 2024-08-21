@@ -43,6 +43,13 @@
       "when": 1723754057527,
       "tag": "0005_add_manuallyActivated_column_to_behaviorProfiles_table",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1724185924391,
+      "tag": "0006_add_offlineChatSEttings_column_to_channelsTable",
+      "breakpoints": true
     }
   ]
 }

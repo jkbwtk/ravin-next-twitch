@@ -33,6 +33,9 @@ export enum BotActionType {
   BehaviorProfileActivatedTitle = 501,
   BehaviorProfileDeactivated = 502,
   BehaviorProfileActivatedManual = 503,
+
+  ChatSettingsChangedOffline = 600,
+  ChatSettingsChangedLive = 601,
 };
 
 
@@ -68,6 +71,9 @@ export type BotActionTypeParams = {
   [BotActionType.BehaviorProfileActivatedTitle]: (profile: string, title: string) => void;
   [BotActionType.BehaviorProfileDeactivated]: (profile: string) => void;
   [BotActionType.BehaviorProfileActivatedManual]: (profile: string) => void;
+
+  [BotActionType.ChatSettingsChangedOffline]: (userDisplayName: string) => void;
+  [BotActionType.ChatSettingsChangedLive]: (userDisplayName: string) => void;
 };
 
 export const BotActionData = z.array(z.coerce.string()).default([]);

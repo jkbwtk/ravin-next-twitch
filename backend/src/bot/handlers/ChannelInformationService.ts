@@ -12,6 +12,7 @@ import { isDeepStrictEqual } from 'util';
 export class ChannelInformationService implements AutoWirable {
   public channelInformation = basicSignal<ChannelThreadInformation | null>(null);
   public streamStatus = basicSignal<ChannelThreadStreamStatus | null>(null);
+  public streamStatusChanged = basicSignal<ChannelThreadStreamStatus | null>(null);
 
   public readonly refreshChannelInformationJobName: string;
   public readonly refreshStreamStatusJobName: string;
@@ -66,6 +67,10 @@ export class ChannelInformationService implements AutoWirable {
         'UPD_CHANNEL_STREAM_STATUS',
         this.streamStatus(),
       );
+    }
+
+    if ((oldStream === null && stream !== null) || (oldStream !== null && stream === null)) {
+      this.streamStatusChanged.set(stream);
     }
   }
 

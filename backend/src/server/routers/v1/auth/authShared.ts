@@ -16,6 +16,7 @@ export const authScopes: string[] = [
   'moderator:read:chatters',
   'moderator:manage:chat_messages',
   'moderator:manage:banned_users',
+  'moderator:manage:chat_settings',
 ];
 
 const createOrUpdateToken = async (accessToken: string, refreshToken: string | null, user: User): Promise<Token | null> => {
