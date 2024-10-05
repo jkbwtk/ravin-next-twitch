@@ -7,11 +7,13 @@ export type InputCheckboxProps = JSX.InputHTMLAttributes<HTMLInputElement> & {
   label: string;
 };
 
-const defaultProps: Partial<InputCheckboxProps> = {
-  label: 'Checkbox',
-};
 
 const InputCheckbox: Component<InputCheckboxProps> = (userProps) => {
+  const defaultProps: Partial<InputCheckboxProps> = {
+    id: Math.random().toString().slice(2),
+    label: 'Checkbox',
+  };
+
   const props = mergeProps(defaultProps, userProps);
 
   return (

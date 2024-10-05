@@ -102,7 +102,6 @@ const ChantingSettingsBase: Component<{ settings: InitializedResourceReturn<Chan
   return (
     <form class={style.settingsForm} onSubmit={handleFormSubmit}>
       <InputCheckbox
-        id='enabled'
         name='enabled'
         label='Enabled'
         ref={enabledRef}
@@ -117,7 +116,6 @@ const ChantingSettingsBase: Component<{ settings: InitializedResourceReturn<Chan
 
       <InputLabeled label='Time between chants' for='interval'>
         <InputRange
-          id='interval'
           name='interval'
           min={0}
           max={300}
@@ -137,7 +135,6 @@ const ChantingSettingsBase: Component<{ settings: InitializedResourceReturn<Chan
 
       <InputLabeled label='Minimum chant length' for='minLength'>
         <InputRange
-          id='minLength'
           name='minLength'
           min={2}
           max={64}
