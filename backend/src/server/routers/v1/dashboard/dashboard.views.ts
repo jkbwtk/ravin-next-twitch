@@ -57,8 +57,7 @@ export const postJoinChannelView = new ExpressStack()
       if (channel.joined) await Bot.joinChannel(channel.user.id);
       else await Bot.leaveChannel(channel.user.id);
 
-      await ChannelController.update({
-        id: channel.id,
+      await ChannelController.updateByUserId(req.user.id, {
         joined: channel.joined,
       });
 

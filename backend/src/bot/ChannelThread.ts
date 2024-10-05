@@ -148,7 +148,7 @@ export class ChannelThread implements AutoWirable {
     this.jobs.delete(this.refreshChatMembersJobName);
   }
 
-  public async syncChannel(): Promise<void> {
+  public syncChannel = async (): Promise<void> => {
     const channel = await ChannelController.getByUserId(this.channel.userId);
 
     if (channel === null) {
@@ -160,13 +160,13 @@ export class ChannelThread implements AutoWirable {
     }
 
     this.channel = channel;
-  }
+  };
 
   private registerSignalHandlers(): void {
-    ChannelController.$signals.registerAfter('update', this.syncChannel);
+    ChannelController.$signals.registerAfter('updateByUserId', this.syncChannel);
   }
 
   private unregisterSignalHandlers(): void {
-    ChannelController.$signals.unregisterAfter('update', this.syncChannel);
+    ChannelController.$signals.unregisterAfter('updateByUserId', this.syncChannel);
   }
 }

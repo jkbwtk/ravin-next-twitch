@@ -5,8 +5,10 @@ import { Channel, ChannelUpdate, ChannelWithUser } from '#types/database/tables'
 import { eq, getTableColumns } from 'drizzle-orm';
 
 
+const sharedMethods = createSharedMethods(channelsTable);
+
 const ChannelControllerTarget = {
-  ...createSharedMethods(channelsTable),
+  ...sharedMethods as Omit<typeof sharedMethods, 'update'>,
 
   async updateByUserId(userId: string, channel: Omit<ChannelUpdate, 'id' | 'userId'>): Promise<Channel | null> {
     const query = db
