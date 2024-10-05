@@ -1,7 +1,7 @@
 import { useNotification } from '#providers/NotificationProvider';
 import { ServerErrorResponse } from '#types/api/serverError';
 import { mergeOptions } from '#shared/utils';
-import { createContext, For, JSX, useContext } from 'solid-js';
+import { createContext, For, JSX, onCleanup, onMount, useContext } from 'solid-js';
 import { isDev } from 'solid-js/web';
 
 
@@ -85,6 +85,37 @@ export const ErrorHandlersProvider: ParentComponent = (props) => {
     });
   };
 
+  const errorEventHandler = (event: ErrorEvent) => {
+    const href = `${event.filename}:${event.lineno}:${event.colno}`;
+
+    addNotification({
+      title: 'An error occurred',
+      type: 'error',
+      duration: 3000,
+      message: (
+        <>
+          <code style={{ 'font-size': '1.6rem' }}>
+            {event.message}
+          </code>
+          <a href={href} style={{ 'font-size': '1.6rem', 'text-decoration': 'none' }}>
+            {href}
+          </a>
+        </>
+      ),
+    });
+  };
+
+  onMount(() => {
+    if (isDev) {
+      window.addEventListener('error', errorEventHandler);
+    }
+  });
+
+  onCleanup(() => {
+    if (isDev) {
+      window.removeEventListener('error', errorEventHandler);
+    }
+  });
 
   return (
     <ErrorHandlersContext.Provider
