@@ -72,9 +72,7 @@ export class ChantHandler implements AutoWirable {
       if (self && this.options.ignoreSelf) {} else this.resetChant();
     }
 
-    if (!this.chantParticipants.has(message.userId)) {
-      this.chantParticipants.add(message.userId);
-    }
+    this.chantParticipants.add(message.userId);
 
     if (
       !chantingSettings.enabled ||

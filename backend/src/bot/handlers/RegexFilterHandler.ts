@@ -166,13 +166,13 @@ export class RegexFilterHandler implements AutoWirable {
 
   private registerSignalHandlers(): void {
     RegexFilterController.$signals.registerAfter('create', this.add);
-    RegexFilterController.$signals.registerAfter('update', this.remove);
+    RegexFilterController.$signals.registerAfter('update', this.update);
     RegexFilterController.$signals.registerAfter('delete', this.remove);
   }
 
   private unregisterSignalHandlers(): void {
     RegexFilterController.$signals.unregisterAfter('create', this.add);
-    RegexFilterController.$signals.unregisterAfter('update', this.remove);
+    RegexFilterController.$signals.unregisterAfter('update', this.update);
     RegexFilterController.$signals.unregisterAfter('delete', this.remove);
   }
 }
