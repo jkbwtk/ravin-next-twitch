@@ -34,6 +34,9 @@ export const botActions = new Dictionary<BotActionType, string>(
     [BotActionType.BehaviorProfileActivatedTitle]: 'Behavior Profile Activated (Title)',
     [BotActionType.BehaviorProfileDeactivated]: 'Behavior Profile Deactivated',
     [BotActionType.BehaviorProfileActivatedManual]: 'Behavior Profile Activated (Manual)',
+
+    [BotActionType.ChatSettingsChangedOffline]: 'Chat Settings Changed (Offline)',
+    [BotActionType.ChatSettingsChangedLive]: 'Chat Settings Changed (Online)',
   });
 
 
@@ -143,6 +146,18 @@ export const botActionsDescriptions = new Dictionary<BotActionType, BotActionsDe
     [BotActionType.BehaviorProfileActivatedManual]: (data) => (
       <span>
       Behavior profile <code>{data.at(0)}</code> activated manually
+      </span>
+    ),
+
+    [BotActionType.ChatSettingsChangedOffline]: (data) => (
+      <span>
+      Chat settings changed offline: <code>{data.at(0)}</code>
+      </span>
+    ),
+
+    [BotActionType.ChatSettingsChangedLive]: (data) => (
+      <span>
+        Chat settings changed live: <code>{data.at(0)}</code>
       </span>
     ),
   });
