@@ -1,11 +1,11 @@
-import { db } from '#database/database';
 import { beforeEach, expect, test, vi } from 'vitest';
-import { db as mock } from '#database/__mocks__/database';
+import { ConfigController as mockedController } from '#database/controllers/__mocks__/ConfigController';
 import { Config } from '#lib/Config';
 import { ExtendedMap } from '#lib/ExtendedMap';
+import { ConfigController } from '#database/controllers/ConfigController';
 
-vi.mock('#database/database');
 
+vi.mock('#database/controllers/ConfigController');
 
 beforeEach(async () => {
   await Config.shadowRestoreAll();
@@ -13,16 +13,16 @@ beforeEach(async () => {
 });
 
 test('getConfig should return an empty map if there are no entries in the database', async () => {
-  mock.config.findMany.mockResolvedValue([]);
+  mockedController.getAll.mockResolvedValue([]);
 
   const result = await Config.getConfig();
 
   expect(result).toEqual(new ExtendedMap());
-  expect(db.config.findMany).toHaveBeenCalled();
+  expect(ConfigController.getAll).toHaveBeenCalled();
 });
 
 test('getConfig should return a map with the entries in the database', async () => {
-  mock.config.findMany.mockResolvedValue([
+  mockedController.getAll.mockResolvedValue([
     {
       key: 'key1',
       value: 'value1',
@@ -40,11 +40,11 @@ test('getConfig should return a map with the entries in the database', async () 
   const result = await Config.getConfig();
 
   expect(result).toEqual(new ExtendedMap([['key1', 'value1'], ['key2', 'value2']]));
-  expect(db.config.findMany).toHaveBeenCalled();
+  expect(ConfigController.getAll).toHaveBeenCalled();
 });
 
 test('get should return the value for an existing key', async () => {
-  mock.config.findFirst.mockResolvedValue({
+  mockedController.getByKey.mockResolvedValue({
     key: 'key1',
     value: 'value1',
     createdAt: new Date(),
@@ -54,20 +54,20 @@ test('get should return the value for an existing key', async () => {
   const result = await Config.get('key1');
 
   expect(result).toEqual('value1');
-  expect(db.config.findFirst).toHaveBeenCalledWith({ where: { key: 'key1' } });
+  expect(ConfigController.getByKey).toHaveBeenCalledWith('key1');
 });
 
 test('get should return undefined for a non-existing key', async () => {
-  mock.config.findFirst.mockResolvedValue(null);
+  mockedController.getByKey.mockResolvedValue(null);
 
   const result = await Config.get('key1');
 
   expect(result).toBeUndefined();
-  expect(db.config.findFirst).toHaveBeenCalledWith({ where: { key: 'key1' } });
+  expect(ConfigController.getByKey).toHaveBeenCalledWith('key1');
 });
 
 test('get should return the shadowed value if it exists', async () => {
-  mock.config.findFirst.mockResolvedValue({
+  mockedController.getByKey.mockResolvedValue({
     key: 'key1',
     value: 'value1',
     createdAt: new Date(),
@@ -79,11 +79,11 @@ test('get should return the shadowed value if it exists', async () => {
   const result = await Config.get('key1');
 
   expect(result).toEqual('shadowedValue');
-  expect(db.config.findFirst).not.toHaveBeenCalled();
+  expect(ConfigController.getByKey).not.toHaveBeenCalled();
 });
 
 test('get should return the non-shadowed value if the shadowed value does not exist', async () => {
-  mock.config.findFirst.mockResolvedValue({
+  mockedController.getByKey.mockResolvedValue({
     key: 'key1',
     value: 'value1',
     createdAt: new Date(),
@@ -93,11 +93,11 @@ test('get should return the non-shadowed value if the shadowed value does not ex
   const result = await Config.get('key1');
 
   expect(result).toEqual('value1');
-  expect(db.config.findFirst).toHaveBeenCalledWith({ where: { key: 'key1' } });
+  expect(ConfigController.getByKey).toHaveBeenCalledWith('key1');
 });
 
 test('getOrFail should return the value for an existing key', async () => {
-  mock.config.findFirst.mockResolvedValue({
+  mockedController.getByKey.mockResolvedValue({
     key: 'key1',
     value: 'value1',
     createdAt: new Date(),
@@ -107,14 +107,14 @@ test('getOrFail should return the value for an existing key', async () => {
   const result = await Config.getOrFail('key1');
 
   expect(result).toEqual('value1');
-  expect(db.config.findFirst).toHaveBeenCalledWith({ where: { key: 'key1' } });
+  expect(ConfigController.getByKey).toHaveBeenCalledWith('key1');
 });
 
 test('getOrFail should throw an error for a non-existing key', async () => {
-  mock.config.findFirst.mockResolvedValue(null);
+  mockedController.getByKey.mockResolvedValue(null);
 
   await expect(Config.getOrFail('key1')).rejects.toThrow('Config key [key1] does not exist');
-  expect(db.config.findFirst).toHaveBeenCalledWith({ where: { key: 'key1' } });
+  expect(ConfigController.getByKey).toHaveBeenCalledWith('key1');
 });
 
 test('set should create a new entry if the key does not exist', async () => {
@@ -126,18 +126,14 @@ test('set should create a new entry if the key does not exist', async () => {
     destroyedAt: null,
   };
 
-  mock.config.upsert.mockResolvedValue(entity);
+  mockedController.upsert.mockResolvedValue(entity);
 
   const result = await Config.set('key1', 'value1');
 
   expect(result).toEqual(entity);
-  expect(db.config.upsert).toHaveBeenCalledWith({
-    update: { value: 'value1' },
-    where: { key: 'key1' },
-    create: {
-      key: 'key1',
-      value: 'value1',
-    },
+  expect(ConfigController.upsert).toHaveBeenCalledWith({
+    key: 'key1',
+    value: 'value1',
   });
 });
 
@@ -150,16 +146,12 @@ test('set should update an existing entry if the key exists', async () => {
     destroyedAt: null,
   };
 
-  mock.config.upsert.mockResolvedValue(entity);
+  mockedController.upsert.mockResolvedValue(entity);
 
   const result = await Config.set('key1', 'value2');
 
   expect(result).toEqual(entity);
-  expect(db.config.upsert).toHaveBeenCalledWith({
-    update: { value: 'value2' },
-    where: { key: 'key1' },
-    create: { key: 'key1', value: 'value2' },
-  });
+  expect(ConfigController.upsert).toHaveBeenCalledWith({ key: 'key1', value: 'value2' });
 });
 
 test('batchSet should create new entries if the keys do not exist', async () => {
@@ -179,9 +171,7 @@ test('batchSet should create new entries if the keys do not exist', async () => 
     destroyedAt: null,
   };
 
-  mock.config.upsert.mockResolvedValueOnce(entity1);
-  mock.config.upsert.mockResolvedValueOnce(entity2);
-  mock.$transaction.mockImplementation((tx) => tx(mock));
+  mockedController.bulkUpsert.mockResolvedValueOnce([entity1, entity2]);
 
   const result = await Config.batchSet([
     ['key1', 'value1'],
@@ -189,17 +179,9 @@ test('batchSet should create new entries if the keys do not exist', async () => 
   ]);
 
   expect(result).toEqual([entity1, entity2]);
-  expect(db.$transaction).toHaveBeenCalled();
-  expect(db.config.upsert).toHaveBeenCalledWith({
-    update: { value: 'value1' },
-    where: { key: 'key1' },
-    create: { key: 'key1', value: 'value1' },
-  });
-  expect(db.config.upsert).toHaveBeenCalledWith({
-    update: { value: 'value2' },
-    where: { key: 'key2' },
-    create: { key: 'key2', value: 'value2' },
-  });
+  expect(ConfigController.bulkUpsert).toHaveBeenCalledWith(
+    [{ key: 'key1', value: 'value1' }, { key: 'key2', value: 'value2' }],
+  );
 });
 
 test('batchSet should update existing entries if the keys exist', async () => {
@@ -219,9 +201,7 @@ test('batchSet should update existing entries if the keys exist', async () => {
     destroyedAt: null,
   };
 
-  mock.config.upsert.mockResolvedValueOnce(entity1);
-  mock.config.upsert.mockResolvedValueOnce(entity2);
-  mock.$transaction.mockImplementation((tx) => tx(mock));
+  mockedController.bulkUpsert.mockResolvedValueOnce([entity1, entity2]);
 
   const result = await Config.batchSet([
     ['key1', 'value2'],
@@ -229,17 +209,9 @@ test('batchSet should update existing entries if the keys exist', async () => {
   ]);
 
   expect(result).toEqual([entity1, entity2]);
-  expect(db.$transaction).toHaveBeenCalled();
-  expect(db.config.upsert).toHaveBeenCalledWith({
-    update: { value: 'value2' },
-    where: { key: 'key1' },
-    create: { key: 'key1', value: 'value2' },
-  });
-  expect(db.config.upsert).toHaveBeenCalledWith({
-    update: { value: 'value3' },
-    where: { key: 'key2' },
-    create: { key: 'key2', value: 'value3' },
-  });
+  expect(ConfigController.bulkUpsert).toHaveBeenCalledWith(
+    [{ key: 'key1', value: 'value2' }, { key: 'key2', value: 'value3' }],
+  );
 });
 
 test('shadowSet should set the shadowed value for a key', async () => {
@@ -262,7 +234,7 @@ test('shadowBatchSet should set the shadowed values for multiple keys', async ()
 });
 
 test('shadowRestore should restore the non-shadowed value for a key', async () => {
-  mock.config.upsert.mockResolvedValueOnce({
+  mockedController.upsert.mockResolvedValueOnce({
     key: 'key1',
     value: 'value1',
     createdAt: new Date(),
@@ -295,9 +267,7 @@ test('shadowBulkRestore should restore the non-shadowed values for multiple keys
     destroyedAt: null,
   };
 
-  mock.config.upsert.mockResolvedValueOnce(entity1);
-  mock.config.upsert.mockResolvedValueOnce(entity2);
-  mock.$transaction.mockImplementation((tx) => tx(mock));
+  mockedController.bulkUpsert.mockResolvedValueOnce([entity1, entity2]);
 
   await Config.batchSet([
     ['key1', 'value1'],
@@ -333,9 +303,7 @@ test('shadowRestoreAll should restore the non-shadowed values for all keys', asy
     destroyedAt: null,
   };
 
-  mock.config.upsert.mockResolvedValueOnce(entity1);
-  mock.config.upsert.mockResolvedValueOnce(entity2);
-  mock.$transaction.mockImplementation((tx) => tx(mock));
+  mockedController.bulkUpsert.mockResolvedValueOnce([entity1, entity2]);
 
   await Config.batchSet([
     ['key1', 'value1'],
@@ -363,11 +331,12 @@ test('delete should delete an entry for a key', async () => {
     destroyedAt: null,
   };
 
-  mock.config.upsert.mockResolvedValueOnce(entity);
+  mockedController.upsert.mockResolvedValueOnce(entity);
+  mockedController.getByKey.mockResolvedValueOnce(null);
 
   await Config.set('key1', 'value1');
   await Config.delete('key1');
 
+  expect(ConfigController.deleteByKey).toHaveBeenCalledWith('key1');
   expect(await Config.get('key1')).toBeUndefined();
-  expect(db.config.delete).toHaveBeenCalledWith({ where: { key: 'key1' } });
 });
