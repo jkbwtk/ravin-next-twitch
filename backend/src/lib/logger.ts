@@ -4,7 +4,7 @@ import { FileOutput } from '#lib/logger/outputs/FileOutput';
 import { ARGS, LEVEL, MESSAGE, TransformableEntry } from '#lib/logger/types';
 import chalk from 'chalk';
 import { duration } from 'dayjs';
-
+import { isDevMode } from '#shared/constants';
 
 export type HTTPLogEntry = {
   method: string;
@@ -125,7 +125,7 @@ const instance = new Logger({
   outputs: [
     new ConsoleOutput({
       format: prettyFormat,
-      level: [
+      level: isDevMode ? [
         'error',
         'warn',
         'info',
@@ -135,7 +135,7 @@ const instance = new Logger({
         'time',
         'queryTime',
         'logQuery',
-      ],
+      ] : ['error', 'warn', 'info'],
     }),
     // new ConsoleOutput({
     //   format: fileJsonFormat,
